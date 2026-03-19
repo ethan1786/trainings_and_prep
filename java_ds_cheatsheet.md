@@ -1,535 +1,535 @@
-# Java Data Structures Cheat Sheet (Interview Quick Reference)
+# Interview Playbook — Patterns, Data Structures & Tricks
+
+> Quick-reference for staff+ level SWE interviews. Organized by **pattern** first, **data structure** second.
 
 ---
 
-## TreeMap<K, V>
+## Table of Contents
 
-Sorted map backed by a Red-Black tree. All operations **O(log n)**.
+1. [Pattern Recognition Decision Tree](#pattern-recognition-decision-tree)
+2. [Two Pointers](#two-pointers)
+3. [Sliding Window](#sliding-window)
+4. [Binary Search](#binary-search)
+5. [Intervals](#intervals)
+6. [Greedy](#greedy)
+7. [Dynamic Programming](#dynamic-programming)
+8. [Backtracking](#backtracking)
+9. [Graph Algorithms](#graph-algorithms)
+10. [Union-Find](#union-find)
+11. [Topological Sort](#topological-sort)
+12. [Linked List Tricks](#linked-list-tricks)
+13. [Stack Patterns](#stack-patterns)
+14. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
+15. [Bit Manipulation](#bit-manipulation)
+16. [Matrix Tricks](#matrix-tricks)
+17. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
+18. [Data Structures Reference](#data-structures-reference)
 
-### Core
+---
 
-| Method | Description |
-|---|---|
-| `put(k, v)` | Insert / update |
-| `get(k)` | Get value |
-| `remove(k)` | Remove by key |
-| `containsKey(k)` | Check existence |
-| `size()` | Number of entries (O(1)) |
+## Pattern Recognition Decision Tree
 
-### Min / Max
+```
+What does the problem ask?
+│
+├── "Optimal path / min cost / count ways" + indices only go forward
+│   └── DP (define state → recurrence → base case → fill table)
+│
+├── "Find pair / subarray" in sorted or linear data
+│   ├── Sorted → Two Pointers
+│   └── Contiguous subarray with constraint → Sliding Window
+│
+├── "Search in sorted / monotonic" space
+│   └── Binary Search
+│
+├── "Merge / overlap / schedule" time ranges
+│   ├── Combine overlapping → Sort by start + merge
+│   ├── Max concurrent → Sweep line or min-heap
+│   └── Max non-overlapping → Sort by end + greedy
+│
+├── "Shortest path / reachability / connectivity"
+│   ├── Unweighted → BFS
+│   ├── Weighted, no negative → Dijkstra
+│   ├── Weighted, negative → Bellman-Ford
+│   └── Connectivity / grouping → Union-Find
+│
+├── "Dependencies / ordering"
+│   └── Topological Sort (Kahn's BFS)
+│
+├── "Generate all valid combinations / permutations"
+│   └── Backtracking
+│
+├── "Next greater / smaller element" or "largest rectangle"
+│   └── Monotonic Stack
+│
+└── "Top K / median / merge K sorted"
+    └── Heap (PriorityQueue)
+```
 
-| Method | Description |
-|---|---|
-| `firstKey()` / `firstEntry()` | Smallest key / entry |
-| `lastKey()` / `lastEntry()` | Largest key / entry |
-| `pollFirstEntry()` | Remove + return smallest |
-| `pollLastEntry()` | Remove + return largest |
+---
 
-### Neighbor Lookups
-
-| Method | Description |
-|---|---|
-| `floorKey(k)` | Largest key **≤ k** |
-| `ceilingKey(k)` | Smallest key **≥ k** |
-| `lowerKey(k)` | Largest key **< k** |
-| `higherKey(k)` | Smallest key **> k** |
-
-All have `Entry` variants: `floorEntry(k)`, `ceilingEntry(k)`, etc. Returns `null` if no match.
-
-### Range Views (live — changes reflect in original)
-
-| Method | Description |
-|---|---|
-| `subMap(from, to)` | Keys in `[from, to)` |
-| `subMap(from, incl, to, incl)` | Configurable bounds |
-| `headMap(to)` | All keys `< to` |
-| `tailMap(from)` | All keys `≥ from` |
+## Two Pointers
 
 ### When to Use
+- Sorted array: find pair with target sum, remove duplicates, merge
+- Linked list: find middle, detect cycle, find kth from end
+- String: palindrome check, reverse
 
-- Sliding window needing sorted access (min/max + arbitrary removal)
-- Nearest neighbor queries (`floor`/`ceiling`)
-- Interval problems (find overlapping intervals)
-- Prefer over `PriorityQueue` when you need **O(log n) removal by key**
+### Patterns
+
+**Opposite ends** (sorted array, target sum):
+```java
+int lo = 0, hi = nums.length - 1;
+while (lo < hi) {
+    int sum = nums[lo] + nums[hi];
+    if (sum == target) return new int[]{lo, hi};
+    else if (sum < target) lo++;
+    else hi--;
+}
+```
+
+**Same direction** (remove duplicates in-place):
+```java
+int slow = 0;
+for (int fast = 1; fast < nums.length; fast++) {
+    if (nums[fast] != nums[slow]) {
+        nums[++slow] = nums[fast];
+    }
+}
+return slow + 1;
+```
+
+**Trapping Rain Water** (LC 42 — two pointer with max tracking):
+```java
+int lo = 0, hi = n - 1, leftMax = 0, rightMax = 0, water = 0;
+while (lo < hi) {
+    if (height[lo] < height[hi]) {
+        leftMax = Math.max(leftMax, height[lo]);
+        water += leftMax - height[lo++];
+    } else {
+        rightMax = Math.max(rightMax, height[hi]);
+        water += rightMax - height[hi--];
+    }
+}
+```
+
+### Key Problems
+| Problem | Trick |
+|---|---|
+| LC 1 (Two Sum) | HashMap for unsorted; two pointers if sorted |
+| LC 11 (Container With Most Water) | Shrink the shorter side |
+| LC 42 (Trapping Rain Water) | Track leftMax/rightMax from both ends |
+| LC 15 (3Sum) | Sort + fix one + two pointers for remaining |
 
 ---
 
-## ArrayDeque<E>
-
-Resizable array-backed double-ended queue. All operations **O(1) amortized**. Faster than `LinkedList` for both stack and queue use. **Does not allow `null` elements.**
-
-### As a Stack (LIFO)
-
-| Method | Description |
-|---|---|
-| `push(e)` | Push onto top (head) |
-| `pop()` | Remove + return top (throws if empty) |
-| `peek()` | View top without removing (returns `null` if empty) |
-
-### As a Queue (FIFO)
-
-| Method | Description |
-|---|---|
-| `offer(e)` / `add(e)` | Enqueue at tail |
-| `poll()` | Dequeue from head (returns `null` if empty) |
-| `peek()` | View head without removing |
-
-### As a Deque (double-ended)
-
-| Method | Description |
-|---|---|
-| `offerFirst(e)` / `addFirst(e)` | Add to head |
-| `offerLast(e)` / `addLast(e)` | Add to tail |
-| `pollFirst()` | Remove from head |
-| `pollLast()` | Remove from tail |
-| `peekFirst()` | View head |
-| `peekLast()` | View tail |
-
-### Throwing vs Returning null
-
-| Operation | Throws on empty | Returns null on empty |
-|---|---|---|
-| Add | `addFirst` / `addLast` | `offerFirst` / `offerLast` |
-| Remove | `removeFirst` / `removeLast` | `pollFirst` / `pollLast` |
-| Examine | `getFirst` / `getLast` | `peekFirst` / `peekLast` |
-
-For interviews, the `poll`/`peek`/`offer` family is generally safer (no exceptions).
+## Sliding Window
 
 ### When to Use
+- "Longest/shortest **contiguous** subarray/substring with constraint"
+- The constraint can be checked incrementally (add right, shrink left)
 
-- **Stack**: monotonic stack (LC 739, 42), DFS iteration, parentheses matching
-- **Queue**: BFS (LC 200, 127), sliding window with deque (LC 239, 1438)
-- **Deque**: monotonic deque for sliding window max/min
+### Template
 
-### Common Interview Patterns
-
-**Monotonic stack** (decreasing, for "next greater element"):
 ```java
-Deque<Integer> stack = new ArrayDeque<>();
-for (int i = 0; i < nums.length; i++) {
-    while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
-        int idx = stack.pop();
-        result[idx] = nums[i];
+int left = 0;
+// expand right boundary
+for (int right = 0; right < n; right++) {
+    // add nums[right] to window state
+
+    // shrink from left while constraint is violated
+    while (/* constraint violated */) {
+        // remove nums[left] from window state
+        left++;
     }
-    stack.push(i);
+    // update answer (window is [left, right])
 }
 ```
 
-**Monotonic deque** (for sliding window maximum):
-```java
-Deque<Integer> deque = new ArrayDeque<>();
-for (int i = 0; i < nums.length; i++) {
-    while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i]) {
-        deque.pollLast();
-    }
-    deque.offerLast(i);
-    if (deque.peekFirst() <= i - k) deque.pollFirst();  // evict out-of-window
-    if (i >= k - 1) result[i - k + 1] = nums[deque.peekFirst()];
-}
-```
-
-**BFS template**:
-```java
-Deque<Node> queue = new ArrayDeque<>();
-queue.offer(start);
-while (!queue.isEmpty()) {
-    Node curr = queue.poll();
-    for (Node neighbor : curr.neighbors) {
-        if (!visited.contains(neighbor)) {
-            visited.add(neighbor);
-            queue.offer(neighbor);
-        }
-    }
-}
-```
-
----
-
-## PriorityQueue<E>
-
-Min-heap backed by a **resizable array**. Default ordering is natural (min on top). Use `new PriorityQueue<>(Comparator.reverseOrder())` for max-heap.
-
-### Core Operations
-
-| Method | Description | Time |
-|---|---|---|
-| `offer(e)` / `add(e)` | Insert element | **O(log n)** — sift up |
-| `peek()` | View min (top) without removing | **O(1)** |
-| `poll()` | Remove + return min | **O(log n)** — sift down |
-| `remove(obj)` | Remove arbitrary element | **O(n)** — linear scan + O(log n) sift |
-| `contains(obj)` | Check if element exists | **O(n)** — linear scan |
-| `size()` | Number of elements | **O(1)** |
-
-### Bulk / Construction
-
-| Operation | Time |
+### Key Problems
+| Problem | Window Condition |
 |---|---|
-| `new PriorityQueue<>(collection)` | **O(n)** — heapify (not n log n) |
-| `toArray()` | **O(n)** |
+| LC 3 (Longest Substring Without Repeating) | All chars unique (use Set or freq map) |
+| LC 76 (Minimum Window Substring) | Window contains all chars of t (use freq map + count) |
+| LC 239 (Sliding Window Maximum) | Fixed-size window, use monotonic deque |
+| LC 1438 (Longest Subarray with Abs Diff ≤ K) | Use two TreeMaps or two monotonic deques |
 
-### Key Gotchas
-
-- **`remove(obj)` is O(n)** — this is the big one. No index from value → position, so it must scan the backing array. This is why `TreeMap` is preferred when you need arbitrary removal.
-- **No random access** — you can only efficiently access the min element. The rest of the heap is unordered.
-- **Iterator is NOT sorted** — `for (int x : pq)` does NOT iterate in sorted order. The heap property only guarantees the root is min.
-- **Duplicates allowed** — unlike `TreeMap`, PQ happily stores duplicate values.
-
-### Common Interview Patterns
-
-**Top K elements** (use max-heap of size k):
-```java
-PriorityQueue<Integer> pq = new PriorityQueue<>(Comparator.reverseOrder());
-// or for top-k smallest, use min-heap and evict when size > k:
-PriorityQueue<Integer> pq = new PriorityQueue<>();
-for (int num : nums) {
-    pq.offer(num);
-    if (pq.size() > k) pq.poll();  // O(n log k) total
-}
-```
-
-**Merge K sorted lists**:
-```java
-PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);
-// add first node of each list, then poll min + offer its next
-```
+### Trick: Fixed vs Variable Window
+- **Variable**: shrink left when constraint violated → find min/max length
+- **Fixed** (size k): just slide, no shrinking logic
 
 ---
 
-## Trie (Prefix Tree)
-
-Tree where each node represents a character. Paths from root to nodes represent prefixes; paths to nodes marked `isEnd` represent complete words.
-
-### Node Structure
-
-```java
-class TrieNode {
-    TrieNode[] children = new TrieNode[26];  // or Map<Character, TrieNode> for unicode
-    boolean isEnd;
-}
-```
-
-Use `TrieNode[26]` for lowercase English letters (interview default). Use `Map<Character, TrieNode>` when the character set is large or unknown (e.g., file paths, arbitrary strings).
-
-### Core Operations
-
-```java
-class Trie {
-    TrieNode root = new TrieNode();
-
-    // INSERT — O(L) where L = word length
-    void insert(String word) {
-        TrieNode curr = root;
-        for (char c : word.toCharArray()) {
-            if (curr.children[c - 'a'] == null)
-                curr.children[c - 'a'] = new TrieNode();
-            curr = curr.children[c - 'a'];
-        }
-        curr.isEnd = true;
-    }
-
-    // SEARCH exact word — O(L)
-    boolean search(String word) {
-        TrieNode node = find(word);
-        return node != null && node.isEnd;
-    }
-
-    // STARTS WITH prefix — O(L)
-    boolean startsWith(String prefix) {
-        return find(prefix) != null;
-    }
-
-    // Helper: traverse to end of prefix, return node or null
-    private TrieNode find(String s) {
-        TrieNode curr = root;
-        for (char c : s.toCharArray()) {
-            if (curr.children[c - 'a'] == null) return null;
-            curr = curr.children[c - 'a'];
-        }
-        return curr;
-    }
-}
-```
-
-### Big O
-
-| Operation | Time | Space |
-|---|---|---|
-| Insert | O(L) | O(L) worst case (new branch) |
-| Search | O(L) | O(1) |
-| Prefix check | O(L) | O(1) |
-| Total space | — | O(N × L × 26) worst case |
-
-Where L = word length, N = number of words.
+## Binary Search
 
 ### When to Use
+- Sorted array search
+- "Minimize the maximum" / "maximize the minimum" → binary search on answer
+- Find boundary (first/last occurrence)
 
-- **Prefix matching**: autocomplete, type-ahead search
-- **Word-by-word validation**: word search in grids (LC 212)
-- **Directory/path structures**: file system design (LC 588, 1166)
-- **Shared prefix optimization**: when many strings share prefixes, trie deduplicates storage
+### Templates
 
-### Key Gotchas
-
-- **Array vs Map children**: `TrieNode[26]` is faster but wastes space if the tree is sparse. For interviews, array is fine for lowercase English.
-- **`isEnd` is critical**: without it, `search("app")` would return true if `"apple"` was inserted (the path exists, but "app" was never added).
-- **Delete is rarely asked**: it requires decrementing reference counts or recursive cleanup. Skip unless the problem explicitly needs it.
-
-### Common Interview Patterns
-
-**Basic trie** (LC 208):
+**Standard** (find exact value):
 ```java
-// Just implement insert, search, startsWith as above
+int lo = 0, hi = nums.length - 1;
+while (lo <= hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (nums[mid] == target) return mid;
+    else if (nums[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+}
+return -1;
 ```
 
-**Trie + DFS backtracking** (LC 212 — Word Search II):
+**Left boundary** (first element ≥ target):
 ```java
-// Build trie from word list, then DFS from each grid cell
-// At each cell, follow trie children instead of checking all words
-// This prunes search: if no trie child for current char, stop early
-void dfs(char[][] board, int i, int j, TrieNode node, List<String> result) {
-    char c = board[i][j];
-    if (c == '#' || node.children[c - 'a'] == null) return;
-    node = node.children[c - 'a'];
-    if (node.isEnd) {
-        result.add(node.word);  // store word at end node for easy retrieval
-        node.isEnd = false;     // de-duplicate
-    }
-    board[i][j] = '#';  // mark visited
-    for (int[] d : DIRS) dfs(board, i+d[0], j+d[1], node, result);
-    board[i][j] = c;    // restore
+int lo = 0, hi = nums.length;
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (nums[mid] < target) lo = mid + 1;
+    else hi = mid;
 }
+return lo;  // first index where nums[i] >= target
 ```
 
-**Trie as directory tree** (LC 588 — File System):
+**Binary search on answer** (LC 410, 875, etc.):
 ```java
-class TrieNode {
-    Map<String, TrieNode> children = new TreeMap<>();  // sorted listing
-    String content = "";  // file content if this is a file
-    boolean isFile;
+int lo = minPossible, hi = maxPossible;
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (feasible(mid)) hi = mid;    // try smaller
+    else lo = mid + 1;              // need bigger
 }
-// Navigate path segments like trie characters: split("/foo/bar") → ["foo", "bar"]
+return lo;
+```
+
+### Key Problems
+| Problem | Trick |
+|---|---|
+| LC 33 (Search Rotated Sorted Array) | Determine which half is sorted, then narrow |
+| LC 4 (Median of Two Sorted Arrays) | Binary search on partition of shorter array |
+| LC 528 (Random Pick with Weight) | Prefix sum + binary search for random value |
+
+### Trick: Rotated Array (LC 33)
+One half is always sorted. Check which, then decide if target is in that half.
+```java
+if (nums[lo] <= nums[mid]) {  // left half sorted
+    if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;
+    else lo = mid + 1;
+} else {                       // right half sorted
+    if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;
+    else hi = mid - 1;
+}
 ```
 
 ---
 
-## Graph Algorithms Cheat Sheet
+## Intervals
+
+### Rule #1: Always Sort First
+
+### Four Patterns
+
+**1. Merge overlapping** (LC 56) — sort by start:
+```java
+Arrays.sort(intervals, (a, b) -> a[0] - b[0]);
+List<int[]> result = new ArrayList<>();
+int[] curr = intervals[0];
+result.add(curr);
+for (int i = 1; i < intervals.length; i++) {
+    if (intervals[i][0] <= curr[1]) curr[1] = Math.max(curr[1], intervals[i][1]);
+    else { curr = intervals[i]; result.add(curr); }
+}
+```
+
+**2. Insert interval** (LC 57) — three phases:
+```java
+// Phase 1: add all before newInterval
+// Phase 2: merge all overlapping with newInterval
+// Phase 3: add all after
+```
+
+**3. Count max concurrent / sweep line** (LC 253) — sort starts and ends separately:
+```java
+Arrays.sort(start);
+Arrays.sort(end);
+int s = 0, e = 0, count = 0, max = 0;
+while (s < n) {
+    if (start[s] < end[e]) { count++; max = Math.max(max, count); s++; }
+    else { count--; e++; }
+}
+```
+
+**4. Greedy selection** (LC 435) — sort by END time:
+```java
+Arrays.sort(intervals, (a, b) -> a[1] - b[1]);  // sort by END
+int kept = 1, lastEnd = intervals[0][1];
+for (int i = 1; i < intervals.length; i++) {
+    if (intervals[i][0] >= lastEnd) { kept++; lastEnd = intervals[i][1]; }
+}
+return intervals.length - kept;
+```
+
+### Sort by Start vs End
+| Sort By | Pattern | Use When |
+|---|---|---|
+| **Start** | Merge / sweep | Combine overlapping, count concurrent |
+| **End** | Greedy selection | Maximize kept / minimize removals |
+
+### Key Problems
+| Problem | Pattern |
+|---|---|
+| LC 56 (Merge Intervals) | Sort by start + merge |
+| LC 57 (Insert Interval) | Three-phase insert |
+| LC 253 (Meeting Rooms II) | Sweep line or min-heap |
+| LC 435 (Non-overlapping) | Sort by end + greedy |
+| LC 1235 (Job Scheduling) | Sort by end + DP + binary search |
+
+---
+
+## Greedy
+
+### When to Use
+- Locally optimal choice leads to globally optimal — **no need to explore all options**
+- Often involves sorting + single pass
+
+### Key Insight
+Greedy works when **you can prove** the local choice never hurts the global answer. If items have different values/weights, you usually need DP instead.
+
+### Key Problems
+| Problem | Greedy Choice |
+|---|---|
+| LC 435 (Non-overlapping Intervals) | Keep earliest-ending interval |
+| LC 621 (Task Scheduler) | Schedule most frequent task first, fill gaps |
+| LC 134 (Gas Station) | If total gas ≥ total cost, solution exists. Start where running sum is lowest |
+| LC 55 (Jump Game) | Track farthest reachable index |
+
+---
+
+## Dynamic Programming
+
+### The Mental Model
+
+```
+1. Define state:  dp[i] or dp[i][j] — what subproblem does this represent?
+2. Recurrence:    dp[i][j] = f(smaller subproblems) — how to build from known answers?
+3. Base case:     dp[0] = ? — what are the trivial answers?
+4. Answer:        dp[n] or dp[m][n] — where is the final answer?
+```
+
+**Key rule**: Express the answer as the **return value**, not a parameter passed down. Each state is computed exactly once.
+
+### Top-Down vs Bottom-Up
+
+| | Top-Down (recursive + memo) | Bottom-Up (iterative table) |
+|---|---|---|
+| Thinking | "What are my choices?" → recurse | "Fill table in order" |
+| Visits | Only reachable states | Entire table |
+| Space optimization | Harder | Easy (keep prev row) |
+| Interview | Easier to derive | Shorter code |
+
+### Five Core Patterns
+
+**1. 1D DP (sequence/decision)** — `dp[i]` = answer for first `i` elements
+```java
+// LC 198 (House Robber): rob or skip
+dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i]);
+
+// LC 300 (LIS): longest increasing subsequence ending at i
+for (int j = 0; j < i; j++)
+    if (nums[j] < nums[i]) dp[i] = Math.max(dp[i], dp[j] + 1);
+```
+
+**2. 2D DP (grid/string)** — `dp[i][j]` = answer for `X[0..i-1]` and `Y[0..j-1]`
+```java
+// LC 72 (Edit Distance)
+if (word1[i-1] == word2[j-1]) dp[i][j] = dp[i-1][j-1];
+else dp[i][j] = 1 + min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
+
+// LC 1143 (LCS)
+if (text1[i-1] == text2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+else dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+```
+
+**3. Knapsack (0/1)** — each item used at most once → iterate **right to left**
+```java
+// LC 416 (Partition Equal Subset Sum)
+for (int num : nums)
+    for (int j = target; j >= num; j--)  // RIGHT to LEFT
+        dp[j] = dp[j] || dp[j - num];
+```
+
+**4. Knapsack (unbounded)** — items reusable → iterate **left to right**
+```java
+// LC 322 (Coin Change)
+for (int coin : coins)
+    for (int j = coin; j <= amount; j++)  // LEFT to RIGHT
+        dp[j] = Math.min(dp[j], dp[j - coin] + 1);
+```
+
+**5. DP + Binary Search** (sorted intervals/sequences)
+```java
+// LC 1235 (Job Scheduling): sort by end, binary search for last non-overlapping
+dp[i] = max(dp[i-1], profit[i] + dp[lastNonOverlapping(i)]);
+```
+
+### DP is Shortest Path on a DAG
+Every DP recurrence defines a DAG. Table-filling = topological sort. If cycles exist → can't use DP, need BFS/Dijkstra.
+
+---
+
+## Backtracking
+
+### When to Use
+- "Generate **all** valid combinations / permutations / subsets"
+- "Find **any** valid configuration" (N-Queens, Sudoku)
+- State space is a tree; prune invalid branches early
+
+### Template
+
+```java
+void backtrack(List<List<Integer>> result, List<Integer> path, /* state */) {
+    if (/* goal reached */) {
+        result.add(new ArrayList<>(path));  // copy!
+        return;
+    }
+    for (/* each choice */) {
+        if (/* invalid */) continue;  // prune
+        path.add(choice);             // choose
+        backtrack(result, path, /* updated state */);
+        path.remove(path.size() - 1); // un-choose
+    }
+}
+```
+
+### Key Problems
+| Problem | Key Trick |
+|---|---|
+| LC 46 (Permutations) | `used[]` boolean array |
+| LC 78 (Subsets) | Start index to avoid duplicates |
+| LC 39 (Combination Sum) | Stay at same index (reuse allowed) |
+| LC 51 (N-Queens) | Track columns + diagonals with sets |
+| LC 79 (Word Search) | Mark visited in grid, restore on backtrack |
+| LC 17 (Letter Combinations) | Map digit → letters, recurse |
+
+### Trick: Avoiding Duplicates
+For arrays with duplicate elements (LC 40, 47), sort first, then skip `nums[i] == nums[i-1]` at the same recursion level.
+
+---
+
+## Graph Algorithms
 
 ### Algorithm Overview
 
 | Algorithm | Problem | Time | Data Structure |
 |---|---|---|---|
 | **BFS** | Shortest path (unweighted) | O(V + E) | Queue |
-| **Dijkstra's** | Shortest path (non-negative weights) | O(E log V) | PriorityQueue |
-| **Bellman-Ford** | Shortest path (negative weights ok) | O(V × E) | Array |
+| **Dijkstra's** | Shortest path (non-neg weights) | O(E log V) | PriorityQueue |
+| **Bellman-Ford** | Shortest path (neg weights ok) | O(V × E) | Array |
 | **Kruskal's** | Minimum Spanning Tree | O(E log E) | Union-Find |
 | **Prim's** | Minimum Spanning Tree | O(E log V) | PriorityQueue |
-| **Topological Sort (Kahn's)** | Dependency ordering (DAG) | O(V + E) | Queue + in-degree array |
+
+### BFS Template
+```java
+Queue<int[]> queue = new ArrayDeque<>();
+queue.offer(start);
+visited.add(start);
+int level = 0;
+while (!queue.isEmpty()) {
+    int size = queue.size();  // process level by level
+    for (int i = 0; i < size; i++) {
+        var curr = queue.poll();
+        for (var next : neighbors(curr)) {
+            if (!visited.contains(next)) {
+                visited.add(next);
+                queue.offer(next);
+            }
+        }
+    }
+    level++;
+}
+```
+
+### Dijkstra's
+```java
+int[] dist = new int[n];
+Arrays.fill(dist, Integer.MAX_VALUE);
+dist[src] = 0;
+PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+pq.offer(new int[]{0, src});
+
+while (!pq.isEmpty()) {
+    int[] curr = pq.poll();
+    int d = curr[0], u = curr[1];
+    if (d > dist[u]) continue;  // stale entry
+    for (int[] edge : graph.getOrDefault(u, List.of())) {
+        int v = edge[0], w = edge[1];
+        if (dist[u] + w < dist[v]) {
+            dist[v] = dist[u] + w;
+            pq.offer(new int[]{dist[v], v});
+        }
+    }
+}
+```
+
+### Bellman-Ford
+```java
+int[] dist = new int[n];
+Arrays.fill(dist, Integer.MAX_VALUE);
+dist[src] = 0;
+for (int i = 0; i < n - 1; i++)       // V-1 rounds
+    for (int[] e : edges)               // relax all edges
+        if (dist[e[0]] != Integer.MAX_VALUE && dist[e[0]] + e[2] < dist[e[1]])
+            dist[e[1]] = dist[e[0]] + e[2];
+```
+
+### Kruskal's (MST)
+```java
+Arrays.sort(edges, (a, b) -> a[2] - b[2]);  // sort by weight
+UnionFind uf = new UnionFind(n);
+int total = 0, count = 0;
+for (int[] e : edges) {
+    if (uf.union(e[0], e[1])) {
+        total += e[2];
+        if (++count == n - 1) break;
+    }
+}
+```
+
+### Prim's (MST)
+```java
+boolean[] inMST = new boolean[n];
+PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+pq.offer(new int[]{0, 0});
+int total = 0, count = 0;
+while (!pq.isEmpty() && count < n) {
+    int[] curr = pq.poll();
+    if (inMST[curr[1]]) continue;
+    inMST[curr[1]] = true;
+    total += curr[0];
+    count++;
+    for (int[] edge : graph.getOrDefault(curr[1], List.of()))
+        if (!inMST[edge[0]]) pq.offer(new int[]{edge[1], edge[0]});
+}
+```
 
 ### When to Use Which
-
 ```
 Shortest path?
 ├── Unweighted → BFS
 ├── Non-negative weights → Dijkstra's
-├── Negative weights → Bellman-Ford
-└── All pairs → Floyd-Warshall (rare in interviews)
+└── Negative weights → Bellman-Ford
 
-Minimum Spanning Tree?
-├── Sparse graph / edge list → Kruskal's (sort edges + Union-Find)
-└── Dense graph / adjacency list → Prim's (greedy + PriorityQueue)
-
-Dependency order?
-└── Topological Sort (Kahn's BFS or DFS post-order)
+MST?
+├── Edge list / sparse → Kruskal's
+└── Adjacency list / dense → Prim's
 ```
 
 ---
 
-### Dijkstra's Algorithm
+## Union-Find
 
-**Problem**: Shortest path from source to all nodes in a weighted graph (non-negative weights).
-
-**Mental model**: BFS but with a PriorityQueue instead of a Queue. Always process the closest unvisited node.
-
-```java
-// Returns shortest distance from src to all nodes
-int[] dijkstra(Map<Integer, List<int[]>> graph, int src, int n) {
-    int[] dist = new int[n];
-    Arrays.fill(dist, Integer.MAX_VALUE);
-    dist[src] = 0;
-
-    // {distance, node}
-    PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-    pq.offer(new int[]{0, src});
-
-    while (!pq.isEmpty()) {
-        int[] curr = pq.poll();
-        int d = curr[0], u = curr[1];
-
-        if (d > dist[u]) continue;  // stale entry, skip
-
-        for (int[] edge : graph.getOrDefault(u, List.of())) {
-            int v = edge[0], w = edge[1];
-            if (dist[u] + w < dist[v]) {
-                dist[v] = dist[u] + w;
-                pq.offer(new int[]{dist[v], v});
-            }
-        }
-    }
-    return dist;
-}
-```
-
-**Key points**:
-- `if (d > dist[u]) continue` — lazy deletion instead of decreaseKey. The PQ may have stale entries; skip them.
-- **Cannot handle negative weights** — a "settled" node might later find a shorter path via a negative edge.
-- LC 743 (Network Delay Time): run Dijkstra, return max of all distances.
-- LC 787 (Cheapest Flights Within K Stops): modified Dijkstra/BFS with stop count limit.
-
----
-
-### Bellman-Ford Algorithm
-
-**Problem**: Shortest path with **negative weights** allowed. Also detects negative cycles.
-
-**Mental model**: Relax all edges V-1 times. Each round propagates shortest paths one hop further.
-
-```java
-int[] bellmanFord(int[][] edges, int src, int n) {
-    int[] dist = new int[n];
-    Arrays.fill(dist, Integer.MAX_VALUE);
-    dist[src] = 0;
-
-    for (int i = 0; i < n - 1; i++) {          // V-1 rounds
-        for (int[] e : edges) {                  // relax all edges
-            int u = e[0], v = e[1], w = e[2];
-            if (dist[u] != Integer.MAX_VALUE && dist[u] + w < dist[v]) {
-                dist[v] = dist[u] + w;
-            }
-        }
-    }
-
-    // Optional: detect negative cycle (one more round)
-    for (int[] e : edges) {
-        if (dist[e[0]] != Integer.MAX_VALUE && dist[e[0]] + e[2] < dist[e[1]]) {
-            // negative cycle exists
-        }
-    }
-    return dist;
-}
-```
-
-**Key points**:
-- Slower than Dijkstra's but handles negatives.
-- LC 787 (Cheapest Flights Within K Stops): limit relaxation rounds to K+1 instead of V-1.
-- Rarely asked to implement from scratch in interviews, but knowing when to use it matters.
-
----
-
-### Kruskal's Algorithm (MST)
-
-**Problem**: Find minimum spanning tree — connect all nodes with minimum total edge weight.
-
-**Mental model**: Sort all edges by weight, greedily add the cheapest edge that doesn't form a cycle. Use Union-Find for cycle detection.
-
-```java
-int kruskal(int n, int[][] edges) {
-    // Sort edges by weight
-    Arrays.sort(edges, (a, b) -> a[2] - b[2]);
-
-    int[] parent = new int[n];
-    int[] rank = new int[n];
-    for (int i = 0; i < n; i++) parent[i] = i;
-
-    int totalWeight = 0, edgesUsed = 0;
-    for (int[] e : edges) {
-        int u = e[0], v = e[1], w = e[2];
-        if (find(parent, u) != find(parent, v)) {
-            union(parent, rank, u, v);
-            totalWeight += w;
-            if (++edgesUsed == n - 1) break;  // MST complete
-        }
-    }
-    return edgesUsed == n - 1 ? totalWeight : -1;  // -1 if disconnected
-}
-
-int find(int[] parent, int x) {
-    if (parent[x] != x) parent[x] = find(parent, parent[x]);  // path compression
-    return parent[x];
-}
-
-void union(int[] parent, int[] rank, int x, int y) {
-    int px = find(parent, x), py = find(parent, y);
-    if (rank[px] < rank[py]) parent[px] = py;
-    else if (rank[px] > rank[py]) parent[py] = px;
-    else { parent[py] = px; rank[px]++; }
-}
-```
-
-**Key points**:
-- Sort edges O(E log E) dominates. Union-Find operations are nearly O(1) amortized.
-- MST has exactly V-1 edges. Early termination when `edgesUsed == n - 1`.
-- LC 1135 (Connecting Cities With Minimum Cost): direct Kruskal's application.
-- LC 1584 (Min Cost to Connect All Points): generate all edges, then Kruskal's.
-
----
-
-### Prim's Algorithm (MST)
-
-**Problem**: Same as Kruskal's — minimum spanning tree. Different approach.
-
-**Mental model**: Start from any node. Greedily add the cheapest edge connecting the MST to a non-MST node. Like Dijkstra's but for MST.
-
-```java
-int prim(Map<Integer, List<int[]>> graph, int n) {
-    boolean[] inMST = new boolean[n];
-    // {weight, node}
-    PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-    pq.offer(new int[]{0, 0});  // start from node 0
-
-    int totalWeight = 0, nodesAdded = 0;
-    while (!pq.isEmpty() && nodesAdded < n) {
-        int[] curr = pq.poll();
-        int w = curr[0], u = curr[1];
-        if (inMST[u]) continue;
-
-        inMST[u] = true;
-        totalWeight += w;
-        nodesAdded++;
-
-        for (int[] edge : graph.getOrDefault(u, List.of())) {
-            if (!inMST[edge[0]]) {
-                pq.offer(new int[]{edge[1], edge[0]});
-            }
-        }
-    }
-    return nodesAdded == n ? totalWeight : -1;
-}
-```
-
-**Key points**:
-- Very similar to Dijkstra's in structure (PQ + greedy).
-- Difference: Dijkstra tracks **distance from source**, Prim's tracks **edge weight to MST**.
-- Better for dense graphs (adjacency list/matrix); Kruskal's better for sparse (edge list).
-
----
-
-### Kruskal's vs Prim's
-
-| | Kruskal's | Prim's |
-|---|---|---|
-| **Approach** | Sort edges, add cheapest non-cycle | Grow tree, add cheapest connection |
-| **Data structure** | Union-Find | PriorityQueue |
-| **Input format** | Edge list | Adjacency list |
-| **Better for** | Sparse graphs | Dense graphs |
-| **Time** | O(E log E) | O(E log V) |
-| **Simpler when** | Edges already given as list | Graph already as adjacency list |
-
----
-
-### Union-Find (Disjoint Set Union)
-
-Not a graph algorithm itself, but the backbone of Kruskal's and many connectivity problems.
-
+### Template
 ```java
 class UnionFind {
     int[] parent, rank;
@@ -543,13 +543,13 @@ class UnionFind {
     }
 
     int find(int x) {
-        if (parent[x] != x) parent[x] = find(parent, parent[x]);
+        if (parent[x] != x) parent[x] = find(parent[x]);  // path compression
         return parent[x];
     }
 
     boolean union(int x, int y) {
         int px = find(x), py = find(y);
-        if (px == py) return false;  // already connected
+        if (px == py) return false;
         if (rank[px] < rank[py]) parent[px] = py;
         else if (rank[px] > rank[py]) parent[py] = px;
         else { parent[py] = px; rank[px]++; }
@@ -559,172 +559,495 @@ class UnionFind {
 }
 ```
 
-**Two optimizations** (always use both):
-- **Path compression**: `parent[x] = find(parent[x])` — flattens tree on every find
-- **Union by rank**: attach shorter tree under taller — keeps tree balanced
+### When to Use
+- **Merge groups that share a common element** (LC 721 Accounts Merge)
+- **Detect redundant connections** (LC 684)
+- **Count connected components** (LC 323)
+- **Dynamic connectivity** — edges added one by one
 
-Together they give nearly O(1) amortized per operation (technically O(α(n)), inverse Ackermann).
+### String-Keyed Union-Find
+For problems where nodes are strings (emails, words), use `Map<String, String> parent` instead of `int[]`.
 
-**Interview problems**:
-- LC 323 (Number of Connected Components): union all edges, return `components`
-- LC 684 (Redundant Connection): union edges one by one, first edge where `union` returns false is redundant
-- LC 721 (Accounts Merge): union accounts sharing the same email
+### Key Signal
+"Group things together by shared attribute" → Union-Find.
 
 ---
 
-### Topological Sort
+## Topological Sort
 
-Produces a linear ordering of vertices in a **directed acyclic graph (DAG)** such that for every edge u→v, u comes before v. If a cycle exists, no valid ordering is possible.
-
-#### When to Use
-
-- **"Prerequisites" / "dependencies"** — LC 207, 210, 269
-- **"Order of compilation / build"**
-- **"Is it possible to finish all tasks?"** — cycle detection in directed graphs
-
-#### Kahn's Algorithm (BFS) — Preferred for Interviews
-
-**Mental model**: Repeatedly process nodes with no remaining prerequisites (in-degree 0).
-
+### Kahn's Algorithm (BFS) — Preferred
 ```java
-// Returns topological order, or empty if cycle exists
-List<Integer> topoSort(int n, Map<Integer, List<Integer>> graph) {
-    int[] inDegree = new int[n];
-    for (var neighbors : graph.values())
-        for (int next : neighbors)
-            inDegree[next]++;
+int[] inDegree = new int[n];
+for (var neighbors : graph.values())
+    for (int next : neighbors) inDegree[next]++;
 
-    Queue<Integer> queue = new ArrayDeque<>();
-    for (int i = 0; i < n; i++)
-        if (inDegree[i] == 0) queue.offer(i);
-
-    List<Integer> order = new ArrayList<>();
-    while (!queue.isEmpty()) {
-        int curr = queue.poll();
-        order.add(curr);
-        for (int next : graph.getOrDefault(curr, List.of()))
-            if (--inDegree[next] == 0)  // all prerequisites met
-                queue.offer(next);
-    }
-
-    return order.size() == n ? order : List.of();  // empty = cycle
-}
-```
-
-**Core insight**: `if (--inDegree[next] == 0) queue.offer(next)` — a node is ready only when **all** its prerequisites are processed.
-
-#### DFS Post-Order (Alternative)
-
-**Mental model**: DFS to the deepest dependency first, add to result on the way back (post-order), then reverse.
-
-```java
-List<Integer> topoSortDFS(int n, Map<Integer, List<Integer>> graph) {
-    int[] state = new int[n];  // 0=unvisited, 1=visiting, 2=visited
-    List<Integer> order = new ArrayList<>();
-
-    for (int i = 0; i < n; i++)
-        if (state[i] == 0 && hasCycle(i, graph, state, order))
-            return List.of();  // cycle
-
-    Collections.reverse(order);
-    return order;
-}
-
-boolean hasCycle(int node, Map<Integer, List<Integer>> graph,
-                 int[] state, List<Integer> order) {
-    state[node] = 1;  // visiting (in current DFS path)
-    for (int next : graph.getOrDefault(node, List.of())) {
-        if (state[next] == 1) return true;   // back edge = cycle
-        if (state[next] == 0 && hasCycle(next, graph, state, order))
-            return true;
-    }
-    state[node] = 2;  // done
-    order.add(node);   // post-order: add AFTER all descendants
-    return false;
-}
-```
-
-#### Kahn's vs DFS
-
-| | Kahn's (BFS) | DFS Post-Order |
-|---|---|---|
-| **Cycle detection** | `order.size() != n` | Back edge: `state[next] == 1` |
-| **Result** | Direct order | Must reverse |
-| **Easier to** | Get order + count levels | Detect cycle during traversal |
-| **Interview preference** | Preferred — more intuitive | Fine, but trickier to get right |
-
-#### Key Patterns
-
-**Build the graph — watch edge direction**:
-```java
-// "a must come before b" or "a is prerequisite of b"
-// → edge from a to b: graph[a].add(b), inDegree[b]++
-
-// LC 210: prerequisites[i] = [course, prereq]
-// prereq → course (prereq must come first)
-graph.get(prereq).add(course);  // NOT course → prereq
-```
-
-**Alien Dictionary (LC 269) — graph from sorted words**:
-```java
-// Compare adjacent words, first differing char gives one edge
-// "wrt" vs "wrf" → t before f → edge t→f
-```
-
-#### Edge Cases
-
-| Case | What Happens |
-|---|---|
-| **Cycle exists** | Kahn's: `order.size() < n`. DFS: back edge found |
-| **Multiple valid orders** | Both methods produce one valid answer |
-| **Disconnected graph** | Works fine — multiple starting nodes with in-degree 0 |
-| **Single node** | Returns `[0]` |
-| **Nodes with no edges** | In-degree 0, processed first in Kahn's |
-
-#### Variant: Lexicographically Smallest Topological Order
-
-When multiple nodes have in-degree 0 at the same time, a regular queue picks arbitrarily. Swap it for a **PriorityQueue** to always pick the smallest first.
-
-**Example**: Nodes `{0,1,2,3}`, edges `2→0, 2→1, 3→0`
-
-```
-Regular Kahn's queue:  [2, 3] → could produce [2, 3, 0, 1] or [3, 2, 1, 0]
-PriorityQueue Kahn's:  [2, 3] → always picks 2 first → [2, 1, 3, 0]
-                        (lexicographically smallest valid order)
-```
-
-```java
-// Only change: PriorityQueue instead of ArrayDeque
-PriorityQueue<Integer> pq = new PriorityQueue<>();
+Queue<Integer> queue = new ArrayDeque<>();
 for (int i = 0; i < n; i++)
-    if (inDegree[i] == 0) pq.offer(i);
+    if (inDegree[i] == 0) queue.offer(i);
 
 List<Integer> order = new ArrayList<>();
-while (!pq.isEmpty()) {
-    int curr = pq.poll();  // always picks smallest available
+while (!queue.isEmpty()) {
+    int curr = queue.poll();
     order.add(curr);
     for (int next : graph.getOrDefault(curr, List.of()))
-        if (--inDegree[next] == 0)
-            pq.offer(next);
+        if (--inDegree[next] == 0) queue.offer(next);
 }
+return order.size() == n ? order : List.of();  // empty = cycle
 ```
 
-**Trade-off**: O(V log V) instead of O(V) due to heap operations. Only use when the problem explicitly asks for lexicographic order.
+### DFS Post-Order (Alternative)
+```java
+int[] state = new int[n];  // 0=unvisited, 1=visiting, 2=visited
+List<Integer> order = new ArrayList<>();
+for (int i = 0; i < n; i++)
+    if (state[i] == 0 && hasCycle(i, graph, state, order)) return List.of();
+Collections.reverse(order);
+return order;
+```
 
-#### Common Mistakes
+### When to Use
+- **Prerequisites / dependencies**: LC 207, 210
+- **Alien dictionary**: LC 269 (compare adjacent words → edges)
+- **Build order / compilation**
 
-- **Reversing edge direction** — "prereq → course", not "course → prereq"
-- **Forgetting to count all nodes** — some nodes may not appear in any edge (LC 269)
-- **Not checking for cycles** — always verify `order.size() == n`
+### Common Mistakes
+- Reversing edge direction: "prereq → course", not "course → prereq"
+- Forgetting isolated nodes
+- Not checking for cycles (`order.size() == n`)
+
+### Variant: Lexicographic Order
+Replace `ArrayDeque` with `PriorityQueue` — always picks smallest available node. O(V log V) instead of O(V).
 
 ---
 
-## Quick Comparison
+## Linked List Tricks
+
+### Core Patterns
+
+**Fast/Slow pointers** (Floyd's cycle detection):
+```java
+ListNode slow = head, fast = head;
+while (fast != null && fast.next != null) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow == fast) return true;  // cycle
+}
+// slow is at middle when fast reaches end
+```
+
+**Reverse a linked list**:
+```java
+ListNode prev = null, curr = head;
+while (curr != null) {
+    ListNode next = curr.next;
+    curr.next = prev;
+    prev = curr;
+    curr = next;
+}
+return prev;
+```
+
+**Dummy head** (simplifies edge cases):
+```java
+ListNode dummy = new ListNode(0);
+dummy.next = head;
+// ... manipulate list ...
+return dummy.next;
+```
+
+### Key Problems
+| Problem | Trick |
+|---|---|
+| LC 206 (Reverse Linked List) | Three-pointer iteration |
+| LC 141/142 (Cycle Detection) | Fast/slow, then entry point |
+| LC 21 (Merge Two Sorted) | Dummy head + compare |
+| LC 25 (Reverse Nodes in k-Group) | Count k, reverse segment, connect |
+| LC 23 (Merge K Sorted Lists) | Min-heap of list heads |
+
+### Finding Cycle Entry (LC 142)
+After fast and slow meet, reset one pointer to head. Move both one step at a time — they meet at the cycle entry. Mathematical proof: both travel the same distance to the entry point.
+
+---
+
+## Stack Patterns
+
+### Monotonic Stack
+Maintain a stack where elements are in sorted order. Used for "next greater/smaller element" problems.
+
+**Decreasing stack** (next greater element):
+```java
+Deque<Integer> stack = new ArrayDeque<>();
+for (int i = 0; i < nums.length; i++) {
+    while (!stack.isEmpty() && nums[stack.peek()] < nums[i]) {
+        result[stack.pop()] = nums[i];
+    }
+    stack.push(i);
+}
+```
+
+**Largest rectangle in histogram** (LC 84):
+```java
+Deque<Integer> stack = new ArrayDeque<>();
+stack.push(-1);  // sentinel
+int maxArea = 0;
+for (int i = 0; i <= heights.length; i++) {
+    int h = (i == heights.length) ? 0 : heights[i];
+    while (stack.peek() != -1 && heights[stack.peek()] >= h) {
+        int height = heights[stack.pop()];
+        int width = i - stack.peek() - 1;
+        maxArea = Math.max(maxArea, height * width);
+    }
+    stack.push(i);
+}
+```
+
+### Stack-Based Parsing
+For expression evaluation, calculators, nested structures:
+
+```java
+// LC 224 (Basic Calculator) pattern:
+// Use stack to save state when entering parentheses
+Deque<Integer> stack = new ArrayDeque<>();
+int result = 0, num = 0, sign = 1;
+for (char c : s.toCharArray()) {
+    if (Character.isDigit(c)) num = num * 10 + (c - '0');
+    else if (c == '+' || c == '-') {
+        result += sign * num;
+        num = 0;
+        sign = (c == '+') ? 1 : -1;
+    } else if (c == '(') {
+        stack.push(result);
+        stack.push(sign);
+        result = 0; sign = 1;
+    } else if (c == ')') {
+        result += sign * num;
+        num = 0;
+        result = stack.pop() * result + stack.pop();
+    }
+}
+result += sign * num;
+```
+
+### Monotonic Deque (Sliding Window Max/Min)
+```java
+Deque<Integer> deque = new ArrayDeque<>();
+for (int i = 0; i < nums.length; i++) {
+    while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i])
+        deque.pollLast();
+    deque.offerLast(i);
+    if (deque.peekFirst() <= i - k) deque.pollFirst();  // evict out-of-window
+    if (i >= k - 1) result[i - k + 1] = nums[deque.peekFirst()];
+}
+```
+
+### Key Problems
+| Problem | Pattern |
+|---|---|
+| LC 739 (Daily Temperatures) | Monotonic decreasing stack |
+| LC 84 (Largest Rectangle) | Monotonic stack with sentinel |
+| LC 224 (Basic Calculator) | Stack for parentheses state |
+| LC 895 (Max Frequency Stack) | HashMap + stack per frequency |
+
+---
+
+## Heap / Priority Queue Patterns
+
+### Patterns
+
+**Top K elements** (keep heap of size k):
+```java
+PriorityQueue<Integer> pq = new PriorityQueue<>();  // min-heap
+for (int num : nums) {
+    pq.offer(num);
+    if (pq.size() > k) pq.poll();  // evict smallest → keeps k largest
+}
+// pq.peek() = kth largest
+```
+
+**Two heaps for median** (LC 295):
+```java
+PriorityQueue<Integer> lo = new PriorityQueue<>(Comparator.reverseOrder()); // max-heap: smaller half
+PriorityQueue<Integer> hi = new PriorityQueue<>();  // min-heap: larger half
+// Balance: lo.size() == hi.size() or lo.size() == hi.size() + 1
+// Median = lo.peek() or (lo.peek() + hi.peek()) / 2.0
+```
+
+**Merge K sorted lists** (LC 23):
+```java
+PriorityQueue<ListNode> pq = new PriorityQueue<>((a, b) -> a.val - b.val);
+for (ListNode head : lists) if (head != null) pq.offer(head);
+ListNode dummy = new ListNode(0), curr = dummy;
+while (!pq.isEmpty()) {
+    ListNode node = pq.poll();
+    curr.next = node;
+    curr = curr.next;
+    if (node.next != null) pq.offer(node.next);
+}
+```
+
+### Key Problems
+| Problem | Pattern |
+|---|---|
+| LC 215 (Kth Largest) | Min-heap of size k |
+| LC 347 (Top K Frequent) | Frequency map + min-heap |
+| LC 295 (Find Median) | Two heaps (max + min) |
+| LC 23 (Merge K Sorted) | Min-heap of heads |
+| LC 253 (Meeting Rooms II) | Min-heap of end times |
+
+### PriorityQueue Gotchas
+- `remove(obj)` is **O(n)** — prefer `TreeMap` when you need arbitrary removal
+- Iterator is **NOT sorted** — only `peek()/poll()` gives min
+- Duplicates allowed (unlike TreeMap)
+
+---
+
+## Bit Manipulation
+
+### Essential Tricks
+
+| Operation | Code | What It Does |
+|---|---|---|
+| Check bit i | `(n >> i) & 1` | Is bit i set? |
+| Set bit i | `n \| (1 << i)` | Turn on bit i |
+| Clear bit i | `n & ~(1 << i)` | Turn off bit i |
+| Toggle bit i | `n ^ (1 << i)` | Flip bit i |
+| Clear lowest set bit | `n & (n - 1)` | Remove rightmost 1 |
+| Isolate lowest set bit | `n & (-n)` | Keep only rightmost 1 |
+| Check power of 2 | `n > 0 && (n & (n-1)) == 0` | Only one bit set |
+
+### Key Problems
+| Problem | Trick |
+|---|---|
+| LC 191 (Number of 1 Bits) | `n & (n-1)` in loop, count iterations |
+| LC 338 (Counting Bits) | `dp[i] = dp[i & (i-1)] + 1` |
+| LC 136 (Single Number) | XOR all elements — duplicates cancel |
+
+---
+
+## Matrix Tricks
+
+### Rotate Image 90° CW (LC 48)
+```java
+// Step 1: Transpose (swap [i][j] with [j][i])
+// Step 2: Reverse each row
+for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
+        swap(matrix[i][j], matrix[j][i]);
+for (int[] row : matrix)
+    reverse(row);
+```
+
+### Spiral Matrix (LC 54)
+```java
+int top = 0, bot = m - 1, left = 0, right = n - 1;
+while (top <= bot && left <= right) {
+    for (int j = left; j <= right; j++) result.add(matrix[top][j]);  // →
+    top++;
+    for (int i = top; i <= bot; i++) result.add(matrix[i][right]);   // ↓
+    right--;
+    if (top <= bot) { for (int j = right; j >= left; j--) result.add(matrix[bot][j]); bot--; }  // ←
+    if (left <= right) { for (int i = bot; i >= top; i--) result.add(matrix[i][left]); left++; } // ↑
+}
+```
+
+### 4-Directional Traversal
+```java
+int[][] dirs = {{0,1},{0,-1},{1,0},{-1,0}};
+for (int[] d : dirs) {
+    int ni = i + d[0], nj = j + d[1];
+    if (ni >= 0 && ni < m && nj >= 0 && nj < n) { /* valid */ }
+}
+```
+
+---
+
+## Minor Patterns & One-Trick Techniques
+
+One-trick patterns — know the technique and you can solve them instantly.
+
+### Boyer-Moore Voting (LC 169 — Majority Element)
+```java
+int candidate = 0, count = 0;
+for (int num : nums) {
+    if (count == 0) candidate = num;
+    count += (num == candidate) ? 1 : -1;
+}
+return candidate;  // guaranteed majority exists
+```
+Cancel different elements pairwise — the majority element always survives. O(n) time, O(1) space.
+
+### Kadane's Algorithm (LC 53 — Maximum Subarray)
+```java
+int maxHere = nums[0], maxSoFar = nums[0];
+for (int i = 1; i < nums.length; i++) {
+    maxHere = Math.max(nums[i], maxHere + nums[i]);
+    maxSoFar = Math.max(maxSoFar, maxHere);
+}
+```
+**Variant** (LC 152 — Maximum Product Subarray): track both `maxHere` and `minHere` because a negative × negative can become the max.
+
+### Dutch National Flag (LC 75 — Sort Colors)
+```java
+int lo = 0, mid = 0, hi = nums.length - 1;
+while (mid <= hi) {
+    if (nums[mid] == 0) swap(nums, lo++, mid++);
+    else if (nums[mid] == 2) swap(nums, mid, hi--);
+    else mid++;
+}
+```
+3-way partition in a single pass. Generalizes to any 3-category sort.
+
+### In-Place Array Marking (LC 41 — First Missing Positive)
+Use array indices as a hash map — place each value `v` at index `v - 1`:
+```java
+for (int i = 0; i < n; i++)
+    while (nums[i] > 0 && nums[i] <= n && nums[nums[i] - 1] != nums[i])
+        swap(nums, i, nums[i] - 1);
+for (int i = 0; i < n; i++)
+    if (nums[i] != i + 1) return i + 1;
+return n + 1;
+```
+
+### Reservoir Sampling (LC 382 — Linked List Random Node)
+Select a random element from a stream of unknown length:
+```java
+int result = 0, count = 0;
+ListNode curr = head;
+while (curr != null) {
+    count++;
+    if (rand.nextInt(count) == 0) result = curr.val;  // keep with prob 1/count
+    curr = curr.next;
+}
+```
+
+### Bucket Sort (LC 164 — Maximum Gap)
+When value range is bounded, sort in O(n) by distributing into buckets. For Maximum Gap: bucket size = `(max - min) / (n - 1)`, then max gap is between consecutive non-empty buckets.
+
+### Next Permutation (LC 31)
+Four steps — memorize the procedure:
+1. **Find dip**: scan right-to-left, find first `i` where `nums[i] < nums[i+1]`
+2. **Find swap**: scan right-to-left, find first `j` where `nums[j] > nums[i]`
+3. **Swap** `nums[i]` and `nums[j]`
+4. **Reverse** the suffix after index `i`
+
+If no dip found → array is last permutation → reverse entire array.
+
+### Trie + Wildcard DFS (LC 211 — Add and Search Words)
+Standard Trie insert, but search branches at `.` to explore **all** children:
+```java
+boolean search(TrieNode node, String word, int i) {
+    if (i == word.length()) return node.isEnd;
+    char c = word.charAt(i);
+    if (c == '.') {
+        for (TrieNode child : node.children)
+            if (child != null && search(child, word, i + 1)) return true;
+        return false;
+    }
+    return node.children[c - 'a'] != null && search(node.children[c - 'a'], word, i + 1);
+}
+```
+
+### Reference-Only Techniques
+
+| Technique | What It Does | When You'd See It |
+|---|---|---|
+| **Segment Tree / BIT** | Range update + range query O(log n) | "Update index AND query range sum" — very rare |
+| **KMP / Rabin-Karp** | String pattern matching O(n) | "Find pattern in text" — almost never asked |
+| **Manacher's** | Longest palindromic substring O(n) | Expand-around-center O(n²) is always sufficient |
+| **A\* Search** | Heuristic shortest path | Game pathfinding, not SWE interviews |
+| **Suffix Array** | All suffixes sorted | Advanced string problems — never asked |
+| **Heavy-Light Decomp** | Tree path queries | Competitive programming only |
+
+---
+
+## Data Structures Reference
+
+### TreeMap<K, V>
+
+Sorted map backed by Red-Black tree. All operations **O(log n)**.
+
+| Method | Description |
+|---|---|
+| `put(k, v)` / `get(k)` / `remove(k)` | Standard map ops |
+| `firstKey()` / `lastKey()` | Min / max key |
+| `pollFirstEntry()` / `pollLastEntry()` | Remove + return min / max |
+| `floorKey(k)` / `ceilingKey(k)` | Largest ≤ k / smallest ≥ k |
+| `lowerKey(k)` / `higherKey(k)` | Strict < k / strict > k |
+| `subMap(from, to)` | Live view of keys in range |
+
+**When to use**: Sliding window needing sorted access, nearest neighbor queries, O(log n) arbitrary removal (vs PriorityQueue's O(n)).
+
+---
+
+### ArrayDeque<E>
+
+O(1) amortized stack/queue/deque. Faster than `LinkedList`. No `null` elements.
+
+| Use As | Key Methods |
+|---|---|
+| **Stack** | `push(e)`, `pop()`, `peek()` |
+| **Queue** | `offer(e)`, `poll()`, `peek()` |
+| **Deque** | `offerFirst/Last`, `pollFirst/Last`, `peekFirst/Last` |
+
+Use `poll`/`peek`/`offer` family (returns null) over `remove`/`get`/`add` (throws).
+
+---
+
+### PriorityQueue<E>
+
+Min-heap. Use `Comparator.reverseOrder()` for max-heap.
+
+| Method | Time |
+|---|---|
+| `offer(e)` / `poll()` | O(log n) |
+| `peek()` | O(1) |
+| `remove(obj)` | **O(n)** — linear scan! |
+| `new PriorityQueue<>(collection)` | O(n) heapify |
+
+**Gotchas**: `remove(obj)` is O(n), iterator is NOT sorted, duplicates allowed.
+
+---
+
+### Trie (Prefix Tree)
+
+```java
+class TrieNode {
+    TrieNode[] children = new TrieNode[26];
+    boolean isEnd;
+}
+```
+
+| Operation | Time |
+|---|---|
+| Insert / Search / Prefix check | O(L) where L = word length |
+
+**When to use**: Prefix matching, autocomplete, word search in grids (LC 212), file system design.
+
+**Gotchas**: `isEnd` is critical (without it, "app" matches when only "apple" was inserted). Use `Map<Character, TrieNode>` for non-lowercase-English character sets.
+
+**Trie + DFS** (LC 212 — Word Search II):
+```java
+// Build trie from word list, DFS from each grid cell
+// Follow trie children instead of checking all words → prunes search
+void dfs(char[][] board, int i, int j, TrieNode node, List<String> result) {
+    char c = board[i][j];
+    if (c == '#' || node.children[c - 'a'] == null) return;
+    node = node.children[c - 'a'];
+    if (node.isEnd) { result.add(node.word); node.isEnd = false; }
+    board[i][j] = '#';
+    for (int[] d : DIRS) dfs(board, i+d[0], j+d[1], node, result);
+    board[i][j] = c;
+}
+```
+
+---
+
+### Quick Comparison
 
 | | TreeMap | ArrayDeque | PriorityQueue |
 |---|---|---|---|
-| **Order** | Sorted by key | Insertion order | Heap order (min by default) |
+| **Order** | Sorted by key | Insertion order | Heap (min default) |
 | **Min access** | O(log n) | O(1) head | O(1) peek |
 | **Arbitrary remove** | O(log n) | O(n) | O(n) |
-| **Neighbor query** | O(log n) | N/A | N/A |
+| **Neighbor query** | O(log n) `floor`/`ceiling` | N/A | N/A |
 | **Best for** | Sorted access + removal | Stack / Queue / Deque | Pure min/max stream |
