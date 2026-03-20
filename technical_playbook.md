@@ -121,6 +121,12 @@ while (lo < hi) {
 | LC 42 (Trapping Rain Water) | Track leftMax/rightMax from both ends |
 | LC 15 (3Sum) | Sort + fix one + two pointers for remaining |
 
+### Common Pitfalls
+- **Forgetting to sort first** — two pointers on unsorted array gives wrong results
+- **Off-by-one with `lo < hi` vs `lo <= hi`** — use `lo < hi` when pointers must be distinct elements
+- **Skipping duplicates in 3Sum** — must skip *after* finding a match, not before: `while (lo < hi && nums[lo] == nums[lo+1]) lo++`
+- **Modifying array when you shouldn't** — sorting mutates input; check if that's allowed
+
 ---
 
 ## Sliding Window
@@ -157,6 +163,12 @@ for (int right = 0; right < n; right++) {
 ### Trick: Fixed vs Variable Window
 - **Variable**: shrink left when constraint violated → find min/max length
 - **Fixed** (size k): just slide, no shrinking logic
+
+### Common Pitfalls
+- **Forgetting to remove left element from state** when shrinking — e.g., decrement freq map, remove from set
+- **Updating answer at the wrong place** — for "longest", update *after* shrinking; for "shortest", update *during* shrinking
+- **Using `if` instead of `while` for shrinking** — may need to shrink multiple times
+- **Off-by-one in window size** — window `[left, right]` has size `right - left + 1`
 
 ---
 
@@ -222,6 +234,13 @@ if (nums[lo] <= nums[mid]) {  // left half sorted
 }
 ```
 
+### Common Pitfalls
+- **`lo <= hi` vs `lo < hi`** — exact search uses `<=`; boundary search uses `<`. Mixing them causes infinite loops or missed elements
+- **Integer overflow in `lo + hi`** — always use `lo + (hi - lo) / 2`
+- **Wrong initial `hi`** — `nums.length - 1` (inclusive) vs `nums.length` (exclusive). Must match your loop condition
+- **Rotated array: `<=` vs `<`** in `nums[lo] <= nums[mid]` — the `=` handles the case where `lo == mid` (2-element subarray)
+- **Search on answer: wrong feasibility direction** — if `feasible(mid)` means "mid is big enough", then `hi = mid`; if "mid is too small", then `lo = mid + 1`
+
 ---
 
 ## Intervals
@@ -285,6 +304,13 @@ return intervals.length - kept;
 | LC 435 (Non-overlapping) | Sort by end + greedy |
 | LC 1235 (Job Scheduling) | Sort by end + DP + binary search |
 
+### Common Pitfalls
+- **Forgetting to sort** — interval problems almost always need sorting first
+- **Sort by start vs end** — wrong sort order gives wrong results. Merge = start, greedy selection = end
+- **`<=` vs `<` for overlap** — `[1,3]` and `[3,5]`: do they overlap? Depends on problem definition. Check carefully
+- **Mutating the input array** during merge — the `curr[1] = Math.max(...)` trick works because `result` holds a reference to `curr`
+- **Sweep line: `<` vs `<=` for simultaneous start/end** — if a meeting ends at 10 and another starts at 10, do they need the same room? Read the problem
+
 ---
 
 ## Greedy
@@ -303,6 +329,11 @@ Greedy works when **you can prove** the local choice never hurts the global answ
 | LC 621 (Task Scheduler) | Schedule most frequent task first, fill gaps |
 | LC 134 (Gas Station) | If total gas ≥ total cost, solution exists. Start where running sum is lowest |
 | LC 55 (Jump Game) | Track farthest reachable index |
+
+### Common Pitfalls
+- **Can't prove the greedy choice is safe** — if you can't explain in one sentence why the local choice doesn't hurt, it's probably DP instead
+- **Greedy on the wrong dimension** — e.g., sorting by start instead of end for interval scheduling
+- **Missing the "total feasibility" check** — LC 134: must verify `totalGas >= totalCost` before claiming a solution exists
 
 ---
 
@@ -376,6 +407,15 @@ dp[i] = max(dp[i-1], profit[i] + dp[lastNonOverlapping(i)]);
 ### DP is Shortest Path on a DAG
 Every DP recurrence defines a DAG. Table-filling = topological sort. If cycles exist → can't use DP, need BFS/Dijkstra.
 
+### Common Pitfalls
+- **Wrong base case** — `dp[0] = 0` vs `dp[0] = 1` vs `dp[0] = true` depends on what the state represents
+- **Off-by-one in table size** — if `dp[i]` represents "first i elements", you need `dp[n+1]`
+- **Knapsack direction** — 0/1 knapsack: iterate capacity **right to left**. Unbounded: **left to right**. Reversing this silently gives wrong answers
+- **Forgetting to initialize `dp` array** — `Arrays.fill(dp, Integer.MAX_VALUE)` for min problems, but then check for MAX_VALUE before adding to avoid overflow
+- **Integer overflow** — `dp[j - coin] + 1` when `dp[j - coin]` is `Integer.MAX_VALUE` wraps to negative
+- **Top-down: returning void instead of a value** — memoization requires the recursive function to *return* the answer, not accumulate it in a parameter
+- **Top-down: forgetting the memo check** — must check and return cached value *before* computing
+
 ---
 
 ## Backtracking
@@ -414,6 +454,12 @@ void backtrack(List<List<Integer>> result, List<Integer> path, /* state */) {
 
 ### Trick: Avoiding Duplicates
 For arrays with duplicate elements (LC 40, 47), sort first, then skip `nums[i] == nums[i-1]` at the same recursion level.
+
+### Common Pitfalls
+- **Forgetting to copy the path** — `result.add(path)` adds a *reference*; the list gets modified later. Must do `new ArrayList<>(path)`
+- **Not restoring state** — every `choose` must have a matching `un-choose`. Forgetting `board[i][j] = c` in word search breaks everything
+- **Duplicate results** — sort the input + skip `nums[i] == nums[i-1]` at the *same level*. Skipping across levels removes valid answers
+- **Start index confusion** — subsets/combinations: pass `i` (or `i+1`) as start. Permutations: always start from 0 with `used[]` array
 
 ---
 
@@ -525,6 +571,13 @@ MST?
 └── Adjacency list / dense → Prim's
 ```
 
+### Common Pitfalls
+- **BFS: adding to visited when polling instead of when offering** — causes duplicates in queue, TLE or wrong results
+- **Dijkstra: not skipping stale entries** — without `if (d > dist[u]) continue`, you process nodes multiple times
+- **Dijkstra with negative weights** — silently gives wrong answers. Use Bellman-Ford instead
+- **Bellman-Ford: off-by-one in rounds** — V-1 rounds for standard; K+1 rounds for "at most K stops" variant
+- **Building adjacency list: forgetting bidirectional edges** — undirected graph needs `graph[u].add(v)` AND `graph[v].add(u)`
+
 ---
 
 ## Union-Find
@@ -570,6 +623,12 @@ For problems where nodes are strings (emails, words), use `Map<String, String> p
 
 ### Key Signal
 "Group things together by shared attribute" → Union-Find.
+
+### Common Pitfalls
+- **Forgetting path compression** — without it, `find()` degrades to O(n)
+- **Union without rank/size** — creates degenerate chains
+- **Counting components wrong** — don't count `parent[i] == i`; use the `components` field updated during `union()`
+- **Off-by-one in node numbering** — if nodes are 1-indexed, allocate `parent[n+1]`
 
 ---
 
@@ -617,6 +676,12 @@ return order;
 
 ### Variant: Lexicographic Order
 Replace `ArrayDeque` with `PriorityQueue` — always picks smallest available node. O(V log V) instead of O(V).
+
+### Common Pitfalls
+- **Edge direction reversed** — "A is prerequisite of B" means edge A→B, `inDegree[B]++`. Not B→A
+- **Forgetting isolated nodes** — nodes with no edges still need to be in the graph and the result
+- **Not checking for cycles** — if `order.size() != n`, there's a cycle and no valid ordering exists
+- **DFS: forgetting to reverse** — DFS post-order gives reverse topological order
 
 ---
 
@@ -666,6 +731,12 @@ return dummy.next;
 
 ### Finding Cycle Entry (LC 142)
 After fast and slow meet, reset one pointer to head. Move both one step at a time — they meet at the cycle entry. Mathematical proof: both travel the same distance to the entry point.
+
+### Common Pitfalls
+- **Losing the head reference** — always keep a reference to dummy or head before manipulating
+- **Not using a dummy node** — leads to special-casing when the head itself changes (delete head, insert before head)
+- **Forgetting to null-terminate** — after reversing or rearranging, the last node's `.next` may still point to its old successor, creating a cycle
+- **Modifying `node.next` before saving it** — always do `ListNode next = curr.next` *before* `curr.next = prev`
 
 ---
 
@@ -748,6 +819,13 @@ for (int i = 0; i < nums.length; i++) {
 | LC 224 (Basic Calculator) | Stack for parentheses state |
 | LC 895 (Max Frequency Stack) | HashMap + stack per frequency |
 
+### Common Pitfalls
+- **Forgetting elements remaining in the stack after the loop** — for "next greater element", leftover items have no next greater (set to -1 or default). For histogram, use a sentinel value (height 0) at the end to flush the stack
+- **Pushing values vs indices** — push indices when you need position info (width calculation in histogram); push values when you only need comparison
+- **Wrong monotonic direction** — decreasing stack for "next greater", increasing stack for "next smaller"
+- **Calculator: not flushing the last number** — after the loop, `result += sign * num` is needed for the last pending number
+- **Calculator: operator precedence in LC 227** — `*` and `/` must be applied immediately, while `+` and `-` are deferred
+
 ---
 
 ## Heap / Priority Queue Patterns
@@ -799,6 +877,12 @@ while (!pq.isEmpty()) {
 - Iterator is **NOT sorted** — only `peek()/poll()` gives min
 - Duplicates allowed (unlike TreeMap)
 
+### Common Pitfalls
+- **Using max-heap when you need min-heap** (or vice versa) — for "top K largest", use a **min**-heap of size K (evict smallest)
+- **Two-heap median: wrong insertion order** — always add to one heap first, then rebalance. Don't try to decide which heap upfront
+- **Null check on list heads** — `for (ListNode head : lists) if (head != null) pq.offer(head)` — input may contain null lists
+- **Comparator overflow** — `(a, b) -> a - b` overflows for large ints. Use `Integer.compare(a, b)` for safety
+
 ---
 
 ## Bit Manipulation
@@ -821,6 +905,11 @@ while (!pq.isEmpty()) {
 | LC 191 (Number of 1 Bits) | `n & (n-1)` in loop, count iterations |
 | LC 338 (Counting Bits) | `dp[i] = dp[i & (i-1)] + 1` |
 | LC 136 (Single Number) | XOR all elements — duplicates cancel |
+
+### Common Pitfalls
+- **Signed right shift `>>` vs unsigned `>>>`** — for negative numbers, `>>` fills with 1s, `>>>` fills with 0s
+- **Shift amount > 31** — `1 << 32` wraps to `1 << 0` in Java. Use `1L << i` for long
+- **Forgetting `n > 0` check** for power of 2 — `0 & (0-1) == 0` is true but 0 is not a power of 2
 
 ---
 
@@ -858,6 +947,12 @@ for (int[] d : dirs) {
     if (ni >= 0 && ni < m && nj >= 0 && nj < n) { /* valid */ }
 }
 ```
+
+### Common Pitfalls
+- **Rows vs columns confusion** — `matrix[row][col]`, `m` = rows, `n` = cols. Transpose swaps `[i][j]` with `[j][i]`
+- **Spiral: not checking `top <= bot` and `left <= right`** before the bottom-row and left-column traversals — causes duplicate visits on single-row/column matrices
+- **In-place modification losing data** — when rotating or transforming, process in the right order or use a temp variable
+- **BFS/DFS on grid: not marking visited early enough** — mark when adding to queue, not when processing, to avoid duplicate visits
 
 ---
 
