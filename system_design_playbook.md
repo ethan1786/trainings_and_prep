@@ -15,17 +15,23 @@
 7. [Deep Dives & Tradeoffs](#5-deep-dives--tradeoffs-10-15-min)
 8. [Operational Excellence](#6-operational-excellence-5-min)
 9. [Building Blocks Catalog](#building-blocks-catalog)
-10. [Scalability Patterns](#scalability-patterns)
-11. [Consistency & Coordination](#consistency--coordination)
-12. [Messaging & Async Patterns](#messaging--async-patterns)
-13. [Caching Strategies](#caching-strategies)
-14. [Storage Decision Guide](#storage-decision-guide)
-15. [Rate Limiting & Load Management](#rate-limiting--load-management)
-16. [Observability & Reliability](#observability--reliability)
-17. [Security Considerations](#security-considerations)
-18. [Common System Design Problems](#common-system-design-problems)
-19. [Numbers Every Engineer Should Know](#numbers-every-engineer-should-know)
-20. [Staff+ Differentiators](#staff-differentiators)
+10. [Communication Protocols](#communication-protocols)
+11. [Scalability Patterns](#scalability-patterns)
+12. [Replication & Partitioning](#replication--partitioning)
+13. [Consistent Hashing](#consistent-hashing)
+14. [Consistency & Coordination](#consistency--coordination)
+15. [Messaging & Async Patterns](#messaging--async-patterns)
+16. [Batch & Stream Processing](#batch--stream-processing)
+17. [Caching Strategies](#caching-strategies)
+18. [Storage Decision Guide](#storage-decision-guide)
+19. [Encoding & Schema Evolution](#encoding--schema-evolution)
+20. [Rate Limiting & Load Management](#rate-limiting--load-management)
+21. [Observability & Reliability](#observability--reliability)
+22. [Security Considerations](#security-considerations)
+23. [Common System Design Problems](#common-system-design-problems)
+24. [Numbers Every Engineer Should Know](#numbers-every-engineer-should-know)
+25. [Staff+ Differentiators](#staff-differentiators)
+26. [Recommended Resources](#recommended-resources)
 
 ---
 
@@ -298,6 +304,51 @@ Quick reference for the components you'll use repeatedly.
 | **API Gateway** | Auth, rate limiting, request routing, protocol translation |
 | **Service Mesh** (Istio, Linkerd) | mTLS, retries, circuit breaking, observability — sidecar pattern |
 
+### Proxies & Reverse Proxies
+
+| Type | Direction | Purpose |
+|---|---|---|
+| **Forward proxy** | Client → Proxy → Server | Client anonymity, corporate firewalls, caching |
+| **Reverse proxy** | Client → Proxy → Backend servers | Load balancing, SSL termination, caching, compression |
+
+**Load balancer vs reverse proxy**: A load balancer distributes across multiple servers. A reverse proxy can do that *plus* SSL termination, caching, compression, and request rewriting. In practice, ALB/Nginx serve as both.
+
+---
+
+## Communication Protocols
+
+### Protocol Comparison
+
+| Protocol | Transport | Format | Use Case |
+|---|---|---|---|
+| **REST** | HTTP | JSON | Public APIs, CRUD, browser clients |
+| **gRPC** | HTTP/2 | Protobuf (binary) | Service-to-service, low latency, streaming |
+| **GraphQL** | HTTP | JSON | Mobile clients, flexible queries, reduce over-fetching |
+| **WebSocket** | TCP (upgraded HTTP) | Any | Real-time bidirectional (chat, live updates) |
+| **Server-Sent Events** | HTTP | Text | Server → client one-way stream (notifications) |
+| **UDP** | UDP | Any | Video streaming, gaming, DNS (loss-tolerant, low latency) |
+
+### REST vs gRPC vs GraphQL
+
+| Dimension | REST | gRPC | GraphQL |
+|---|---|---|---|
+| **Payload** | JSON (text, verbose) | Protobuf (binary, compact) | JSON (flexible shape) |
+| **Performance** | Good | Excellent (2-10x smaller payloads) | Good |
+| **Schema** | OpenAPI/Swagger (optional) | `.proto` files (required, strongly typed) | Schema (required, strongly typed) |
+| **Streaming** | Not native (polling/SSE) | Native bidirectional streaming | Subscriptions (via WebSocket) |
+| **Browser support** | Native | Needs gRPC-Web proxy | Native |
+| **Best for** | Public APIs, simple CRUD | Internal microservices, high-throughput | Mobile/frontend with varied data needs |
+
+### RPC vs REST Mental Model
+
+| | REST | RPC (gRPC) |
+|---|---|---|
+| Style | Resource-oriented: `GET /users/123` | Action-oriented: `GetUser(id=123)` |
+| Contract | Loose (HTTP verbs + URL conventions) | Strict (`.proto` IDL with code generation) |
+| Versioning | URL path `/v1/` or headers | Package versioning in proto |
+
+**Staff+ insight**: "For service-to-service communication within our platform, I'd use gRPC for performance and strong contracts. For public-facing APIs, REST for broad compatibility. For mobile clients needing flexible data, consider GraphQL to reduce round trips."
+
 ---
 
 ## Scalability Patterns
@@ -337,6 +388,11 @@ User ID % N → Shard N
 
 **Cross-shard queries are expensive** — design your shard key to keep related data together. If you need cross-shard joins, you probably need a different approach.
 
+### Rebalancing Strategies (When Adding/Removing Shards)
+- **Fixed number of partitions**: Create many more partitions than nodes (e.g., 1000 partitions on 10 nodes). When adding a node, move whole partitions — no re-hashing.
+- **Dynamic partitioning**: Split a partition when it gets too large, merge when too small. (Used by HBase, DynamoDB.)
+- **Consistent hashing**: See dedicated section below.
+
 ### CQRS (Command Query Responsibility Segregation)
 Separate the write model from the read model:
 ```
@@ -346,6 +402,95 @@ Write → Command Service → Write DB (normalized)
 Read  → Query Service → Read DB
 ```
 **When to use**: Read and write patterns are very different. Reads need denormalized views. Write throughput is high.
+
+---
+
+## Replication & Partitioning
+
+### Replication Models (from DDIA)
+
+| Model | How It Works | Pros | Cons |
+|---|---|---|---|
+| **Single-leader** | One primary accepts writes, replicates to followers | Simple, strong consistency possible | Leader is bottleneck & SPOF |
+| **Multi-leader** | Multiple nodes accept writes, replicate to each other | Tolerates datacenter failure, lower write latency | Conflict resolution needed (LWW, CRDTs, custom) |
+| **Leaderless** | Client writes to multiple replicas, reads from multiple | High availability, no failover needed | Quorum math, read repair, anti-entropy |
+
+### Replication: Sync vs Async
+
+| | Synchronous | Asynchronous |
+|---|---|---|
+| **Guarantee** | Follower confirmed before response | Leader responds immediately, follower catches up |
+| **Latency** | Higher (wait for follower) | Lower |
+| **Durability** | Stronger (data on ≥ 2 nodes) | Weaker (data loss if leader fails before replication) |
+| **Common config** | Semi-synchronous: 1 sync follower + rest async | Fully async (most setups) |
+
+### Replication Lag Problems
+
+| Problem | Symptom | Solution |
+|---|---|---|
+| **Read-after-write** | User posts, refreshes, doesn't see their post | Read own writes from leader (session affinity) |
+| **Monotonic reads** | User sees newer data, then older data on refresh | Always read from same replica per user |
+| **Consistent prefix** | Causal order violated (answer appears before question) | Use causal ordering / version vectors |
+
+### Leaderless Quorum
+
+```
+N = total replicas, W = write quorum, R = read quorum
+Rule: W + R > N  →  guarantees overlap (at least one node has latest)
+
+Common: N=3, W=2, R=2
+Tuning:
+  W=1, R=3  →  fast writes, slow reads (write-heavy)
+  W=3, R=1  →  slow writes, fast reads (read-heavy)
+```
+
+**Sloppy quorum**: During network partition, writes go to any N reachable nodes (not necessarily the "home" replicas). Increases availability but weakens consistency. Requires **hinted handoff** to replay writes to correct nodes later.
+
+### Partitioning with Secondary Indexes
+
+| Approach | How | Pros | Cons |
+|---|---|---|---|
+| **Document-partitioned** (local index) | Each partition maintains its own secondary index | Writes update one partition | Reads must scatter-gather across all partitions |
+| **Term-partitioned** (global index) | Secondary index itself is partitioned across nodes | Reads hit one partition | Writes may need to update multiple index partitions |
+
+**Staff+ insight**: "For our search feature, I'd use a document-partitioned local index because write throughput matters more. The scatter-gather read cost is acceptable since search queries are less frequent than writes and we can parallelize them."
+
+---
+
+## Consistent Hashing
+
+### The Problem
+With `hash(key) % N`, adding or removing a node changes the mapping for almost all keys → massive data movement.
+
+### How It Works
+```
+1. Hash both nodes and keys onto a ring (0 to 2^32)
+2. Each key maps to the first node clockwise from its position
+3. Adding a node only affects keys between the new node and its predecessor
+4. Removing a node only affects keys that mapped to it → they shift to next node
+```
+
+### Virtual Nodes (Vnodes)
+Each physical node gets multiple positions on the ring (e.g., 100-200 vnodes each).
+
+**Why**: Without vnodes, data distribution is uneven (some nodes get more keys by luck of hash position). Vnodes spread the load evenly and make rebalancing smoother when nodes join/leave.
+
+```
+Physical Node A → vnode_A1, vnode_A2, ..., vnode_A150
+Physical Node B → vnode_B1, vnode_B2, ..., vnode_B150
+```
+
+### Where It's Used
+- **Cassandra, DynamoDB**: Partition data across nodes
+- **CDN**: Map URLs to edge servers
+- **Distributed cache**: Map keys to cache nodes (Memcached)
+- **Load balancing**: Sticky sessions with consistent hashing
+
+### When to Mention in Interviews
+Consistent hashing comes up when:
+- Designing a **distributed cache** or **distributed KV store**
+- Asked "what happens when you add/remove a node?"
+- Designing any system where you need **stable key → node mapping** with minimal disruption
 
 ---
 
@@ -433,6 +578,63 @@ Current State = replay all events (or read from materialized view)
 
 ---
 
+## Batch & Stream Processing
+
+### When to Use Which (from DDIA)
+
+| | Batch Processing | Stream Processing |
+|---|---|---|
+| **Input** | Bounded dataset (finite) | Unbounded stream (ongoing) |
+| **Latency** | Minutes to hours | Seconds to milliseconds |
+| **Throughput** | Very high (processes everything) | Moderate (processes as it arrives) |
+| **Examples** | MapReduce, Spark, data warehouse ETL | Kafka Streams, Flink, Spark Streaming |
+| **Use case** | Analytics, reports, ML training, reprocessing | Real-time dashboards, alerting, event-driven updates |
+
+### MapReduce Mental Model
+
+```
+Input → Map (extract key-value pairs)
+      → Shuffle (group by key)
+      → Reduce (aggregate per key)
+
+Example: Count word frequency in 1TB of text
+  Map:     "hello world hello" → (hello, 1), (world, 1), (hello, 1)
+  Shuffle:  (hello, [1, 1]), (world, [1])
+  Reduce:   (hello, 2), (world, 1)
+```
+
+**Limitation**: Multi-stage MapReduce jobs are clumsy. Modern systems (Spark, Flink) use DAG-based execution with in-memory processing.
+
+### Stream Processing Patterns
+
+| Pattern | Description | Example |
+|---|---|---|
+| **Event-driven microservices** | Services react to events on a shared bus | Order placed → inventory reserved → payment charged |
+| **Change Data Capture (CDC)** | Stream DB changes to downstream systems | Debezium captures MySQL binlog → Kafka → Elasticsearch |
+| **Stream-table join** | Enrich streaming events with reference data | Join click events with user profile table |
+| **Windowed aggregation** | Aggregate events within time windows | Count clicks per URL per 5-minute window |
+
+### Window Types (for Aggregations)
+
+| Window | Description |
+|---|---|
+| **Tumbling** | Fixed-size, non-overlapping (every 5 min exactly) |
+| **Hopping** | Fixed-size, overlapping (5-min window every 1 min) |
+| **Sliding** | Event-triggered, exact time range |
+| **Session** | Gap-based, groups events with no gap > threshold |
+
+### Stream Processing Guarantees
+
+| Guarantee | Meaning | How |
+|---|---|---|
+| **At-most-once** | May lose messages | Fire and forget, no retry |
+| **At-least-once** | May duplicate messages | Retry on failure, consumer must be idempotent |
+| **Exactly-once** | No loss, no duplicates | Kafka transactions + idempotent producers, or Flink checkpoints |
+
+**Staff+ insight**: "True exactly-once is expensive. In most cases, I'd design for at-least-once delivery with idempotent consumers — it's simpler, cheaper, and achieves the same end result."
+
+---
+
 ## Caching Strategies
 
 ### Cache Placement
@@ -508,6 +710,42 @@ Need horizontal write scaling?                 → NoSQL
 Access patterns are simple and well-known?     → NoSQL (DynamoDB)
 Need strong consistency?                       → SQL (or DynamoDB with strong reads)
 ```
+
+---
+
+## Encoding & Schema Evolution
+
+### Serialization Formats
+
+| Format | Type | Schema | Human-Readable | Use Case |
+|---|---|---|---|---|
+| **JSON** | Text | Optional (JSON Schema) | Yes | REST APIs, config, logging |
+| **XML** | Text | XSD | Yes (verbose) | Legacy, SOAP |
+| **Protobuf** | Binary | Required (`.proto`) | No | gRPC, high-throughput internal APIs |
+| **Avro** | Binary | Required (`.avsc`) | No | Kafka, data pipelines (schema in header) |
+| **Thrift** | Binary | Required (`.thrift`) | No | Facebook-era services (less common now) |
+| **MessagePack** | Binary | No | No | Compact JSON replacement |
+
+### Why Schema Matters for Evolution
+
+Systems evolve. Old producers talk to new consumers and vice versa. You need:
+
+| Compatibility | Direction | Rule | Example |
+|---|---|---|---|
+| **Backward** | New code reads old data | New schema can read data written with old schema | Add a field with a default value |
+| **Forward** | Old code reads new data | Old schema can read data written with new schema | Old code ignores unknown fields |
+| **Full** | Both directions | Both backward and forward compatible | Safest for rolling deployments |
+
+### Safe Schema Changes (Protobuf/Avro)
+
+| Safe | Unsafe |
+|---|---|
+| Add optional field with default | Remove a required field |
+| Add new enum value | Rename a field (Protobuf uses field numbers, so OK there) |
+| Deprecate a field (don't reuse its number) | Change a field's type |
+
+### Staff+ Insight
+"For our Kafka topics, I'd use Avro with a Schema Registry. This gives us full compatibility checking on every schema change — a producer can't accidentally break consumers. For gRPC services, Protobuf's field numbering gives us backward/forward compatibility naturally, as long as we never reuse field numbers."
 
 ---
 
@@ -634,6 +872,9 @@ Mention these proactively — staff+ candidates think about security without bei
 | **Design Payment System** | Exactly-once processing, reconciliation, compliance | Idempotency, saga pattern, ledger, audit log |
 | **Design Distributed ID Generator** | Uniqueness, ordering, high throughput | Snowflake (timestamp + worker + sequence), or UUID |
 | **Design Ad Click Aggregator** | Real-time aggregation, dedup, scale | Kafka + Flink/Spark, HyperLogLog, OLAP store |
+| **Design Ticketmaster / Booking** | Seat reservation, concurrency, double-booking prevention | Optimistic locking, distributed lock, reservation expiry |
+| **Design Yelp / Proximity Search** | Geospatial queries, nearby search, ranking | Geohash / Quadtree, PostGIS, weighted ranking |
+| **Design Instagram** | Photo upload, feed, stories, explore | Object storage + CDN, fan-out, ML ranking, ephemeral storage |
 
 ### Feed Design Deep Dive (Most Common)
 
@@ -655,6 +896,635 @@ Con: Slow reads (N queries for N followees)
 - Push for users with < 10K followers (most users)
 - Pull for celebrities (merge at read time)
 - Cache hot feeds in Redis
+
+### Key-Value Store Deep Dive (Staff+ Favorite)
+
+Based on Dynamo/Cassandra architecture. Tests understanding of distributed systems fundamentals.
+
+**Core Architecture**:
+```
+Client → Coordinator Node → Consistent Hash Ring → N Replicas
+         (any node can     (data partitioning)    (data replication)
+          be coordinator)
+```
+Fully decentralized — no single point of failure, every node has same responsibilities.
+
+**Write Path (LSM Tree / SSTable)**:
+```
+Write Request
+  → 1. Append to Write-Ahead Log (WAL / commit log) — durability
+  → 2. Write to in-memory table (memtable) — fast writes
+  → 3. When memtable full → flush to SSTable on disk (sorted, immutable)
+```
+- **WAL**: Crash recovery — replay log to rebuild memtable
+- **Memtable**: Sorted in-memory structure (e.g., red-black tree)
+- **SSTable**: Sorted String Table — immutable, sorted key-value pairs on disk. Periodically compacted (merge-sort) to remove duplicates/tombstones
+
+**Read Path**:
+```
+Read Request
+  → 1. Check memtable (in-memory) — fast
+  → 2. If miss → check Bloom filter to identify which SSTables might have the key
+  → 3. Read candidate SSTables from disk
+  → 4. Return most recent value
+```
+
+**Bloom Filter**: Probabilistic data structure. Answers "is this key in this SSTable?" with:
+- **No** → definitely not there (skip this SSTable)
+- **Yes** → probably there (check it)
+- False positives possible, false negatives impossible. Saves unnecessary disk reads.
+
+**Conflict Resolution: Vector Clocks**:
+```
+D1([Sx, 1])           — initial write by server Sx
+D2([Sx, 2])           — updated by Sx again
+D3([Sx, 2], [Sy, 1])  — branched: updated by Sy based on D2
+D4([Sx, 2], [Sz, 1])  — branched: updated by Sz based on D2
+→ D3 and D4 are siblings (conflict!) — client must resolve
+D5([Sx, 3], [Sy, 1], [Sz, 1]) — client resolved, written to Sx
+```
+Rule: Version X is ancestor of Y if all of X's counters ≤ Y's counters. Otherwise → conflict → client resolves.
+
+**Failure Detection: Gossip Protocol**:
+- Each node maintains membership list with heartbeat counters
+- Periodically sends heartbeats to random nodes → propagated further
+- If a node's heartbeat hasn't incremented for threshold time → marked as down
+- Decentralized — no need for a central health checker
+
+**Failure Handling**:
+
+| Failure Type | Technique |
+|---|---|
+| **Temporary** | Sloppy quorum + hinted handoff (healthy nodes temporarily handle requests, hand data back when failed node recovers) |
+| **Permanent** | Anti-entropy with **Merkle trees** — compare tree root hashes between replicas; if different, traverse to find divergent buckets and sync only those |
+| **Data center outage** | Cross-datacenter replication |
+
+**Merkle Tree**: Hash tree where each leaf = hash of a data bucket, parents = hash of children. To compare two replicas: compare root hash → if different, recurse into children → only sync the buckets that actually differ. Proportional to differences, not total data.
+
+**Summary Table**:
+
+| Goal | Technique |
+|---|---|
+| Store big data | Consistent hashing |
+| High availability reads | Replication + multi-DC |
+| High availability writes | Versioning + vector clocks |
+| Partition data | Consistent hashing + virtual nodes |
+| Tunable consistency | Quorum (W, R, N) |
+| Temporary failures | Sloppy quorum + hinted handoff |
+| Permanent failures | Merkle tree anti-entropy |
+| Failure detection | Gossip protocol |
+| Storage engine | WAL + memtable + SSTable (LSM tree) |
+| Efficient reads from disk | Bloom filter |
+
+**Staff+ insight**: This problem is a favorite because it touches almost every distributed systems concept. If asked, lead with the consistency model choice (CP vs AP), then walk through the architecture systematically. The write path (WAL → memtable → SSTable) and quorum tuning (W + R > N) are the two areas interviewers probe deepest.
+
+### Search Autocomplete Deep Dive
+
+Also called "design top K" or "design typeahead". Unique because it combines a specialized data structure (Trie) with an offline data pipeline.
+
+**Requirements**: Return top 5 suggestions for a prefix in < 100ms. 10M DAU, ~24K QPS (~48K peak).
+
+**Two Services**:
+```
+1. Data Gathering Service (offline):
+   Analytics Logs → Aggregators (weekly) → Workers → Build Trie → Trie DB
+
+2. Query Service (online):
+   Client → LB → API Server → Trie Cache (distributed) → return top 5
+                                    ↑
+                              Trie DB (on cache miss)
+```
+
+**Core Data Structure: Trie with Cached Top-K**
+
+Basic trie: each node = one character, path from root = prefix. Finding prefix = O(p), then traverse subtree O(c), sort O(c log c). Too slow.
+
+**Two key optimizations**:
+1. **Limit prefix length** (e.g., 50 chars) → O(1) prefix lookup
+2. **Cache top-K results at each node** → O(1) to return suggestions (no subtree traversal)
+
+```
+Example: node for prefix "be" stores:
+  [best: 35, bet: 29, bee: 20, be: 15, beer: 10]
+
+Lookup "be" → return cached list immediately → O(1)
+```
+
+**Tradeoff**: Uses more space (top-K at every node), but response time drops to O(1). Worth it for autocomplete's strict latency requirement.
+
+**Data Gathering Pipeline**:
+```
+Analytics Logs (append-only, raw queries with timestamps)
+  → Aggregators (batch, weekly for most use cases)
+  → Aggregated Data (query, time_window, frequency)
+  → Workers (rebuild trie from aggregated data)
+  → Trie DB (serialized trie in document store, or prefix→top-K in KV store)
+  → Trie Cache (weekly snapshot in distributed cache)
+```
+
+**Why not real-time updates?**
+- Billions of queries/day → updating trie on every query is too expensive
+- Top suggestions don't change much → weekly rebuild is sufficient for most products
+- For trending/real-time (e.g., Twitter): use streaming (Kafka/Flink), shorter aggregation windows, weight recent queries higher
+
+**Trie Storage Options**:
+
+| Option | How | Best For |
+|---|---|---|
+| **Serialized document** | Snapshot entire trie, store in MongoDB | Simple, periodic full rebuild |
+| **KV store** | Each prefix → top-K list (e.g., `"be" → [best:35, bet:29, ...]`) | Incremental updates, distributed |
+
+**Trie Sharding** (when too large for one server):
+- Naive: shard by first character (a-m on server 1, n-z on server 2)
+- Problem: uneven distribution ('c' has far more words than 'x')
+- Better: **shard map manager** — analyze historical query distribution and assign prefix ranges to shards based on actual load, not alphabet position
+
+**Query Service Optimizations**:
+- **AJAX requests** — no page refresh
+- **Browser caching** — `Cache-Control: private, max-age=3600` (suggestions don't change within an hour)
+- **Data sampling** — log only 1/N queries to reduce storage/processing
+
+**Trie Operations**:
+
+| Operation | Approach |
+|---|---|
+| **Create** | Workers build from aggregated data (offline) |
+| **Update** | Option 1: rebuild weekly (replace old trie). Option 2: update node + all ancestors (expensive, only for small tries) |
+| **Delete** | Filter layer in front of Trie Cache removes hateful/explicit suggestions. Physical deletion happens async in next rebuild cycle |
+
+**Follow-up Questions**:
+- **Multi-language**: Store Unicode characters in trie nodes
+- **Per-country suggestions**: Build separate tries per country, serve from regional CDN
+- **Real-time trending**: Stream processing (Kafka/Flink), shorter aggregation windows, recency-weighted ranking
+
+**Staff+ insight**: The key architectural decision is separating the offline data pipeline (build trie weekly) from the online serving path (read from cache). This is a classic batch-serving pattern. For the deep dive, focus on the trie optimization (cached top-K at each node → O(1) lookup) and the sharding strategy for the trie.
+
+### Proximity Service Deep Dive (Yelp / Google Maps Nearby)
+
+Core question: given a user's location and radius, return nearby businesses. Read-heavy (5K QPS), write-light (business updates effective next day).
+
+**High-Level Architecture**:
+```
+Client (lat, lng, radius)
+  → Load Balancer
+  → Location-Based Service (LBS) — stateless, read-only, horizontally scalable
+      → Geohash Redis Cache (geohash → list of business IDs)
+      → Business Info Redis Cache (business_id → business object)
+  → Business Service — CRUD for business owners (low write QPS)
+      → Primary DB (writes) → Read Replicas (reads)
+```
+
+**Geospatial Indexing Options**:
+
+| Option | How It Works | Pros | Cons |
+|---|---|---|---|
+| **Geohash** | Encode lat/lng into a string; longer shared prefix = closer. Query: `WHERE geohash LIKE 'prefix%'` | Simple, easy to index in DB, easy updates | Fixed grid size per precision level; boundary issues |
+| **Quadtree** | In-memory tree; recursively subdivide until ≤ K businesses per cell | Adaptive grid density (dense areas = smaller cells); good for k-nearest | In-memory only, ~1.7GB for 200M businesses; complex updates (locking); minutes to build at startup |
+| **Google S2** | Maps sphere to 1D via Hilbert curve | Great for geofencing (arbitrary shapes); variable cell sizes | Complex to explain in interview |
+
+**Recommendation**: Use **geohash** for simplicity or **quadtree** for adaptive density. S2 is overkill for interviews.
+
+**How Geohash Works**:
+```
+1. Recursively divide globe into quadrants using lat/lng bits
+2. Encode as base32 string
+3. Precision levels 4-6 are most useful:
+   Length 4 → ~39km × 19.5km  (radius 5-20km)
+   Length 5 → ~4.9km × 4.9km  (radius 1-2km)
+   Length 6 → ~1.2km × 609m   (radius 0.5km)
+```
+
+**Geohash Boundary Issues**:
+1. **Close but no shared prefix** — two locations near the equator/prime meridian can be very close but have completely different geohashes (e.g., `u000` vs `ezzz`, only 30km apart)
+2. **Same prefix, different grids** — two points with long shared prefix can be in adjacent grids
+
+**Solution**: Always fetch businesses from current grid + 8 neighboring grids. Neighbor geohashes can be computed in O(1).
+
+**Not enough results?** Remove last digit of geohash → larger grid → repeat until enough businesses found.
+
+**How Quadtree Works**:
+```java
+public void buildQuadtree(TreeNode node) {
+    if (countBusinesses(node) > 100) {
+        node.subdivide();  // split into 4 children
+        for (TreeNode child : node.getChildren())
+            buildQuadtree(child);
+    }
+}
+```
+- Memory: ~1.71 GB for 200M businesses (leaf: 832 bytes, internal: 64 bytes)
+- Build time: few minutes — must do rolling deploys to avoid brownout
+- Search: traverse from root to leaf containing user's location, expand to neighbors if needed
+
+**Geohash vs Quadtree**:
+
+| | Geohash | Quadtree |
+|---|---|---|
+| **Grid size** | Fixed per precision level | Adaptive (denser areas = smaller cells) |
+| **Storage** | DB rows (easy to shard/replicate) | In-memory tree on each LBS server |
+| **Updates** | Simple row insert/delete | Tree traversal O(log n), needs locking |
+| **Best for** | "businesses within radius R" | "k-nearest businesses" (variable radius) |
+| **Used by** | Bing, Redis, MongoDB, Lyft | Yext, Elasticsearch |
+
+**Caching Strategy**:
+
+| Cache Key | Cache Value | Notes |
+|---|---|---|
+| `geohash` | List of business IDs in that grid | Pre-cache for all 3 precision levels (4, 5, 6). ~5GB total for 200M businesses × 3 precisions |
+| `business_id` | Full business object | For rendering detail pages. Updated via nightly job |
+
+**Why geohash is a good cache key**: Unlike raw lat/lng (which changes slightly with every GPS reading), all users in the same grid map to the same geohash → high cache hit rate.
+
+**Scaling**:
+- **LBS**: Stateless → horizontal scaling, multi-region deployment
+- **Geospatial index**: Fits in memory (~1.7GB). Don't shard — use **read replicas** instead (simpler)
+- **Business table**: Shard by `business_id` if needed
+- **Multi-region**: Deploy LBS + cache in each region for lower latency + privacy law compliance (GDPR)
+
+**Query Flow**:
+```
+1. Client sends (lat, lng, radius=500m) to LBS
+2. LBS computes geohash length 6 for 500m radius
+3. LBS computes 9 geohashes (current + 8 neighbors)
+4. For each geohash, fetch business IDs from Redis (parallel)
+5. Hydrate business objects from Business Info cache
+6. Calculate actual distances, filter by radius, rank, return top results
+```
+
+**Follow-ups**:
+- **Filter by type/hours**: Fetch IDs first, hydrate, then filter (dataset per grid is small enough)
+- **Moving user**: GPS changes slightly, but geohash stays same → cache still works. No need to refresh constantly
+
+**Staff+ insight**: The key decision is geohash vs quadtree. Lead with the tradeoff: geohash is simpler and DB-native (good default), quadtree is better when you need adaptive density or k-nearest queries. For scaling, resist the urge to shard the geospatial index — read replicas are sufficient since the dataset is small (~1.7GB). Save sharding for the business table.
+
+### Stock Exchange Deep Dive (Ultra-Low Latency)
+
+Unique because it's the opposite of most system design problems: instead of distributed microservices, modern exchanges put **everything on a single server** for minimal latency. Tests event sourcing, determinism, and HA without typical distributed patterns.
+
+**Scale**: 100 symbols, 1B orders/day, ~43K QPS (215K peak). P99 latency target: microseconds.
+
+**Three Flows**:
+```
+1. Trading Flow (critical path, ultra-low latency):
+   Client → Broker → Client Gateway → Order Manager → Sequencer → Matching Engine
+                                                                        ↓
+   Client ← Broker ← Client Gateway ← Order Manager ← Sequencer ← Executions
+
+2. Market Data Flow (near real-time):
+   Matching Engine → Market Data Publisher → Data Service → Brokers/Subscribers
+
+3. Reporting Flow (not latency-sensitive):
+   Orders + Executions → Reporter → Database (compliance, tax, reconciliation)
+```
+
+**Matching Engine — The Heart**:
+- Maintains an **order book** per symbol (buy book + sell book)
+- Matches buy/sell orders → emits two executions (fills) per match
+- Must be **deterministic**: same input sequence → same output, always
+
+**Order Book Data Structure** (O(1) for all operations):
+```java
+class OrderBook {
+    Book<Buy> buyBook;          // sorted price levels
+    Book<Sell> sellBook;
+    PriceLevel bestBid;
+    PriceLevel bestOffer;
+    Map<OrderID, Order> orderMap;  // O(1) cancel lookup
+}
+class PriceLevel {
+    Price limitPrice;
+    long totalVolume;
+    DoublyLinkedList<Order> orders;  // O(1) add/remove
+}
+```
+- **Place**: append to tail of PriceLevel's doubly-linked list → O(1)
+- **Match**: remove from head → O(1)
+- **Cancel**: lookup in orderMap → O(1), delete from doubly-linked list → O(1)
+
+**Sequencer**: Stamps every order and execution with a sequential ID.
+- Guarantees ordering for deterministic replay
+- Detects missing messages (gaps in sequence)
+- Functions as both sequencer and message queue (like Kafka but lower latency)
+
+**Why Single Server?** Latency breakdown:
+- Network round trip: ~500μs per hop. Multiple hops on critical path → single-digit ms
+- Disk access: ~10ms even for sequential writes
+- Solution: eliminate network hops, replace disk with mmap over `/dev/shm` (memory-backed filesystem)
+- Result: sub-microsecond inter-component communication
+
+**mmap Event Store**:
+```
+Components on same server communicate via memory-mapped files:
+  Gateway → [mmap event store] → Order Manager → [mmap] → Matching Engine → [mmap] → out
+No network. No disk I/O. Sub-microsecond messaging.
+Like Kafka, but for single-server ultra-low latency.
+```
+
+**Application Loop Pattern** (per component):
+- Single-threaded while loop, pinned to a dedicated CPU core
+- **No context switches** (CPU fully dedicated)
+- **No locks** (single writer, no contention)
+- Both contribute to low, stable P99 latency
+
+**Event Sourcing**:
+- Don't store current state → store immutable log of all events (NewOrderEvent, OrderFilledEvent, CancelEvent, etc.)
+- Current state = replay events in sequence
+- Benefits: complete audit trail, deterministic replay for recovery, debugging
+
+```
+Traditional DB:        | order_id | status  | price | qty |
+                       | 123      | FILLED  | 100   | 50  |  ← how did we get here?
+
+Event Sourcing:        | seq | event          | order_id | price | qty |
+                       | 1   | NEW_ORDER      | 123      | 100   | 50  |
+                       | 2   | ORDER_MATCHED  | 123      | 100   | 30  |
+                       | 3   | ORDER_MATCHED  | 123      | 100   | 20  |  ← full history
+```
+
+**High Availability**: Hot-warm architecture
+- **Hot** (primary): processes events, sends results to event store
+- **Warm** (standby): receives same events, processes them, but doesn't emit results
+- If hot fails → warm takes over immediately (state already up to date)
+- Recovery = replay events from event store (deterministic, so state is identical)
+
+**Fault Tolerance** (multi-server):
+- Replicate event store across multiple servers using **Raft** consensus
+- 5-server Raft cluster: needs 3/5 votes (quorum) for writes
+- Leader sends events to followers via RPC; if leader fails → automatic leader election
+- RPO ≈ 0 (no data loss with Raft); RTO = seconds (automatic failover)
+
+**Market Data Publisher**:
+- Rebuilds order books and candlestick charts from execution stream
+- Uses **ring buffers** (pre-allocated circular buffers) — no object allocation, lock-free
+- Fairness: use **multicast UDP** to send data to all subscribers simultaneously (no first-subscriber advantage)
+
+**Candlestick Chart**: `{open, close, high, low, volume, timestamp, interval}` per time window. Stored in ring buffers in memory, persisted to columnar DB (KDB) for analytics, archived after market close.
+
+**Key Design Decisions Summary**:
+
+| Decision | Choice | Why |
+|---|---|---|
+| Architecture | Single server | Eliminate network latency on critical path |
+| IPC | mmap over `/dev/shm` | Sub-microsecond, no disk I/O |
+| Threading | Single-threaded + CPU pinning | No context switch, no locks → stable P99 |
+| State management | Event sourcing | Deterministic replay, audit trail, easy recovery |
+| Order book | Doubly-linked list + HashMap | O(1) for place/match/cancel |
+| HA | Hot-warm + Raft | Immediate failover, zero data loss |
+| Market data distribution | Multicast UDP | Fairness — all subscribers receive simultaneously |
+
+**Staff+ insight**: This problem tests a fundamentally different mindset from typical distributed systems design. The key insight to lead with: "For an exchange, latency is the dominant constraint. Unlike most systems where we scale horizontally, here we want everything on one server to eliminate network hops. We use event sourcing for determinism and recovery, and mmap for zero-copy IPC." This shows you understand that architecture choices are driven by requirements, not dogma.
+
+### Digital Wallet Deep Dive (Distributed Transactions + Event Sourcing)
+
+Core question: design a wallet service supporting balance transfers between accounts at 1M TPS with correctness, reproducibility, and 99.99% availability. Tests distributed transaction patterns and event sourcing in depth.
+
+**Three Progressive Designs**:
+
+| Design | Approach | Limitation |
+|---|---|---|
+| **1. In-memory (Redis)** | Shard accounts across Redis nodes, wallet service updates two nodes per transfer | No atomicity — crash between two updates = inconsistent state |
+| **2. Distributed transactions** | Replace Redis with relational DBs, use 2PC/TC/C/Saga for atomicity | Correct but no audit trail, can't reproduce historical state |
+| **3. Event sourcing** | Immutable event log + deterministic state machine → reproducible state | Best: correct, auditable, reproducible |
+
+**Distributed Transaction Options**:
+
+**2PC (Two-Phase Commit)** — database-level:
+```
+Phase 1 (Prepare): Coordinator asks all DBs to prepare (locks held)
+Phase 2 (Commit/Abort): If all say "yes" → commit all. If any "no" → abort all.
+```
+- Locks held across both phases → poor performance
+- Coordinator is single point of failure
+- Uses X/Open XA standard
+
+**TC/C (Try-Confirm/Cancel)** — application-level:
+```
+Try phase:     Deduct $1 from A (committed). NOP on C.
+                → A and C are in separate local transactions (no cross-DB lock)
+Confirm phase: If Try succeeded → Add $1 to C
+Cancel phase:  If Try failed → Reverse: add $1 back to A
+```
+- Each phase is a separate local transaction (no long-held locks)
+- Must handle **out-of-order execution**: Cancel may arrive before Try → use out-of-order flag
+- Must deduct first, add second (choice 1 is the only valid order — prevents double-spending)
+- **Phase status table** tracks progress for crash recovery
+
+**Saga** — application-level, linear execution:
+```
+Step 1: A - $1  →  Step 2: C + $1
+        ↓ fail          ↓ fail
+   (already done)    Compensate: A + $1 (reverse step 1)
+```
+- Operations execute in strict linear order (no parallelism)
+- Each step is an independent local transaction
+- Rollback = compensating transactions in reverse order
+- Two coordination modes: **Choreography** (decentralized, event-driven) vs **Orchestration** (central coordinator)
+
+**TC/C vs Saga**:
+
+| | TC/C | Saga |
+|---|---|---|
+| Execution order | Any (parallel possible) | Strictly linear |
+| Latency | Lower (parallel) | Higher (sequential) |
+| Complexity | Higher (out-of-order handling) | Lower |
+| Best for | Latency-sensitive, many services | Simpler flows, microservice standard |
+
+**Event Sourcing Architecture**:
+
+```
+Commands (transfer requests) → [Command Queue (Kafka)]
+  → State Machine:
+      1. Validate command against current state
+      2. If valid → generate Event(s) (immutable facts)
+      3. Apply event to update State (account balances)
+  → [Event Queue] → CQRS read-only state machines → external queries
+```
+
+**Key terms**:
+- **Command**: intention ("transfer $1 from A to C") — may be invalid
+- **Event**: validated fact ("transferred $1 from A to C") — immutable, deterministic
+- **State**: current account balances (derived from events)
+- **State Machine**: validates commands, generates events, applies events — must be deterministic
+
+**Why event sourcing wins for wallets** (answers auditor questions):
+1. "What was the balance at time T?" → Replay events up to T
+2. "Is the current balance correct?" → Replay all events, verify
+3. "Is the code correct after a change?" → Replay events with new code, compare results
+
+**Performance Optimization Progression**:
+
+| Level | Command/Event Store | State Store | Latency |
+|---|---|---|---|
+| **Naive** | Kafka (remote) | Remote DB | Network + disk for every operation |
+| **File-based** | Local disk via mmap | Local RocksDB (LSM tree) | Sequential disk + OS cache |
+| **+ Snapshots** | Same | Periodic state snapshots to HDFS | Fast recovery (don't replay from beginning) |
+
+**mmap optimization**: Map files to memory → OS caches recent data → append-only writes are nearly as fast as memory writes. Commands, events, and state all stored locally → no network hops.
+
+**Snapshots**: Periodically freeze state to a file. Recovery = load snapshot + replay events since snapshot (not from the beginning). Finance teams often require daily snapshots (00:00) for reconciliation.
+
+**Reliability via Raft**:
+```
+3 or 5 nodes in Raft group
+Leader: receives commands, generates events, replicates event list to followers
+Followers: receive replicated events, update their own state
+If leader crashes → Raft elects new leader → immediate failover
+Client retries command to new leader (idempotent via transaction_id)
+```
+- Only the **event list** needs Raft replication (state + snapshots can be rebuilt from events)
+- Event generation may be non-deterministic (I/O, random) → can't just replay commands → must replicate events
+
+**CQRS (Command Query Responsibility Segregation)**:
+```
+Write path: Commands → State Machine → Events → State (leader)
+Read path:  Events → Read-only State Machines → Various views
+                     (balance queries, audit trails, analytics)
+```
+- Read-only state machines are eventually consistent
+- Can build different views from same event stream (balance view, audit view, time-series view)
+
+**Distributed Event Sourcing** (for 1M TPS):
+```
+Shard accounts across multiple Raft groups (partitions)
+Each partition: independent event sourcing node group
+Cross-partition transfers: Saga coordinator orchestrates
+
+User → Saga Coordinator → Partition 1 (A - $1) → success
+                        → Partition 2 (C + $1) → success
+                        → respond to user
+```
+- Saga coordinator tracks phase status for crash recovery
+- Each partition internally uses event sourcing + Raft
+- Reverse proxy converts async event sourcing to sync for external users (push model)
+
+**Back-of-Envelope**: 1M TPS ÷ 1K TPS per node = 1000 nodes (×2 for debit+credit = 2000 nodes). Optimize per-node TPS to reduce total nodes.
+
+**Staff+ insight**: This problem is a masterclass in progressive design refinement. Lead with: "The core challenge is atomicity across sharded accounts with auditability. I'd start with the transaction model choice — Saga for simplicity since our flow is linear (debit then credit). But for reproducibility and audit, I'd layer event sourcing on top. The event log becomes the source of truth, state is derived, and we can answer any auditor question by replaying events." This shows you understand both the distributed transaction landscape and why event sourcing is the right architecture for financial systems.
+
+### Payment System Deep Dive (E-Commerce Payments)
+
+Core question: design the payment backend for an e-commerce site (like Amazon). 1M transactions/day (~10 TPS). Focus is on correctness, not throughput. Tests idempotency, reconciliation, exactly-once delivery, and PSP integration.
+
+**Two Flows**:
+```
+Pay-in:  Buyer pays → money flows to e-commerce bank account
+Pay-out: E-commerce pays sellers → money flows to seller bank accounts
+```
+
+**Pay-in Architecture**:
+```
+User clicks "Place Order"
+  → Payment Service (risk check, orchestration)
+    → Payment Executor (one per payment order)
+      → PSP (Stripe/PayPal — processes credit card)
+        → Card Scheme (Visa/MasterCard)
+    → Wallet Service (update seller balance)
+    → Ledger Service (double-entry accounting record)
+```
+
+**PSP Integration — Hosted Payment Page**:
+```
+1. Client → Payment Service: send payment order info
+2. Payment Service → PSP: register payment (amount, currency, redirect URL, nonce)
+3. PSP → Payment Service: returns token (UUID for this payment)
+4. Payment Service: stores token in DB
+5. Client: displays PSP-hosted payment page (Stripe JS / SDK)
+6. User enters card info on PSP page (card data never touches our system)
+7. PSP processes payment, returns status
+8. Browser redirects to our success/failure page
+9. PSP → Payment Service: async webhook with final payment status
+```
+**Key**: We never store credit card numbers → avoids PCI DSS compliance burden. PSP handles all sensitive data.
+
+**Double-Entry Ledger**:
+```
+Every transaction records two entries that sum to 0:
+  Debit:  buyer  -$1
+  Credit: seller +$1
+```
+Fundamental accounting principle — provides end-to-end traceability. Use an immutable append-only ledger.
+
+**Exactly-Once Delivery** = At-Least-Once (retry) + At-Most-Once (idempotency):
+
+**At-Least-Once — Retry**:
+- Retry with exponential backoff for transient failures
+- Use **retry queue** for retryable errors
+- Use **dead letter queue (DLQ)** for messages that fail repeatedly (investigation needed)
+```
+Payment fails → retryable? → yes → retry queue → retry
+                                     → still fails? → retry count < threshold → retry queue
+                                                     → retry count ≥ threshold → DLQ
+               → no → store error in DB (non-retryable)
+```
+
+**At-Most-Once — Idempotency**:
+- Every payment request carries an **idempotency key** (UUID) in the HTTP header
+- DB uses this key as primary key → duplicate insert fails → second request returns previous result
+- For PSP: the `payment_order_id` (nonce) serves as the deduplication key
+
+**Two double-payment scenarios**:
+
+| Scenario | Solution |
+|---|---|
+| User clicks "pay" twice | Same idempotency key → second request returns cached result (or 429) |
+| PSP succeeds but response lost, user retries | Same token sent to PSP → PSP returns previous execution status |
+
+**Reconciliation** — the last line of defense:
+```
+Every night:
+  PSP/Bank sends settlement file (all transactions + final balance)
+  Reconciliation system compares settlement file vs internal ledger
+  Mismatches → classify → auto-fix OR manual finance team queue
+```
+Also used internally: compare ledger vs wallet for consistency.
+
+**Mismatch categories**:
+1. **Classifiable + automatable** → write program to auto-fix
+2. **Classifiable + not automatable** → manual fix queue for finance team
+3. **Unclassifiable** → special investigation queue
+
+**Payment State Tracking**:
+```
+payment_order_status: NOT_STARTED → EXECUTING → SUCCESS / FAILED
+```
+Persisted in append-only table. Scheduled job monitors in-flight orders and alerts if stuck past threshold.
+
+**Handling Delays**: PSP may hold payments for risk review or 3D Secure authentication (hours/days).
+- PSP returns "pending" status → client shows pending page with status check
+- PSP notifies us via webhook when complete
+- Alternative: payment service polls PSP for status updates
+
+**Communication Patterns**:
+
+| Pattern | Pros | Cons | Use When |
+|---|---|---|---|
+| **Synchronous** (HTTP) | Simple | Tight coupling, poor failure isolation, hard to scale | Small-scale, simple flows |
+| **Async — single receiver** (message queue) | Decoupled, buffered | More complex | One consumer per message |
+| **Async — multiple receivers** (Kafka) | Fan-out to many services, messages retained | Most complex | Payment events → analytics, billing, notifications |
+
+**Data Model**:
+
+| Table | Key Fields |
+|---|---|
+| **Payment Event** | `checkout_id` (PK), buyer_info, seller_info, credit_card_info, is_payment_done |
+| **Payment Order** | `payment_order_id` (PK), buyer_account, amount, currency, checkout_id (FK), payment_order_status, ledger_updated, wallet_updated |
+
+- One checkout (payment event) → multiple payment orders (one per seller)
+- `payment_order_id` = idempotency key for PSP
+- Amount stored as **string** (not double) to avoid precision loss
+
+**Security**:
+
+| Threat | Mitigation |
+|---|---|
+| Eavesdropping | HTTPS everywhere |
+| Man-in-the-middle | SSL + certificate pinning |
+| Card theft | Tokenization (PSP stores real card numbers, we store tokens) |
+| DDoS | Rate limiting + firewall |
+| PCI compliance | Hosted payment page (we never see card data) |
+| Fraud | Address verification, CVV, behavior analysis |
+
+**Staff+ insight**: The key architectural decisions to highlight: (1) Use hosted payment pages to avoid PCI compliance burden — this is what real companies do. (2) Exactly-once = retry + idempotency, not a magic protocol. (3) Reconciliation is the safety net — assume things will go wrong between async systems and design for nightly reconciliation. (4) Double-entry ledger is non-negotiable for any financial system. This problem is less about scale and more about correctness and operational maturity.
 
 ---
 
@@ -751,3 +1621,37 @@ Before you finish, make sure you've covered:
 - [ ] **Failure modes** identified with mitigation
 - [ ] **Monitoring** — how you know it's healthy
 - [ ] **Security** — auth, encryption, PII handling
+
+---
+
+## Recommended Resources
+
+### Core Reading
+
+| Resource | What It Covers | Priority |
+|---|---|---|
+| **[System Design Primer](https://github.com/donnemartin/system-design-primer)** | Comprehensive reference: CAP, caching, DB, load balancing, async, communication protocols, 8 worked problems with solutions | Must-read — best single free resource |
+| **[Designing Data-Intensive Applications (DDIA)](https://www.goodreads.com/book/show/23463279-designing-data-intensive-applications)** by Martin Kleppmann | Replication, partitioning, transactions, consistency, batch/stream processing, encoding — the theoretical foundation | Must-read — the "bible" of system design depth |
+| **[DDIA Notes](https://github.com/keyvanakbary/learning-notes/blob/master/books/designing-data-intensive-applications.md)** | Chapter-by-chapter summary of DDIA | Quick review if you've read the book |
+| **[ByteByteGo / Alex Xu's Course](https://bytebytego.com)** | Visual walkthroughs of common system design problems, interview-focused | Great for visual learners, paid course |
+
+### System Design Interview Practice
+
+| Resource | What It Covers | Priority |
+|---|---|---|
+| **[Grokking System Design](https://github.com/Jeevan-kumar-Raj/Grokking-System-Design)** | Educative course mirror: basics (consistent hashing, proxies, queues, CAP) + 12 designs (URL shortener, Instagram, Dropbox, Uber, Ticketmaster, etc.) | Good walkthrough of common problems |
+| **[Grokking the System Design Interview PDF](https://github.com/judylime/grokking)** | PDF collection: System Design Interview, Advanced System Design, OOD | Reference PDFs for offline study |
+
+### Coding Interview Patterns (Supplementary)
+
+| Resource | What It Covers | Priority |
+|---|---|---|
+| **[Grokking Coding Interview Patterns](https://github.com/dipjul/Grokking-the-Coding-Interview-Patterns-for-Coding-Questions)** | 28 coding patterns with problems: Two Pointers, Sliding Window, Cyclic Sort, Monotonic Stack, Knapsack, Trie, Union-Find, Multi-thread, etc. | Supplementary — overlaps with your Java playbook |
+
+### How to Use These Resources
+
+1. **Start with this playbook** — it's tailored for staff+ level and covers the framework + building blocks
+2. **Read DDIA chapters 5-9** (replication, partitioning, transactions, consistency, batch/stream) for depth — this is where interview questions about "why" come from
+3. **Practice 5-6 problems end-to-end** using the Grokking System Design walkthroughs, applying this playbook's framework
+4. **Reference the System Design Primer** for any building block you need to review (caching strategies, load balancing algorithms, etc.)
+5. **Do mock interviews** — practice talking through a design in 35-40 minutes, hitting all checklist items
