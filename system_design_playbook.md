@@ -1526,6 +1526,588 @@ Persisted in append-only table. Scheduled job monitors in-flight orders and aler
 
 **Staff+ insight**: The key architectural decisions to highlight: (1) Use hosted payment pages to avoid PCI compliance burden — this is what real companies do. (2) Exactly-once = retry + idempotency, not a magic protocol. (3) Reconciliation is the safety net — assume things will go wrong between async systems and design for nightly reconciliation. (4) Double-entry ledger is non-negotiable for any financial system. This problem is less about scale and more about correctness and operational maturity.
 
+### Notification System Deep Dive
+
+Core question: design a system that sends 10M push notifications, 1M SMS, and 5M emails per day. Soft real-time. Tests fan-out, message queues, third-party integration, reliability, and rate limiting.
+
+**Three Notification Channels**:
+
+| Channel | Third-Party Service | Token/Address |
+|---|---|---|
+| **iOS push** | Apple Push Notification Service (APNS) | Device token |
+| **Android push** | Firebase Cloud Messaging (FCM) | Device token |
+| **SMS** | Twilio, Nexmo | Phone number |
+| **Email** | SendGrid, Mailchimp | Email address |
+
+**Data Model**:
+```
+user table:       user_id, email, phone_number, created_at
+device table:     id, user_id, device_token, platform (iOS/Android), last_active
+notification_setting: user_id, channel, opt_in (boolean)
+notification_log: notification_id, user_id, channel, status, retry_count, created_at
+```
+One user → multiple devices → push notification sent to all active devices.
+
+**High-Level Architecture**:
+```
+Services (1..N)  →  Notification Servers (stateless, horizontally scaled)
+                      ├── Validate input, check opt-in settings
+                      ├── Fetch user/device info from cache/DB
+                      ├── Rate limit check
+                      ├── Build payload from notification template
+                      └── Enqueue to per-channel message queue
+                              ├── iOS Push Queue → Workers → APNS → iOS devices
+                              ├── Android Push Queue → Workers → FCM → Android devices
+                              ├── SMS Queue → Workers → Twilio → phones
+                              └── Email Queue → Workers → SendGrid → inboxes
+```
+
+**Key design decisions**:
+
+1. **Separate message queue per channel**: Outage in one third-party (e.g., APNS down) doesn't affect email/SMS delivery
+2. **Workers pull from queues**: Decouples notification creation from delivery — natural backpressure
+3. **Notification log DB**: Persist every notification before sending — no data loss even if worker crashes
+4. **Deduplication**: Check event ID before sending — if seen before, discard (prevents duplicate notifications on retry)
+
+**Reliability**:
+```
+Worker pulls notification from queue
+  → Attempt delivery to third-party service
+    → Success: mark as delivered in notification log
+    → Failure: put back in queue for retry (with backoff)
+      → Exceeds retry limit: move to DLQ, alert engineers
+```
+- **Cannot guarantee exactly-once delivery** in distributed systems — aim for at-least-once with dedup
+- Notification log provides audit trail and supports retry
+
+**Additional Components**:
+
+| Component | Purpose |
+|---|---|
+| **Notification templates** | Pre-formatted payloads with variable substitution. Consistent format, less error-prone |
+| **User notification settings** | Per-channel opt-in/opt-out. Always check before sending |
+| **Rate limiting** | Cap notifications per user per time window. Prevents user from turning off all notifications |
+| **Authentication** | appKey/appSecret for push notification APIs. Only verified clients can trigger notifications |
+| **Event tracking** | Track sent → delivered → opened → clicked. Feed into analytics service for engagement metrics |
+| **Queue depth monitoring** | Alert when queue backlog grows — indicates workers can't keep up, need to scale out |
+
+**Scaling Considerations**:
+- **Notification servers**: Stateless → horizontal autoscaling
+- **Workers**: Scale per channel independently based on queue depth
+- **Cache**: User info, device tokens, templates — high read frequency, low write
+- **DB**: Notification log is append-only, can be sharded by user_id or time
+
+**Staff+ insight**: The key insight is the per-channel queue separation — it provides fault isolation (APNS outage doesn't block emails) and independent scaling. For the deep dive, focus on: (1) reliability via notification log + retry + dedup, (2) rate limiting to protect user experience, (3) extensibility for new channels (just add a new queue + worker). This is a common Stripe question since webhooks are essentially a notification delivery system.
+
+### Rate Limiter Deep Dive
+
+Core question: design a distributed rate limiter for server-side API throttling. Tests algorithm knowledge, Redis usage, race conditions, and distributed synchronization. Directly relevant to **Stripe** (rate limiting is a core product feature) and **Anthropic/OpenAI** (API throttling).
+
+**Five Algorithms**:
+
+| Algorithm | How It Works | Pros | Cons |
+|---|---|---|---|
+| **Token Bucket** | Bucket fills at fixed rate; each request consumes a token. Excess requests dropped when bucket empty | Memory efficient, allows short bursts | Hard to tune bucket size + refill rate |
+| **Leaking Bucket** | FIFO queue; requests processed at fixed rate. New requests dropped when queue full | Smooth output rate, memory efficient | Bursts fill queue with old requests; recent requests starved |
+| **Fixed Window Counter** | Divide time into windows, count requests per window. Drop when count > threshold | Simple, memory efficient | Edge-of-window burst: 2× allowed rate across window boundary |
+| **Sliding Window Log** | Store timestamp of each request in sorted set. Remove outdated entries. Count remaining | Perfectly accurate — no boundary issue | High memory (stores every timestamp, even rejected ones) |
+| **Sliding Window Counter** | Hybrid: weighted sum of current window count + previous window count × overlap % | Memory efficient, smooths spikes, ~99.997% accurate | Approximate (assumes even distribution in previous window) |
+
+**Used by**: Token Bucket → Amazon, Stripe. Leaking Bucket → Shopify. Sliding Window → Cloudflare.
+
+**Where to Place It**: API Gateway middleware (most common in microservices) or server-side. Not client-side (easily forged).
+
+**High-Level Architecture**:
+```
+Client → Rate Limiter Middleware → API Servers
+              ↕
+         Redis (counters + TTL)
+              ↕
+         Rules Cache (loaded from config on disk by workers)
+```
+
+**Redis Implementation** (Token Bucket / Fixed Window):
+- `INCR key` — atomically increment counter
+- `EXPIRE key ttl` — auto-delete after time window
+- Use Lua scripts for atomic check-and-increment (avoids race conditions)
+
+**Response Headers**:
+```
+X-Ratelimit-Remaining: 4      # requests left in current window
+X-Ratelimit-Limit: 10         # total allowed per window
+X-Ratelimit-Retry-After: 30   # seconds until reset
+HTTP 429 Too Many Requests     # when throttled
+```
+
+**Distributed Challenges**:
+
+| Challenge | Problem | Solution |
+|---|---|---|
+| **Race condition** | Two threads read same counter, both increment → under-counting | Lua script in Redis (atomic read+increment) or Redis sorted sets |
+| **Synchronization** | Multiple rate limiter servers don't share state → client can exceed limit by hitting different servers | Centralized Redis store (not sticky sessions — not scalable) |
+| **Multi-datacenter latency** | Users far from Redis → high latency on every request | Edge servers with local Redis, eventual consistency sync |
+
+**Rate Limiting Rules** (Lyft open-source format):
+```yaml
+domain: messaging
+descriptors:
+  - key: message_type
+    value: marketing
+    rate_limit:
+      unit: day
+      requests_per_unit: 5
+```
+Rules stored on disk → workers pull periodically → cached in memory.
+
+**Bucket Granularity**:
+- Per user per API endpoint (e.g., 1 post/sec, 150 friends/day, 5 likes/sec → 3 buckets per user)
+- Per IP address (DDoS protection)
+- Global bucket (system-wide max QPS)
+
+**When Rate Limited**:
+- Return 429 + retry headers
+- Optionally enqueue for later processing (e.g., rate-limited orders during flash sales)
+
+**Hard vs Soft Rate Limiting**:
+- **Hard**: Strict — never exceed threshold
+- **Soft**: Allow brief bursts above threshold
+
+**Staff+ insight**: For Stripe/Anthropic interviews, the key is showing you understand the algorithm tradeoffs and distributed challenges. Lead with: "I'd use token bucket for its burst tolerance, backed by Redis with Lua scripts for atomicity. The main distributed challenge is synchronization — centralized Redis solves it, with edge servers for latency. Rules should be config-driven and hot-reloadable." Also mention that rate limiting exists at multiple layers (L3/IP via iptables, L7/HTTP via middleware) and that monitoring is essential to tune rules without over-throttling legitimate traffic.
+
+### Unique ID Generator Deep Dive
+
+Core question: generate unique, 64-bit, time-sortable, numeric IDs at 10K+ IDs/sec in a distributed system. Quick chapter but frequently asked as a warm-up or sub-problem (transaction IDs, idempotency keys, order IDs).
+
+**Four Approaches**:
+
+| Approach | How It Works | Pros | Cons |
+|---|---|---|---|
+| **Multi-master replication** | DB auto_increment by K (K = number of servers) | Simple | IDs not time-ordered across servers; hard to scale when adding/removing servers |
+| **UUID** | 128-bit random ID, generated independently per server | No coordination needed, easy to scale | 128 bits (not 64), not sortable by time, non-numeric |
+| **Ticket Server** (Flickr) | Centralized DB with auto_increment | Numeric, simple | SPOF; multiple ticket servers need sync |
+| **Snowflake** (Twitter) | 64-bit ID divided into sections: timestamp + datacenter + machine + sequence | 64-bit, time-sortable, no coordination, high throughput | Clock sync required across servers |
+
+**Winner: Snowflake** — meets all requirements.
+
+**Snowflake ID Layout** (64 bits):
+```
+| 1 bit  | 41 bits    | 5 bits       | 5 bits     | 12 bits        |
+| sign=0 | timestamp  | datacenter ID| machine ID | sequence number|
+```
+
+| Section | Bits | Range | Notes |
+|---|---|---|---|
+| **Sign** | 1 | Always 0 | Reserved |
+| **Timestamp** | 41 | ~69 years of milliseconds | Custom epoch (e.g., 2010-11-04). IDs sortable by time |
+| **Datacenter ID** | 5 | 32 datacenters | Fixed at startup |
+| **Machine ID** | 5 | 32 machines per DC | Fixed at startup |
+| **Sequence** | 12 | 4096 per millisecond per machine | Reset to 0 each ms. Max 4096 IDs/ms/machine |
+
+**Throughput**: 4096 IDs/ms × 32 machines × 32 DCs = **~4 billion IDs/sec** theoretical max.
+
+**Key Considerations**:
+- **Clock synchronization**: Servers must have synchronized clocks (NTP). Clock drift can cause duplicate or out-of-order IDs
+- **Section length tuning**: Adjust bit allocation based on needs — fewer sequence bits + more timestamp bits for low-concurrency long-term apps
+- **69-year limit**: 2^41 ms ≈ 69 years from custom epoch. Plan for epoch migration
+- **High availability**: ID generator is mission-critical — deploy redundantly
+
+**Staff+ insight**: This is often a sub-problem inside larger designs (e.g., "how do you generate transaction IDs for your payment system?"). Know Snowflake cold — it takes 2 minutes to explain and shows you understand distributed ID generation tradeoffs. The key insight: "We need IDs that are time-sortable without coordination between servers, which rules out UUID and centralized approaches. Snowflake embeds timestamp + machine ID + sequence into 64 bits, giving us sortability, uniqueness, and independence."
+
+### Chat System Deep Dive
+
+Core question: design a chat system supporting 1-on-1 and group chat (≤100 members), 50M DAU, online presence, multi-device sync, push notifications. Tests WebSocket, stateful services, message delivery, and presence.
+
+**Communication Protocols**:
+
+| Protocol | How It Works | Drawbacks |
+|---|---|---|
+| **Polling** | Client periodically asks server for new messages | Wasteful — most polls return empty |
+| **Long Polling** | Client holds connection open until server has new data or timeout | Sender/receiver may hit different servers; can't detect client disconnect well |
+| **WebSocket** | Bi-directional persistent connection over port 80/443 | Best choice — real-time, works through firewalls. Use for both send and receive |
+
+**High-Level Architecture**:
+```
+Stateless Services (HTTP):         Stateful Service (WebSocket):
+  ├── API Servers (login,            Chat Servers
+  │   signup, profile)                 ├── Maintain persistent WS connections
+  ├── behind Load Balancer             ├── Route messages between users
+  └── Service Discovery                └── Coordinate with Presence Servers
+       (Zookeeper — assigns
+        best chat server to client)
+
+Storage:                            Third-Party:
+  KV Store (chat history)             Push Notification Servers
+  ├── HBase (Facebook)
+  └── Cassandra (Discord)
+```
+
+**Why KV Store for Chat History** (not relational DB):
+- Enormous volume (60B messages/day at Facebook+WhatsApp scale)
+- Access pattern: mostly recent messages, occasional random access (search, mentions)
+- Read:write ratio ≈ 1:1
+- Relational DB handles long-tail poorly (indexes grow huge → expensive random access)
+- KV stores: easy horizontal scaling, low latency
+
+**Data Model**:
+```
+1-on-1 messages:
+  PK: message_id
+  Fields: message_from, message_to, content, created_at
+
+Group messages:
+  PK: (channel_id, message_id)   ← channel_id is partition key
+  Fields: message_from, content, created_at
+```
+- `message_id`: Snowflake ID (time-sortable, unique). Can't use `created_at` for ordering (two messages may have same timestamp)
+- For group chat, local sequence numbers suffice (unique within channel, not globally)
+
+**Service Discovery** (Zookeeper):
+```
+1. User A logs in → API server authenticates
+2. Service discovery picks best chat server (by geo, capacity)
+3. Returns chat server address to client
+4. Client opens WebSocket to assigned chat server
+```
+
+**1-on-1 Message Flow**:
+```
+1. User A sends message via WebSocket to Chat Server 1
+2. Chat Server 1 gets message_id from ID generator
+3. Message → message sync queue
+4. Message stored in KV store
+5a. If User B online → forward to Chat Server 2 (where B is connected) → deliver via WebSocket
+5b. If User B offline → push notification server
+```
+
+**Multi-Device Sync**:
+- Each device tracks `cur_max_message_id` (latest message ID seen on that device)
+- On reconnect, device fetches all messages with ID > `cur_max_message_id` from KV store
+- Simple and effective — each device independently catches up
+
+**Small Group Chat** (fan-out on write):
+```
+User A sends message to group (A, B, C)
+  → Message copied to User B's message sync queue (inbox)
+  → Message copied to User C's message sync queue (inbox)
+Each recipient reads only from their own inbox
+```
+- Good for small groups (≤100-500): simplifies sync, each client checks one inbox
+- WeChat uses this approach (groups capped at 500)
+- **Not suitable for large groups** — storing a copy per member is too expensive
+
+**Online Presence**:
+
+| Event | Action |
+|---|---|
+| **Login** | Save `{user_id: online, last_active_at: now}` in KV store |
+| **Logout** | Update status to offline |
+| **Disconnect** | Don't immediately mark offline — use **heartbeat mechanism** |
+
+**Heartbeat**: Client sends heartbeat every 5 seconds. If no heartbeat received within 30 seconds → mark offline. Prevents flapping during brief network interruptions (e.g., tunnel).
+
+**Presence Fanout** (pub-sub):
+```
+User A's status changes → publish to channels A-B, A-C, A-D
+User B subscribes to A-B → gets notified
+```
+- Works for small friend lists
+- For large groups (100K members): don't fan out — fetch presence on demand (when user opens group or refreshes)
+
+**Staff+ insight**: The key architectural decisions: (1) WebSocket for real-time bidirectional messaging — but HTTP for everything else (login, profile, etc.). (2) Stateful chat servers + Zookeeper for service discovery — clients stick to one server. (3) KV store for chat history (HBase/Cassandra) — not relational DB. (4) Fan-out on write for small groups (inbox per user), but switch to fan-out on read for large groups. This maps directly to the Airbnb Messaging Staff role.
+
+### YouTube / Video Streaming Deep Dive
+
+Core question: design a video streaming service (YouTube/Netflix). 5M DAU, upload + stream videos, multiple resolutions, global. Tests video transcoding pipeline, CDN cost optimization, and DAG-based processing. Directly relevant to **Netflix** roles.
+
+**Back-of-Envelope**:
+- 5M DAU × 10% upload × 300MB avg = **150 TB/day** new storage
+- CDN cost: 5M × 5 videos/day × 0.3GB × $0.02/GB = **$150K/day** (CDN is the dominant cost)
+
+**Two Core Flows**:
+```
+1. Video Upload Flow:  Client → API servers → Original blob storage → Transcoding → CDN
+2. Video Streaming Flow:  Client → CDN edge server (closest) → stream video chunks
+```
+
+**Video Upload Architecture**:
+```
+Client uploads video
+  ├── Flow A: Upload actual video
+  │     1. Upload to Original Storage (blob)
+  │     2. Transcoding servers fetch & transcode
+  │     3a. Transcoded videos → Transcoded Storage → CDN
+  │     3b. Completion event → Completion Queue → Completion Handler
+  │     4. Handler updates Metadata DB + Cache
+  │     5. API server notifies client: ready for streaming
+  │
+  └── Flow B: Upload metadata (parallel with Flow A)
+        Client → API servers → Metadata DB + Cache
+        (file name, size, format, etc.)
+```
+
+**Video Transcoding Pipeline** (DAG Model — inspired by Facebook SVE):
+```
+Original Video
+  ├── Video → Inspection → Video Encoding (multiple resolutions/codecs) → Watermark
+  ├── Audio → Audio Encoding
+  └── Metadata extraction → Thumbnail generation
+```
+- **DAG** (Directed Acyclic Graph) defines task dependencies → enables parallel execution of independent tasks
+- **Preprocessor**: Split video into GOPs (Group of Pictures, ~few seconds each), generate DAG, cache segments
+- **DAG Scheduler**: Split DAG into stages, enqueue tasks
+- **Resource Manager**: Task queue (priority) + Worker queue (utilization) + Running queue + Task scheduler
+- **Task Workers**: Execute encoding, thumbnailing, watermarking, etc.
+- **Temporary Storage**: Cache metadata in memory, video/audio in blob storage. Freed after processing
+
+**Streaming Protocols**: MPEG-DASH, Apple HLS, Microsoft Smooth Streaming, Adobe HDS. Key point: different protocols support different encodings/players. Videos stream from CDN edge servers closest to user.
+
+**Speed Optimizations**:
+
+| Optimization | How |
+|---|---|
+| **Parallel upload** | Client splits video by GOP → upload chunks in parallel → fast resumable uploads |
+| **Upload centers** | Multiple global upload centers (use CDN as upload points) |
+| **Pipeline parallelism** | Message queues between download → encode → upload stages. Each stage processes independently |
+
+**Safety Optimizations**:
+
+| Optimization | How |
+|---|---|
+| **Pre-signed upload URL** | Client gets pre-signed URL from API server → uploads directly to blob storage. Only authorized uploads |
+| **DRM** | Apple FairPlay, Google Widevine, Microsoft PlayReady |
+| **AES encryption** | Encrypt video, decrypt on playback with authorization |
+| **Visual watermark** | Overlay identifying info on video |
+
+**Cost-Saving Optimizations** (CDN is expensive):
+1. **Popular videos only on CDN** — long-tail videos served from origin storage servers
+2. **Fewer encoded versions for unpopular content** — encode on-demand for short/rare videos
+3. **Regional distribution** — region-popular videos stay in that region's CDN only
+4. **Build your own CDN** (Netflix approach) — partner with ISPs for last-mile delivery
+
+**Error Handling**:
+
+| Component | Error Strategy |
+|---|---|
+| Upload | Retry |
+| Video splitting | Server-side fallback for old clients |
+| Transcoding | Retry on new worker |
+| DAG scheduler | Reschedule task |
+| Resource manager queue | Use replica |
+| API server down | Stateless → route to another server |
+| Metadata cache down | Read from replica, spin up replacement |
+| Metadata DB master down | Promote slave |
+
+**Staff+ insight**: For Netflix interviews, emphasize: (1) The DAG model for transcoding — it's how Facebook and Netflix actually build their encoding pipelines, enabling flexible parallel processing. (2) CDN cost optimization is the real engineering challenge — long-tail distribution means most videos are rarely watched, so tiered storage (CDN for hot, origin for cold) is critical. (3) GOP-aligned chunked uploads enable resumable parallel uploads and adaptive bitrate streaming. (4) Pre-signed URLs are the standard pattern for secure direct-to-storage uploads without proxying through your API servers.
+
+### Web Crawler Deep Dive
+
+Core question: design a web crawler for search engine indexing. 1B pages/month (~400 QPS, peak 800). Tests distributed task scheduling, URL frontier design, politeness, deduplication, and robustness. Good for infrastructure-heavy roles at any company.
+
+**Back-of-Envelope**:
+- 1B pages/month ÷ 30 days ÷ 86400 sec ≈ **400 pages/sec** (peak ~800)
+- 500KB avg page size × 1B pages = **500 TB/month**
+- 5-year retention: 500 TB × 60 months = **30 PB**
+
+**High-Level Workflow** (BFS-based):
+```
+1. Seed URLs → URL Frontier (queue of URLs to download)
+2. URL Frontier → HTML Downloader (fetches pages via HTTP)
+3. HTML Downloader → DNS Resolver → download page
+4. Downloaded page → Content Parser (validate, reject malformed)
+5. Content Parser → "Content Seen?" (hash-based dedup — skip if duplicate)
+6. If new content → Content Storage + URL Extractor
+7. URL Extractor → extract links → URL Filter (exclude blacklisted, bad extensions)
+8. URL Filter → "URL Seen?" (Bloom filter — skip if already visited)
+9. If new URL → URL Frontier (loop back to step 2)
+```
+
+**URL Frontier** — the key component. Two modules:
+
+**Front Queues (Priority)**:
+```
+URLs → Prioritizer (compute priority by PageRank, traffic, update frequency)
+  → Queue f1 (high priority)
+  → Queue f2 (medium priority)
+  → Queue fn (low priority)
+  → Queue Selector (weighted random pick — bias toward high priority)
+```
+
+**Back Queues (Politeness)**:
+```
+→ Queue Router (route URL to queue by hostname)
+  → Queue b1 (wikipedia.com only)
+  → Queue b2 (apple.com only)
+  → Queue bn (nike.com only)
+  → Queue Selector → Worker Thread (one thread per queue)
+     Each thread downloads one page at a time from same host with delay between requests
+```
+- **Key insight**: Separate priority (what to crawl next) from politeness (don't overwhelm any single host)
+- Storage: Hybrid — most URLs on disk, enqueue/dequeue buffers in memory, periodic flush
+
+**Deduplication**:
+
+| Component | What It Deduplicates | Technique |
+|---|---|---|
+| **"Content Seen?"** | Page content (29% of web is duplicate) | Compare hash values of HTML (not character-by-character) |
+| **"URL Seen?"** | URLs already visited or in frontier | Bloom filter or hash table |
+
+**HTML Downloader Optimizations**:
+
+| Optimization | How |
+|---|---|
+| **Distributed crawl** | Partition URL space across multiple servers, each running multiple threads |
+| **DNS caching** | Cache DNS lookups (DNS is 10-200ms, synchronous — major bottleneck). Update via cron |
+| **Geo-locality** | Place crawl servers near target websites for faster downloads |
+| **Timeouts** | Short max wait time per request — don't block on unresponsive servers |
+| **robots.txt caching** | Download and cache robots.txt per domain, refresh periodically |
+
+**Robustness**:
+- **Consistent hashing** for distributing load across downloaders (easy add/remove servers)
+- **Save crawl state** to storage — restart from checkpoint after failure
+- **Exception handling** — graceful error handling, no full-system crashes
+- **Spider trap detection** — max URL length, manual identification of trap sites
+
+**Freshness**: Recrawl strategy based on page update history + priority (important pages recrawled more frequently).
+
+**Extensibility**: Plugin architecture — add new modules (e.g., PNG Downloader, Web Monitor) without redesigning core system.
+
+**Problematic Content**:
+- **Redundant content**: Hash-based dedup (~30% of web is duplicate)
+- **Spider traps**: Infinite URL loops (e.g., `/foo/bar/foo/bar/...`) — max URL depth
+- **Data noise**: Ads, spam, code snippets — filter before storage
+
+**Staff+ insight**: The URL frontier is the heart of this design — it's where you show depth. Lead with: "The frontier has two concerns: priority (what's most valuable to crawl next) and politeness (don't DDoS any host). I'd split it into front queues for priority ranking and back queues for per-host rate limiting with one worker thread per host." Also emphasize distributed crawling with consistent hashing, DNS caching as a critical performance optimization, and Bloom filters for URL dedup at scale. This problem tests your ability to design a robust distributed task processing system.
+
+### Distributed Message Queue Deep Dive
+
+Core question: design a distributed message queue (Kafka-like) with long retention, ordered delivery, configurable delivery semantics, and high throughput. Tests partitioning, replication (ISR), consumer groups, and delivery guarantees. Foundational for **Stripe** (workflow engine), **Netflix** (event-driven arch), **Coinbase** (async processing).
+
+**Message Queue vs Event Streaming Platform**:
+- Traditional MQ (RabbitMQ, ActiveMQ): no retention, no ordering guarantee, point-to-point
+- Event Streaming (Kafka, Pulsar): long retention, ordered within partition, pub-sub + consumer groups
+- Lines are blurring — this design covers the streaming platform flavor
+
+**Core Concepts**:
+
+| Concept | Definition |
+|---|---|
+| **Topic** | Named category for messages. Producers write to topics, consumers subscribe to topics |
+| **Partition** | Shard of a topic. FIFO within partition. Distributed across brokers for scalability |
+| **Offset** | Position of a message within a partition. Monotonically increasing |
+| **Broker** | Server that holds partitions. Multiple brokers form the cluster |
+| **Consumer Group** | Set of consumers that collectively consume a topic. Each partition assigned to exactly one consumer in the group |
+| **Message Key** | Optional. `hash(key) % numPartitions` determines partition. Same key → same partition → ordering preserved |
+
+**High-Level Architecture**:
+```
+Producers → Brokers (hold partitions on disk as WAL segments)
+               ↕
+          Coordination Service (Zookeeper/etcd)
+            ├── Leader election (one broker = active controller)
+            ├── Metadata storage (topic config, partition assignments)
+            └── State storage (consumer offsets, partition-consumer mapping)
+               ↕
+          Consumer Groups ← pull messages from partitions
+```
+
+**Why WAL on Disk** (not database):
+- Sequential read/write access pattern → rotational disks achieve hundreds of MB/sec
+- OS aggressively caches disk data in memory
+- Append-only segments: active segment receives writes, old segments are read-only
+- Segments truncated after retention period (e.g., 2 weeks)
+- Database is not ideal: hard to support both write-heavy and read-heavy at scale
+
+**Messaging Models**:
+
+| Model | How | Our Design |
+|---|---|---|
+| **Point-to-point** | Each message consumed by exactly one consumer | Put all consumers in same consumer group → each partition → one consumer |
+| **Pub-sub** | Each message consumed by all subscribers | Multiple consumer groups subscribe to same topic → each group gets all messages |
+
+**Key Constraint**: One partition → one consumer per group. This guarantees ordering within partition and prevents duplicate processing.
+
+**Producer Flow**:
+```
+Producer (with routing logic + batch buffer built into client library)
+  → hash(message_key) % numPartitions → select partition
+  → batch messages in memory buffer (throughput vs latency tradeoff)
+  → send batch to leader replica of target partition
+  → leader writes to WAL, followers pull from leader
+  → ACK returned based on config
+```
+
+**ACK Settings** (durability vs performance):
+
+| ACK | Behavior | Use Case |
+|---|---|---|
+| **ack=all** | Wait for ALL ISRs to sync | Strongest durability. Financial data |
+| **ack=1** | Wait for leader only | Low latency, occasional loss acceptable |
+| **ack=0** | Fire and forget, no retry | Lowest latency. Metrics, logging |
+
+**Consumer Flow** (pull model — consumers control rate):
+```
+1. Consumer joins group → finds coordinator broker (hash of group name)
+2. Coordinator assigns partitions to consumer
+3. Consumer reads from last committed offset (stored in state storage)
+4. Consumer processes message, then commits offset
+```
+**Pull > Push**: consumers control consumption rate, supports both real-time and batch modes, scales by adding consumers. Long polling avoids busy-waiting when no messages.
+
+**Consumer Rebalancing** (triggered by join/leave/crash):
+```
+1. Coordinator detects change (heartbeat timeout or explicit leave)
+2. Notifies all consumers to rejoin group
+3. Elects consumer leader → generates new partition assignment plan
+4. Coordinator broadcasts plan → consumers start consuming from new assignments
+```
+
+**Replication & In-Sync Replicas (ISR)**:
+```
+Each partition: 1 leader + N-1 follower replicas across different brokers
+Producers write to leader → followers pull from leader
+ISR = replicas that are "in-sync" (within configured lag threshold)
+Committed offset = all ISRs have synced up to this point
+```
+- If follower falls behind → removed from ISR → can rejoin when caught up
+- Leader fails → new leader elected from ISR
+- Replicas must be on different broker nodes (same node = no fault tolerance)
+
+**Broker Failure Recovery**:
+```
+Broker 3 crashes → controller detects via Zookeeper
+  → generates new replica distribution plan
+  → assigns new replicas on remaining brokers
+  → new followers catch up from leaders
+```
+
+**Broker Scaling** (add new broker):
+```
+1. New broker 4 added
+2. Controller assigns some partition replicas to broker 4
+3. New replicas copy data from leaders (temporarily > configured replica count)
+4. Once caught up, remove old redundant replicas
+→ No data loss during scaling
+```
+
+**Partition Scaling**:
+- **Increase**: New partition created, new messages go to all partitions. No data migration needed
+- **Decrease**: Decommission partition (stop receiving new messages). Keep serving reads until retention expires, then truncate
+
+**Delivery Semantics**:
+
+| Semantic | Producer | Consumer | Use Case |
+|---|---|---|---|
+| **At-most-once** | ack=0, no retry | Commit offset before processing | Metrics, logging (loss OK) |
+| **At-least-once** | ack=1 or all, retry on failure | Commit offset after processing (may re-consume on crash) | Most use cases. Dedup on consumer side |
+| **Exactly-once** | Idempotent producer + ack=all | Transactional offset commit | Financial systems (expensive to implement) |
+
+**Advanced Features**:
+- **Message filtering**: Tags in message metadata → broker filters before delivery (no payload decryption needed)
+- **Delayed messages**: Store in temporary topic → timing function delivers to real topic when time expires (e.g., "check payment after 30 min")
+- **Batching everywhere**: Producer batches in memory, broker writes large sequential batches, consumer fetches in batches → critical for throughput
+
+**Staff+ insight**: This is foundational infrastructure knowledge. Key points to lead with: (1) "Partitions are the unit of parallelism and ordering — I'd use `hash(key) % partitions` for deterministic routing and guarantee ordering within a partition." (2) "ISR is the durability knob — ack=all with ISR gives us strong durability, ack=1 trades durability for latency." (3) "Consumer groups give us both pub-sub (multiple groups) and point-to-point (single group) from the same primitive." (4) "WAL on disk with sequential I/O outperforms databases for this access pattern, and OS page cache gives us near-memory speed for hot data." This directly applies to Stripe's workflow engine role and any event-driven architecture discussion.
+
 ---
 
 ## Numbers Every Engineer Should Know
