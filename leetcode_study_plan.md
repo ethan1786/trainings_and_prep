@@ -122,36 +122,36 @@ patterns and set up the recurrence. That's sufficient for staff+ level.
 
 **1D DP (sequence/decision):**
 
-- [ ] 198. House Robber (Medium) — Uber, Airbnb — simplest DP warmup
-- [ ] 139. Word Break (Medium) — Uber, Airbnb, Stripe
-- [ ] 322. Coin Change (Medium) — Uber, Coinbase, Stripe
-- [ ] 91. Decode Ways (Medium) — Uber, Airbnb
-- [ ] 300. Longest Increasing Subsequence (Medium) — Uber, Nvidia — classic 1D DP + binary search optimization
-- [ ] 152. Maximum Product Subarray (Medium) — Uber, Airbnb — track min and max simultaneously
+- [x] 198. House Robber (Medium) — Uber, Airbnb — simplest DP warmup
+- [x] 139. Word Break (Medium) — Uber, Airbnb, Stripe
+- [x] 322. Coin Change (Medium) — Uber, Coinbase, Stripe
+- [x] 91. Decode Ways (Medium) — Uber, Airbnb
+- [x] 300. Longest Increasing Subsequence (Medium) — Uber, Nvidia — classic 1D DP + binary search optimization
+- [x] 152. Maximum Product Subarray (Medium) — Uber, Airbnb — track min and max simultaneously
 
 **2D DP (grid/string comparison):**
 
-- [ ] 62. Unique Paths (Medium) — Uber, Nvidia
-- [ ] 1143. Longest Common Subsequence (Medium) — Uber, Coinbase
-- [ ] 72. Edit Distance (Medium) — Uber, Airbnb, Stripe
+- [x] 62. Unique Paths (Medium) — Uber, Nvidia
+- [x] 1143. Longest Common Subsequence (Medium) — Uber, Coinbase
+- [x] 72. Edit Distance (Medium) — Uber, Airbnb, Stripe
 
 **Knapsack / Subset DP:**
 
-- [ ] 416. Partition Equal Subset Sum (Medium) — Uber, Coinbase
-- [ ] 518. Coin Change II (Medium) — Stripe, Coinbase
+- [x] 416. Partition Equal Subset Sum (Medium) — Uber, Coinbase
+- [x] 518. Coin Change II (Medium) — Stripe, Coinbase
 
 ### Intervals
 
-- [ ] 56. Merge Intervals (Medium) — Uber, Airbnb, Stripe, Netflix
-- [ ] 57. Insert Interval (Medium) — Uber, Airbnb, Stripe — builds on 56
-- [ ] 253. Meeting Rooms II (Medium) — Uber, Airbnb (Premium)
-- [ ] 435. Non-overlapping Intervals (Medium) — Uber, Airbnb — greedy interval scheduling
-- [ ] 1235. Maximum Profit in Job Scheduling (Hard) — Uber, Airbnb, Nvidia
+- [x] 56. Merge Intervals (Medium) — Uber, Airbnb, Stripe, Netflix
+- [x] 57. Insert Interval (Medium) — Uber, Airbnb, Stripe — builds on 56
+- [x] 253. Meeting Rooms II (Medium) — Uber, Airbnb (Premium)
+- [x] 435. Non-overlapping Intervals (Medium) — Uber, Airbnb — greedy interval scheduling
+- [x] 1235. Maximum Profit in Job Scheduling (Hard) — Uber, Airbnb, Nvidia
 
 ### Greedy
 
-- [ ] 621. Task Scheduler (Medium) — Uber, Airbnb
-- [ ] 134. Gas Station (Medium) — Uber
+- [x] 621. Task Scheduler (Medium) — Uber, Airbnb
+- [x] 134. Gas Station (Medium) — Uber
 
 **Week 3 total: 18 problems**
 
@@ -161,53 +161,53 @@ patterns and set up the recurrence. That's sufficient for staff+ level.
 
 ### Heaps / Priority Queues
 
-- [ ] 295. Find Median from Data Stream (Hard) — Uber, Airbnb, Netflix
-- [ ] 347. Top K Frequent Elements (Medium) — Uber, Coinbase
-- [ ] 23. Merge k Sorted Lists (Hard) — Uber, Airbnb, Nvidia
-- [ ] 973. K Closest Points to Origin (Medium) — Uber, Airbnb
-- [ ] 215. Kth Largest Element in an Array (Medium) — Uber, Airbnb — quickselect or heap
+- [x] 295. Find Median from Data Stream (Hard) — Uber, Airbnb, Netflix
+- [x] 347. Top K Frequent Elements (Medium) — Uber, Coinbase
+- [x] 23. Merge k Sorted Lists (Hard) — Uber, Airbnb, Nvidia
+- [x] 973. K Closest Points to Origin (Medium) — Uber, Airbnb
+- [x] 215. Kth Largest Element in an Array (Medium) — Uber, Airbnb — quickselect or heap
 
 ### Linked List
 
-- [ ] 206. Reverse Linked List (Easy) — Uber, Airbnb — fundamental, know iterative + recursive
-- [ ] 25. Reverse Nodes in k-Group (Hard) — Uber, Airbnb — builds on 206
-- [ ] 141. Linked List Cycle (Easy) — Uber, Nvidia — fast/slow pointer
-- [ ] 142. Linked List Cycle II (Medium) — Uber — find cycle start (Floyd's algorithm)
+- [x] 206. Reverse Linked List (Easy) — Uber, Airbnb — fundamental, know iterative + recursive
+- [x] 25. Reverse Nodes in k-Group (Hard) — Uber, Airbnb — builds on 206
+- [x] 141. Linked List Cycle (Easy) — Uber, Nvidia — fast/slow pointer
+- [x] 142. Linked List Cycle II (Medium) — Uber — find cycle start (Floyd's algorithm)
 
 ### Monotonic Stack / Stack Parsing
 
-- [ ] 84. Largest Rectangle in Histogram (Hard) — Uber, Nvidia
-- [ ] 739. Daily Temperatures (Medium) — Uber
-- [ ] 224. Basic Calculator (Hard) — Uber, Airbnb, Stripe — stack-based expression parsing
-- [ ] 227. Basic Calculator II (Medium) — Uber, Airbnb — stack + operator precedence
+- [x] 84. Largest Rectangle in Histogram (Hard) — Uber, Nvidia
+- [x] 739. Daily Temperatures (Medium) — Uber
+- [x] 224. Basic Calculator (Hard) — Uber, Airbnb, Stripe — stack-based expression parsing
+- [x] 227. Basic Calculator II (Medium) — Uber, Airbnb — stack + operator precedence
 
 ### Matrix
 
-- [ ] 48. Rotate Image (Medium) — Uber, Airbnb — transpose + reverse
-- [ ] 54. Spiral Matrix (Medium) — Uber, Airbnb — boundary shrinking
+- [x] 48. Rotate Image (Medium) — Uber, Airbnb — transpose + reverse
+- [x] 54. Spiral Matrix (Medium) — Uber, Airbnb — boundary shrinking
 
 ### Binary Search
 
-- [ ] 33. Search in Rotated Sorted Array (Medium) — Uber, Airbnb, Nvidia
-- [ ] 528. Random Pick with Weight (Medium) — Uber, Airbnb — prefix sum + binary search
-- [ ] 4. Median of Two Sorted Arrays (Hard) — Uber, Nvidia
+- [x] 33. Search in Rotated Sorted Array (Medium) — Uber, Airbnb, Nvidia
+- [x] 528. Random Pick with Weight (Medium) — Uber, Airbnb — prefix sum + binary search
+- [x] 4. Median of Two Sorted Arrays (Hard) — Uber, Nvidia
 
 ### Backtracking
 
-- [ ] 46. Permutations (Medium) — Uber, Airbnb — backtracking fundamental
-- [ ] 79. Word Search (Medium) — Uber, Airbnb
-- [ ] 51. N-Queens (Hard) — Uber, Nvidia
-- [ ] 17. Letter Combinations of a Phone Number (Medium) — Uber, Airbnb
+- [x] 46. Permutations (Medium) — Uber, Airbnb — backtracking fundamental
+- [x] 79. Word Search (Medium) — Uber, Airbnb
+- [x] 51. N-Queens (Hard) — Uber, Nvidia
+- [x] 17. Letter Combinations of a Phone Number (Medium) — Uber, Airbnb
 
 ### Bit Manipulation
 
-- [ ] 191. Number of 1 Bits (Easy) — Uber, Nvidia — Hamming weight, n & (n-1) trick
-- [ ] 338. Counting Bits (Easy) — Uber — DP on bits
+- [x] 191. Number of 1 Bits (Easy) — Uber, Nvidia — Hamming weight, n & (n-1) trick
+- [x] 338. Counting Bits (Easy) — Uber — DP on bits
 
 ### Concurrency (relevant for backend/platform roles)
 
-- [ ] 1188. Design Bounded Blocking Queue (Medium) — Uber, Netflix (Premium)
-- [ ] 1117. Building H2O (Medium) — Uber (Premium)
+- [x] 1188. Design Bounded Blocking Queue (Medium) — Uber, Netflix (Premium)
+- [x] 1117. Building H2O (Medium) — Uber (Premium)
 
 **Week 4 total: 26 problems**
 
@@ -281,85 +281,130 @@ One-trick patterns — know the technique and you can solve them instantly. No d
 Timed mock exams to review all patterns after completing the study plan.
 **Rules**: 25 min per Medium, 35 min per Hard. No notes. Write solution from scratch. Explain out loud as you code.
 
-### Exam 1 — Foundations (Hash Map, Sliding Window, Prefix Sum, Two Pointers)
+### Day 1
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 76. Minimum Window Substring | Variable sliding window + frequency | 35 min |
-| 2 | 560. Subarray Sum Equals K | Prefix sum + HashMap | 25 min |
-| 3 | 146. LRU Cache | Design: HashMap + doubly linked list | 25 min |
-| 4 | 42. Trapping Rain Water | Two pointers / monotonic stack | 35 min |
-| 5 | 862. Shortest Subarray with Sum at Least K | Monotonic deque + prefix sum | 35 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 76. Minimum Window Substring | 35 min |
+| 2 | 721. Accounts Merge | 25 min |
+| 3 | 295. Find Median from Data Stream | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
 
-### Exam 2 — Graphs (BFS/DFS, Topo Sort, Union Find)
+### Day 2
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 127. Word Ladder | BFS shortest path + neighbor generation | 35 min |
-| 2 | 269. Alien Dictionary | Build graph + topological sort (Kahn's) | 35 min |
-| 3 | 721. Accounts Merge | Union-Find (string keys, merge groups) | 25 min |
-| 4 | 994. Rotting Oranges | Multi-source BFS | 25 min |
-| 5 | 399. Evaluate Division | Weighted graph BFS or weighted Union-Find | 25 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 269. Alien Dictionary | 35 min |
+| 2 | 146. LRU Cache | 25 min |
+| 3 | 416. Partition Equal Subset Sum | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
 
-### Exam 3 — DP + Intervals + Greedy
+### Day 3
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 139. Word Break | 1D DP | 25 min |
-| 2 | 72. Edit Distance | 2D DP (string comparison) | 25 min |
-| 3 | 416. Partition Equal Subset Sum | Knapsack DP | 25 min |
-| 4 | 56. Merge Intervals | Sort + merge | 25 min |
-| 5 | 1235. Maximum Profit in Job Scheduling | DP + binary search | 35 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 84. Largest Rectangle in Histogram | 35 min |
+| 2 | 399. Evaluate Division | 25 min |
+| 3 | 33. Search in Rotated Sorted Array | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
 
-### Exam 4 — Heaps, Stacks, Binary Search, Backtracking
+### Day 4
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 295. Find Median from Data Stream | Two heaps | 25 min |
-| 2 | 84. Largest Rectangle in Histogram | Monotonic stack | 35 min |
-| 3 | 33. Search in Rotated Sorted Array | Modified binary search | 25 min |
-| 4 | 23. Merge k Sorted Lists | Heap merge | 35 min |
-| 5 | 51. N-Queens | Backtracking + constraint pruning | 35 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 72. Edit Distance | 25 min |
+| 2 | 25. Reverse Nodes in k-Group | 35 min |
+| 3 | 994. Rotting Oranges | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
 
-### Exam 5 — Design + Trees + Mixed
+### Day 5
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 208. Implement Trie | Trie | 25 min |
-| 2 | 236. Lowest Common Ancestor | Tree recursion (return value as signal) | 25 min |
-| 3 | 895. Maximum Frequency Stack | HashMap + stack per frequency | 25 min |
-| 4 | 300. Longest Increasing Subsequence | 1D DP + binary search optimization | 25 min |
-| 5 | 253. Meeting Rooms II | Sweep line / heap | 25 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 1235. Maximum Profit in Job Scheduling | 35 min |
+| 2 | 208. Implement Trie | 25 min |
+| 3 | 142. Linked List Cycle II | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
 
-### Exam 6 — Linked List + Stack Parsing + Matrix + Bits
+### Day 6
 
-| # | Problem | Pattern | Time |
-|---|---------|---------|------|
-| 1 | 25. Reverse Nodes in k-Group | Linked list reversal in chunks | 35 min |
-| 2 | 224. Basic Calculator | Stack-based expression parsing | 35 min |
-| 3 | 54. Spiral Matrix | Boundary shrinking traversal | 25 min |
-| 4 | 142. Linked List Cycle II | Floyd's cycle detection | 25 min |
-| 5 | 152. Maximum Product Subarray | DP — track min/max | 25 min |
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 127. Word Ladder | 35 min |
+| 2 | 56. Merge Intervals | 25 min |
+| 3 | 895. Maximum Frequency Stack | 25 min |
 
-- [ ] Completed — Score: ___/5
+- [ ] Completed — Score: ___/3
+
+### Day 7
+
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 42. Trapping Rain Water | 35 min |
+| 2 | 139. Word Break | 25 min |
+| 3 | 23. Merge k Sorted Lists | 35 min |
+
+- [ ] Completed — Score: ___/3
+
+### Day 8
+
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 224. Basic Calculator | 35 min |
+| 2 | 253. Meeting Rooms II | 25 min |
+| 3 | 300. Longest Increasing Subsequence | 25 min |
+
+- [ ] Completed — Score: ___/3
+
+### Day 9
+
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 51. N-Queens | 35 min |
+| 2 | 152. Maximum Product Subarray | 25 min |
+| 3 | 236. Lowest Common Ancestor | 25 min |
+
+- [ ] Completed — Score: ___/3
+
+### Day 10
+
+| # | Problem | Time |
+|---|---------|------|
+| 1 | 4. Median of Two Sorted Arrays | 35 min |
+| 2 | 862. Shortest Subarray with Sum at Least K | 35 min |
+| 3 | 54. Spiral Matrix | 25 min |
+
+- [ ] Completed — Score: ___/3
 
 ### Exam Scoring Guide
 
 | Score | Action |
 |-------|--------|
-| 5/5 | Move on — these patterns are solid |
-| 3-4/5 | Re-study missed patterns, retry those problems in 2 days |
-| 0-2/5 | Review the cheat sheet section, redo the original problems first |
+| 3/3 | Solid — move on |
+| 2/3 | Re-study the missed pattern, retry in 2 days |
+| 0-1/3 | Review cheat sheet sections, redo original problems first |
+
+### Answer Key (don't peek until done!)
+
+<details>
+
+**Day 1**: Sliding window → Union-Find → Two heaps
+**Day 2**: Topological sort → Design (HashMap + DLL) → Knapsack DP
+**Day 3**: Monotonic stack → Weighted graph BFS → Binary search
+**Day 4**: 2D DP → Linked list reversal → Multi-source BFS
+**Day 5**: DP + binary search → Trie → Floyd's cycle detection
+**Day 6**: BFS shortest path → Sort + merge intervals → HashMap + stack per frequency
+**Day 7**: Two pointers → 1D DP → Heap merge
+**Day 8**: Stack-based parsing → Sweep line / heap → 1D DP + binary search opt
+**Day 9**: Backtracking → DP (track min/max) → Tree recursion
+**Day 10**: Binary search on two arrays → Monotonic deque + prefix sum → Matrix boundary
+
+</details>
 
 ---
 

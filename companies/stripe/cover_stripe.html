@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yifei Sun — Cover Letter — Stripe</title>
+<style>
+  :root {
+    --accent: #1a365d;
+    --accent-light: #2c5282;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --text-light: #718096;
+    --page-bg: #ffffff;
+  }
+  @page { size: letter; margin: 0.75in 0.85in; }
+  @media print {
+    body { margin: 0; padding: 0; }
+    a { color: var(--accent-light) !important; text-decoration: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--page-bg);
+    max-width: 7in;
+    margin: 0 auto;
+    padding: 0.75in 0;
+  }
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 28px;
+  }
+  .header-left h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .header-left .tagline {
+    font-size: 9pt;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .header-right a {
+    color: var(--accent-light);
+    text-decoration: none;
+  }
+  .date {
+    font-size: 10pt;
+    color: var(--text-light);
+    margin-bottom: 20px;
+  }
+  .recipient {
+    font-size: 10.5pt;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .body p {
+    margin-bottom: 14px;
+    text-align: justify;
+  }
+  .closing {
+    margin-top: 28px;
+  }
+  .closing .sign {
+    margin-top: 6px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Yifei Sun</h1>
+    <div class="tagline">Principal Software Engineer · Backend &amp; Platform Architecture · 13 Years</div>
+  </div>
+  <div class="header-right">
+    (617) 922-4823<br>
+    sun1fei@gmail.com<br>
+    <a href="https://www.linkedin.com/in/yifei-sun-a789861b">linkedin.com/in/yifei-sun-a789861b</a>
+  </div>
+</div>
+
+<div class="date">March 25, 2026</div>
+
+<div class="recipient">
+  Stripe Hiring Team<br>
+  Staff Engineer, Workflow Engine — Service Platform
+</div>
+
+<div class="body">
+  <p>Dear Stripe Hiring Team,</p>
+
+  <p>I'm writing to express my interest in the Staff Engineer, Workflow Engine role on Stripe's Service Platform team. I'm a Principal Software Engineer at CarGurus with 13 years of experience building distributed orchestration systems, high-traffic APIs, and cross-org platform architecture — and orchestration infrastructure is exactly the problem space where I do my strongest work.</p>
+
+  <p>My most directly relevant experience: I led the modernization of CarGurus' highest-traffic API (~8,000 rpm, millions of daily impressions), designing an orchestration service and GraphQL boundary that consolidated 12 downstream integrations into 5 well-defined services. This reduced p99 latency from 250 ms to 50 ms, improved availability from 98% to 99.9%, and cut deploy time from 1 hour to 3 minutes. I coordinated with 10 teams across 3 departments, and the architectural patterns we established became the organizational standard for new services.</p>
+
+  <p>I've also recently built a ChatGPT MCP server from scratch (0→1 proof-of-concept under ambiguity) and integrated a Netflix DGS subgraph into a federated GraphQL gateway with schema federation, batch data loaders, and JVM warmup strategies. In an independent project, I architected a hybrid rules + GenAI decision engine with a configurable policy framework and experimentation platform.</p>
+
+  <p>I'm drawn to Stripe because building reliable, scalable workflow infrastructure that other teams depend on for financial transactions is exactly the kind of high-leverage platform work I find most rewarding. I'd welcome the opportunity to discuss how my experience aligns with the team's goals.</p>
+
+  <div class="closing">
+    Sincerely,
+    <div class="sign">Yifei Sun</div>
+  </div>
+</div>
+
+</body>
+</html>

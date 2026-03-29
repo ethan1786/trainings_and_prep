@@ -99,16 +99,215 @@ Always quantify. Don't say "high availability" — say "99.99% uptime."
 
 ### Back-of-Envelope Estimation
 
-Always do this. Show you can reason about scale.
+Always do this. Show you can reason about scale. The goal isn't precision — it's to demonstrate you can identify bottlenecks, pick the right storage/compute, and justify design decisions with numbers.
+
+#### The One Magic Number: 86,400
+
+**1 day = 86,400 seconds ≈ 100K seconds.** This is the only number you need to memorize for QPS conversion.
 
 ```
-Example: Twitter-like feed
-- 500M users, 200M DAU
-- Avg user: 2 reads/min during active hours → 400M reads/min → ~7M QPS reads
-- Avg user: 1 tweet/day → 200M writes/day → ~2.3K QPS writes
-- Read-heavy: 3000:1 read/write ratio
-- Each tweet: ~300 bytes text + metadata → 200M × 300B = 60GB/day new data
+Daily events → QPS:  divide by 100K (86,400 rounded up)
+QPS → Daily events:  multiply by 100K
+
+Example: 1M requests/day ÷ 100K = 10 QPS
+Example: 500 QPS × 100K = 50M requests/day
 ```
+
+For **peak QPS**: multiply average by 2–5× (2× for steady traffic, 5× for bursty/event-driven).
+
+#### Powers of 2 You Must Know
+
+| Power | Exact | Approx | Name |
+|---|---|---|---|
+| 2^10 | 1,024 | ~1 Thousand | 1 KB |
+| 2^20 | 1,048,576 | ~1 Million | 1 MB |
+| 2^30 | 1,073,741,824 | ~1 Billion | 1 GB |
+| 2^40 | | ~1 Trillion | 1 TB |
+
+**Shortcut**: Every 10 powers of 2 ≈ 3 powers of 10. So 2^30 ≈ 10^9 (1 billion).
+
+#### Common Data Sizes to Memorize
+
+| Data | Size |
+|---|---|
+| **1 ASCII character** | 1 byte |
+| **UUID / ULID** | 36 bytes (string) or 16 bytes (binary) |
+| **A tweet / short text message** | ~200-500 bytes (text + metadata) |
+| **A database row** (typical) | ~500 bytes – 2 KB |
+| **A JSON API response** | 1–10 KB |
+| **A profile photo / thumbnail** | 50–200 KB |
+| **A high-res image** | 2–5 MB |
+| **A 1-minute video (compressed)** | 5–10 MB (720p), 20–50 MB (1080p) |
+| **1 hour of video** (1080p) | ~1.5–3 GB |
+
+#### Latency Numbers to Know
+
+| Operation | Latency |
+|---|---|
+| L1 cache reference | ~1 ns |
+| L2 cache reference | ~4 ns |
+| RAM access | ~100 ns |
+| SSD random read | ~100 μs |
+| HDD seek | ~10 ms |
+| Network round trip (same datacenter) | ~500 μs |
+| Network round trip (cross-continent) | ~150 ms |
+| Read 1 MB sequentially from SSD | ~1 ms |
+| Read 1 MB sequentially from network | ~10 ms |
+| Redis GET (network + lookup) | ~0.5–1 ms |
+| Simple DB query (indexed) | ~1–5 ms |
+| Complex DB query (join/scan) | ~10–100 ms |
+
+**Key takeaway**: Memory is 1000× faster than SSD. SSD is 100× faster than HDD. Network within a datacenter is ~500μs. Cross-region is ~150ms. This is why caching matters.
+
+#### Throughput Numbers to Know
+
+| System | Throughput |
+|---|---|
+| **MySQL / Postgres** (single node) | ~1K–5K QPS (writes), ~10K–50K QPS (reads, indexed) |
+| **Redis** (single node) | ~100K–500K QPS |
+| **Kafka** (single broker) | ~100K–500K messages/sec |
+| **Nginx / API Gateway** | ~50K–100K req/sec (per instance) |
+| **Single web server** (Node/Go/Java) | ~5K–50K req/sec (depends on work per request) |
+
+#### The 4-Step Estimation Framework
+
+Use this every time. Say it out loud in the interview:
+
+**Step 1: Start with users**
+```
+"Let's say we have 100M DAU..."
+```
+
+**Step 2: Estimate actions per user**
+```
+"Each user does ~10 reads/day and ~1 write/day..."
+→ Reads: 100M × 10 = 1B reads/day → 1B ÷ 100K = 10K QPS reads
+→ Writes: 100M × 1 = 100M writes/day → 100M ÷ 100K = 1K QPS writes
+→ Read:Write ratio = 10:1 (read-heavy → cache aggressively)
+```
+
+**Step 3: Estimate storage**
+```
+"Each record is ~1KB..."
+→ New data per day: 100M writes × 1KB = 100GB/day
+→ Per year: 100GB × 365 = ~36TB/year
+→ With replication (3×): ~110TB/year
+```
+
+**Step 4: Identify the bottleneck & state the implication**
+```
+"10K QPS reads is well within a single Redis instance (100K+ QPS).
+ 1K QPS writes is fine for a single Postgres with connection pooling.
+ The bottleneck is storage growth at 36TB/year — we'll need sharding within 2 years."
+```
+
+> **This is the staff+ move**: Don't just compute numbers. State what the numbers *mean* for your design. "This is read-heavy, so I'll add a cache layer." "This write volume exceeds single-node Postgres, so I'll shard."
+
+#### Worked Examples
+
+**Example 1: URL Shortener**
+```
+Given: 100M new URLs/day, 10:1 read:write ratio
+
+Writes: 100M/day ÷ 100K = 1K QPS (low, single DB is fine)
+Reads:  1B/day ÷ 100K = 10K QPS (moderate, cache hot URLs in Redis)
+Peak:   10K × 3 = 30K QPS reads (Redis handles this easily)
+
+Storage per URL: short_url (7B) + long_url (200B) + metadata (100B) ≈ 300B
+Daily: 100M × 300B = 30GB/day
+Yearly: ~11TB/year
+5 years: ~55TB → will need sharding or archival
+
+Implication: Read-heavy → Redis cache for hot URLs. Storage is manageable for years.
+             Single DB for writes. The design challenge is hash collisions, not scale.
+```
+
+**Example 2: Chat System (WhatsApp)**
+```
+Given: 50M DAU, 40 messages/user/day
+
+Messages: 50M × 40 = 2B messages/day ÷ 100K = 20K QPS (moderate)
+Peak:     20K × 5 = 100K QPS (need distributed message queue)
+
+Storage per message: text (200B) + metadata (100B) = 300B
+Daily: 2B × 300B = 600GB/day
+Yearly: ~220TB/year → Cassandra/HBase (wide-column, good for time-series chat data)
+
+Concurrent WebSocket connections: 50M DAU, ~30% online at any time = 15M connections
+Each WS connection: ~10KB memory → 15M × 10KB = 150GB RAM for connections alone
+→ Need ~150 WebSocket servers (1GB RAM each for connections, leaving room for app logic)
+
+Implication: The bottleneck is concurrent connections, not message QPS.
+             Need stateful WebSocket servers + service discovery (user → server mapping).
+```
+
+**Example 3: Video Platform (YouTube)**
+```
+Given: 5M DAU, 10% upload daily, avg video 300MB
+
+Uploads: 5M × 10% = 500K videos/day
+Storage: 500K × 300MB = 150TB/day raw
+With 3 resolutions (360p, 720p, 1080p): 150TB × 3 = 450TB/day transcoded
+Yearly: 450TB × 365 = ~164PB/year (massive — object storage like S3)
+
+Streaming: 5M users × 5 videos/day × 300MB avg = 7.5PB/day bandwidth
+CDN cost: 7.5PB × $0.02/GB = $150K/day = $55M/year
+
+Implication: Storage and CDN cost are the dominant concerns, not QPS.
+             CDN optimization (cache popular videos at edge) is critical.
+             Transcode only popular resolutions eagerly; rare ones on-demand.
+```
+
+**Example 4: Ride-Sharing (Uber)**
+```
+Given: 5M active drivers, GPS update every 4 seconds
+
+Location writes: 5M ÷ 4 = 1.25M writes/sec (very high write throughput!)
+→ Single DB can't handle this → need Redis/in-memory geospatial index
+→ Partition by city (100 cities → ~12.5K writes/sec per city partition — manageable)
+
+Ride requests: 20M rides/day ÷ 100K = 200 QPS (low — not the bottleneck)
+
+Storage per location update: (driver_id, lat, lng, timestamp) ≈ 50B
+Daily: 1.25M/sec × 86,400 × 50B = ~5.4TB/day (only need latest, not historical)
+→ Use Redis with TTL (overwrite previous location). No need to persist all updates.
+
+Implication: The bottleneck is location write throughput (1.25M/sec).
+             Use in-memory store (Redis geospatial) partitioned by city.
+             Ride matching QPS is low — the hard part is the geospatial query, not scale.
+```
+
+#### Quick Conversion Cheat Sheet
+
+| From | To | Formula |
+|---|---|---|
+| X per day → QPS | | X ÷ 100K |
+| QPS → per day | | QPS × 100K |
+| MB/sec → TB/day | | MB/sec × 86.4 ÷ 1000 |
+| N users × B bytes | | N × B (use powers of 10, simplify) |
+| Replication factor | | Multiply storage by 3 (standard) |
+| 5-year retention | | Multiply yearly by 5, ask about archival |
+| Single DB limit | | ~5K writes/sec, ~50K reads/sec |
+| Single Redis limit | | ~100K–500K ops/sec |
+| Single Kafka broker | | ~100K msgs/sec |
+
+#### Common Mistakes to Avoid
+
+1. **Don't over-precision**: Say "~10K QPS" not "9,723 QPS". Round aggressively.
+2. **Don't forget peak**: Average QPS ≠ peak. Always multiply by 2-5× for peak load.
+3. **Don't forget replication**: Storage × 3 for replicas (standard).
+4. **Don't forget growth**: "At current growth, we'll hit X in Y months — that's when we need to shard."
+5. **Don't compute without concluding**: Every number should lead to a design decision. If it doesn't, you wasted time.
+
+#### Practice Drill
+
+Pick any problem from the Common System Design Problems section and do this in 2 minutes:
+1. Estimate QPS (reads + writes separately)
+2. Estimate storage (daily, yearly, 5-year)
+3. Estimate bandwidth (if media involved)
+4. State the bottleneck and what it means for your design
+
+Do this for 5 different problems and the pattern becomes automatic.
 
 ### Staff+ Move: Identify the Hard Problem
 After scoping, explicitly state: "The hardest part of this system is ___. I want to spend most of our time there." This shows you can cut through noise.
@@ -848,41 +1047,961 @@ Mention these proactively — staff+ candidates think about security without bei
 
 ### Tier 1: Must-Know (Very Commonly Asked)
 
-| Problem | Key Challenges | Core Components |
-|---|---|---|
-| **URL Shortener** | Hash collisions, redirect latency, analytics | Hash/counter, KV store, cache, 301 vs 302 |
-| **News Feed / Timeline** | Fan-out (push vs pull), ranking, real-time updates | Kafka, cache, social graph, ranking service |
-| **Chat / Messaging** | Real-time delivery, ordering, presence, group chat | WebSocket, message queue, per-conversation store |
-| **Rate Limiter** | Distributed counting, accuracy, multi-tier | Redis, sliding window, API gateway |
-| **Notification System** | Multi-channel, priority, dedup, user preferences | Queue per channel, template service, preference store |
+---
+
+#### 1.1 URL Shortener (TinyURL)
+
+**How the interviewer asks it:**
+> "Design a URL shortening service like TinyURL or bit.ly."
+
+**Standard info/constraints typically given:**
+- 100M URLs created per day, 10:1 read-to-write ratio → ~1B redirects/day (~12K QPS, 24K peak)
+- Shortened URLs should be as short as possible
+- URLs can be custom or auto-generated
+- URLs expire after a configurable time (optional)
+
+**Clarifying questions you should ask:**
+- What's the expected length of the shortened URL? (7 chars with base62 gives 3.5 trillion combinations)
+- Do we need analytics (click counts, referrer, geo)?
+- Do URLs expire, or are they permanent?
+- Do we need custom aliases (e.g., `tiny.url/my-brand`)?
+- What's the read-to-write ratio? (Usually heavily read-biased)
+
+**Key challenges:** Hash collisions, redirect latency, 301 vs 302 redirect, analytics pipeline
+
+**Core components:** Hash/counter ID generator, KV store (DynamoDB/Cassandra), Redis cache for hot URLs, analytics event stream
+
+**Quick architecture:**
+```
+Write: Long URL → ID Generator (base62 encode counter or hash) → Store in DB → Return short URL
+Read:  Short URL → Cache lookup → DB fallback → 301/302 redirect to long URL
+```
+
+**Staff+ talking points:**
+- 301 (permanent) vs 302 (temporary) redirect: 301 is better for SEO and reduces load (browsers cache), but you lose analytics. 302 lets you track every click.
+- Hash vs counter: Hashing (MD5/SHA → base62 first 7 chars) is simple but has collisions. Counter (auto-increment or Snowflake → base62) guarantees uniqueness.
+- Rate limiting on creation to prevent abuse.
+
+---
+
+#### 1.2 News Feed / Timeline
+
+**How the interviewer asks it:**
+> "Design the news feed for Facebook/Instagram/Twitter — when a user opens the app, they see recent posts from people they follow."
+
+**Standard info/constraints typically given:**
+- 300M DAU, each user follows ~500 people on average
+- Feed should show posts from friends/followed accounts, ranked by relevance
+- Near-real-time (new posts appear within seconds)
+- Support text, images, video
+
+**Clarifying questions you should ask:**
+- Is this a social feed (friends) or a follow-based feed (asymmetric, like Twitter)?
+- How is the feed ranked — chronological or algorithmic?
+- What's the celebrity/influencer distribution? (Matters for fan-out strategy)
+- Do we need real-time push updates, or is pull-on-refresh OK?
+- What content types do we support? (Text-only is simpler; media adds CDN layer)
+- Do we need support for ads/sponsored content injection?
+
+**Key challenges:** Fan-out (push vs pull), celebrity problem, ranking, real-time updates, cache invalidation
+
+**Core components:** Social graph service, post storage, Kafka event bus, feed cache (Redis), ranking service, CDN for media
+
+**Quick architecture:**
+```
+Post creation: User posts → Write to Posts DB → Fan-out service → Push to followers' feed caches
+Feed read:     User opens app → Fetch pre-built feed from cache → Merge with pull-based celebrity posts → Rank → Return
+```
+
+**Staff+ talking points:**
+- Hybrid fan-out: Push for normal users (<10K followers), pull for celebrities. This is what real systems do.
+- Feed cache in Redis: pre-built per user, list of post IDs (not full posts). Hydrate at read time.
+- Ranking happens at read time, not write time (allows real-time re-ranking with fresh signals).
+
+---
+
+#### 1.3 Chat / Messaging System
+
+**How the interviewer asks it:**
+> "Design a chat system like WhatsApp, Facebook Messenger, or Slack."
+
+**Standard info/constraints typically given:**
+- 50M DAU, each user sends ~40 messages/day
+- Support 1:1 and group chat (up to 500 members)
+- Messages delivered in order, at-least-once
+- Online/offline presence indicator
+- Message history (persistent storage)
+
+**Clarifying questions you should ask:**
+- 1:1 only, or group chat too? What's the max group size?
+- Do we need end-to-end encryption? (Changes architecture significantly)
+- Do we need read receipts and typing indicators?
+- Do we need presence (online/offline/last seen)?
+- What about media (images, files, voice messages)?
+- Is this mobile-first or web-first? (Affects connection management)
+- Do we need message search?
+
+**Key challenges:** Real-time delivery (WebSocket), message ordering, presence at scale, group chat fan-out, offline message queue
+
+**Core components:** WebSocket servers (stateful), chat service, presence service, message queue, per-conversation message store (Cassandra), push notification for offline users
+
+**Quick architecture:**
+```
+Send:    User A → WebSocket → Chat Service → Message Queue → Store in DB
+                                           → Route to User B's WebSocket server → Deliver
+Offline: User B reconnects → Fetch undelivered messages from DB → Push via WebSocket
+```
+
+**Staff+ talking points:**
+- WebSocket servers are stateful — need a service discovery layer (Redis/ZooKeeper) mapping user → server.
+- Message ordering: use per-conversation sequential IDs (not global). Snowflake IDs with conversation-level sequence.
+- Presence is expensive at scale. Heartbeat-based (every 5s) + subscribe only to friends' presence. Fan-out on status change is the bottleneck.
+- Group chat: small groups (<100) fan-out on write. Large groups/channels: fan-out on read.
+
+---
+
+#### 1.4 Rate Limiter
+
+**How the interviewer asks it:**
+> "Design a rate limiter for an API gateway that limits requests per user/IP."
+
+**Standard info/constraints typically given:**
+- Configurable rate limits (e.g., 100 req/min per user, 1000 req/min per IP)
+- Distributed system (multiple API gateway instances)
+- Low latency — rate limiting check must be <1ms
+- Accurate counting (minimal over/under-counting)
+
+**Clarifying questions you should ask:**
+- Where does the rate limiter sit — client-side, server-side, or middleware/gateway?
+- What's the rate limiting key — user ID, IP, API key, or combination?
+- Do we need different limits per endpoint (e.g., search=100/min, write=10/min)?
+- Hard limit (reject immediately) or soft limit (queue/throttle)?
+- Do we need rate limiting across multiple data centers?
+- What response should rate-limited requests get? (HTTP 429 + Retry-After header)
+
+**Key challenges:** Distributed counting with accuracy, race conditions, multi-tier limits, latency overhead
+
+**Core components:** Redis (centralized counter), Lua scripts (atomic operations), API gateway plugin, rate limit rules config
+
+**Quick architecture:**
+```
+Request → API Gateway → Rate Limiter Middleware → Check Redis counter
+  → Under limit: increment counter, forward request
+  → Over limit: return 429 Too Many Requests + Retry-After header
+```
+
+**Staff+ talking points:**
+- Algorithm choice: Token bucket (allows bursts, simple), sliding window log (precise but memory-heavy), sliding window counter (good balance — hybrid of fixed window + weight).
+- Redis + Lua script for atomic check-and-increment (avoids race conditions).
+- Multi-tier: per-user + per-IP + global. Check all tiers; reject if any is exceeded.
+- Distributed: each gateway instance talks to shared Redis. Accept slight over-counting for lower latency (eventual consistency).
+
+---
+
+#### 1.5 Notification System
+
+**How the interviewer asks it:**
+> "Design a notification system that sends push notifications, SMS, and emails to millions of users."
+
+**Standard info/constraints typically given:**
+- 100M+ users, 10M+ notifications/day across channels
+- Channels: push notification (iOS/Android), SMS, email
+- Users have notification preferences (opt-in/out per channel per notification type)
+- Priority levels (urgent vs. marketing)
+- Must handle deduplication (don't send same notification twice)
+
+**Clarifying questions you should ask:**
+- Which channels — push, SMS, email, in-app, or all of the above?
+- Do users configure per-channel preferences? Per notification type?
+- Do we need notification grouping/batching (e.g., "3 people liked your photo")?
+- What are the latency requirements? (Transactional: <30s. Marketing: minutes OK.)
+- Do we need delivery confirmation/tracking (open rates, click-through)?
+- How do we handle rate limiting per user (avoid notification fatigue)?
+- Do we need template support for different locales?
+
+**Key challenges:** Multi-channel routing, user preferences, deduplication, delivery guarantees, rate limiting per user, template management
+
+**Core components:** Notification service, queue per channel (Kafka), preference store, template engine, per-channel workers (APNS, FCM, Twilio, SendGrid), delivery log for dedup
+
+**Quick architecture:**
+```
+Event (order shipped, friend request, etc.)
+  → Notification Service: fetch user preferences, apply rules, build payload
+  → Route to per-channel queues (push_queue, sms_queue, email_queue)
+  → Channel workers: consume, format via template, send via provider API
+  → Log delivery status (for dedup, analytics, retry)
+```
+
+**Staff+ talking points:**
+- Queue per channel, not per notification type — each channel has different throughput, retry, and cost characteristics.
+- Dedup: check notification log (user_id + event_id + channel) before sending. Idempotent delivery.
+- Priority: separate high-priority queue (transactional) from low-priority (marketing). Different SLOs.
+- Retry with exponential backoff per channel. Dead letter queue for permanently failed notifications.
 
 ### Tier 2: Frequently Asked
 
-| Problem | Key Challenges | Core Components |
-|---|---|---|
-| **Design Twitter** | Feed generation, celebrity problem, search | Fan-out on write (small) + fan-out on read (celebrities), Elasticsearch |
-| **Design YouTube / Netflix** | Video upload pipeline, adaptive streaming, recommendations | Object storage, CDN, transcoding pipeline, ML ranking |
-| **Design Uber / Ride Sharing** | Location matching, ETA, surge pricing, dispatch | Geospatial index, matching service, pricing engine |
-| **Design Dropbox / Google Drive** | File sync, conflict resolution, chunked upload | Block storage, metadata DB, sync protocol, CDC |
-| **Design Web Crawler** | Politeness, dedup, scale, priority | URL frontier (queue), DNS cache, bloom filter, robots.txt |
+---
+
+#### 2.1 Design Twitter
+
+**How the interviewer asks it:**
+> "Design Twitter — users can tweet, follow others, and see a timeline of tweets from people they follow."
+
+**Standard info/constraints typically given:**
+- 300M MAU, 150M DAU
+- 500M tweets/day, each user follows ~200 accounts on average
+- Average user reads feed 5× per day
+- Celebrity accounts (10M+ followers) exist
+- Support text + media (images, short video)
+
+**Clarifying questions you should ask:**
+- Are we designing the tweet posting, the feed/timeline, search, or all three?
+- What's the celebrity distribution — how many users have 1M+ followers?
+- Is the feed chronological or algorithmically ranked?
+- Do we need trending topics / hashtag search?
+- Do we need real-time push (new tweets appear without refresh)?
+- Direct messages in scope?
+
+**Key challenges:** Feed generation at scale, celebrity problem (fan-out explosion), search/trending, hybrid push/pull
+
+**Core components:** Tweet storage (sharded by user ID), fan-out service, feed cache (Redis), social graph, Elasticsearch for search, CDN for media
+
+**Quick architecture:**
+```
+Tweet:    User tweets → Write to Tweets DB → Fan-out service
+            → Normal users (<10K followers): push tweet ID to all followers' feed caches
+            → Celebrities (>10K followers): skip push (too expensive)
+Feed:     User opens feed → Fetch from feed cache (pushed tweets)
+            → Merge with pull from followed celebrities' tweet lists → Rank → Return
+Search:   Tweet → async index to Elasticsearch → Search API queries ES
+```
+
+**Staff+ talking points:**
+- This is essentially the same as News Feed (1.2) but with Twitter's asymmetric follow model and the celebrity problem being the central design tension.
+- Trending: streaming pipeline (Kafka → Flink), sliding window counts of hashtags, decay function for recency.
+- Search: inverted index on tweet text. Elasticsearch cluster sharded by time (recent tweets more searchable).
+
+---
+
+#### 2.2 Design YouTube / Netflix (Video Streaming)
+
+**How the interviewer asks it:**
+> "Design a video streaming platform like YouTube or Netflix — users upload videos, and other users can search and watch them."
+
+**Standard info/constraints typically given:**
+- 2B MAU, 5M videos uploaded/day
+- Average video: 300MB, average watch time: 5 min
+- Support multiple resolutions (240p to 4K) and devices (mobile, TV, web)
+- Global audience — CDN is essential
+- 100M DAU watching videos
+
+**Clarifying questions you should ask:**
+- Are we focusing on upload pipeline, streaming/playback, or both?
+- Do we need adaptive bitrate streaming (adjust quality based on network)?
+- Do we need live streaming, or only pre-recorded?
+- Do we need recommendations? (Usually a separate system design problem)
+- What about comments, likes, view counts? In scope?
+- Copyright detection / content moderation?
+
+**Key challenges:** Video upload & transcoding pipeline, adaptive streaming, CDN cost optimization, content moderation at scale
+
+**Core components:** Object storage (S3) for originals, transcoding pipeline (DAG), CDN for delivery, metadata DB, streaming protocol (HLS/DASH)
+
+**Quick architecture:**
+```
+Upload:   User uploads → Object Storage (original) → Transcoding DAG pipeline
+            → Split video → Transcode to N resolutions → Generate thumbnails → Write manifests
+            → Push transcoded files to CDN origin
+Watch:    User plays → CDN edge serves HLS/DASH manifest → Client requests segments at adaptive bitrate
+            → CDN edge cache hit → serve. Miss → pull from origin → cache → serve.
+```
+
+**Staff+ talking points:**
+- Transcoding pipeline as a DAG (not linear): split, transcode, thumbnail, watermark can run in parallel stages.
+- Adaptive bitrate: client monitors bandwidth and switches between quality levels mid-stream (HLS manifest has all quality URLs).
+- CDN cost: 90% of views are on popular content. Long-tail videos can be served from origin (not worth caching on edge).
+- Pre-generate popular resolutions (360p, 720p, 1080p). Transcode rare ones (4K, 240p) on demand.
+
+---
+
+#### 2.3 Design Uber / Ride Sharing
+
+**How the interviewer asks it:**
+> "Design a ride-sharing service like Uber or Lyft — riders request a ride, the system matches them with nearby drivers."
+
+**Standard info/constraints typically given:**
+- 20M rides/day, 5M active drivers
+- Riders and drivers in the same city should match within seconds
+- Driver locations update every 3-4 seconds (GPS)
+- Need ETA calculation, surge pricing, trip tracking
+
+**Clarifying questions you should ask:**
+- Are we focusing on matching, trip lifecycle, or the full system?
+- How are drivers matched — nearest, ETA-based, or rated-based?
+- Do we need surge pricing / dynamic pricing?
+- What about ride scheduling (future rides)?
+- Do we need ride pooling (shared rides with multiple riders)?
+- Real-time trip tracking for the rider?
+
+**Key challenges:** Real-time location matching at scale, driver location updates (high-frequency writes), ETA computation, surge pricing, dispatch efficiency
+
+**Core components:** Driver location service (geospatial index), matching/dispatch service, trip service, pricing engine, ETA service, push notifications
+
+**Quick architecture:**
+```
+Driver:   Driver app sends GPS every 4s → Location Service → Update geospatial index (geohash in Redis)
+Rider:    Request ride → Matching Service → Query nearby drivers from Location Service
+            → Rank by ETA/rating → Offer to best driver → Driver accepts → Create Trip
+Trip:     Trip Service tracks state (requested → matched → en-route → in-progress → completed)
+            → Real-time location streaming to rider via WebSocket
+Pricing:  Pricing Engine: base fare + distance + time + surge multiplier (demand/supply ratio per geohash zone)
+```
+
+**Staff+ talking points:**
+- Driver location: geohash in Redis with TTL. High-frequency writes (millions of GPS updates/sec). Partition by city.
+- Matching: don't just find nearest — use ETA (accounts for traffic, road network). Google Maps / OSRM for routing.
+- Surge pricing: compute demand/supply ratio per geohash zone every 1-2 min. Price multiplier = f(ratio).
+- Dispatch optimization: not just nearest driver — consider driver heading direction, time-to-pickup vs. time-to-dropoff.
+
+---
+
+#### 2.4 Design Dropbox / Google Drive (File Storage & Sync)
+
+**How the interviewer asks it:**
+> "Design a cloud file storage and sync service like Dropbox or Google Drive."
+
+**Standard info/constraints typically given:**
+- 500M users, 100M DAU
+- Average user has 200 files, average file 500KB (some up to 10GB)
+- File changes should sync to all devices within seconds
+- Concurrent edits should not cause data loss
+- Support upload, download, share, version history
+
+**Clarifying questions you should ask:**
+- Are we focusing on sync, storage, sharing, or collaboration?
+- Do we need conflict resolution for simultaneous edits?
+- Do we need version history / rollback?
+- What's the max file size? (Affects chunking strategy)
+- Do we need file sharing with permissions (read-only, edit)?
+- Real-time collaboration (like Google Docs) or just file-level sync?
+- Offline support?
+
+**Key challenges:** Efficient file sync (delta sync, chunking), conflict resolution, metadata consistency, large file upload, bandwidth optimization
+
+**Core components:** Block storage (S3), metadata DB (MySQL), sync service, notification service (long-polling/WebSocket), chunking layer, dedup engine
+
+**Quick architecture:**
+```
+Upload:   Client detects file change → Split into 4MB blocks → Hash each block → Upload only new/changed blocks to Block Storage
+            → Update metadata (file → ordered list of block hashes)
+Sync:     File metadata changes → Notification Service pushes change to other devices
+            → Other devices fetch updated metadata → Download only changed blocks → Reconstruct file
+Conflict: Two devices edit same file offline → both upload → metadata service detects conflict
+            → Save both versions, prompt user to resolve
+```
+
+**Staff+ talking points:**
+- Block-level dedup: hash each block (SHA-256). If block already exists in storage, skip upload. Saves massive storage.
+- Delta sync: only upload changed blocks, not the entire file. For a 1GB file where 1 block changed, upload 4MB, not 1GB.
+- Metadata DB is the bottleneck — it tracks every file, every version, every block. Shard by user/namespace.
+- Conflict resolution: Last-writer-wins is dangerous for files. Better: save conflicting copies and let user merge.
+- Notification: long-polling for mobile (battery-friendly), WebSocket for desktop (low-latency).
+
+---
+
+#### 2.5 Design Web Crawler
+
+**How the interviewer asks it:**
+> "Design a web crawler that can crawl billions of web pages for a search engine."
+
+**Standard info/constraints typically given:**
+- Crawl 1B pages/month (~400 pages/second)
+- Respect robots.txt and politeness (don't DDoS websites)
+- Detect and skip duplicate content
+- Handle the entire internet: different domains, link depths, content types
+- Prioritize important/popular pages
+
+**Clarifying questions you should ask:**
+- What's the purpose — search engine indexing, monitoring, or data extraction?
+- Do we need to recrawl pages for freshness? How often?
+- Do we need to handle JavaScript-rendered pages (SPA)?
+- What content types — HTML only, or also images/PDFs?
+- Do we need to respect robots.txt and rate limits per domain?
+- Geographic distribution — crawl from multiple regions?
+
+**Key challenges:** Scale (billions of pages), politeness (don't overload sites), dedup (detect already-crawled URLs and duplicate content), priority (crawl important pages first), link traps (infinite loops)
+
+**Core components:** URL frontier (priority queue + politeness queue per domain), DNS resolver cache, content fetcher, HTML parser + link extractor, Bloom filter for URL dedup, content fingerprint store
+
+**Quick architecture:**
+```
+Seed URLs → URL Frontier (priority queue)
+  → Fetch: Pop URL → Check robots.txt (cached) → Rate-limit per domain → HTTP GET
+  → Parse: Extract links + content → Normalize URLs → Dedup via Bloom filter
+  → Store: Content → Object storage / index pipeline. New URLs → back to Frontier.
+  → Repeat
+```
+
+**Staff+ talking points:**
+- URL Frontier is the key data structure: two layers — (1) priority queue (PageRank, freshness) and (2) politeness queue per domain (enforce delay between requests to same host).
+- Bloom filter for URL dedup: probabilistic, memory-efficient. False positives (re-crawl a URL) are OK. False negatives (miss a URL) don't happen.
+- Content fingerprint (SimHash/MinHash) to detect near-duplicate pages (mirrors, slight variations).
+- Distributed: partition by domain hash. Each worker owns a set of domains → natural politeness isolation.
+- Link traps: limit crawl depth, detect infinite query parameter patterns (`?page=1`, `?page=2`...).
 
 ### Tier 3: Advanced / Staff+ Level
 
-| Problem | Key Challenges | Core Components |
-|---|---|---|
-| **Design Google Search** | Inverted index, PageRank, query processing at scale | Crawl → index → serve pipeline, distributed index |
-| **Design Distributed Cache** | Consistent hashing, replication, eviction, hot keys | Hash ring, replication protocol, LRU/LFU |
-| **Design Distributed Task Scheduler** | Exactly-once execution, fault tolerance, priority | DB-backed queue or Kafka, lease-based execution |
-| **Design Payment System** | Exactly-once processing, reconciliation, compliance | Idempotency, saga pattern, ledger, audit log |
-| **Design Distributed ID Generator** | Uniqueness, ordering, high throughput | Snowflake (timestamp + worker + sequence), or UUID |
-| **Design Ad Click Aggregator** | Real-time aggregation, dedup, scale | Kafka + Flink/Spark, HyperLogLog, OLAP store |
-| **Design Ticketmaster / Booking** | Seat reservation, concurrency, double-booking prevention | Optimistic locking, distributed lock, reservation expiry |
-| **Design Yelp / Proximity Search** | Geospatial queries, nearby search, ranking | Geohash / Quadtree, PostGIS, weighted ranking |
-| **Design Instagram** | Photo upload, feed, stories, explore | Object storage + CDN, fan-out, ML ranking, ephemeral storage |
-| **Design Feature Flag Service** | Flag evaluation at scale, consistent rollout, hot-reload | Local SDK cache, SSE distribution, deterministic hashing |
-| **Design Multi-Tenant SaaS Backend** | Data isolation, noisy neighbor, tier migration | Silo/pool/hybrid tenancy, RLS, tenant routing, CDC migration |
-| **Design Distributed Job Scheduler** | Exactly-once execution, DAG deps, cron at scale | Lease-based execution, priority queues, leader election |
-| **Design Fraud Detection Pipeline** | Real-time ML + rules, latency budget, feedback loops | Feature Store, rule engine, model serving, Kafka pipeline |
+---
+
+#### 3.1 Design Google Search
+
+**How the interviewer asks it:**
+> "Design a web search engine — users type a query, and the system returns the most relevant web pages ranked by quality."
+
+**Standard info/constraints typically given:**
+- Billions of indexed web pages
+- Search latency < 500ms (P99)
+- Handle 100K+ QPS
+- Results ranked by relevance and quality
+
+**Clarifying questions you should ask:**
+- Are we designing the full pipeline (crawl → index → serve) or just the query/serving layer?
+- Do we need personalized results or universal ranking?
+- Do we need to handle typos / spell correction?
+- Do we need autocomplete / "did you mean"?
+- What about ads — interleaved with organic results?
+- Multi-language support?
+
+**Key challenges:** Building and maintaining a massive inverted index, ranking (PageRank + relevance scoring), query processing at scale, freshness (re-indexing), spell correction
+
+**Core components:** Web crawler, indexing pipeline, inverted index (distributed), ranking engine (PageRank + TF-IDF/BM25), query processing service, cache layer
+
+**Quick architecture:**
+```
+Offline:  Crawler → Raw Pages → Indexer → Inverted Index (term → [doc_id, frequency, positions])
+                                       → Forward Index (doc_id → metadata, PageRank score)
+Online:   User query → Query Parser (tokenize, spell-check, expand synonyms)
+            → Index Lookup (retrieve candidate docs per term)
+            → Intersect + Score (BM25 for relevance × PageRank for quality)
+            → Rank → Return top 10 with snippets
+```
+
+**Staff+ talking points:**
+- Inverted index sharding: shard by document (each shard has all terms for its docs — query hits all shards) or by term (each shard has all docs for its terms — query hits fewer shards but hotspots on popular terms). Document-based is more common.
+- Two-phase ranking: Phase 1 retrieves top 1000 candidates cheaply (BM25). Phase 2 re-ranks with expensive features (ML model, click-through data).
+- Cache aggressively: same queries repeat (power law). Cache top results for popular queries.
+
+---
+
+#### 3.2 Design Distributed Cache (Redis/Memcached)
+
+**How the interviewer asks it:**
+> "Design a distributed caching system like Redis or Memcached that stores key-value pairs across multiple nodes."
+
+**Standard info/constraints typically given:**
+- Millions of QPS, sub-millisecond latency
+- Data doesn't fit on a single machine (distributed)
+- High availability — cache downtime causes database overload (thundering herd)
+- Support TTL-based expiration
+
+**Clarifying questions you should ask:**
+- What's the data size — fits on one machine, or must be distributed?
+- What consistency model — eventual or strong?
+- Do we need persistence, or is this a pure in-memory cache?
+- What eviction policy — LRU, LFU, TTL?
+- Do we need replication for high availability?
+- How do we handle hot keys (single key receiving disproportionate traffic)?
+
+**Key challenges:** Consistent hashing for partitioning, replication for HA, eviction policies, hot key mitigation, cache stampede prevention, thundering herd on cache miss
+
+**Core components:** Hash ring (consistent hashing), node management, replication protocol, eviction policy engine (LRU/LFU), client library with connection pooling
+
+**Quick architecture:**
+```
+Client → Hash key → Consistent hash ring → Route to responsible node → Get/Set
+  Node: In-memory hash table + doubly-linked list (LRU) + TTL heap
+  Replication: async replicate writes to R replica nodes
+  Node failure: consistent hashing minimizes key redistribution (~1/N keys move)
+```
+
+**Staff+ talking points:**
+- Consistent hashing with virtual nodes (150-200 per physical node) for even distribution.
+- Hot keys: replicate hot key to multiple nodes, client randomly picks one. Or use local L1 cache in application servers.
+- Cache stampede: when a popular key expires, hundreds of requests simultaneously miss cache and hit DB. Solutions: lock-based refresh (only one request rebuilds), probabilistic early expiration, stale-while-revalidate.
+- Thundering herd on node failure: traffic redistributes to other nodes, which may cascade. Use circuit breakers and fallback to DB with rate limiting.
+
+---
+
+#### 3.3 Design Distributed Task Scheduler
+
+**How the interviewer asks it:**
+> "Design a distributed task scheduler like Airflow or cron — users submit jobs that should execute at specified times or on schedules."
+
+**Standard info/constraints typically given:**
+- 100K+ scheduled tasks, some recurring (cron-like), some one-time
+- Exactly-once execution guarantee (no missed, no double-executed)
+- Support dependencies between tasks (DAG)
+- Fault tolerant — if a worker crashes, task should be retried
+
+**Clarifying questions you should ask:**
+- Do we need cron-like recurring schedules, one-time delayed execution, or both?
+- Do we need task dependencies (DAGs)?
+- What's the execution latency tolerance? (Seconds? Sub-second?)
+- What happens if a task fails — retry, skip, alert?
+- Do we need task prioritization?
+- What's the max execution time for a task?
+- Do we need task cancellation?
+
+**Key challenges:** Exactly-once execution (no double-fire), cron schedule parsing, task dependency (DAG) resolution, fault tolerance (worker crash), priority scheduling
+
+**Core components:** Scheduler service, task queue (Kafka or DB-backed), worker pool, lease-based execution, DAG resolver, cron parser, dead-letter queue
+
+**Quick architecture:**
+```
+Task submission: User defines task (code + schedule/trigger + deps) → Store in Task DB
+Scheduler:       Poll for tasks due now → Resolve DAG deps → Enqueue ready tasks to Task Queue
+Worker:          Dequeue task → Acquire lease (TTL) → Execute → Report success/failure
+                   → If worker crashes, lease expires → Scheduler re-enqueues
+```
+
+**Staff+ talking points:**
+- Lease-based execution: worker acquires a time-limited lease on a task. Must heartbeat to extend. If lease expires → task is re-enqueued. This prevents double-execution AND ensures failed tasks are retried.
+- DAG deps: a task can only execute when all upstream tasks have succeeded. Scheduler maintains a dependency graph and only enqueues tasks whose parents are complete.
+- Cron misfire: if scheduler was down when a cron job was due, what happens on recovery? Options: fire immediately, skip, or fire all missed instances. Must be configurable.
+- Priority: multiple queues (high, medium, low) or weighted fair scheduling.
+
+---
+
+#### 3.4 Design Payment System
+
+**How the interviewer asks it:**
+> "Design a payment system for an e-commerce platform — users can pay for orders with credit cards, and sellers receive payouts."
+
+**Standard info/constraints typically given:**
+- 1M transactions/day (~10 TPS, not high throughput)
+- Support credit card, debit card, digital wallets
+- Must be correct — no double-charging, no lost payments
+- Need reconciliation with external payment providers
+- Compliance with financial regulations (PCI DSS)
+
+**Clarifying questions you should ask:**
+- Are we designing pay-in (customer pays), pay-out (seller receives), or both?
+- Do we integrate with a PSP (Stripe, PayPal), or build our own processor?
+- Do we need to handle refunds, chargebacks, disputes?
+- What currencies? Do we need multi-currency support?
+- Do we need a ledger / double-entry bookkeeping?
+- What about recurring payments (subscriptions)?
+- PCI compliance — do card numbers touch our system?
+
+**Key challenges:** Exactly-once payment processing (idempotency), PSP integration, reconciliation between internal records and PSP/bank, double-entry ledger, failure handling (partial failures in distributed payment flow)
+
+**Core components:** Payment service (orchestrator), payment executor (per PSP), wallet/balance service, ledger service (double-entry), reconciliation service, idempotency store
+
+**Quick architecture:**
+```
+Pay-in:   User clicks "Pay" → Payment Service (idempotency check, risk check)
+            → Payment Executor → PSP API (Stripe) → Card network → Bank
+            → PSP webhook confirms → Update payment status
+            → Wallet Service (credit seller balance) → Ledger Service (double-entry record)
+Pay-out:  Seller requests payout → Payment Service → PSP pay-out API → Seller bank
+Reconciliation: Nightly job compares internal ledger vs PSP settlement file → flag discrepancies
+```
+
+**Staff+ talking points:**
+- Idempotency key: client generates a UUID per payment attempt. Server deduplicates. This prevents double-charging on retries.
+- PSP hosted payment page: card data never touches our system (PCI compliance). PSP handles the sensitive bits.
+- Double-entry ledger: every payment is a balanced debit/credit pair. The ledger always sums to zero. This is how you prove correctness.
+- Reconciliation is the safety net: even with idempotency, compare your records against PSP settlement files daily. Flag and investigate discrepancies.
+- Webhook reliability: PSP webhooks can be delayed, duplicated, or lost. Be idempotent, store webhook events, and have a polling fallback.
+
+---
+
+#### 3.5 Design Distributed ID Generator
+
+**How the interviewer asks it:**
+> "Design a system that generates globally unique IDs at high throughput for a distributed system."
+
+**Standard info/constraints typically given:**
+- IDs must be globally unique
+- IDs should be sortable by time (roughly ordered)
+- 10K+ IDs per second per service
+- 64-bit numeric IDs (not UUIDs — too long)
+- Must work across multiple data centers
+
+**Clarifying questions you should ask:**
+- Do IDs need to be strictly ordered or roughly time-ordered?
+- What's the throughput requirement? (Per server? Globally?)
+- Do IDs need to be numeric, or are strings OK? (UUIDs are 128-bit strings)
+- How many data centers / machines will generate IDs?
+- Can we tolerate clock skew between machines?
+- Do IDs need to be unpredictable (security), or is sequential OK?
+
+**Key challenges:** Uniqueness without coordination, time-ordering, clock skew across machines, high throughput, compactness (64-bit)
+
+**Core components:** Snowflake ID generator (timestamp + datacenter + machine + sequence), or centralized ticket server (auto-increment DB), or UUID with tradeoffs
+
+**Quick architecture (Snowflake):**
+```
+64-bit ID layout:
+  [1 bit unused] [41 bits timestamp (ms)] [5 bits datacenter] [5 bits machine] [12 bits sequence]
+
+  → 41 bits timestamp = ~69 years of milliseconds
+  → 5 bits datacenter = 32 data centers
+  → 5 bits machine = 32 machines per DC
+  → 12 bits sequence = 4096 IDs per millisecond per machine
+  → Total: ~4M IDs/sec per machine, time-sortable, no coordination needed
+```
+
+**Staff+ talking points:**
+- Snowflake is the standard answer. No coordination needed — each machine generates independently using its own (datacenter_id, machine_id) assignment.
+- Clock skew: if system clock moves backward, either wait or reject until clock catches up. NTP can cause jumps.
+- Alternatives: UUID (128-bit, no coordination, but not sortable and too long), DB auto-increment (simple but single point of failure and not scalable), multi-master (odd/even or modular IDs — simple but not time-sortable).
+- For interviews: lead with requirements (uniqueness, ordering, throughput), then show Snowflake as the solution. Walk through the bit layout.
+
+---
+
+#### 3.6 Design Ad Click Aggregator
+
+**How the interviewer asks it:**
+> "Design a system that counts ad clicks in real-time for billing and analytics — advertisers need to know how many clicks their ads received."
+
+**Standard info/constraints typically given:**
+- 1B+ ad clicks/day (~10K clicks/sec)
+- Real-time aggregation (< 1 min latency)
+- Must deduplicate clicks (prevent click fraud)
+- Aggregations: clicks per ad per minute, per advertiser per hour, per campaign per day
+- Used for billing — accuracy matters
+
+**Clarifying questions you should ask:**
+- What's the latency requirement for aggregation — real-time (seconds) or near-real-time (minutes)?
+- Do we need click deduplication (same user clicking same ad repeatedly)?
+- What aggregation dimensions — per ad, per campaign, per advertiser, per geography?
+- Is this for billing (must be exact) or analytics (approximate OK)?
+- Do we need historical queries (last 30 days trend)?
+- How do we handle late-arriving events?
+
+**Key challenges:** Real-time aggregation at high throughput, click deduplication, exactly-once counting for billing, late-arriving events, multiple aggregation windows
+
+**Core components:** Kafka ingestion, stream processor (Flink/Spark Streaming), dedup store (Redis/Bloom filter), OLAP database (ClickHouse/Druid), aggregation service
+
+**Quick architecture:**
+```
+Ad click event → Kafka (partitioned by ad_id)
+  → Stream Processor (Flink):
+      1. Dedup: check (user_id, ad_id, timestamp_bucket) in Redis → skip if seen
+      2. Aggregate: tumbling windows (1 min, 1 hr, 1 day) per ad_id
+      3. Output: write aggregated counts to OLAP store (ClickHouse)
+  → Query Service: advertisers query aggregated data from OLAP store
+```
+
+**Staff+ talking points:**
+- Two paths: real-time (Kafka → Flink → OLAP for live dashboard) + batch (Kafka → S3 → Spark → data warehouse for reconciliation). Lambda architecture.
+- Dedup: for billing accuracy, use exact dedup (Redis set of (user_id, ad_id, minute)). For analytics, approximate dedup (HyperLogLog) is cheaper.
+- Late events: watermark-based processing in Flink. Events arriving after the watermark go to a side output / late-events topic for reprocessing.
+- Exactly-once: Flink checkpointing + Kafka transactions + idempotent OLAP writes.
+
+---
+
+#### 3.7 Design Ticketmaster / Booking System
+
+**How the interviewer asks it:**
+> "Design a seat booking system like Ticketmaster — users can browse events, select seats, and purchase tickets without double-booking."
+
+**Standard info/constraints typically given:**
+- 100K seats per event, multiple events concurrent
+- Popular events: 10M+ users competing for 100K seats simultaneously
+- No double-booking — a seat can only be sold once
+- Reservation timeout (hold seat for 10 min during checkout)
+- Handle payment failure gracefully (release seat)
+
+**Clarifying questions you should ask:**
+- Do users select specific seats, or is it general admission?
+- How long do we hold a reserved seat before timeout?
+- Do we need waitlisting?
+- Is there a queue / virtual waiting room for hot events?
+- Do we need to show real-time seat availability?
+- Do we need dynamic pricing (prices change as seats fill)?
+
+**Key challenges:** Preventing double-booking under extreme concurrency, seat reservation with timeout, handling hot events (thundering herd), payment integration with reservation lifecycle
+
+**Core components:** Event/seat catalog, reservation service (with TTL), payment service, distributed lock or optimistic locking, virtual waiting room (queue), real-time availability view
+
+**Quick architecture:**
+```
+Browse:   User views event → Seat Availability Service (cached, eventually consistent)
+Reserve:  User selects seat → Reservation Service:
+            → Optimistic lock: UPDATE seats SET status='reserved', user_id=X, expires_at=NOW()+10min
+              WHERE seat_id=Y AND status='available'
+            → If rows affected = 1 → success (seat reserved). If 0 → already taken.
+Pay:      User pays within 10 min → Payment Service → On success: UPDATE status='sold'
+            → On failure/timeout: background job releases expired reservations
+```
+
+**Staff+ talking points:**
+- Optimistic locking is the core technique: `UPDATE ... WHERE status='available'` is atomic at the DB level. No distributed lock needed for a single-DB setup.
+- Hot events: virtual waiting room. Assign users a queue position, admit N at a time. Prevents thundering herd on the seat DB.
+- Reservation expiry: background job or DB-level TTL. Must handle race condition where user pays at the exact moment reservation expires.
+- Scaling: shard seats by event_id. Each event's seats live on one shard — no cross-shard transactions needed for individual seat bookings.
+
+---
+
+#### 3.8 Design Yelp / Proximity Search
+
+**How the interviewer asks it:**
+> "Design a proximity service like Yelp — users search for nearby businesses (restaurants, shops) based on their location."
+
+**Standard info/constraints typically given:**
+- 200M businesses, 5K QPS for search
+- User provides location + radius (or "nearby")
+- Results ranked by distance, rating, and relevance
+- Businesses update infrequently (address, hours)
+
+**Clarifying questions you should ask:**
+- What's the search radius — fixed (5km) or user-specified?
+- How are results ranked — distance only, or distance + rating + relevance?
+- Do we need filtering (cuisine type, open now, price range)?
+- What's the write frequency — how often do business details change?
+- Do we need "k nearest" or "all within radius"?
+- Multi-region deployment?
+
+**Key challenges:** Geospatial indexing at scale, nearby search with ranking, handling boundary conditions, low-latency with high cache hit rate
+
+**Core components:** Geospatial index (geohash or quadtree), business catalog DB, Redis cache (geohash → business IDs), ranking/scoring service
+
+**Quick architecture:**
+```
+User sends (lat, lng, radius) → Location Service:
+  1. Compute geohash at appropriate precision for radius
+  2. Fetch business IDs from current geohash + 8 neighbors (Redis cache)
+  3. Hydrate business objects from Business Cache
+  4. Calculate exact distance, filter by radius, apply ranking (distance × rating × relevance)
+  5. Return top results
+```
+
+**Staff+ talking points:**
+- Geohash vs quadtree: geohash is simpler (DB-native, easy to cache), quadtree is better for adaptive density. For most interviews, lead with geohash.
+- Boundary fix: always query 9 cells (current + 8 neighbors) to avoid missing nearby businesses at grid edges.
+- Cache key = geohash string → high hit rate because all users in the same grid cell query the same key.
+- This is read-heavy (5K QPS search vs ~100 writes/day per business). Read replicas + heavy caching.
+
+---
+
+#### 3.9 Design Instagram
+
+**How the interviewer asks it:**
+> "Design Instagram — users can upload photos, follow others, and see a feed of photos from people they follow."
+
+**Standard info/constraints typically given:**
+- 500M DAU, 100M photos uploaded/day
+- Feed shows photos from followed accounts, ranked
+- Support stories (ephemeral, 24hr TTL)
+- Support explore/discover (personalized recommendations)
+- Global user base
+
+**Clarifying questions you should ask:**
+- Are we focusing on upload, feed, stories, explore, or the full system?
+- How is the feed ranked — chronological or algorithmic?
+- Do we need stories (ephemeral content)?
+- Do we need direct messages? (Usually separate problem)
+- What about video (Reels)?
+- Do we need content moderation?
+
+**Key challenges:** Photo upload + storage at scale, feed generation (same as News Feed), stories (ephemeral storage with TTL), explore/discover (recommendation system), CDN for media delivery
+
+**Core components:** Object storage (S3) + CDN for photos, metadata DB, feed service (fan-out), stories service (TTL-based storage), recommendation engine, notification service
+
+**Quick architecture:**
+```
+Upload:   User uploads photo → Resize/compress → Store in S3 → CDN → Write metadata to DB
+            → Fan-out: push photo ID to followers' feed caches
+Feed:     User opens app → Fetch feed from cache → Hydrate photo metadata → Fetch images from CDN
+Stories:  Upload to ephemeral storage with 24hr TTL → Fan-out story ID to followers' story ring
+            → Auto-delete after 24hrs (TTL in Redis or Cassandra)
+Explore:  Recommendation service: collaborative filtering (users who liked X also liked Y)
+            → Candidate generation → Ranking (ML model) → Return personalized grid
+```
+
+**Staff+ talking points:**
+- This combines News Feed (1.2) + YouTube upload pipeline (2.2) into one problem. Lead with the feed architecture, then discuss media pipeline.
+- Stories: Redis with TTL is simple for small scale. At Instagram's scale, Cassandra with TTL-based compaction is more appropriate.
+- Explore: two-stage recommendation — candidate generation (broad, fast) → ranking (narrow, ML model). Pre-compute for active users.
+- Photo sizes: generate multiple sizes on upload (thumbnail, feed, full). Serve appropriate size per device (mobile gets smaller images → less bandwidth).
+
+---
+
+#### 3.10 Design Feature Flag Service
+
+**How the interviewer asks it:**
+> "Design a feature flag service like LaunchDarkly — engineers can toggle features on/off, roll out to a percentage of users, and target specific segments."
+
+**Standard info/constraints typically given:**
+- 1000+ flags, evaluated millions of times per second across all services
+- Flag evaluation must be < 1ms (in the hot path of every request)
+- Support percentage rollout, user targeting (by attribute), and kill switch
+- Changes propagate to all servers within seconds
+- Audit trail for every flag change
+
+**Clarifying questions you should ask:**
+- Where does flag evaluation happen — server-side SDK (local eval) or API call to a flag service?
+- What targeting rules — percentage rollout, user segments, individual users?
+- How fast must flag changes propagate? (Seconds? Real-time?)
+- Do we need A/B testing integration (metrics per variant)?
+- Do we need an audit log of every flag change?
+- Do we need a "kill switch" for emergency shutoff?
+
+**Key challenges:** Ultra-low-latency evaluation (must be local, not network call), consistent rollout (same user always sees same variant), real-time flag distribution to thousands of servers, deterministic hashing for percentage rollout
+
+**Core components:** Flag management API, flag store (DB), SSE/WebSocket distribution layer, SDK (local cache + evaluation engine), deterministic hash function (for consistent rollout), audit log
+
+**Quick architecture:**
+```
+Admin:    Engineer creates/updates flag → Flag API → Store in DB → Audit log
+Distribute: Flag change → SSE/WebSocket push to all connected SDKs (within seconds)
+Evaluate: SDK receives flag data → Cache locally → On request:
+            → Hash(user_id + flag_key) mod 100 → Compare to rollout percentage
+            → Check targeting rules (user attributes) → Return variant
+```
+
+**Staff+ talking points:**
+- SDK local eval is the key insight: flag evaluation happens in-process, not via network call. This gives < 1ms latency. The SDK holds all flag data in memory and evaluates locally.
+- Deterministic hashing: `hash(user_id + flag_key) mod 100` ensures the same user always gets the same variant. Changing rollout from 10% → 20% adds users but never removes existing ones.
+- SSE for distribution: lightweight, server-push, auto-reconnect. Better than polling (delay) or WebSocket (heavier).
+- Kill switch: special flag type with highest priority. Propagate via SSE + separate fast path. Must work even if the flag service is degraded.
+
+---
+
+#### 3.11 Design Multi-Tenant SaaS Backend
+
+**How the interviewer asks it:**
+> "Design the backend for a multi-tenant SaaS platform — multiple customers share the same infrastructure, but their data must be isolated."
+
+**Standard info/constraints typically given:**
+- 10K+ tenants, ranging from small (100 users) to enterprise (100K users)
+- Tenants must not see each other's data
+- Noisy neighbor prevention (one tenant's spike shouldn't affect others)
+- Support different tiers (free, pro, enterprise) with different resource limits
+- Need ability to migrate tenants between isolation models
+
+**Clarifying questions you should ask:**
+- What data isolation model — shared DB, shared schema, or separate DB per tenant?
+- What are the tenant size ranges? (Affects isolation strategy)
+- Do we need to support different SLA tiers (99.9% for enterprise vs. 99% for free)?
+- How do we handle noisy neighbors — rate limiting, resource quotas, or full isolation?
+- Do enterprise tenants require dedicated infrastructure (for compliance/security)?
+- Do we need to migrate tenants between tiers without downtime?
+
+**Key challenges:** Data isolation (security), noisy neighbor prevention (performance), tenant routing, migration between isolation models, per-tenant rate limiting and billing
+
+**Core components:** Tenant routing layer, tenant config store, per-tenant rate limiter, data access layer (RLS or schema-based isolation), billing/metering service, migration pipeline
+
+**Quick architecture:**
+```
+Request → API Gateway → Tenant Resolver (extract tenant from auth token / subdomain)
+  → Rate Limiter (per-tenant quotas) → Route to appropriate backend:
+    - Pool tenants: shared DB + Row-Level Security (tenant_id column on every table)
+    - Bridge tenants: shared DB cluster, separate schema per tenant
+    - Silo tenants: dedicated DB + compute (enterprise, compliance-required)
+  → Metering: log resource usage per tenant for billing
+```
+
+**Staff+ talking points:**
+- Three models: Pool (shared everything, cheapest, RLS for isolation), Bridge (shared infra, separate schema), Silo (dedicated everything, most expensive, highest isolation). Most SaaS platforms use hybrid.
+- Noisy neighbor: per-tenant rate limiting at the gateway + per-tenant connection pool limits at the DB. Monitor per-tenant resource consumption.
+- RLS (Row-Level Security): Postgres `SET app.current_tenant = 'X'` + RLS policy `WHERE tenant_id = current_setting('app.current_tenant')`. Every query is automatically filtered. Defense in depth.
+- Migration: CDC (Change Data Capture) to stream data from pool → silo without downtime. Dual-write during cutover.
+
+---
+
+#### 3.12 Design Distributed Job Scheduler (Airflow / Cron at Scale)
+
+**How the interviewer asks it:**
+> "Design a distributed job scheduler like Airflow — users define workflows (DAGs) with dependencies, and the system executes them on schedule."
+
+**Standard info/constraints typically given:**
+- 100K+ jobs, some with complex DAG dependencies
+- Cron-like scheduling (every hour, daily at 2am, etc.)
+- Must handle worker failures gracefully
+- Jobs can take seconds to hours
+- Need job status visibility (running, succeeded, failed, queued)
+
+**Clarifying questions you should ask:**
+- Do we need DAG dependencies (job B starts after job A succeeds)?
+- What's the execution granularity — seconds, minutes?
+- How large are individual jobs — seconds or hours?
+- Do we need retries on failure? How many times?
+- Do we need backfill (run a past date's job)?
+- What about resource constraints (CPU/memory limits per job)?
+- Do we need alerting on job failure?
+
+**Key challenges:** Exactly-once execution, DAG dependency resolution, cron schedule management, worker fault tolerance, job prioritization, backfill handling
+
+**Core components:** Scheduler (cron parser + DAG resolver), task queue (priority-based), worker pool (lease-based execution), state store (job status, DAG state), alerting service
+
+**Quick architecture:**
+```
+Define:    User creates DAG (tasks + dependencies + schedule) → Store in DAG DB
+Schedule:  Scheduler: every tick → check which DAGs are due → create DAG Run → resolve deps
+             → Enqueue ready tasks (all upstream tasks succeeded) to Task Queue
+Execute:   Worker: dequeue task → Acquire lease (heartbeat-based) → Execute → Report result
+             → If worker dies (lease expires) → Scheduler re-enqueues task
+Monitor:   Dashboard shows DAG runs, task states, logs. Alerting on failures.
+```
+
+**Staff+ talking points:**
+- Lease-based execution (same as 3.3): worker acquires lease with TTL, heartbeats to extend. Dead workers' tasks are automatically re-enqueued.
+- DAG resolution: topological sort. Maintain in-degree count per task. When a task completes, decrement downstream tasks' in-degree. When in-degree = 0, enqueue.
+- Cron misfire: when scheduler was down and missed a trigger. Options: fire immediately on recovery, skip, or fire all missed. Configurable per DAG.
+- Leader election for scheduler: only one scheduler should trigger DAGs (prevent double-trigger). Use DB advisory lock or ZooKeeper.
+- This overlaps with 3.3 (Distributed Task Scheduler). If asked specifically "Airflow", emphasize DAGs and backfill. If asked generically "task scheduler", emphasize lease-based execution and priority.
+
+---
+
+#### 3.13 Design Fraud Detection Pipeline
+
+**How the interviewer asks it:**
+> "Design a real-time fraud detection system — every transaction must be evaluated within 100ms, combining rule-based checks with ML model scoring."
+
+**Standard info/constraints typically given:**
+- 10K+ TPS (transactions per second)
+- P99 evaluation latency < 100ms
+- Combine rules (hard rules: block known bad actors) with ML (soft scoring: probability of fraud)
+- Need to minimize false positives (blocking legitimate users)
+- Rules must be hot-reloadable (deploy new rules without restart)
+- Feedback loop: fraud analysts label transactions, which feed back into model training
+
+**Clarifying questions you should ask:**
+- What's the latency budget — synchronous (block transaction until evaluated) or async (evaluate after)?
+- Do we need both rules (deterministic) and ML models (probabilistic)?
+- How are rules managed — engineer-written, analyst-configurable, or both?
+- What features does the ML model need? (Transaction amount, velocity, geo, device, etc.)
+- Do we need real-time feature computation (e.g., "transactions in last 5 min")?
+- What's the false positive tolerance? (Blocking 1% legitimate users may be acceptable, 10% is not.)
+- How quickly must new rules take effect?
+
+**Key challenges:** Sub-100ms end-to-end latency with both rules and ML, real-time feature computation (Feature Store), rule hot-reloading, feedback loop for model retraining, balancing precision vs. recall
+
+**Core components:** Transaction ingestion (Kafka), Feature Store (real-time + batch features), rule engine (hot-reloadable), ML model serving (low-latency inference), decision service, feedback pipeline
+
+**Quick architecture:**
+```
+Transaction → Kafka → Fraud Evaluation Service:
+  1. Feature enrichment: fetch from Feature Store (user history, velocity, device fingerprint)
+     → Real-time features: Redis (tx count last 5min, amount last 1hr)
+     → Batch features: precomputed (avg monthly spend, account age)
+  2. Rule evaluation: hot-loaded rules engine (known bad actors, impossible travel, amount thresholds)
+     → Hard block: if any rule triggers → reject immediately
+  3. ML scoring: send features to Model Serving (TF Serving / SageMaker) → fraud probability score
+     → Soft block: if score > threshold → flag for review or reject
+  4. Decision: combine rule + ML results → approve / reject / flag for manual review
+  → Log decision + features to Kafka → Feedback pipeline → Analyst labels → Model retrain
+```
+
+**Staff+ talking points:**
+- Latency budget decomposition: 100ms total. Feature enrichment: 20ms. Rule eval: 5ms. ML inference: 30ms. Decision + logging: 10ms. Network/overhead: 35ms. Each component has a strict budget.
+- Feature Store: dual-layer. Real-time features (Redis: transaction velocity, recent amounts) + batch features (precomputed daily: account age, avg spend). Feature consistency between training and serving is critical.
+- Rule hot-reload: rules stored in a config store (DB/S3), polled every 30s, or pushed via SSE. Rule engine evaluates without restart. This lets fraud analysts respond to new attack patterns in minutes, not deployment cycles.
+- Feedback loop: analyst-labeled transactions → training pipeline → retrained model → shadow mode (run alongside production, compare) → promote to production. Never deploy a model without shadow testing.
+- False positive tradeoff: precision vs. recall curve. At staff+ level, discuss how to set the threshold — not just technically, but in terms of business impact ($ lost to fraud vs. $ lost from blocked legitimate users).
 
 ### Feed Design Deep Dive (Most Common)
 

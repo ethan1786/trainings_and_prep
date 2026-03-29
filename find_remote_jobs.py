@@ -12,12 +12,15 @@ Usage:
   # Default: scan ALL target companies for remote/Boston + staff/principal engineer roles
   python find_remote_jobs.py
 
+  # Check if shortlisted jobs are still live (and find replacements if not)
+  python find_remote_jobs.py --check
+
   # Single company
-  python find_remote_jobs.py anthropic
-  python find_remote_jobs.py openai --keyword "software"
+  python find_remote_jobs.py coinbase
+  python find_remote_jobs.py stripe --keyword "staff"
 
   # Show all jobs (skip remote/location filter)
-  python find_remote_jobs.py openai --all --keyword "staff"
+  python find_remote_jobs.py datadog --all --keyword "staff"
 
   # Custom company (specify ATS)
   python find_remote_jobs.py mycompany --ats greenhouse
@@ -38,12 +41,10 @@ from typing import Optional
 # Target companies for the default scan-all mode
 TARGET_COMPANIES = [
     "airbnb",
-    "anthropic",
     "coinbase",
+    "datadog",
+    "figma",
     "netflix",
-    "nvidia",
-    "openai",
-    "snowflake",
     "stripe",
 ]
 
@@ -61,6 +62,7 @@ COMPANY_BOARDS = {
     "airbnb":     {"ats": "greenhouse", "board": "airbnb"},
     "anthropic":  {"ats": "greenhouse", "board": "anthropic"},
     "coinbase":   {"ats": "greenhouse", "board": "coinbase"},
+    "datadog":    {"ats": "greenhouse", "board": "datadog"},
     "databricks": {"ats": "greenhouse", "board": "databricks"},
     "discord":    {"ats": "greenhouse", "board": "discord"},
     "figma":      {"ats": "greenhouse", "board": "figma"},
@@ -88,6 +90,85 @@ WORKDAY_CONFIGS = {
     "nvidia":  ("nvidia.wd5.myworkdayjobs.com", "nvidia/NVIDIAExternalCareerSite"),
     "netflix": ("netflix.wd1.myworkdayjobs.com", "netflix/Netflix"),
 }
+
+
+# ── Shortlisted Jobs to Track ────────────────────────────────────────────────
+# These are the specific job postings we're monitoring.
+# Each entry: company, title, job_id, url, ats, board, priority
+SHORTLIST = [
+    {
+        "company": "stripe",
+        "title": "Staff Engineer, Workflow Engine",
+        "job_id": "7600571",
+        "url": "https://job-boards.greenhouse.io/stripe/jobs/7600571",
+        "ats": "greenhouse",
+        "board": "stripe",
+        "priority": 1,
+    },
+    {
+        "company": "netflix",
+        "title": "Software Engineer (L6) - Technical Catalog",
+        "job_id": "JR37313",
+        "url": "https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer--L6----Technical-Catalog_JR37313",
+        "ats": "workday",
+        "board": "netflix",
+        "priority": 2,
+    },
+    {
+        "company": "datadog",
+        "title": "Staff Software Engineer",
+        "job_id": "3210217",
+        "url": "https://careers.datadoghq.com/detail/3210217/?gh_jid=3210217",
+        "ats": "greenhouse",
+        "board": "datadog",
+        "priority": 3,
+    },
+    {
+        "company": "coinbase",
+        "title": "Senior Staff Software Engineer - Financial Hub",
+        "job_id": "7587071",
+        "url": "https://job-boards.greenhouse.io/coinbase/jobs/7587071",
+        "ats": "greenhouse",
+        "board": "coinbase",
+        "priority": 4,
+    },
+    {
+        "company": "airbnb",
+        "title": "Senior Staff Engineer, Performance",
+        "job_id": "7315583",
+        "url": "https://job-boards.greenhouse.io/airbnb/jobs/7315583",
+        "ats": "greenhouse",
+        "board": "airbnb",
+        "priority": 5,
+    },
+    {
+        "company": "figma",
+        "title": "Software Engineer, Distributed Systems",
+        "job_id": "5552549004",
+        "url": "https://boards.greenhouse.io/figma/jobs/5552549004?gh_jid=5552549004",
+        "ats": "greenhouse",
+        "board": "figma",
+        "priority": 6,
+    },
+    {
+        "company": "circle",
+        "title": "Distinguished Software Engineer",
+        "job_id": "JR100849",
+        "url": "https://careers.circle.com/us/en/job/JR100849/Distinguished-Software-Engineer",
+        "ats": "custom",
+        "board": "circle",
+        "priority": 7,
+    },
+    {
+        "company": "netflix",
+        "title": "Senior Software Engineer (L5) - Games",
+        "job_id": "JR38527",
+        "url": "https://explore.jobs.netflix.net/careers/job/790313749790",
+        "ats": "workday",
+        "board": "netflix",
+        "priority": 99,  # backup
+    },
+]
 
 
 # ── HTTP Helper ─────────────────────────────────────────────────────────────
@@ -301,6 +382,180 @@ def fetch_jobs(company: str, workday_search_terms: Optional[list[str]] = None) -
         return fetch_uber()
     else:
         raise ValueError(f"Unknown ATS type: {ats}")
+
+
+# ── Shortlist Checking ──────────────────────────────────────────────────────
+
+def _http_head(url: str) -> int:
+    """Return HTTP status code for a URL (follows redirects). Returns 0 on error."""
+    hdrs = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+    req = urllib.request.Request(url, headers=hdrs, method="HEAD")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception:
+        return 0
+
+
+def _check_greenhouse_job(board: str, job_id: str) -> bool:
+    """Check if a specific Greenhouse job is still listed."""
+    url = f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{job_id}"
+    try:
+        _http_json(url)
+        return True
+    except Exception:
+        return False
+
+
+def _check_workday_job(company: str, job_id: str) -> bool:
+    """Check if a Workday job is still findable by searching its ID."""
+    if company not in WORKDAY_CONFIGS:
+        return False
+    host, site_path = WORKDAY_CONFIGS[company]
+    base = f"https://{host}/wday/cxs/{site_path}/jobs"
+    try:
+        data = _http_json(base, method="POST", body={
+            "appliedFacets": {}, "limit": 5, "offset": 0, "searchText": job_id,
+        })
+        for posting in data.get("jobPostings", []):
+            if job_id in posting.get("bulletFields", []) or job_id in posting.get("title", "") or job_id in posting.get("externalPath", ""):
+                return True
+            ext = posting.get("externalPath", "")
+            if job_id.replace("-", "") in ext.replace("-", ""):
+                return True
+        return data.get("total", 0) > 0
+    except Exception:
+        return False
+
+
+def _find_similar_jobs(company: str, title_hint: str, location_keywords: list[str]) -> list[dict]:
+    """Find similar jobs at a company that match location and title hint."""
+    try:
+        ats_type = COMPANY_BOARDS.get(company, {}).get("ats", "")
+        if ats_type == "workday":
+            jobs = fetch_jobs(company, workday_search_terms=[title_hint])
+        else:
+            jobs = fetch_jobs(company)
+    except Exception:
+        return []
+    # Filter by location
+    loc_filtered = [j for j in jobs if matches_location(j, location_keywords)]
+    # Filter by title hint keywords
+    hint_words = [w.lower() for w in title_hint.split() if len(w) > 3]
+    scored = []
+    for j in loc_filtered:
+        t = j["title"].lower()
+        score = sum(1 for w in hint_words if w in t)
+        if score > 0:
+            scored.append((score, j))
+    scored.sort(key=lambda x: -x[0])
+    return [j for _, j in scored[:5]]
+
+
+def check_shortlist(output_dir: str):
+    """Check if all shortlisted jobs are still live, suggest replacements for dead ones."""
+    print()
+    print("=" * 90)
+    print("CHECKING SHORTLISTED JOB POSTINGS")
+    print(f"Tracked jobs: {len(SHORTLIST)}")
+    print("=" * 90)
+
+    alive = []
+    dead = []
+
+    for entry in sorted(SHORTLIST, key=lambda x: x["priority"]):
+        company = entry["company"]
+        title = entry["title"]
+        ats = entry["ats"]
+        job_id = entry.get("job_id")
+        url = entry.get("url")
+        pri = entry["priority"]
+        pri_label = "backup" if pri >= 99 else f"#{pri}"
+
+        print(f"\n  [{pri_label}] {company.upper()} — {title}")
+
+        if ats == "custom" or not job_id:
+            # For custom ATS (Circle) or unknown IDs, do a HEAD check on URL
+            if url:
+                status = _http_head(url)
+                # Circle returns 200 even for filled jobs, so we can't reliably check
+                print(f"      URL responds {status} — verify manually: {url}")
+                alive.append(entry)
+            else:
+                print(f"      No URL/ID — search via API ...")
+                search_hint = entry.get("search_title", title)
+                similar = _find_similar_jobs(company, search_hint, DEFAULT_LOCATION_KEYWORDS)
+                if similar:
+                    print(f"      Found {len(similar)} similar role(s):")
+                    for s in similar:
+                        print(f"        • {s['title']} — {s['location']}")
+                        print(f"          {s['url']}")
+                    alive.append(entry)
+                else:
+                    print(f"      ⚠ No matching roles found")
+                    dead.append(entry)
+        elif ats == "greenhouse":
+            board = entry["board"]
+            is_live = _check_greenhouse_job(board, job_id)
+            if is_live:
+                print(f"      ✅ Still live")
+                alive.append(entry)
+            else:
+                print(f"      ❌ Not found on board — may be closed")
+                dead.append(entry)
+        elif ats == "workday":
+            is_live = _check_workday_job(company, job_id)
+            if is_live:
+                print(f"      ✅ Still live")
+                alive.append(entry)
+            else:
+                print(f"      ❌ Not found — may be closed")
+                dead.append(entry)
+        else:
+            print(f"      ⚠ Unknown ATS '{ats}' — verify manually: {url}")
+            alive.append(entry)
+
+    # Summary
+    print(f"\n{'=' * 90}")
+    print(f"SUMMARY: {len(alive)} alive, {len(dead)} possibly closed")
+    print(f"{'=' * 90}")
+
+    if dead:
+        print(f"\n⚠ The following jobs may be closed — searching for replacements:\n")
+        for entry in dead:
+            company = entry["company"]
+            title = entry["title"]
+            print(f"  {company.upper()} — {title}")
+            search_hint = entry.get("search_title", title.split(",")[0].split("-")[0].strip())
+            similar = _find_similar_jobs(company, search_hint, DEFAULT_LOCATION_KEYWORDS)
+            if similar:
+                print(f"    Possible replacements:")
+                for s in similar:
+                    print(f"      • {s['title']} — {s['location']}")
+                    print(f"        {s['url']}")
+            else:
+                print(f"    No similar roles found on {company}'s board.")
+            print()
+
+    # Save report
+    out_path = os.path.join(output_dir, "job_shortlist_check.txt")
+    with open(out_path, "w") as f:
+        f.write(f"Job Shortlist Status Check\n")
+        f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
+        f.write(f"{'=' * 70}\n\n")
+        for entry in sorted(SHORTLIST, key=lambda x: x["priority"]):
+            pri = entry["priority"]
+            pri_label = "backup" if pri >= 99 else f"#{pri}"
+            status = "ALIVE" if entry in alive else "CLOSED?"
+            f.write(f"[{pri_label}] {entry['company'].upper()} — {entry['title']}\n")
+            f.write(f"  Status: {status}\n")
+            if entry.get("url"):
+                f.write(f"  URL: {entry['url']}\n")
+            f.write("\n")
+    print(f"\nReport saved to: {out_path}")
+    print()
 
 
 # ── Filtering ───────────────────────────────────────────────────────────────
@@ -549,6 +804,11 @@ def main():
         help="Show ALL jobs (skip location filter).",
     )
     parser.add_argument(
+        "--check", "-c",
+        action="store_true",
+        help="Check if shortlisted jobs are still live and suggest replacements.",
+    )
+    parser.add_argument(
         "--ats",
         choices=["greenhouse", "ashby"],
         default=None,
@@ -563,7 +823,9 @@ def main():
 
     location_keywords = args.location if args.location else DEFAULT_LOCATION_KEYWORDS
 
-    if args.company is None:
+    if args.check:
+        check_shortlist(args.output_dir)
+    elif args.company is None:
         # Default: scan all target companies
         scan_all(args.output_dir)
     else:

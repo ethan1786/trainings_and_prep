@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yifei Sun — Cover Letter — Netflix</title>
+<style>
+  :root {
+    --accent: #1a365d;
+    --accent-light: #2c5282;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --text-light: #718096;
+    --page-bg: #ffffff;
+  }
+  @page { size: letter; margin: 0.75in 0.85in; }
+  @media print {
+    body { margin: 0; padding: 0; }
+    a { color: var(--accent-light) !important; text-decoration: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--page-bg);
+    max-width: 7in;
+    margin: 0 auto;
+    padding: 0.75in 0;
+  }
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 28px;
+  }
+  .header-left h1 {
+    font-size: 22pt;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .header-left .tagline {
+    font-size: 9pt;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .header-right a { color: var(--accent-light); text-decoration: none; }
+  .date { font-size: 10pt; color: var(--text-light); margin-bottom: 20px; }
+  .recipient { font-size: 10.5pt; margin-bottom: 20px; line-height: 1.5; }
+  .body p { margin-bottom: 14px; text-align: justify; }
+  .closing { margin-top: 28px; }
+  .closing .sign { margin-top: 6px; font-weight: 700; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Yifei Sun</h1>
+    <div class="tagline">Principal Software Engineer · Backend &amp; Platform Architecture · 13 Years</div>
+  </div>
+  <div class="header-right">
+    (617) 922-4823<br>
+    sun1fei@gmail.com<br>
+    <a href="https://www.linkedin.com/in/yifei-sun-a789861b">linkedin.com/in/yifei-sun-a789861b</a>
+  </div>
+</div>
+
+<div class="date">March 25, 2026</div>
+
+<div class="recipient">
+  Netflix Hiring Team<br>
+  Software Engineer L6 — Technical Catalog, Data Platform
+</div>
+
+<div class="body">
+  <p>Dear Netflix Hiring Team,</p>
+
+  <p>I'm writing to express my interest in the L6 Software Engineer role on the Technical Catalog team. I'm a Principal Software Engineer with 13 years of experience in Java, distributed systems, and cross-org technical leadership — with direct, hands-on experience building Netflix DGS subgraphs and GraphQL federation gateways.</p>
+
+  <p>Most relevantly, I recently designed and integrated a Netflix DGS subgraph for the Delivery Lookup service at CarGurus into a federated GraphQL gateway, exposing data to frontend, backend, and AI consumers from a single graph. I implemented schema federation, batch data loaders for N+1 prevention, and JVM warmup strategies to eliminate cold-start latency spikes. I also led the modernization of our highest-traffic API — coordinating 10+ teams across 3 departments, reducing p99 latency 5×, and achieving 99.9% availability.</p>
+
+  <p>I'm also the sole backend engineer on a ChatGPT MCP server integration (0→1 under ambiguity) and have built an independent GenAI decision engine with a hybrid rules + LLM architecture and experimentation platform.</p>
+
+  <p>The Technical Catalog role excites me because metadata platform architecture at Netflix scale is a deeply compelling problem — building the data foundation that powers content discovery for 200M+ subscribers across every surface. My experience with DGS, GraphQL federation, cross-org migrations, and Java performance optimization aligns well with this challenge. I'd welcome the opportunity to discuss how I can contribute to the team.</p>
+
+  <div class="closing">
+    Sincerely,
+    <div class="sign">Yifei Sun</div>
+  </div>
+</div>
+
+</body>
+</html>
