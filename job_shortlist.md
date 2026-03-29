@@ -70,15 +70,16 @@ python find_remote_jobs.py stripe --keyword "staff"
 - **Job ID**: 7315583
 - **Status**: [ ] To apply
 
-### 6. Figma — SWE, Distributed Systems
+### 6. Figma — Software Engineer, AI Platforms
 - **Priority**: #6
 - **Location**: US Remote / SF / NYC
-- **Department**: Engineering - Infrastructure
-- **Fit**: ⭐⭐⭐⭐ — distributed systems, storage, streaming, Kafka, Postgres
-- **Est. TC**: $400K–$550K (base $149K–$350K + equity)
-- **URL**: https://boards.greenhouse.io/figma/jobs/5552549004?gh_jid=5552549004
+- **Department**: AI Platforms (Extensibility / Agent Platform sub-teams best fit)
+- **Fit**: ⭐⭐⭐⭐⭐ — MCP server platforms, AI/LLM integration, plugin/API extensibility, platform engineering, cross-team leadership
+- **Est. TC**: $400K–$550K (base $153K–$376K + equity)
+- **URL**: https://job-boards.greenhouse.io/figma/jobs/5691886004?gh_jid=5691886004
 - **ATS**: Greenhouse (board: figma)
-- **Job ID**: 5552549004
+- **Job ID**: 5691886004
+- **Note**: Original Distributed Systems role (5552549004) was too DevOps-leaning. This role's Extensibility team builds MCP offerings — direct match.
 - **Status**: [ ] To apply
 
 ### 7. Circle — Distinguished Software Engineer (stretch)

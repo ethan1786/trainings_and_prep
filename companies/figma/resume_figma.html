@@ -248,26 +248,27 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Principal/Staff-level backend &amp; platform engineer with 13 years of experience in distributed systems,
-  data infrastructure, and platform architecture at scale. Deep expertise in Kafka, PostgreSQL, Redis,
-  and event-driven streaming pipelines. Recently built a Netflix DGS subgraph with schema federation and
-  batch data loaders for a federated GraphQL gateway. Track record of leading cross-org migrations,
-  consolidating distributed services, and optimizing high-traffic systems serving millions of daily requests
-  with 99.9% availability.
+  Staff/Principal-level platform engineer with 13 years of experience building developer platforms, API
+  extensibility layers, and AI-integrated systems. Currently leading MCP server development at CarGurus,
+  exposing platform capabilities into ChatGPT via the OpenAI Apps SDK — designing the server platform,
+  API surface, and production rollout strategy. Built and launched a federated GraphQL gateway (Netflix DGS)
+  that unified data access for frontend, backend, and AI consumers. Founding backend engineer of an innovation
+  lab, with a track record of shipping 0→1 products and leading cross-org platform initiatives spanning
+  10+ teams.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Led multi-team platform and API migrations involving 10+ engineering teams across 3 departments</li>
-  <li>Consolidated 12 distributed services into 5 via orchestration layer and GraphQL federation gateway</li>
-  <li>Drove architecture standards for distributed systems, streaming pipelines, and data infrastructure</li>
-  <li>Mentored senior engineers to Principal-level scope; drove cross-org architectural impact</li>
+  <li>Built MCP server platform exposing product capabilities into ChatGPT — concept to production as sole backend engineer</li>
+  <li>Designed GraphQL federation gateway unifying data for frontend, backend, and AI consumers from a single graph</li>
+  <li>Led cross-org platform initiatives spanning 10+ teams; defined API design and extensibility standards</li>
+  <li>Mentored senior engineers; shaped platform strategy, roadmaps, and engineering best practices across org</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, GraphQL (Netflix DGS), Python, Node.js · AWS, Kubernetes, Kafka, Redis, PostgreSQL, MySQL ·
-  Distributed Systems, Streaming, Event-Driven, CQRS, Microservices · Datadog, Grafana · CI/CD, Docker
+  Java, Spring Boot, Python, TypeScript/Node.js, GraphQL (Netflix DGS) · AWS, Kubernetes, Kafka, Redis, PostgreSQL ·
+  MCP/LLM Integration, API Platforms, Developer Extensibility, Event-Driven, Microservices · Datadog, Grafana · CI/CD, Docker
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
@@ -287,57 +288,52 @@
 <!-- ── CarGurus ──────────────────────────────────────────────── -->
 <div class="job">
   <div class="job-header">
-    <div><span class="company">CarGurus</span><span class="role">— Principal Software Engineer / Technical Lead</span></div>
+    <div><span class="company">CarGurus</span><span class="role">— Principal Software Engineer / Founding Backend Engineer, Innovation Lab</span></div>
     <span class="dates">Oct 2019 – Present</span>
   </div>
 
   <div class="project">
-    <span class="project-name">GraphQL Federation — Delivery Lookup DGS Subgraph</span>
+    <span class="project-name">ChatGPT Apps SDK — MCP Server Platform (0→1)</span>
     <ul>
-      <li>Designed and integrated a Netflix DGS subgraph for the Delivery Lookup service into CarGurus' federated GraphQL gateway, exposing vehicle delivery details data to frontend, backend, and AI consumers from a single graph.</li>
-      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies to avoid JIT compilation latency spikes on cold starts.</li>
-      <li>Built load tests and staging GraphQL integration tests; migrating from legacy REST endpoints (2 consumers) to support the new AI chatbot/shopping assistant platform.</li>
+      <li>Sole backend engineer who designed and built an MCP server platform compatible with the OpenAI Apps SDK, exposing CarGurus' product capabilities into ChatGPT — from concept to working demo in days, iterating rapidly with PMs and directors.</li>
+      <li>Defined the API surface, tool schemas, authentication model, and production rollout strategy; designed for safe, incremental adoption alongside existing REST and GraphQL APIs and clients.</li>
+      <li>Became the key engineering representative for AI integration strategy, shaping the company's technical roadmap for LLM-powered product features across multiple teams.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">GraphQL Federation Gateway — Unified API for AI &amp; Product Consumers</span>
+    <ul>
+      <li>Designed and integrated a Netflix DGS subgraph into CarGurus' federated GraphQL gateway, creating a unified API layer that serves frontend, backend, and AI consumers (including the new AI chatbot/shopping assistant) from a single graph.</li>
+      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies; built load tests and staging integration tests. Migrating legacy REST endpoints to support the expanding AI platform.</li>
     </ul>
   </div>
 
   <div class="project">
     <span class="project-name">High-Traffic Legacy API Modernization</span>
     <ul>
-      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); the new implementation handled 50% of traffic during A/B testing.</li>
-      <li>Introduced a new orchestration service and GraphQL boundary, consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes.</li>
-      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm); consolidated 12 downstream integrations into 5 well-defined services.</li>
     </ul>
     <div class="metrics">
       <div class="m">p99: 250 ms → 50 ms <span>(5×)</span></div>
       <div class="m">Availability: 98% → 99.9%</div>
       <div class="m">Deploy: 1 hr → 3 min <span>(20×)</span></div>
     </div>
-    <ul style="margin-left:12px; margin-top:2px;">
-      <li>Defined architectural standards for new microservices; built a parity-testing framework validating full payload and data-integrity against the legacy stack; removed years of hidden domain logic with clear documentation.</li>
-    </ul>
   </div>
 
   <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server (0→1 POC)</span>
+    <span class="project-name">Digital Shopping &amp; Online Leads Products (0→1, Multiple Launches)</span>
     <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, exposing CarGurus capabilities into ChatGPT as a high-visibility proof-of-concept.</li>
-      <li>Delivered a performant implementation to unblock demos for PMs and directors, iterating on ambiguous requirements; designed for safe, incremental production rollout alongside existing APIs and clients.</li>
-    </ul>
-  </div>
-
-  <div class="project">
-    <span class="project-name">Digital Shopping &amp; Online Leads Products</span>
-    <ul>
-      <li>Led backend design and implementation for a new digital shopping product launched during the pandemic to capture online leads, using a microservice and event-driven architecture for inventory, merchandising, and lead flows.</li>
-      <li>Subsequently led backend work for additional digital commerce experiments, enabling the company to quickly launch and safely retire product bets without destabilizing core systems.</li>
+      <li>As founding backend engineer of the innovation lab, shipped multiple 0→1 products from concept to production — including a digital commerce platform built during the pandemic using microservice and event-driven architecture.</li>
+      <li>Enabled the company to rapidly test, launch, and safely retire product experiments without destabilizing core systems.</li>
     </ul>
   </div>
 
   <div class="project compact">
     <span class="project-name">Cross-Org Platform &amp; API Leadership</span>
     <ul>
-      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored key design docs, RFCs, and decision records that drove consensus across platform and product teams.</li>
-      <li>Mentored multiple senior engineers on system design, performance work, and path to Principal-level scope.</li>
+      <li>Established patterns for API design, extensibility, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and decision records driving consensus across platform and product teams.</li>
+      <li>Mentored multiple senior engineers on system design, performance, and path to Principal-level scope.</li>
     </ul>
   </div>
 </div>
