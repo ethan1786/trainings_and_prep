@@ -15,15 +15,15 @@ python find_remote_jobs.py stripe --keyword "staff"
 
 ## Target Roles (1 per company)
 
-### 1. Stripe — Staff Engineer, Workflow Engine
+### 1. Stripe — Staff Engineer, Experimental Projects
 - **Priority**: #1
-- **Location**: US-Remote, Seattle, San Francisco
-- **Department**: Service Platform
-- **Fit**: ⭐⭐⭐⭐⭐ — distributed orchestration, Staff level, matches MCP/service platform experience
-- **Est. TC**: $450K–$650K
-- **URL**: https://job-boards.greenhouse.io/stripe/jobs/7600571
-- **ATS**: Greenhouse (board: stripe)
-- **Job ID**: 7600571
+- **Location**: Remote - USA
+- **Department**: Data & Data Science (Innovation Lab)
+- **Fit**: ⭐⭐⭐⭐ — 12+ yrs, 0→1 prototyping, innovation lab background, MCP/ChatGPT, cross-org leadership
+- **Est. TC**: $400K–$600K (base $246K–$370K + equity + bonus)
+- **URL**: https://stripe.com/jobs/listing/staff-engineer-experimental-projects/7280343
+- **Job ID**: 7280343
+- **Note**: Original Workflow Engine role (7600571) no longer remote. This role matches innovation lab experience.
 - **Status**: [ ] To apply
 
 ### 2. Netflix — Software Engineer L6, Technical Catalog
