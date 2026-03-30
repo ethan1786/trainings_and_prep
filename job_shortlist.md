@@ -35,7 +35,7 @@ python find_remote_jobs.py stripe --keyword "staff"
 - **URL**: https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer--L6----Technical-Catalog_JR37313
 - **ATS**: Workday (netflix)
 - **Job ID**: JR37313
-- **Status**: [ ] To apply
+- **Status**: [x] To apply
 
 ### 3. Datadog — Staff Software Engineer
 - **Priority**: #3
