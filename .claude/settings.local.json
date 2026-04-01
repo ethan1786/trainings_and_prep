@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__glean_default__search",
+      "mcp__glean_default__chat",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}

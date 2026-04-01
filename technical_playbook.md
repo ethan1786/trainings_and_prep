@@ -972,6 +972,38 @@ return candidate;  // guaranteed majority exists
 ```
 Cancel different elements pairwise — the majority element always survives. O(n) time, O(1) space.
 
+**How it works**: Think of it as a battle royale. Maintain a `candidate` and a `count`. When count drops to 0, pick the current element as the new candidate. If the next element matches, increment; otherwise, decrement. Since the majority element has more than n/2 occurrences, it can't be fully canceled out by all other elements combined — it always survives as the final candidate.
+
+**Generalized: find all elements appearing more than n/k times (LC 229 for k=3)**
+
+At most **k-1 elements** can appear more than n/k times. Maintain **k-1 candidates** with k-1 counters:
+```java
+// LC 229: elements appearing more than n/3 times (k=3, so 2 candidates)
+int c1 = 0, c2 = 0, count1 = 0, count2 = 0;
+for (int num : nums) {
+    if (num == c1)           count1++;
+    else if (num == c2)      count2++;
+    else if (count1 == 0)  { c1 = num; count1 = 1; }
+    else if (count2 == 0)  { c2 = num; count2 = 1; }
+    else                   { count1--; count2--; }  // three-way cancellation
+}
+// MUST verify — unlike LC 169, majority is not guaranteed
+count1 = 0; count2 = 0;
+for (int num : nums) {
+    if (num == c1) count1++;
+    else if (num == c2) count2++;
+}
+List<Integer> result = new ArrayList<>();
+if (count1 > nums.length / 3) result.add(c1);
+if (count2 > nums.length / 3) result.add(c2);
+```
+The `if/else if` ordering matters — check existing candidates *before* checking empty slots to avoid assigning the same value to both candidates.
+
+**When you'll see this in interviews**:
+- LC 169/229 directly
+- Streaming/big data: "find dominant element with O(1) memory" — single-pass + constant space is the key selling point
+- Follow-up to a hash map solution: "can you do it without extra space?"
+
 ### Kadane's Algorithm (LC 53 — Maximum Subarray)
 ```java
 int maxHere = nums[0], maxSoFar = nums[0];
@@ -980,7 +1012,37 @@ for (int i = 1; i < nums.length; i++) {
     maxSoFar = Math.max(maxSoFar, maxHere);
 }
 ```
-**Variant** (LC 152 — Maximum Product Subarray): track both `maxHere` and `minHere` because a negative × negative can become the max.
+
+**How it works**: At each index, decide: **extend the previous subarray or start fresh here?** `maxHere` = max subarray sum ending at current index. If the running sum has gone negative, it's dragging you down — start fresh. This is really 1D DP with space optimization: `dp[i] = max(nums[i], dp[i-1] + nums[i])`, compressed to a single variable since `dp[i]` only depends on `dp[i-1]`.
+
+**Variants**:
+
+*LC 152 — Maximum Product Subarray*: a negative × negative = positive, so track both max AND min:
+```java
+int maxHere = nums[0], minHere = nums[0], result = nums[0];
+for (int i = 1; i < nums.length; i++) {
+    int temp = maxHere;
+    maxHere = Math.max(nums[i], Math.max(maxHere * nums[i], minHere * nums[i]));
+    minHere = Math.min(nums[i], Math.min(temp * nums[i], minHere * nums[i]));
+    result = Math.max(result, maxHere);
+}
+```
+
+*LC 918 — Maximum Circular Subarray*: max circular subarray is either a normal max subarray, or the total sum minus the **minimum** subarray (wrap-around case): `answer = max(maxKadane, totalSum - minKadane)`. Edge case: if all negative, `totalSum - minKadane = 0`, so use `maxKadane`.
+
+*2D — Max sum path (right/down)*: same "extend or restart" in two directions:
+`dp[i][j] = matrix[i][j] + max(0, dp[i-1][j], dp[i][j-1])`
+
+*2D — Max sum subrectangle*: fix two rows (top/bottom), compress each column into a sum, run 1D Kadane's on the compressed array. O(m² × n):
+```java
+for (int top = 0; top < m; top++) {
+    int[] colSum = new int[n];
+    for (int bot = top; bot < m; bot++) {
+        for (int j = 0; j < n; j++) colSum[j] += matrix[bot][j];
+        maxSum = Math.max(maxSum, kadane(colSum));
+    }
+}
+```
 
 ### Dutch National Flag (LC 75 — Sort Colors)
 ```java
@@ -991,7 +1053,19 @@ while (mid <= hi) {
     else mid++;
 }
 ```
-3-way partition in a single pass. Generalizes to any 3-category sort.
+**How it works**: Maintain three pointers that partition the array into four regions: `[0..lo-1]` = 0s, `[lo..mid-1]` = 1s, `[mid..hi]` = unprocessed, `[hi+1..n-1]` = 2s. All regions start empty (`lo=0, mid=0, hi=n-1` — entire array is unprocessed). `mid` scans forward, placing each element into its region:
+- `nums[mid] == 0`: swap with `nums[lo]`, advance both — the swapped-in value is a confirmed 1
+- `nums[mid] == 2`: swap with `nums[hi]`, shrink `hi` — do NOT advance `mid`, the swapped-in value is unprocessed
+- `nums[mid] == 1`: already in place, advance `mid`
+
+No preconditions needed. Works with fewer than 3 distinct values (missing regions stay empty), arrays of any size.
+
+**Beyond 3 partitions**: DNF doesn't extend cleanly to k > 3 (only 2 ends to work from). Options:
+- **k = 2**: standard two-pointer partition
+- **k = 3**: Dutch National Flag — single pass, O(1) space
+- **k > 3**: counting sort — O(n) time, O(k) space, two passes (count then fill)
+
+**Real-world use**: 3-way quicksort — partition into `< pivot | == pivot | > pivot`. Avoids reprocessing equal elements when there are many duplicates.
 
 ### In-Place Array Marking (LC 41 — First Missing Positive)
 Use array indices as a hash map — place each value `v` at index `v - 1`:
@@ -1003,6 +1077,20 @@ for (int i = 0; i < n; i++)
     if (nums[i] != i + 1) return i + 1;
 return n + 1;
 ```
+
+**How it works**: The answer must be in `[1, n+1]` (at most n positive values in n slots). Use the array itself as a hash map: swap each value `v` to index `v-1` until every valid value is "home." Then scan — first index where `nums[i] != i+1` is the answer.
+
+**Why `while` not `if`**: a single swap places one value home, but the swapped-in value may also need placement. The `while` chains swaps until the current position holds an invalid or already-homed value.
+
+**Three guards**: `nums[i] > 0` (ignore negatives/zero — no home), `nums[i] <= n` (ignore values > n — answer is at most n+1), `nums[nums[i]-1] != nums[i]` (destination already correct — prevents infinite loop on duplicates).
+
+**O(n) despite nested loops**: each swap places exactly one value in its final position (never moves again). At most n total swaps across all iterations.
+
+**Interview signal**: "values in range [1..n]" + "O(1) space" → use indices as a hash map.
+
+**Related — LC 268 (Missing Number)**: simpler variant (find one missing from `[0..n]`). Two O(n)/O(1) approaches:
+- **Sum**: `n*(n+1)/2 - sum(nums)` — intuitive but risks integer overflow for large n
+- **XOR**: `xor = n; for (i=0..n-1) xor ^= i ^ nums[i]` — paired values cancel (`a^a=0`), the missing value survives. No overflow risk. Same principle as LC 136 (Single Number).
 
 ### Reservoir Sampling (LC 382 — Linked List Random Node)
 Select a random element from a stream of unknown length:
@@ -1016,8 +1104,40 @@ while (curr != null) {
 }
 ```
 
+**How it works**: For each node at position `count`, keep it with probability `1/count`. Proof every element gets `1/n`: node `i` must be picked at step `i` (prob `1/i`) AND survive all later replacements (prob `i/(i+1) × ... × (n-1)/n`). Terms telescope to `1/n`.
+
+**Generalized (k items)**: fill reservoir with first k items, then for each subsequent item `i`, replace a random reservoir slot with probability `k/(i+1)`. Same telescoping proof gives `k/n` per element.
+
+**Tradeoff vs array**: both are O(n) total time. Array approach pays O(n) space once, then O(1) per pick. Reservoir pays O(1) space but O(n) on **every pick**. Reservoir only wins when you can't store the data (stream too large, unknown length, single pass required).
+
 ### Bucket Sort (LC 164 — Maximum Gap)
 When value range is bounded, sort in O(n) by distributing into buckets. For Maximum Gap: bucket size = `(max - min) / (n - 1)`, then max gap is between consecutive non-empty buckets.
+
+**How it works**: By pigeonhole principle, the max gap among n numbers in range `[min, max]` is at least `(max-min)/(n-1)`. Create buckets of that size — the max gap can never be *within* a bucket, only *between* consecutive non-empty buckets. So only track min/max per bucket, then scan:
+```java
+int bucketSize = Math.max(1, (max - min) / (n - 1));
+int bucketCount = (max - min) / bucketSize + 1;
+int[] bMin = new int[bucketCount], bMax = new int[bucketCount];
+Arrays.fill(bMin, Integer.MAX_VALUE); Arrays.fill(bMax, Integer.MIN_VALUE);
+for (int num : nums) {
+    int idx = (num - min) / bucketSize;
+    bMin[idx] = Math.min(bMin[idx], num);
+    bMax[idx] = Math.max(bMax[idx], num);
+}
+int maxGap = 0, prevMax = min;
+for (int i = 0; i < bucketCount; i++) {
+    if (bMin[i] == Integer.MAX_VALUE) continue;
+    maxGap = Math.max(maxGap, bMin[i] - prevMax);
+    prevMax = bMax[i];
+}
+```
+
+**Edge cases**: n < 2 → return 0. All equal → bucket size floors to 0, so use `Math.max(1, ...)`.
+
+**Bucket sort beyond LC 164**: the pigeonhole trick is specific to this problem, but distributing into buckets for O(n) sorting applies elsewhere:
+- **LC 347 (Top K Frequent)**: bucket by frequency — index = count, value = list of elements with that count. Scan from highest bucket. Avoids heap's O(n log k)
+- **LC 220 (Contains Duplicate III)**: bucket by value range — elements in the same or adjacent bucket are within distance `t`. Sliding window of buckets checks both value and index constraints
+- **General pattern**: when values are bounded or you need to group by a computable key, buckets give O(n) vs comparison-based O(n log n)
 
 ### Next Permutation (LC 31)
 Four steps — memorize the procedure:
