@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yifei Sun — Resume — OpenAI</title>
+<style>
+  /* ── Color Themes ─────────────────────────────────────────────── */
+  :root {
+    --accent: #1a365d;
+    --accent-light: #2c5282;
+    --accent-muted: #a0b4cc;
+    --accent-bg: #edf2f7;
+    --highlight: #2b6cb0;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --text-light: #718096;
+    --border: #cbd5e0;
+    --page-bg: #ffffff;
+  }
+
+  /* ── Page & Print ─────────────────────────────────────────────── */
+  @page { size: letter; margin: 0.45in 0.55in; }
+  @media print {
+    body { margin: 0; padding: 0; }
+    a { color: var(--accent-light) !important; text-decoration: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+
+  /* ── Base ──────────────────────────────────────────────────────── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+    font-size: 9pt;
+    line-height: 1.42;
+    color: var(--text);
+    background: var(--page-bg);
+    max-width: 7.5in;
+    margin: 0 auto;
+    padding: 0.45in 0;
+  }
+
+  /* ── Header ───────────────────────────────────────────────────── */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .header-left h1 {
+    font-size: 24pt;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .header-left .tagline {
+    font-size: 9pt;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .header-right a {
+    color: var(--accent-light);
+    text-decoration: none;
+  }
+
+  /* ── Section Headings ─────────────────────────────────────────── */
+  .section-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #ffffff;
+    background: #0f2440;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 3px 8px;
+    margin-top: 10px;
+    margin-bottom: 7px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── Summary ──────────────────────────────────────────────────── */
+  .summary {
+    font-size: 9pt;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+
+  /* ── Tech Sub-line ────────────────────────────────────────────── */
+  .tech-sub {
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .tech-sub-label {
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* ── Leadership Highlights ────────────────────────────────────── */
+  .highlights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 20px;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .highlights li {
+    list-style: none;
+    padding-left: 10px;
+    position: relative;
+  }
+  .highlights li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── Job Block ────────────────────────────────────────────────── */
+  .job {
+    margin-bottom: 10px;
+  }
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: var(--accent-bg);
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .job-header .company {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .job-header .role {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: var(--text);
+    margin-left: 8px;
+  }
+  .job-header .dates {
+    font-size: 8pt;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+
+  /* ── Project Block ────────────────────────────────────────────── */
+  .project {
+    margin-bottom: 5px;
+    padding-left: 8px;
+  }
+  .project-name {
+    font-weight: 700;
+    font-size: 8.5pt;
+    color: var(--highlight);
+  }
+  .project ul {
+    margin: 1px 0 0 12px;
+    padding: 0;
+  }
+  .project li {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 1px;
+  }
+  .project p {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  /* ── Metrics Callout ──────────────────────────────────────────── */
+  .metrics {
+    display: inline-flex;
+    gap: 16px;
+    margin: 2px 0 2px 12px;
+    font-size: 8.5pt;
+  }
+  .metrics .m {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .metrics .m span {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* ── Education ────────────────────────────────────────────────── */
+  .edu-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1px;
+    padding-left: 8px;
+  }
+  .edu-row .school {
+    font-weight: 600;
+    font-size: 8.5pt;
+  }
+  .edu-row .year {
+    font-size: 8pt;
+    color: var(--text-light);
+  }
+
+  /* ── Utilities ────────────────────────────────────────────────── */
+  .compact { margin-bottom: 4px; }
+  .muted { color: var(--text-light); }
+  .small { font-size: 8pt; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════════════════════ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Yifei Sun</h1>
+    <div class="tagline">Principal Software Engineer &middot; API &amp; Developer Platform Architecture &middot; 13 Years</div>
+  </div>
+  <div class="header-right">
+    (617) 922-4823<br>
+    sun1fei@gmail.com<br>
+    <a href="https://www.linkedin.com/in/yifei-sun-a789861b">linkedin.com/in/yifei-sun-a789861b</a>
+  </div>
+</div>
+
+<!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
+<div class="section-title">Summary</div>
+<p class="summary">
+  Principal-level backend &amp; platform engineer with 13 years of experience designing production APIs,
+  distributed systems, and platform infrastructure at scale. Recent work includes building an MCP server
+  on the OpenAI Apps SDK — designing API contracts and serving infrastructure for ChatGPT integration —
+  and architecting a high-traffic API modernization that cut p99 latency 5&times; while reaching 99.9% availability.
+  Track record of owning major platform capabilities end-to-end, driving technical direction across 10+ teams,
+  and shipping complex 0&rarr;1 systems from inception through production with a high bar for API design,
+  reliability, and developer experience.
+</p>
+
+<!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
+<div class="section-title">Leadership Highlights</div>
+<ul class="highlights">
+  <li>Designed and shipped production APIs and platform services powering millions of daily requests across multiple consumer types</li>
+  <li>Led multi-team platform migrations spanning 10+ engineering teams across 3 departments</li>
+  <li>Built on OpenAI Apps SDK (MCP server) — firsthand understanding of the developer platform experience</li>
+  <li>Mentored senior engineers toward Principal-level scope; drove cross-org architectural standards via RFCs</li>
+</ul>
+<div class="tech-sub">
+  <span class="tech-sub-label">Technologies:</span>
+  Java, Spring Boot, Python, Node.js &middot; AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL &middot;
+  GraphQL (Netflix DGS), REST API Design, Microservices, Event-Driven, CQRS &middot;
+  OpenAI Apps SDK, MCP Protocol, LLM Integration &middot; Datadog, Grafana &middot; Keycloak, SSO, OAuth 2.0
+</div>
+
+<!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
+<div class="section-title">Independent Project</div>
+<div class="project" style="padding-left:8px;">
+  <span class="project-name">GenAI Platform — Inference Infrastructure &amp; Evaluation System</span>
+  <ul>
+    <li>Architected a platform with hybrid rules + multi-path LLM inference (fast vs. deep), configurable routing across multiple LLM providers, and a policy overlay — producing explainable real-time recommendations over heterogeneous data sources.</li>
+    <li>Built an evaluation and experimentation system ("Prompt Lab") for end-to-end simulation, offline backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with robust observability and multi-provider LLM support.</li>
+    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions — enabling safe, iterative system improvement.</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════ EXPERIENCE ══════════════════════════════ -->
+<div class="section-title">Experience</div>
+
+<!-- ── CarGurus ──────────────────────────────────────────────── -->
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">CarGurus</span><span class="role">— Principal Software Engineer / Technical Lead</span></div>
+    <span class="dates">Oct 2019 – Present</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">OpenAI Apps SDK MCP Server — Developer Platform Integration (0&rarr;1)</span>
+    <ul>
+      <li>Sole backend engineer designing and implementing an MCP server on the OpenAI Apps SDK, exposing CarGurus capabilities into ChatGPT — defining the API contracts, tool schema, serving infrastructure, and request/response interfaces with care for developer experience.</li>
+      <li>Delivered a production-grade implementation under ambiguity; iterated rapidly with PMs and directors on API surface design and behavior; designed for safe, incremental rollout alongside existing APIs and consumers.</li>
+      <li>Gained firsthand experience as a builder on OpenAI's developer platform — understanding integration pain points, SDK ergonomics, and API design tradeoffs from the consumer side.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">High-Traffic API Modernization — Core Platform Infrastructure</span>
+    <ul>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); new implementation handled 50% of traffic during A/B rollout.</li>
+      <li>Introduced a new orchestration service and API boundary, consolidating 12 downstream integrations into 5 well-defined services with clear contracts, reducing fan-out and simplifying failure modes.</li>
+      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
+    </ul>
+    <div class="metrics">
+      <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
+      <div class="m">Availability: 98% &rarr; 99.9%</div>
+      <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
+    </div>
+    <ul style="margin-left:12px; margin-top:2px;">
+      <li>Defined API design standards for new microservices; built a parity-testing framework validating full payload and data-integrity against the legacy stack; removed years of hidden domain logic with clear documentation.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">GraphQL Federation — Unified API Serving Layer</span>
+    <ul>
+      <li>Designed and integrated a Netflix DGS subgraph into CarGurus' federated GraphQL gateway, creating a unified API layer for frontend, backend, and AI consumers from a single graph with consistent contracts.</li>
+      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies; built load tests and integration tests ensuring production-grade reliability and API quality.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Digital Commerce Platform &amp; Experimentation</span>
+    <ul>
+      <li>Led backend design and launch of multiple new products using microservice and event-driven architecture; enabled the company to quickly launch and safely retire product experiments without destabilizing core systems.</li>
+    </ul>
+  </div>
+
+  <div class="project compact">
+    <span class="project-name">Cross-Org Platform Leadership &amp; Engineering Velocity</span>
+    <ul>
+      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored key design docs, RFCs, and decision records that drove consensus across platform and product teams.</li>
+      <li>Mentored multiple senior engineers on system design, API craft, and path to Principal-level scope.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Applause ──────────────────────────────────────────────── -->
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">Applause</span><span class="role">— Senior Software Engineer / Technical Lead</span></div>
+    <span class="dates">Oct 2017 – Oct 2019</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Authentication &amp; Identity Platform — Enterprise Security</span>
+    <ul>
+      <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform, unifying auth across internal systems, an enterprise partner platform, and a large external community. Introduced social and mobile login; migrated multiple Angular, Node.js, and Java monoliths behind the new auth gateway with minimal downtime.</li>
+    </ul>
+  </div>
+  <div class="project">
+    <span class="project-name">Event Sourcing &amp; CQRS Platform Initiative</span>
+    <ul>
+      <li>Drove design and prototyping of a microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
+    </ul>
+  </div>
+  <div class="project compact">
+    <span class="project-name">Cross-Org Collaboration &amp; Enterprise Integrations</span>
+    <ul>
+      <li>Partnered with product, support, and customer-facing teams to modernize internal workflows and enterprise integrations with clear observability, rollback paths, and compliance considerations.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────── -->
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">Toast Inc.</span><span class="role">— Senior Software Engineer (Early Engineer)</span></div>
+    <span class="dates">Sep 2014 – Oct 2017</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Monolith &rarr; Microservices — Founding Platform Services</span>
+    <ul>
+      <li>Among the earliest engineers during hypergrowth (first customer to hundreds in a few years); designed and implemented core backend services (Order Service, Labor Service, foundational APIs) that became the basis for the platform's growth to billions in GMV.</li>
+      <li>Built initial AWS deployment pipelines before a dedicated DevOps team existed; created the first automated testing framework, enabling safer releases during rapid product and team expansion.</li>
+    </ul>
+  </div>
+  <div class="project compact">
+    <span class="project-name">Third-Party API Integrations &amp; Partner Platform</span>
+    <ul>
+      <li>Led integrations with key partners (e.g., workforce management), designing reliable bidirectional sync and schema evolution. Partnered with PMs, sales, and support to translate customer feedback into API and platform capabilities.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── MathWorks ─────────────────────────────────────────────── -->
+<div class="job compact">
+  <div class="job-header">
+    <div><span class="company">The MathWorks Inc.</span><span class="role">— Software Engineer II</span></div>
+    <span class="dates">Jul 2013 – Aug 2014</span>
+  </div>
+  <div class="project">
+    <p>Developed internal engineering tools for MATLAB/Simulink workflows. Improved backend automation systems for build/test reliability and developer productivity.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════ EDUCATION ═══════════════════════════════ -->
+<div class="section-title">Education</div>
+<div class="edu-row">
+  <span class="school">M.S. in Electrical and Computer Engineering — Northeastern University, Boston</span>
+  <span class="year">2010 – 2013</span>
+</div>
+<div class="edu-row">
+  <span class="school">B.S. in Information Science — Beijing University of Aeronautics and Astronautics</span>
+  <span class="year">2006 – 2010</span>
+</div>
+
+</body>
+</html>
