@@ -178,7 +178,20 @@ You don't need to be a blockchain expert, but show baseline literacy:
 
 ---
 
-## 10. Red Flags to Watch For
+## 10. Addressing Potential Concerns
+
+### "The JD says 12+ years in Go or similar — your stack is Java"
+> "My 13 years are in Java/Spring Boot and Python, not Go specifically. But the JD says 'Golang or similar languages' — the distributed systems patterns, concurrency models, and service-oriented architecture I've built throughout my career transfer directly. I've picked up new language ecosystems multiple times (Java → Node.js → Python for my GenAI platform), and Go's simplicity is designed for fast ramp-up. At this level, the systems thinking matters more than the language."
+
+### "Do you have experience getting LLM-based applications to production?"
+> "Yes — two systems. First, the MCP server on the OpenAI Apps SDK, which I shipped to production as the sole backend engineer — defining tool schemas, serving infrastructure, and rollout strategy. Second, my GenAI automation platform, which has multi-provider LLM orchestration, RAG-augmented inference, and a full evaluation harness with hallucination detection. Both are production systems, not prototypes."
+
+### "Have you made build/buy decisions for AI tooling?"
+> "Yes. For the GenAI platform, I evaluated existing LLM orchestration frameworks vs. building custom. I chose to build the orchestration and evaluation layers in-house because the requirements around policy-driven routing and domain-specific evaluation didn't map well to off-the-shelf tools, but used third-party LLM providers via a multi-provider abstraction. For the MCP server, I built on the OpenAI Apps SDK rather than building a custom integration — the right 'buy' decision because the SDK handled protocol details while I focused on the business-specific tool definitions."
+
+---
+
+## 11. Red Flags to Watch For
 
 - If "day 1" means no clear sponsorship or budget — check that leadership is truly committed to this initiative
 - If the team is expected to automate compliance without close compliance team partnership — regulatory risk
@@ -189,7 +202,7 @@ You don't need to be a blockchain expert, but show baseline literacy:
 
 ---
 
-## 11. Pre-Interview Checklist
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_coinbase.html

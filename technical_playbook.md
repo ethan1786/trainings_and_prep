@@ -119,7 +119,7 @@ while (lo < hi) {
 |---|---|
 | LC 1 (Two Sum) | HashMap for unsorted; two pointers if sorted |
 | LC 11 (Container With Most Water) | Shrink the shorter side |
-| LC 42 (Trapping Rain Water) | Track leftMax/rightMax from both ends |
+| LC 42 (Trapping Rain Water) | Track leftMax/rightMax from both ends. **Note**: more naturally a monotonic stack problem (find nearest greater on each side). The two-pointer approach here is a space optimization from O(n) → O(1) |
 | LC 15 (3Sum) | Sort + fix one + two pointers for remaining |
 
 ### Common Pitfalls
@@ -815,6 +815,7 @@ for (int i = 0; i < nums.length; i++) {
 ### Key Problems
 | Problem | Pattern |
 |---|---|
+| LC 42 (Trapping Rain Water) | Monotonic decreasing stack — find boundaries on each side, compute water when popping |
 | LC 739 (Daily Temperatures) | Monotonic decreasing stack |
 | LC 84 (Largest Rectangle) | Monotonic stack with sentinel |
 | LC 224 (Basic Calculator) | Stack for parentheses state |

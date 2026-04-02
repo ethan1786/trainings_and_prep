@@ -1,7 +1,7 @@
 # Datadog — Staff Software Engineer
 
 > **Full prep doc.** Read before recruiter screen, hiring manager call, and on-site.
-> Last updated: March 2026
+> Last updated: April 2026
 
 ---
 
@@ -41,10 +41,18 @@
 
 ## 3. Team Context — Staff SWE (Platform/Core)
 
-- Likely working on **core platform infrastructure**: ingestion pipelines, query engines, storage systems, or a new product area
-- **Scale is enormous** — trillions of data points per day, petabytes of storage, sub-second query latency
-- **Multi-tenancy is critical** — thousands of customers sharing infrastructure, each with different cardinality and volume profiles
-- Performance engineering isn't a nice-to-have — it's the product
+**From the JD — Staff Engineers operate in two modes:**
+1. **Individual contributors** — world-class technical abilities, delivering industry-leading systems (data visualization, runtime profiling, planet-scale streaming)
+2. **Technical leaders** — experienced breadth and communication skills, tackling design/architectural problems spanning the org, charting the course, leading delivery
+
+**Staff community:** Participate in staff engineering community, learn from industry and internal experience, improve company-wide software/systems engineering standards.
+
+**Example projects from JD:**
+- Designing a new data storage engine handling hundreds of millions of records per second
+- Lead engineer building a new product (like Synthetics or Profiling)
+- Rebuilding a critical service to handle the next two orders of magnitude of scale
+
+**Scale is enormous** — trillions of data points per day, petabytes of storage, sub-second query latency. Multi-tenancy is critical — thousands of customers with different cardinality and volume profiles.
 
 **Likely technical challenges:**
 - High-throughput data ingestion (millions of data points per second)
@@ -53,6 +61,7 @@
 - Multi-tenant isolation — noisy neighbor prevention, per-customer rate limiting and quotas
 - Real-time alerting pipeline with low false-positive rates
 - Data pipeline reliability — exactly-once semantics for metrics at massive scale
+- Rebuilding critical services for 2 orders of magnitude scale growth
 
 ---
 
@@ -67,6 +76,8 @@
 | Developer experience focus | Internal developer platforms, shared services, cross-org standards |
 | Cross-org leadership | Led migrations across 3 departments, authored RFCs and design docs |
 | JVM performance depth | JVM warmup, JIT profiling, data-structure-level optimization |
+| End-to-end ownership | MCP server: sole engineer from architecture through production. API modernization: from design to full-scale rollout |
+| AI coding tools proficiency | Uses AI tools daily (Claude, Copilot); built MCP server and GenAI platform; can validate and critique AI output |
 
 ---
 
@@ -174,7 +185,32 @@ Since Datadog is deeply technical, expect probing follow-ups. Be ready to go dee
 
 ---
 
-## 10. Red Flags to Watch For
+## 10. AI Coding Tools — JD Requirement
+
+The JD explicitly requires: **"demonstrated ability to use AI coding tools in day-to-day workflows and validate, critique, and refine AI-generated output."**
+
+Be ready to discuss:
+- **How you use AI tools:** "I use Claude Code and Copilot daily for prototyping, code generation, debugging, and system design exploration. For the MCP server, I used AI to rapidly iterate on implementation approaches before committing to the final design."
+- **How you validate AI output:** "I always verify generated code against tests, edge cases, and performance characteristics. I built an evaluation harness specifically because LLM output needs systematic measurement, not blind trust."
+- **Where AI falls short:** "AI tools are great for boilerplate, exploration, and first drafts. They're unreliable for performance-sensitive code paths where you need to reason about cache lines, GC pressure, or lock contention. I use AI to accelerate the 80%, then apply deep expertise to the 20% that matters most."
+- **Bonus — pushing AI boundaries:** "I built an MCP server that integrates with the OpenAI Apps SDK, and a GenAI platform with multi-provider LLM support. I'm actively thinking about how AI can improve engineering workflows — not just coding, but system design, incident response, and observability."
+
+---
+
+## 11. Addressing Potential Concerns
+
+### "Your scale experience is 8K rpm; Datadog processes trillions of data points per day"
+> "Fair point — CarGurus is meaningful scale (millions of daily requests, 99.9% availability) but not Datadog-level. Two things: first, the architectural patterns I've built — horizontal scaling, event-driven pipelines, multi-service orchestration, caching tiers — are designed for linear scale-out. Second, I was an early engineer at Toast through hypergrowth, building services that had to handle orders-of-magnitude growth. The JD talks about 'rebuilding a critical service for the next two orders of magnitude' — I've done that. I know how to architect for a moving target."
+
+### "You haven't built data storage engines or time-series systems"
+> "True — my experience is in platform services, API infrastructure, and orchestration rather than storage engines specifically. But the JD describes three types of Staff projects: storage engines, new products, and critical service rebuilds. My strength is the second and third — building new products from scratch (MCP server, digital commerce) and rebuilding critical services at scale (API modernization). The systems thinking transfers to storage and pipeline work."
+
+### "Your primary language is Java; Datadog uses Go/Python"
+> "Java is my primary language, with Python and Node.js as secondary. Go's concurrency model and simplicity actually align well with how I already think about concurrent systems in Java. At this level, the distributed systems expertise, performance engineering skills, and architectural leadership matter more than the specific language."
+
+---
+
+## 12. Red Flags to Watch For
 
 - If the team is purely scaling existing systems with no architectural evolution
 - If "Staff" scope is really just senior-level work without cross-team influence
@@ -183,7 +219,7 @@ Since Datadog is deeply technical, expect probing follow-ups. Be ready to go dee
 
 ---
 
-## 11. Pre-Interview Checklist
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_datadog.html
@@ -192,4 +228,6 @@ Since Datadog is deeply technical, expect probing follow-ups. Be ready to go dee
 - [ ] Review technical_playbook.md: concurrency, data structures for high-throughput
 - [ ] Brush up on time-series storage concepts (gorilla compression, inverted index)
 - [ ] Have "Why Datadog?" answer ready
+- [ ] Prepare AI coding tools answers (Section 10) — this is an explicit JD requirement
+- [ ] Prepare responses to potential concerns (Section 11)
 - [ ] Prepare 3 questions per interviewer

@@ -51,8 +51,8 @@ This is a multi-team hire. The sub-teams you're best positioned for:
 - **Your MCP server + GenAI evaluation platform directly apply here**
 
 ### Extensibility (strong fit)
-- Owns plugin, widget, and REST APIs for developer integrations
-- Recently launched MCP offerings integrating Figma into the wider AI ecosystem
+- Owns plugin, widget, and REST APIs that enable developers to build their own Figma integrations
+- Partners with product teams to develop recently-launched **MCP offerings and server platforms** integrating Figma into the wider AI ecosystem
 - **Your MCP server work is literally what this team builds**
 
 ### Search & Recommendations (good fit)
@@ -85,6 +85,7 @@ This is a multi-team hire. The sub-teams you're best positioned for:
 | System design and resilience | API modernization: 8K rpm, p99 5×, 99.9% availability |
 | Cross-team collaboration | Led cross-org initiatives across 3 departments; mentored engineers; wrote RFCs |
 | 0→1 platform building | MCP server, digital commerce, GenAI engine — repeated greenfield execution |
+| Debug complex production issues across services | API modernization required deep debugging across 12 downstream services; parity testing framework for cross-service validation |
 | TypeScript/Python proficiency | Node.js/TypeScript and Python in your stack |
 
 ---
@@ -212,7 +213,23 @@ Practice tip: Focus on tree manipulation, string processing, and graph traversal
 
 ---
 
-## 11. Red Flags to Watch For
+## 11. Addressing Potential Concerns
+
+### "The comp range is $153K-$376K — what level am I being considered for?"
+Ask this in the recruiter screen. With 13 years and Principal title, you should target the top of the band. If they come back with a mid-level offer, that's a red flag — the scope won't match your experience. Clarify early: *"Given my Principal-level background and 13 years of experience, can you confirm what level this maps to in Figma's framework?"*
+
+### "You have 13 years but the JD says 5+ — are you overqualified?"
+> "Figma says 'Grow As You Go' and hires for curiosity and impact, not exact experience match. My 13 years mean I can operate at the intersection of platform strategy AND hands-on implementation — I'm not just architecting, I'm shipping code. For a platform team that needs to influence across the AI org, that combination of seniority and execution is an asset."
+
+### "You don't have ML model training/serving experience (Modeling Platform team)"
+> "That's true — my experience is on the platform and application side, not ML infrastructure. I'm best suited for Agent Platform or Extensibility, where the work is building frameworks, tool-calling infrastructure, and developer platforms — not training or serving models. That said, I've built multi-provider LLM integration and evaluation systems, so I understand the serving and evaluation side even if I haven't trained models."
+
+### "Your primary language is Java, not TypeScript/Python/Ruby"
+> "I work in Python for my GenAI platform and have Node.js/TypeScript experience. My Java expertise translates directly to backend systems thinking. At this level, the platform design skills, system architecture, and cross-team collaboration are more differentiated than the specific language."
+
+---
+
+## 12. Red Flags to Watch For
 
 - If the AI platform team is siloed from product teams (should be deeply partnered)
 - If "AI Platforms" is really just infra support for a small research team with no product impact
@@ -222,7 +239,7 @@ Practice tip: Focus on tree manipulation, string processing, and graph traversal
 
 ---
 
-## 12. Pre-Interview Checklist
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_figma.html
