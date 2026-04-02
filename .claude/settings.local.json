@@ -3,7 +3,12 @@
     "allow": [
       "mcp__glean_default__search",
       "mcp__glean_default__chat",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "WebFetch(domain:www.linkedin.com)",
+      "WebFetch(domain:www.pinterestcareers.com)",
+      "WebFetch(domain:boards.greenhouse.io)",
+      "WebFetch(domain:job-boards.greenhouse.io)",
+      "WebFetch(domain:www.coinbase.com)"
     ]
   }
 }

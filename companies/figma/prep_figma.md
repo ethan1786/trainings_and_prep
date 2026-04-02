@@ -1,7 +1,7 @@
-# Figma — Software Engineer, Distributed Systems (Infrastructure)
+# Figma — Software Engineer, AI Platforms
 
 > **Full prep doc.** Read before recruiter screen, hiring manager call, and on-site.
-> Last updated: March 2026
+> Last updated: April 2026
 
 ---
 
@@ -16,44 +16,61 @@
 **Recent news worth mentioning:**
 - Independence after Adobe acquisition fell through ($20B deal blocked by regulators in 2024)
 - Figma AI — generative design features, auto-layout suggestions, design-to-code
+- MCP offerings — Figma recently launched MCP server integrations for the wider AI ecosystem
 - Dev Mode expansion — bridging design-to-development handoff
-- Enterprise adoption growth — larger organizations, more complex permission/governance needs
-- Significant investment in infrastructure to support real-time collaboration at growing scale
 - Slides product launch — expanding beyond design tools
+- Heavy investment in AI platforms to power the next generation of design tools
 
 ---
 
 ## 2. Engineering Culture & Values
 
 - **Small, high-caliber engineering team:** Figma is selective. Every engineer has outsized impact. Think "small team, big problems."
-- **Real-time collaboration is the core technical differentiator:** CRDTs, distributed storage, WebSocket infrastructure are foundational, not nice-to-haves.
-- **Strong emphasis on developer experience and internal tooling:** Infrastructure engineers build platforms that product engineers consume.
-- **Languages:** Rust, C++ (real-time engine), TypeScript (frontend), distributed systems backend. Growing use of Kafka, PostgreSQL, custom storage.
+- **"Grow As You Go":** They hire for curiosity and learning ability, not just exact experience match.
+- **Strong emphasis on developer experience and internal tooling:** Platform engineers build frameworks that product engineers consume.
+- **Languages:** TypeScript (primary), Python, Ruby, Rust, C++. Growing AI/ML stack.
 - **High coding bar:** Expect medium-hard algorithmic problems. They value engineers who can write clean, efficient code.
-- **Build vs. buy culture:** Figma builds a lot of custom infrastructure when off-the-shelf doesn't meet their latency/consistency requirements.
+- **Build vs. buy culture:** Figma builds custom infrastructure when off-the-shelf doesn't meet their requirements.
 
 **What this means for your interview:**
-- Expect a strong coding round. Practice LeetCode medium-hard, especially graph/tree problems and concurrency.
-- Show you can design systems with **real-time constraints** — sub-100ms latency for collaborative operations.
-- Demonstrate you understand the tradeoffs of building custom infrastructure vs. using managed services.
-- Show breadth AND depth — small team means you'll touch many areas.
+- Expect a strong coding round. Practice LeetCode medium-hard.
+- Show you can build platforms that accelerate other teams — developer velocity is a key metric.
+- Demonstrate breadth AND depth — small team means you'll touch many areas.
+- Show genuine excitement about AI's potential in design/creative tools.
 
 ---
 
-## 3. Team Context — Distributed Systems / Infrastructure
+## 3. Team Context — AI Platforms (4 Sub-teams)
 
-- **Backend infrastructure:** Distributed storage, streaming pipelines, data infrastructure, service platform
-- **Supporting real-time collaboration at scale:** Every keystroke, drag, and resize must propagate to all collaborators in real-time
-- **Core systems:** Kafka-based event pipelines, PostgreSQL (with custom extensions), distributed caching, WebSocket infrastructure
-- **Growing challenges:** Enterprise adoption means multi-region, larger files, more concurrent editors, stricter data residency
+This is a multi-team hire. The sub-teams you're best positioned for:
 
-**Likely technical challenges:**
-- Distributed storage that supports real-time concurrent access (CRDT-based or OT-based conflict resolution)
-- Streaming pipeline for propagating design changes to all connected clients
-- Data pipeline for analytics, search indexing, and ML features (Figma AI needs training data)
-- Multi-region deployment for enterprise customers with data residency requirements
-- Database scaling — PostgreSQL sharding and read replica management as data volume grows
-- File storage and versioning — design files can be large, with deep version history
+### Agent Platform (strongest fit)
+- Builds frameworks and systems powering agentic AI features across Figma
+- Partners with product and infrastructure teams to unlock new AI capabilities
+- Focus: reliability, performance, developer velocity for AI engineers
+- **Your MCP server + GenAI evaluation platform directly apply here**
+
+### Extensibility (strong fit)
+- Owns plugin, widget, and REST APIs for developer integrations
+- Recently launched MCP offerings integrating Figma into the wider AI ecosystem
+- **Your MCP server work is literally what this team builds**
+
+### Search & Recommendations (good fit)
+- Context-gathering platform for agents — surfacing content across Figma ecosystem
+- Combines traditional search/IR with modern agentic search capabilities
+- **Your API platform and data serving experience apply here**
+
+### Modeling Platform (weakest fit)
+- Infrastructure for training, evaluating, deploying, serving AI models
+- More ML-engineering focused — closer to your GenAI evaluation work but deeper on the ML infra side
+
+**Likely technical challenges across all teams:**
+- Agent orchestration — multi-step AI workflows that reason over design files
+- Tool calling and MCP — how agents invoke Figma's internal capabilities
+- Evaluation and quality — measuring AI feature quality, regression detection
+- Search and retrieval — surfacing relevant design content for agent context (RAG over design data)
+- Serving infrastructure — low-latency model serving for real-time design interactions
+- Developer platform — APIs, SDKs, and frameworks that other engineers build on
 
 ---
 
@@ -61,37 +78,39 @@
 
 | Their Need | Your Evidence |
 |---|---|
-| Distributed service architecture | 12→5 service consolidation, well-defined service boundaries |
-| Kafka and event-driven pipelines | Built Kafka-based event-driven pipelines for commerce workflows |
-| GraphQL federation and schema design | Netflix DGS subgraph, schema federation, batch data loaders |
-| Platform architecture for other teams | Built internal developer platforms, shared services, architecture standards |
-| Database and storage systems | PostgreSQL expertise, caching strategies, data-structure-level optimization |
-| Cross-org migrations | Led migration across 10+ teams, parity testing for zero regressions |
-| Event sourcing / CQRS | Introduced at Applause — directly relevant to real-time systems |
+| MCP server and AI integration | Built MCP server for ChatGPT Apps SDK — defined tool schemas, API surface, production rollout |
+| Agent platform frameworks | GenAI agent platform with tool-calling orchestration, evaluation harness, multi-provider LLM support |
+| Developer platform / extensibility | Built platform APIs and architectural standards consumed by 10+ teams org-wide |
+| GraphQL / unified API layer | Netflix DGS federation gateway unifying data for frontend, backend, and AI consumers |
+| System design and resilience | API modernization: 8K rpm, p99 5×, 99.9% availability |
+| Cross-team collaboration | Led cross-org initiatives across 3 departments; mentored engineers; wrote RFCs |
+| 0→1 platform building | MCP server, digital commerce, GenAI engine — repeated greenfield execution |
+| TypeScript/Python proficiency | Node.js/TypeScript and Python in your stack |
 
 ---
 
-## 5. Interview Mindset — B2B Infrastructure Category
+## 5. Interview Mindset — AI Developer Platform Category
 
-**Core philosophy to project:** *"Build custom when the problem demands it, use off-the-shelf when it doesn't. Optimize for developer experience — infrastructure teams exist to make product teams faster."*
+**Core philosophy to project:** *"Build the platform that makes every AI engineer faster. Developer velocity is the most important metric for a platform team."*
 
 **System design framing (say this early):**
-> "For a real-time collaborative system, the key constraints are latency (operations must propagate sub-100ms), consistency (all collaborators must converge to the same state), and availability (losing a user's work is unacceptable). I'll design around CRDTs or OT for conflict resolution, with a streaming layer for change propagation."
+> "For an AI platform, the key question is: what abstractions let product teams ship AI features quickly without re-inventing serving, evaluation, or orchestration? I'll design for developer experience first, then reliability and performance."
 
 **Key concepts to weave into every answer:**
-- **CRDTs (Conflict-Free Replicated Data Types)** — data structures that merge concurrent operations without coordination. State-based vs. operation-based. Figma uses a custom CRDT for their multiplayer engine.
-- **Operational Transformation (OT)** — alternative to CRDTs, used by Google Docs. Transform concurrent operations against each other. Requires a central server.
-- **Real-time constraints** — sub-100ms for local operations, sub-500ms for propagation to remote collaborators.
-- **Event-driven streaming** — Kafka for durable event log, WebSocket for real-time push to clients.
-- **Multi-tenancy** — enterprise customers need isolation, data residency, access controls.
-- **Build vs. buy** — know when custom storage beats managed services (e.g., custom CRDT storage vs. using DynamoDB).
+- **Developer velocity** — the platform's job is to make AI feature teams faster. Measure success by how quickly teams can ship, not just system metrics.
+- **Agent orchestration** — multi-step workflows where agents reason, call tools, and compose results. Reliability and observability are critical.
+- **MCP / tool calling** — structured contracts for how agents invoke platform capabilities. Schema design, versioning, and validation.
+- **Evaluation frameworks** — offline and online quality measurement for AI features. Regression detection, A/B testing of model variants.
+- **Search and retrieval (RAG)** — surfacing relevant context for agents from design files, text, design systems. Combining traditional IR with LLM-powered retrieval.
+- **Extensibility** — plugin/API design that's easy for third-party developers AND internal teams. Backward compatibility, developer experience.
 
 **System design topics likely asked:**
-- Real-time collaborative editing system (CRDT/OT, conflict resolution, presence)
-- Distributed storage system for design files (versioning, large binary objects)
-- Search and indexing pipeline for design assets
-- Notification/activity feed for design collaboration
-- Multi-region deployment with data residency constraints
+- AI agent orchestration platform (multi-step workflows, tool calling, context gathering)
+- Search and recommendation system (relevant to Figma's content discovery)
+- Plugin/extensibility platform (API design, sandboxing, rate limiting)
+- Real-time collaborative system (Figma's core — CRDTs, conflict resolution)
+- Notification/activity feed system
+- Rate limiter / API gateway
 
 ---
 
@@ -99,22 +118,22 @@
 
 | Priority | # | Story | Why It Fits |
 |---|---|---|---|
-| **Must tell** | 7 | DGS Subgraph — Federation Migration | Schema design, service consolidation, API evolution |
-| **Must tell** | 2 | API Modernization — 5× Latency Reduction | Performance depth, profiling, optimization |
-| **Must tell** | 14 | Applause — Event Sourcing / CQRS | Directly relevant to real-time event-driven systems |
-| **Strong** | 3 | Parity Testing Framework | Rigorous testing, migration safety |
-| **Strong** | 13 | Applause — Auth Modernization | Database migration, minimal downtime |
-| **Strong** | 16 | Toast — DevOps & QA from Scratch | Building infrastructure from 0→1, small team impact |
-| **Good** | 1 | API Modernization — Cross-Org Migration | Scale, leadership |
-| **Good** | 8 | DGS Subgraph — JVM Warmup | Performance engineering depth |
-| **Good** | 11 | Mentoring to Principal Level | People development |
+| **Must tell** | 5 | MCP Server — AI Tool Calling (0→1) | Literally what the Extensibility team builds. Agent Platform relevance too |
+| **Must tell** | 17 | GenAI Agent Platform — Evaluation Harness | Agent platform frameworks, evaluation, multi-provider orchestration |
+| **Must tell** | 7 | GraphQL Federation — Unified API Layer | Developer platform, schema design, multiple consumer types |
+| **Strong** | 1 | API Modernization — Cross-Org Platform | Platform at scale, cross-team leadership, performance |
+| **Strong** | 4 | Architectural Standards / RFC Process | Shaping platform strategy, engineering best practices |
+| **Strong** | 9 | Digital Commerce — 0→1 Under Pressure | Shipping under ambiguity, rapid iteration |
+| **Good** | 14 | Applause — Event Sourcing / CQRS | Distributed systems depth |
+| **Good** | 3 | Parity Testing Framework | Quality, reliability, automated validation |
+| **Good** | 11 | Mentoring Engineers | Growing team capability, culture of excellence |
 | **Wildcard** | 19 | Disagree and Commit | Technical conviction |
-| **Wildcard** | 20 | Failure & Learning | Growth mindset |
+| **Wildcard** | 20 | Failure & Learning | Growth mindset — aligns with "Grow As You Go" |
 
 **Story selection strategy per round:**
-- **Behavioral (distributed systems):** Stories 7, 14, 13
-- **Behavioral (performance/depth):** Stories 2, 8, 3
-- **Behavioral (leadership/people):** Stories 1, 11, 16
+- **Behavioral (AI/platform):** Stories 5, 17, 7
+- **Behavioral (leadership/cross-team):** Stories 1, 4, 11
+- **Behavioral (0→1/ambiguity):** Stories 5, 9, 17
 - **Coding round follow-up:** Discuss data structure choices, complexity tradeoffs
 
 ---
@@ -122,62 +141,60 @@
 ## 7. Questions to Ask Interviewers
 
 ### Recruiter Screen
-- Which specific infrastructure area would this role focus on — storage, streaming, data pipelines?
-- What does the engineering team size look like, and how are infrastructure teams organized?
+- This role spans four sub-teams — is the team placement determined during the interview, or after an offer?
 - What does the interview process look like, and what's the expected timeline?
-- Is this a backfill or a new headcount? What's driving the hire?
+- What level is this role targeting given my Principal-level background? (Comp range is wide)
+- Is this remote-friendly, or is there a preference for hub-based?
 
 ### Hiring Manager
-- What's the distributed storage architecture — custom-built, Postgres-based, or something else?
-- How does the team handle real-time data consistency for collaborative editing at the backend level?
-- What are the biggest scaling challenges as Figma grows enterprise adoption?
-- How does the team think about the tradeoff between building custom infrastructure vs. leveraging managed services?
-- What's the most interesting unsolved infrastructure problem on the team right now?
-- How do you measure success for this role in the first 6-12 months?
+- What does the agent platform look like today — is it early-stage, or are there existing frameworks being evolved?
+- How does the Agent Platform team collaborate with the Extensibility team on MCP offerings?
+- What are the biggest developer experience pain points for teams building AI features at Figma today?
+- How does the team measure success — is it developer velocity, feature quality, reliability metrics?
+- How much autonomy does this role have in shaping platform strategy vs. executing a defined roadmap?
+- How do you think about evaluation for AI features — is there an existing framework, or is building one part of the job?
 
 ### Team Match / Technical
-- What's the development experience like for infrastructure engineers — deployment, testing, local dev?
-- How does the team collaborate with the real-time/multiplayer engineering team?
-- What does the data pipeline look like for Figma AI training data?
-- What's the on-call experience like for infrastructure services?
-- What's something you wish you'd known before joining this team?
+- What's the tech stack for the AI platform — TypeScript, Python, or a mix?
+- How do agents interact with Figma's design data — is there a structured representation, or is it more unstructured?
+- What does the MCP integration look like today? How are you thinking about evolving it?
+- How does the team handle the tension between rapid AI feature shipping and platform stability?
+- What's the on-call experience like for platform services?
+- What's a recent technical challenge the team is proud of solving?
 
 ---
 
 ## 8. "Why Figma?" Answer
 
-> "The distributed systems challenges behind real-time collaboration are fascinating — building storage and streaming infrastructure where operations must propagate sub-100ms to all collaborators, with guaranteed convergence and no data loss, is a genuinely hard problem at the intersection of distributed systems and real-time computing. At CarGurus, I consolidated 12 distributed services into 5, built Kafka-based streaming pipelines, and introduced event sourcing patterns — all of which are directly relevant to the infrastructure that powers Figma's multiplayer engine. I also love that Figma's infrastructure team builds custom systems when the problem demands it. The combination of small team, outsized impact, and deeply technical problems is where I do my best work."
+> "Two things. First, the AI platform problem at Figma is uniquely interesting — design data isn't text or tabular data, it's spatial, hierarchical, and visual. Building agent and search infrastructure that reasons over that kind of data is a genuinely novel challenge. I've built MCP servers, agent evaluation frameworks, and GraphQL federation layers, and I'm excited to apply that experience to a domain where the data is fundamentally different. Second, I love building platforms that multiply other teams' velocity. At CarGurus, I built API standards and orchestration layers that 10+ teams consumed. Figma's AI Platforms role is that same leverage — build the foundation once, and every AI feature team moves faster."
 
 ---
 
 ## 9. Technical Deep-Dive Preparation
 
-### CRDTs — Know the Basics
-Figma uses a custom CRDT for their multiplayer engine. You should understand:
+### MCP (Model Context Protocol) — Know It Well
+Figma recently launched MCP offerings. You built one. Be ready to go deep:
+- How MCP works: tool definitions, request/response lifecycle, authentication
+- Tradeoffs in tool schema design — granularity, versioning, backward compatibility
+- How you'd design Figma's MCP server: what tools to expose (read design, create components, query styles)
+- Security considerations: sandboxing, rate limiting, permission scoping
 
-- **What:** Data structures that can be modified concurrently without coordination and always converge to the same state
-- **State-based (CvRDT):** Merge function combines states. Requires full state transfer. Example: G-Counter (grow-only counter per replica, sum across replicas).
-- **Operation-based (CmRDT):** Replicate operations, not state. Requires reliable broadcast. More efficient.
-- **Common types:** G-Counter, PN-Counter, G-Set, OR-Set (observed-remove), LWW-Register (last-writer-wins)
-- **Figma's approach:** Custom CRDT that represents a tree of design objects. Each object has properties that are LWW-Registers. Tree structure uses a custom ordered list CRDT.
-- **Tradeoffs:** CRDTs can grow unboundedly (tombstones for deletions). Need garbage collection. Semantic conflicts aren't resolved (two users move same object to different positions — CRDT resolves it, but the result may not be what either intended).
+### Agent Orchestration Patterns
+- Multi-step reasoning: plan → tool call → observe → reason → next step
+- Context management: what context to pass between steps, token budget management
+- Error handling and fallbacks: what happens when a tool call fails mid-workflow
+- Evaluation: how to measure agent quality end-to-end (not just per-step)
 
-### Real-Time Architecture Pattern
-```
-Client A edits → local CRDT apply → send op to server
-                                          ↓
-                                    Server validates + persists
-                                          ↓
-                              Broadcast to all other clients via WebSocket
-                                          ↓
-Client B, C, D receive → local CRDT merge → UI updates
-```
+### Search & Retrieval for Design Data
+- RAG over non-textual data: how to embed and retrieve design components, layouts, style systems
+- Hybrid search: combining keyword/structured queries with vector similarity
+- Ranking and relevance: how to score results for agent context gathering
 
-### PostgreSQL at Scale
-- Sharding strategies: application-level sharding by org/workspace, pg_partitioning
-- Read replicas for read-heavy workloads (analytics, search indexing)
-- Connection pooling (PgBouncer) for high-concurrency
-- Custom extensions for specialized data types or operations
+### CRDTs — Know the Basics (may come up)
+Figma uses a custom CRDT for multiplayer editing. Unlikely to be the focus for AI Platforms, but good to know:
+- What: Data structures that merge concurrent operations without coordination
+- Figma's approach: custom CRDT representing a tree of design objects with LWW-Register properties
+- Why it matters for AI: agents modifying design files must respect CRDT semantics
 
 ---
 
@@ -186,21 +203,22 @@ Client B, C, D receive → local CRDT merge → UI updates
 Figma has a **strong coding bar**. Expect medium-hard problems. Focus areas:
 
 - **Graph/Tree problems** — DFS/BFS, tree traversal (design files are tree structures)
-- **Concurrency** — producer-consumer, read-write locks, concurrent data structures
-- **Interval/range problems** — overlapping regions, conflict detection
-- **String/parsing** — design file formats, CSS-like property parsing
+- **String/parsing** — relevant to search, design file formats
+- **Hash maps and sets** — frequency counting, deduplication
+- **Interval/range problems** — overlapping regions, spatial queries
 - **System design coding** — implement a simplified version of a system component
 
-Practice tip: Do 2-3 Figma-tagged problems on LeetCode if available. Otherwise focus on tree manipulation, interval merging, and concurrent data structure problems.
+Practice tip: Focus on tree manipulation, string processing, and graph traversal. Design data is hierarchical — tree problems are especially likely.
 
 ---
 
 ## 11. Red Flags to Watch For
 
-- If the infrastructure team is siloed from the real-time/multiplayer team (should collaborate closely)
+- If the AI platform team is siloed from product teams (should be deeply partnered)
+- If "AI Platforms" is really just infra support for a small research team with no product impact
 - If the role is primarily maintaining existing systems with no greenfield work
-- If the engineering team is growing too fast (diluting the small-team culture)
-- If data residency/enterprise features are consuming all infrastructure bandwidth (compliance over innovation)
+- If leveling comes back lower than expected (the wide comp range means this matters — clarify early)
+- If there's no clear path for the AI platform to become a core part of Figma's product strategy
 
 ---
 
@@ -208,10 +226,11 @@ Practice tip: Do 2-3 Figma-tagged problems on LeetCode if available. Otherwise f
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_figma.html
-- [ ] Practice Stories 7, 2, 14 aloud (2 min each)
-- [ ] Review system_design_playbook.md: Chat System (real-time patterns), Distributed Message Queue, KV Store
-- [ ] Review technical_playbook.md: trees, graphs, concurrency, data structures
-- [ ] Brush up on CRDTs (at least understand G-Counter, OR-Set, LWW-Register)
-- [ ] Do 3-4 medium-hard LeetCode problems (tree/graph/concurrency focus)
+- [ ] Practice Stories 5, 17, 7, 1 aloud (2 min each)
+- [ ] Review system_design_playbook.md: Search System, Rate Limiter, Chat System (real-time patterns)
+- [ ] Review technical_playbook.md: trees, graphs, hash maps, string processing
+- [ ] Brush up on MCP protocol details — you'll likely be asked to go deep
+- [ ] Do 3-4 medium-hard LeetCode problems (tree/graph/string focus)
 - [ ] Have "Why Figma?" answer ready
 - [ ] Prepare 3 questions per interviewer
+- [ ] Read Figma's engineering blog posts on AI features and MCP launch

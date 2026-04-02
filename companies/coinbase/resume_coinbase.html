@@ -6,9 +6,6 @@
 <title>Yifei Sun — Resume — Coinbase</title>
 <style>
   /* ── Color Themes ─────────────────────────────────────────────── */
-  /* Change --accent to switch theme. Options:
-     Navy:    #1a365d   Teal:    #0d6e6e   Slate:   #334155
-     Indigo:  #3730a3   Forest:  #1e5631   Crimson: #991b1b   */
   :root {
     --accent: #1a365d;
     --accent-light: #2c5282;
@@ -236,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Principal Software Engineer · Backend &amp; Platform Architecture · 13 Years</div>
+    <div class="tagline">Principal Software Engineer · AI Automation &amp; Platform Architecture · 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -248,35 +245,37 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Principal/Staff-level backend &amp; platform engineer with 13 years building reliable, high-throughput
-  distributed systems and financial-grade platform architecture. Experience designing transactional
-  microservices, event-driven pipelines, and APIs serving millions of daily requests with 99.9% availability.
-  Recent work includes GraphQL federation (Netflix DGS), MCP/ChatGPT integration, and policy/experimentation
-  frameworks. Track record of leading multi-team migrations and defining architectural standards across orgs.
+  Principal-level backend &amp; platform engineer with 13 years building distributed systems and shipping
+  LLM-powered applications to production. Recent work centers on agentic AI — designing an MCP server with
+  tool-calling orchestration for ChatGPT integration, and building an AI automation platform with evaluation,
+  multi-provider LLM support, and configurable policy frameworks. Track record of standing up greenfield
+  platforms from day 1, defining primitives and orchestration layers that scale across organizations,
+  and driving cross-functional alignment across 10+ teams. Thrives in ambiguous, high-impact 0&rarr;1 environments.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Led multi-team platform and API migrations involving 10+ engineering teams across 3 departments</li>
-  <li>Designed transactional microservices and event-driven pipelines for inventory, leads, and commerce flows</li>
-  <li>Drove architecture standards for high-scale APIs, reliability, caching, and distributed orchestration</li>
-  <li>Mentored senior engineers to Principal-level scope; drove cross-org architectural impact</li>
+  <li>Shipped LLM-powered agent systems to production: MCP tool-calling server, AI evaluation harness, multi-provider orchestration</li>
+  <li>Built greenfield platforms from day 1 — defined primitives, APIs, and orchestration patterns adopted org-wide</li>
+  <li>Led cross-org platform initiatives spanning 10+ engineering teams across 3 departments</li>
+  <li>Mentored senior engineers toward Principal-level scope; drove architectural standards via RFCs and design docs</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, GraphQL (Netflix DGS), Python, Node.js · AWS, Kubernetes, Kafka, Redis, PostgreSQL ·
-  Microservices, Event-Driven, CQRS, Transactional Systems · Datadog, Grafana · Keycloak, SSO, OAuth 2.0
+  Java, Spring Boot, Python, Node.js · OpenAI/ChatGPT, MCP Protocol, LLM Orchestration, Agent Evaluation ·
+  AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL · GraphQL (Netflix DGS), Microservices, Event-Driven, CQRS ·
+  Datadog, Grafana · Keycloak, SSO, OAuth 2.0
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
 <div class="section-title">Independent Project</div>
 <div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Decision Engine &amp; Experimentation Platform</span>
+  <span class="project-name">GenAI Automation Platform &amp; Evaluation System</span>
   <ul>
-    <li>Architected a hybrid rules + multi-path GenAI engine (fast vs. deep inference) with a policy overlay over heterogeneous telemetry, producing explainable real-time recommendations.</li>
-    <li>Designed a configurable policy framework with DB-backed enterprise configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions.</li>
-    <li>Built "Prompt Lab" for historical backfill, end-to-end decision simulation, offline evaluation/backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with a robust scheduler, observability, and multi-provider LLM support.</li>
+    <li>Architected an agentic AI platform with hybrid rules + multi-path LLM inference (fast vs. deep), policy overlay, and tool-calling orchestration — producing explainable, grounded recommendations over heterogeneous data sources.</li>
+    <li>Built an evaluation harness ("Prompt Lab") for end-to-end simulation, offline backtesting, hallucination detection, and prompt/parameter search (grid &amp; Bayesian optimization) with observability and multi-provider LLM support.</li>
+    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop — enabling safe, iterative improvement of AI-driven automation without manual intervention.</li>
   </ul>
 </div>
 
@@ -291,52 +290,48 @@
   </div>
 
   <div class="project">
-    <span class="project-name">GraphQL Federation — Delivery Lookup DGS Subgraph</span>
+    <span class="project-name">ChatGPT Apps SDK MCP Server — Agentic Tool Calling (0&rarr;1)</span>
     <ul>
-      <li>Designed and integrated a Netflix DGS subgraph for the Delivery Lookup service into CarGurus' federated GraphQL gateway, exposing vehicle delivery details data to frontend, backend, and AI consumers from a single graph.</li>
-      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies to avoid JIT compilation latency spikes on cold starts.</li>
-      <li>Built load tests and staging GraphQL integration tests; migrating from legacy REST endpoints (2 consumers) to support the new AI chatbot/shopping assistant platform.</li>
+      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, enabling ChatGPT agents to autonomously invoke CarGurus capabilities via structured tool calls — defining tool schemas, orchestration logic, and request/response contracts.</li>
+      <li>Shipped to production under high ambiguity; iterated rapidly with PMs and directors on tool definitions and agent behavior; designed for safe, incremental rollout alongside existing APIs and clients.</li>
+      <li>Served as key engineering representative for AI agent strategy, shaping the technical roadmap for agentic AI integration across the company.</li>
     </ul>
   </div>
 
   <div class="project">
-    <span class="project-name">High-Traffic Legacy API Modernization</span>
+    <span class="project-name">High-Traffic Platform Modernization — Orchestration &amp; Automation</span>
     <ul>
-      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); the new implementation handled 50% of traffic during A/B testing.</li>
-      <li>Introduced a new orchestration service and GraphQL boundary, consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes.</li>
-      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core platform behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions).</li>
+      <li>Introduced a new orchestration service consolidating 12 downstream integrations into 5 well-defined services — defining the primitives, orchestration layer, and tools that enabled teams across the org to build on top of the platform.</li>
+      <li>Produced initial architecture in ~2 weeks; shipped first milestone in 6 months; completed ahead of schedule.</li>
     </ul>
     <div class="metrics">
-      <div class="m">p99: 250 ms → 50 ms <span>(5×)</span></div>
-      <div class="m">Availability: 98% → 99.9%</div>
-      <div class="m">Deploy: 1 hr → 3 min <span>(20×)</span></div>
+      <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
+      <div class="m">Availability: 98% &rarr; 99.9%</div>
+      <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
     </div>
-    <ul style="margin-left:12px; margin-top:2px;">
-      <li>Defined architectural standards for new microservices; built a parity-testing framework validating full payload and data-integrity against the legacy stack; removed years of hidden domain logic with clear documentation.</li>
+  </div>
+
+  <div class="project">
+    <span class="project-name">GraphQL Federation — Unified Serving Layer</span>
+    <ul>
+      <li>Designed and integrated a Netflix DGS subgraph into CarGurus' federated GraphQL gateway, creating a unified API layer for frontend, backend, and AI agent consumers from a single graph.</li>
+      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies; built load tests and staging integration tests for production-grade reliability.</li>
     </ul>
   </div>
 
   <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server (0→1 POC)</span>
+    <span class="project-name">Digital Commerce Platform — 0&rarr;1 Under Ambiguity</span>
     <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, exposing CarGurus capabilities into ChatGPT as a high-visibility proof-of-concept.</li>
-      <li>Delivered a performant implementation to unblock demos for PMs and directors, iterating on ambiguous requirements; designed for safe, incremental production rollout alongside existing APIs and clients.</li>
-    </ul>
-  </div>
-
-  <div class="project">
-    <span class="project-name">Digital Shopping &amp; Online Leads Products</span>
-    <ul>
-      <li>Led backend design and implementation for a new digital shopping product launched during the pandemic to capture online leads, using a microservice and event-driven architecture for inventory, merchandising, and lead flows.</li>
-      <li>Subsequently led backend work for additional digital commerce experiments, enabling the company to quickly launch and safely retire product bets without destabilizing core systems.</li>
+      <li>Led backend design and launch of multiple greenfield products using microservice and event-driven architecture; enabled the company to rapidly test, launch, and safely retire product experiments without destabilizing core systems.</li>
     </ul>
   </div>
 
   <div class="project compact">
-    <span class="project-name">Cross-Org Platform &amp; API Leadership</span>
+    <span class="project-name">Cross-Org Platform Leadership &amp; Automation Standards</span>
     <ul>
-      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored key design docs, RFCs, and decision records that drove consensus across platform and product teams.</li>
-      <li>Mentored multiple senior engineers on system design, performance work, and path to Principal-level scope.</li>
+      <li>Defined platform primitives and architectural standards — API design, caching, distributed orchestration — adopted across multiple teams via RFCs and design docs; built parity-testing framework for safe, automated migration validation.</li>
+      <li>Mentored senior engineers on system design, performance, and path to Principal-level scope.</li>
     </ul>
   </div>
 </div>
@@ -349,19 +344,19 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Authentication &amp; Identity Modernization</span>
+    <span class="project-name">Authentication &amp; Identity Platform</span>
     <ul>
-      <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform, unifying auth across internal systems, an enterprise partner platform, and a large external community. Introduced social login and mobile login; migrated multiple Angular, Node.js, and Java monoliths behind the new auth gateway with minimal downtime.</li>
+      <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform, unifying auth across internal systems, an enterprise partner platform, and a large external community. Migrated multiple Angular, Node.js, and Java monoliths behind the new auth gateway with minimal downtime.</li>
     </ul>
   </div>
   <div class="project">
-    <span class="project-name">Event Sourcing &amp; CQRS Initiative</span>
+    <span class="project-name">Event Sourcing &amp; CQRS Platform Initiative</span>
     <ul>
-      <li>Drove early design and prototyping of a microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
+      <li>Drove design and prototyping of a microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
     </ul>
   </div>
   <div class="project compact">
-    <span class="project-name">Cross-Org Collaboration</span>
+    <span class="project-name">Cross-Org Collaboration — Customer Support &amp; Workflow Automation</span>
     <ul>
       <li>Partnered with product, support, and customer-facing teams to modernize internal workflows and enterprise integrations with clear observability and rollback paths.</li>
     </ul>
@@ -376,16 +371,16 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Monolith → Microservices Decomposition</span>
+    <span class="project-name">Monolith &rarr; Microservices Decomposition</span>
     <ul>
-      <li>Among the earliest engineers during hypergrowth (first customer to hundreds in a few years); designed and implemented core backend services (Order Service, Labor Service, foundational APIs) that became the basis for future growth.</li>
-      <li>Built initial AWS deployment pipelines before a dedicated DevOps team existed; created the first automated testing framework before dedicated QA, enabling safer releases during rapid product expansion.</li>
+      <li>Among the earliest engineers during hypergrowth; designed and implemented core backend services (Order Service, Labor Service, foundational APIs) that became the platform other teams built upon.</li>
+      <li>Built initial AWS deployment pipelines and automated testing framework, enabling safer releases during rapid product expansion.</li>
     </ul>
   </div>
   <div class="project compact">
     <span class="project-name">Third-Party Integrations &amp; Cross-Functional Leadership</span>
     <ul>
-      <li>Led integrations with key partners (e.g., workforce management), ensuring reliable bidirectional sync and schema evolution. Partnered with PMs, sales, and support to translate early customer feedback into platform capabilities.</li>
+      <li>Led integrations with key partners, ensuring reliable bidirectional sync and schema evolution. Partnered with PMs, sales, and support to translate customer feedback into platform capabilities.</li>
     </ul>
   </div>
 </div>
