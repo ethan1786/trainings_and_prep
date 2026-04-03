@@ -27,42 +27,42 @@
 
 ### Hash Maps / Frequency Counting
 
-- [x] 49. Group Anagrams (Medium) — Uber, Airbnb, Stripe
-- [x] 560. Subarray Sum Equals K (Medium) — Uber, Coinbase
-- [x] 146. LRU Cache (Medium) — Airbnb, Netflix, Uber, Stripe, Nvidia
-- [x] 380. Insert Delete GetRandom O(1) (Medium) — Uber, Netflix
-- [x] 460. LFU Cache (Hard) — Uber, Airbnb
+- [ ] 49. Group Anagrams (Medium) — Uber, Airbnb, Stripe
+- [ ] 560. Subarray Sum Equals K (Medium) — Uber, Coinbase
+- [ ] 146. LRU Cache (Medium) — Airbnb, Netflix, Uber, Stripe, Nvidia
+- [ ] 380. Insert Delete GetRandom O(1) (Medium) — Uber, Netflix
+- [ ] 460. LFU Cache (Hard) — Uber, Airbnb
 
 ### Sliding Window
 
-- [x] 3. Longest Substring Without Repeating Characters (Medium) — Uber, Airbnb, Stripe, Netflix
-- [x] 76. Minimum Window Substring (Hard) — Airbnb, Uber, Stripe
-- [x] 239. Sliding Window Maximum (Hard) — Nvidia, Uber
-- [x] 424. Longest Repeating Character Replacement (Medium) — Uber, Airbnb — variable window + constraint
-- [x] 567. Permutation in String (Medium) — Uber, Airbnb — fixed window + frequency match
-- [x] 438. Find All Anagrams in a String (Medium) — Uber, Airbnb — fixed window variant of 567
-- [x] 1004. Max Consecutive Ones III (Medium) — Uber, Nvidia — variable window + flip budget
-- [x] 209. Minimum Size Subarray Sum (Medium) — Uber, Stripe — variable window + sum target
-- [x] 30. Substring with Concatenation of All Words (Hard) — Uber, Airbnb — same pattern as 76 (window + frequency match)
-- [x] 727. Minimum Window Subsequence (Hard) — Airbnb, Uber — harder variant of 76 (Premium)
-- [x] 159. Longest Substring with At Most Two Distinct Characters (Medium) — Uber, Airbnb — same shrink logic as 76 (Premium)
-- [x] 739. Daily Temperatures (Medium) — Uber, Nvidia — monotonic stack (same core idea as 239)
-- [x] 1438. Longest Continuous Subarray With Absolute Diff ≤ Limit (Medium) — Uber, Nvidia — monotonic deque, same pattern as 239
-- [x] 862. Shortest Subarray with Sum at Least K (Hard) — Uber, Stripe — monotonic deque on prefix sums
+- [ ] 3. Longest Substring Without Repeating Characters (Medium) — Uber, Airbnb, Stripe, Netflix
+- [ ] 76. Minimum Window Substring (Hard) — Airbnb, Uber, Stripe
+- [ ] 239. Sliding Window Maximum (Hard) — Nvidia, Uber
+- [ ] 424. Longest Repeating Character Replacement (Medium) — Uber, Airbnb — variable window + constraint
+- [ ] 567. Permutation in String (Medium) — Uber, Airbnb — fixed window + frequency match
+- [ ] 438. Find All Anagrams in a String (Medium) — Uber, Airbnb — fixed window variant of 567
+- [ ] 1004. Max Consecutive Ones III (Medium) — Uber, Nvidia — variable window + flip budget
+- [ ] 209. Minimum Size Subarray Sum (Medium) — Uber, Stripe — variable window + sum target
+- [ ] 30. Substring with Concatenation of All Words (Hard) — Uber, Airbnb — same pattern as 76 (window + frequency match)
+- [ ] 727. Minimum Window Subsequence (Hard) — Airbnb, Uber — harder variant of 76 (Premium)
+- [ ] 159. Longest Substring with At Most Two Distinct Characters (Medium) — Uber, Airbnb — same shrink logic as 76 (Premium)
+- [ ] 739. Daily Temperatures (Medium) — Uber, Nvidia — monotonic stack (same core idea as 239)
+- [ ] 1438. Longest Continuous Subarray With Absolute Diff ≤ Limit (Medium) — Uber, Nvidia — monotonic deque, same pattern as 239
+- [ ] 862. Shortest Subarray with Sum at Least K (Hard) — Uber, Stripe — monotonic deque on prefix sums
 
 ### Prefix Sum
 
-- [x] 525. Contiguous Array (Medium) — Uber, Stripe — prefix sum + HashMap (count variant)
-- [x] 523. Continuous Subarray Sum (Medium) — Uber, Coinbase — prefix sum + modulo + HashMap
-- [x] 974. Subarray Sums Divisible by K (Medium) — Uber, Stripe — prefix sum + modulo counting
-- [x] 304. Range Sum Query 2D (Medium) — Uber, Nvidia — 2D prefix sum
-- [x] 238. Product of Array Except Self (Medium) — Uber, Airbnb, Stripe — prefix/suffix product (same idea)
+- [ ] 525. Contiguous Array (Medium) — Uber, Stripe — prefix sum + HashMap (count variant)
+- [ ] 523. Continuous Subarray Sum (Medium) — Uber, Coinbase — prefix sum + modulo + HashMap
+- [ ] 974. Subarray Sums Divisible by K (Medium) — Uber, Stripe — prefix sum + modulo counting
+- [ ] 304. Range Sum Query 2D (Medium) — Uber, Nvidia — 2D prefix sum
+- [ ] 238. Product of Array Except Self (Medium) — Uber, Airbnb, Stripe — prefix/suffix product (same idea)
 
 ### Two Pointers / Arrays / Strings (light refresh)
 
-- [x] 15. 3Sum (Medium) — Uber, Airbnb
-- [x] 42. Trapping Rain Water (Hard) — Uber, Airbnb, Nvidia
-- [x] 271. Encode and Decode Strings (Medium) — Airbnb, Stripe (Premium)
+- [ ] 15. 3Sum (Medium) — Uber, Airbnb
+- [ ] 42. Trapping Rain Water (Hard) — Uber, Airbnb, Nvidia
+- [ ] 271. Encode and Decode Strings (Medium) — Airbnb, Stripe (Premium)
 
 **Week 1 total: 27 problems**
 
@@ -72,42 +72,42 @@
 
 ### BFS / DFS
 
-- [x] 200. Number of Islands (Medium) — Uber, Airbnb, Nvidia
-- [x] 133. Clone Graph (Medium) — Uber, Airbnb
-- [x] 127. Word Ladder (Hard) — Airbnb, Uber
-- [x] 994. Rotting Oranges (Medium) — Uber, Nvidia
-- [x] 417. Pacific Atlantic Water Flow (Medium) — Uber
+- [ ] 200. Number of Islands (Medium) — Uber, Airbnb, Nvidia
+- [ ] 133. Clone Graph (Medium) — Uber, Airbnb
+- [ ] 127. Word Ladder (Hard) — Airbnb, Uber
+- [ ] 994. Rotting Oranges (Medium) — Uber, Nvidia
+- [ ] 417. Pacific Atlantic Water Flow (Medium) — Uber
 
 ### Topological Sort
 
-- [x] 207. Course Schedule (Medium) — Uber, Airbnb, Stripe
-- [x] 210. Course Schedule II (Medium) — Uber, Airbnb
-- [x] 269. Alien Dictionary (Hard) — Airbnb, Uber (Premium)
+- [ ] 207. Course Schedule (Medium) — Uber, Airbnb, Stripe
+- [ ] 210. Course Schedule II (Medium) — Uber, Airbnb
+- [ ] 269. Alien Dictionary (Hard) — Airbnb, Uber (Premium)
 
 ### Union Find
 
-- [x] 323. Number of Connected Components (Medium) — Uber, Airbnb (Premium)
-- [x] 684. Redundant Connection (Medium) — Uber
-- [x] 721. Accounts Merge (Medium) — Uber, Airbnb
-- [x] 399. Evaluate Division (Medium) — Uber, Airbnb — weighted Union-Find or BFS on graph
+- [ ] 323. Number of Connected Components (Medium) — Uber, Airbnb (Premium)
+- [ ] 684. Redundant Connection (Medium) — Uber
+- [ ] 721. Accounts Merge (Medium) — Uber, Airbnb
+- [ ] 399. Evaluate Division (Medium) — Uber, Airbnb — weighted Union-Find or BFS on graph
 
 ### Trees (light refresh)
 
-- [x] 236. Lowest Common Ancestor of a Binary Tree (Medium) — Uber, Airbnb, Netflix
-- [x] 297. Serialize and Deserialize Binary Tree (Hard) — Uber, Airbnb, Netflix
+- [ ] 236. Lowest Common Ancestor of a Binary Tree (Medium) — Uber, Airbnb, Netflix
+- [ ] 297. Serialize and Deserialize Binary Tree (Hard) — Uber, Airbnb, Netflix
 
 ### Design Data Structures
 
-- [x] 208. Implement Trie (Medium) — Uber, Airbnb, Stripe — prefix tree fundamentals (warmup for 588/1166)
-- [x] 212. Word Search II (Hard) — Uber, Airbnb — trie + DFS backtracking
-- [x] 355. Design Twitter (Medium) — Uber, Airbnb — heap + hash map + linked list
-- [x] 981. Time Based Key-Value Store (Medium) — Uber, Stripe, Netflix — hash map + binary search
-- [x] 1396. Design Underground System (Medium) — Uber, Stripe — hash map bookkeeping
-- [x] 362. Design Hit Counter (Medium) — Uber, Stripe, Netflix — queue or circular array (Premium)
-- [x] 588. Design In-Memory File System (Hard) — Stripe — trie of directories (Premium)
-- [x] 716. Max Stack (Hard) — Uber, Netflix — TreeMap + doubly linked list (Premium)
-- [x] 1166. Design File System (Medium) — Airbnb, Stripe — hash map / trie (Premium)
-- [x] 895. Maximum Frequency Stack (Hard) — Uber, Netflix — hash map + stack per frequency
+- [ ] 208. Implement Trie (Medium) — Uber, Airbnb, Stripe — prefix tree fundamentals (warmup for 588/1166)
+- [ ] 212. Word Search II (Hard) — Uber, Airbnb — trie + DFS backtracking
+- [ ] 355. Design Twitter (Medium) — Uber, Airbnb — heap + hash map + linked list
+- [ ] 981. Time Based Key-Value Store (Medium) — Uber, Stripe, Netflix — hash map + binary search
+- [ ] 1396. Design Underground System (Medium) — Uber, Stripe — hash map bookkeeping
+- [ ] 362. Design Hit Counter (Medium) — Uber, Stripe, Netflix — queue or circular array (Premium)
+- [ ] 588. Design In-Memory File System (Hard) — Stripe — trie of directories (Premium)
+- [ ] 716. Max Stack (Hard) — Uber, Netflix — TreeMap + doubly linked list (Premium)
+- [ ] 1166. Design File System (Medium) — Airbnb, Stripe — hash map / trie (Premium)
+- [ ] 895. Maximum Frequency Stack (Hard) — Uber, Netflix — hash map + stack per frequency
 
 **Week 2 total: 24 problems**
 
@@ -122,36 +122,36 @@ patterns and set up the recurrence. That's sufficient for staff+ level.
 
 **1D DP (sequence/decision):**
 
-- [x] 198. House Robber (Medium) — Uber, Airbnb — simplest DP warmup
-- [x] 139. Word Break (Medium) — Uber, Airbnb, Stripe
-- [x] 322. Coin Change (Medium) — Uber, Coinbase, Stripe
-- [x] 91. Decode Ways (Medium) — Uber, Airbnb
-- [x] 300. Longest Increasing Subsequence (Medium) — Uber, Nvidia — classic 1D DP + binary search optimization
-- [x] 152. Maximum Product Subarray (Medium) — Uber, Airbnb — track min and max simultaneously
+- [ ] 198. House Robber (Medium) — Uber, Airbnb — simplest DP warmup
+- [ ] 139. Word Break (Medium) — Uber, Airbnb, Stripe
+- [ ] 322. Coin Change (Medium) — Uber, Coinbase, Stripe
+- [ ] 91. Decode Ways (Medium) — Uber, Airbnb
+- [ ] 300. Longest Increasing Subsequence (Medium) — Uber, Nvidia — classic 1D DP + binary search optimization
+- [ ] 152. Maximum Product Subarray (Medium) — Uber, Airbnb — track min and max simultaneously
 
 **2D DP (grid/string comparison):**
 
-- [x] 62. Unique Paths (Medium) — Uber, Nvidia
-- [x] 1143. Longest Common Subsequence (Medium) — Uber, Coinbase
-- [x] 72. Edit Distance (Medium) — Uber, Airbnb, Stripe
+- [ ] 62. Unique Paths (Medium) — Uber, Nvidia
+- [ ] 1143. Longest Common Subsequence (Medium) — Uber, Coinbase
+- [ ] 72. Edit Distance (Medium) — Uber, Airbnb, Stripe
 
 **Knapsack / Subset DP:**
 
-- [x] 416. Partition Equal Subset Sum (Medium) — Uber, Coinbase
-- [x] 518. Coin Change II (Medium) — Stripe, Coinbase
+- [ ] 416. Partition Equal Subset Sum (Medium) — Uber, Coinbase
+- [ ] 518. Coin Change II (Medium) — Stripe, Coinbase
 
 ### Intervals
 
-- [x] 56. Merge Intervals (Medium) — Uber, Airbnb, Stripe, Netflix
-- [x] 57. Insert Interval (Medium) — Uber, Airbnb, Stripe — builds on 56
-- [x] 253. Meeting Rooms II (Medium) — Uber, Airbnb (Premium)
-- [x] 435. Non-overlapping Intervals (Medium) — Uber, Airbnb — greedy interval scheduling
-- [x] 1235. Maximum Profit in Job Scheduling (Hard) — Uber, Airbnb, Nvidia
+- [ ] 56. Merge Intervals (Medium) — Uber, Airbnb, Stripe, Netflix
+- [ ] 57. Insert Interval (Medium) — Uber, Airbnb, Stripe — builds on 56
+- [ ] 253. Meeting Rooms II (Medium) — Uber, Airbnb (Premium)
+- [ ] 435. Non-overlapping Intervals (Medium) — Uber, Airbnb — greedy interval scheduling
+- [ ] 1235. Maximum Profit in Job Scheduling (Hard) — Uber, Airbnb, Nvidia
 
 ### Greedy
 
-- [x] 621. Task Scheduler (Medium) — Uber, Airbnb
-- [x] 134. Gas Station (Medium) — Uber
+- [ ] 621. Task Scheduler (Medium) — Uber, Airbnb
+- [ ] 134. Gas Station (Medium) — Uber
 
 **Week 3 total: 18 problems**
 
@@ -161,53 +161,53 @@ patterns and set up the recurrence. That's sufficient for staff+ level.
 
 ### Heaps / Priority Queues
 
-- [x] 295. Find Median from Data Stream (Hard) — Uber, Airbnb, Netflix
-- [x] 347. Top K Frequent Elements (Medium) — Uber, Coinbase
-- [x] 23. Merge k Sorted Lists (Hard) — Uber, Airbnb, Nvidia
-- [x] 973. K Closest Points to Origin (Medium) — Uber, Airbnb
-- [x] 215. Kth Largest Element in an Array (Medium) — Uber, Airbnb — quickselect or heap
+- [ ] 295. Find Median from Data Stream (Hard) — Uber, Airbnb, Netflix
+- [ ] 347. Top K Frequent Elements (Medium) — Uber, Coinbase
+- [ ] 23. Merge k Sorted Lists (Hard) — Uber, Airbnb, Nvidia
+- [ ] 973. K Closest Points to Origin (Medium) — Uber, Airbnb
+- [ ] 215. Kth Largest Element in an Array (Medium) — Uber, Airbnb — quickselect or heap
 
 ### Linked List
 
-- [x] 206. Reverse Linked List (Easy) — Uber, Airbnb — fundamental, know iterative + recursive
-- [x] 25. Reverse Nodes in k-Group (Hard) — Uber, Airbnb — builds on 206
-- [x] 141. Linked List Cycle (Easy) — Uber, Nvidia — fast/slow pointer
-- [x] 142. Linked List Cycle II (Medium) — Uber — find cycle start (Floyd's algorithm)
+- [ ] 206. Reverse Linked List (Easy) — Uber, Airbnb — fundamental, know iterative + recursive
+- [ ] 25. Reverse Nodes in k-Group (Hard) — Uber, Airbnb — builds on 206
+- [ ] 141. Linked List Cycle (Easy) — Uber, Nvidia — fast/slow pointer
+- [ ] 142. Linked List Cycle II (Medium) — Uber — find cycle start (Floyd's algorithm)
 
 ### Monotonic Stack / Stack Parsing
 
-- [x] 84. Largest Rectangle in Histogram (Hard) — Uber, Nvidia
-- [x] 739. Daily Temperatures (Medium) — Uber
-- [x] 224. Basic Calculator (Hard) — Uber, Airbnb, Stripe — stack-based expression parsing
-- [x] 227. Basic Calculator II (Medium) — Uber, Airbnb — stack + operator precedence
+- [ ] 84. Largest Rectangle in Histogram (Hard) — Uber, Nvidia
+- [ ] 739. Daily Temperatures (Medium) — Uber
+- [ ] 224. Basic Calculator (Hard) — Uber, Airbnb, Stripe — stack-based expression parsing
+- [ ] 227. Basic Calculator II (Medium) — Uber, Airbnb — stack + operator precedence
 
 ### Matrix
 
-- [x] 48. Rotate Image (Medium) — Uber, Airbnb — transpose + reverse
-- [x] 54. Spiral Matrix (Medium) — Uber, Airbnb — boundary shrinking
+- [ ] 48. Rotate Image (Medium) — Uber, Airbnb — transpose + reverse
+- [ ] 54. Spiral Matrix (Medium) — Uber, Airbnb — boundary shrinking
 
 ### Binary Search
 
-- [x] 33. Search in Rotated Sorted Array (Medium) — Uber, Airbnb, Nvidia
-- [x] 528. Random Pick with Weight (Medium) — Uber, Airbnb — prefix sum + binary search
-- [x] 4. Median of Two Sorted Arrays (Hard) — Uber, Nvidia
+- [ ] 33. Search in Rotated Sorted Array (Medium) — Uber, Airbnb, Nvidia
+- [ ] 528. Random Pick with Weight (Medium) — Uber, Airbnb — prefix sum + binary search
+- [ ] 4. Median of Two Sorted Arrays (Hard) — Uber, Nvidia
 
 ### Backtracking
 
-- [x] 46. Permutations (Medium) — Uber, Airbnb — backtracking fundamental
-- [x] 79. Word Search (Medium) — Uber, Airbnb
-- [x] 51. N-Queens (Hard) — Uber, Nvidia
-- [x] 17. Letter Combinations of a Phone Number (Medium) — Uber, Airbnb
+- [ ] 46. Permutations (Medium) — Uber, Airbnb — backtracking fundamental
+- [ ] 79. Word Search (Medium) — Uber, Airbnb
+- [ ] 51. N-Queens (Hard) — Uber, Nvidia
+- [ ] 17. Letter Combinations of a Phone Number (Medium) — Uber, Airbnb
 
 ### Bit Manipulation
 
-- [x] 191. Number of 1 Bits (Easy) — Uber, Nvidia — Hamming weight, n & (n-1) trick
-- [x] 338. Counting Bits (Easy) — Uber — DP on bits
+- [ ] 191. Number of 1 Bits (Easy) — Uber, Nvidia — Hamming weight, n & (n-1) trick
+- [ ] 338. Counting Bits (Easy) — Uber — DP on bits
 
 ### Concurrency (relevant for backend/platform roles)
 
-- [x] 1188. Design Bounded Blocking Queue (Medium) — Uber, Netflix (Premium)
-- [x] 1117. Building H2O (Medium) — Uber (Premium)
+- [ ] 1188. Design Bounded Blocking Queue (Medium) — Uber, Netflix (Premium)
+- [ ] 1117. Building H2O (Medium) — Uber (Premium)
 
 **Week 4 total: 26 problems**
 

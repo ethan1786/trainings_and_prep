@@ -1179,6 +1179,50 @@ boolean search(TrieNode node, String word, int i) {
 
 ## Data Structures Reference
 
+### Map Utility Methods (Java 8+)
+
+Methods that eliminate boilerplate in interview code. Work on `HashMap`, `TreeMap`, etc.
+
+| Method | Signature | Use Case |
+|---|---|---|
+| `getOrDefault(k, def)` | `V` | Frequency counting: `map.getOrDefault(c, 0) + 1` |
+| `putIfAbsent(k, v)` | `V` (existing or null) | Set default only if key missing |
+| `computeIfAbsent(k, k -> v)` | `V` | Build adjacency lists / group by key |
+| `compute(k, (k, v) -> newV)` | `V` | Read-modify-write in one call |
+| `merge(k, v, (old, new) -> r)` | `V` | Cleanest frequency counting |
+| `replaceAll((k, v) -> newV)` | `void` | Transform all values in-place |
+| `forEach((k, v) -> ...)` | `void` | Iterate without entrySet boilerplate |
+
+**Common interview patterns**:
+
+```java
+// Frequency map — three equivalent ways
+map.put(c, map.getOrDefault(c, 0) + 1);          // most common
+map.merge(c, 1, Integer::sum);                     // cleanest
+
+// Build adjacency list — no more null checks
+Map<Integer, List<Integer>> graph = new HashMap<>();
+graph.computeIfAbsent(u, k -> new ArrayList<>()).add(v);
+// vs the old way:
+// if (!graph.containsKey(u)) graph.put(u, new ArrayList<>());
+// graph.get(u).add(v);
+
+// Group anagrams (LC 49) — one-liner grouping
+Map<String, List<String>> groups = new HashMap<>();
+for (String s : strs) {
+    char[] key = s.toCharArray();
+    Arrays.sort(key);
+    groups.computeIfAbsent(new String(key), k -> new ArrayList<>()).add(s);
+}
+```
+
+**`merge` vs `compute` vs `computeIfAbsent`**:
+- `computeIfAbsent` — only runs if key is **absent**. Perfect for lazy initialization (lists, maps)
+- `compute` — always runs, receives current value (or null). For read-modify-write
+- `merge` — if absent, inserts value directly; if present, applies remapping function. Ideal for counters
+
+---
+
 ### TreeMap<K, V>
 
 Sorted map backed by Red-Black tree. All operations **O(log n)**.
