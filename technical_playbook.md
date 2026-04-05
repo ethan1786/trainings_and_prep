@@ -136,40 +136,306 @@ while (lo < hi) {
 - "Longest/shortest **contiguous** subarray/substring with constraint"
 - The constraint can be checked incrementally (add right, shrink left)
 
-### Template
+### Template 1: Variable Window — Find Longest
+
+Shrink with `while` — the window may need to shrink multiple steps per expansion.
 
 ```java
-int left = 0;
-// expand right boundary
+int left = 0, ans = 0;
 for (int right = 0; right < n; right++) {
     // add nums[right] to window state
 
-    // shrink from left while constraint is violated
     while (/* constraint violated */) {
         // remove nums[left] from window state
         left++;
     }
-    // update answer (window is [left, right])
+    // window [left, right] is valid — update answer
+    ans = Math.max(ans, right - left + 1);
 }
 ```
 
-### Key Problems
-| Problem | Window Condition |
-|---|---|
-| LC 3 (Longest Substring Without Repeating) | All chars unique (use Set or freq map) |
-| LC 76 (Minimum Window Substring) | Window contains all chars of t (use freq map + count) |
-| LC 239 (Sliding Window Maximum) | Fixed-size window, use monotonic deque |
-| LC 1438 (Longest Subarray with Abs Diff ≤ K) | Use two TreeMaps or two monotonic deques |
+**Update answer AFTER shrinking** — the window is valid at this point.
 
-### Trick: Fixed vs Variable Window
-- **Variable**: shrink left when constraint violated → find min/max length
-- **Fixed** (size k): just slide, no shrinking logic
+### Template 2: Variable Window — Find Shortest
+
+Same structure, but update answer DURING shrinking (inside the `while`).
+
+```java
+int left = 0, ans = Integer.MAX_VALUE;
+for (int right = 0; right < n; right++) {
+    // add nums[right] to window state
+
+    while (/* constraint satisfied */) {
+        ans = Math.min(ans, right - left + 1);  // update INSIDE
+        // remove nums[left] from window state
+        left++;
+    }
+}
+```
+
+**Key difference**: for longest, shrink while *violated*; for shortest, shrink while *satisfied* (greedily shrink valid windows).
+
+### Template 3: Fixed Window (size k)
+
+Shrink with `if`, not `while` — window grows by 1 each step, so at most 1 shrink needed.
+
+```java
+int left = 0;
+for (int right = 0; right < n; right++) {
+    // add nums[right] to window state
+
+    if (right - left + 1 > k) {       // "if", not "while"
+        // remove nums[left] from window state
+        left++;
+    }
+    if (right - left + 1 == k) {
+        // window is exactly size k — process/update answer
+    }
+}
+```
+
+### Trick: `if` vs `while` for Shrinking
+
+| Scenario | Use | Why |
+|---|---|---|
+| Fixed window size k | `if` | Window overshoots by at most 1 per step |
+| Variable — find longest/shortest | `while` | One expansion can violate constraint by many steps |
+| Variable — with `atMost(k)` counting | `while` | Same reason |
+
+**Rule of thumb**: if the window size is predetermined, `if`. If the window size depends on content, `while`.
+
+### Pattern: LC 76 — Minimum Window Substring
+
+Classic "find shortest window covering a target" pattern. Combines variable-shortest template + freq map + `valid` counter. This pattern recurs in LC 438, LC 567, LC 30, and any "window must contain all of X" variant.
+
+**Setup**: two maps — `need` (what we must have) and `window` (what we currently have). A `valid` counter tracks how many distinct characters have fully met their required count — avoids scanning the map every step.
+
+```java
+public String minWindow(String s, String t) {
+    // 1. Build the "need" map
+    Map<Character, Integer> need = new HashMap<>(), window = new HashMap<>();
+    for (char c : t.toCharArray()) need.merge(c, 1, Integer::sum);
+
+    int left = 0, valid = 0;
+    int start = 0, minLen = Integer.MAX_VALUE;
+
+    for (int right = 0; right < s.length(); right++) {
+        // 2. Expand: add s[right] into window
+        char c = s.charAt(right);
+        if (need.containsKey(c)) {
+            window.merge(c, 1, Integer::sum);
+            // only increment valid when count exactly matches (not every time)
+            if (window.get(c).equals(need.get(c))) valid++;
+        }
+
+        // 3. Shrink: window satisfies constraint → try to minimize
+        //    "shortest" pattern: update answer INSIDE the while loop
+        while (valid == need.size()) {
+            // update answer
+            if (right - left + 1 < minLen) {
+                minLen = right - left + 1;
+                start = left;
+            }
+            // remove s[left] from window
+            char d = s.charAt(left);
+            if (need.containsKey(d)) {
+                // must check BEFORE decrementing — if counts match, we're about to lose validity
+                if (window.get(d).equals(need.get(d))) valid--;
+                window.merge(d, -1, Integer::sum);
+            }
+            left++;
+        }
+    }
+    return minLen == Integer.MAX_VALUE ? "" : s.substring(start, start + minLen);
+}
+```
+
+**Step-by-step breakdown**:
+
+| Step | What | Why |
+|---|---|---|
+| Build `need` map | Count required frequency of each char in `t` | Baseline to compare against |
+| Expand right | Add char to `window` map, bump `valid` when a char's count reaches required | Grow window until constraint is met |
+| Shrink left (while valid) | Record answer, remove left char, decrement `valid` if count drops below required | Greedily find shortest valid window |
+| `valid` counter | Tracks # of distinct chars fully satisfied | O(1) check instead of comparing two maps |
+
+**Why `equals()` not `==`**: `window.get(c)` returns `Integer` objects. For values > 127, `==` compares references and can return false even when values match. Always use `.equals()`.
+
+**Adapting this pattern to other problems**:
+- **LC 567 (Permutation in String)**: same structure, but fixed window size = `s1.length()`. Use `if` for shrinking, return true when `valid == need.size()` and window size matches
+- **LC 438 (Find All Anagrams)**: same as LC 567 but collect all `start` indices instead of returning early
+- **LC 30 (Substring with Concatenation of All Words)**: same idea but `need` map counts words, and you slide in word-sized steps
+
+### Trick: Exactly K = atMost(K) − atMost(K − 1)
+
+When asked "subarrays with **exactly** K distinct values" (LC 992), a direct sliding window is tricky because shrinking skips valid windows. Instead:
+
+```java
+// LC 992 — Subarrays with Exactly K Distinct Integers
+return atMost(nums, k) - atMost(nums, k - 1);
+```
+
+```java
+int atMost(int[] nums, int k) {
+    Map<Integer, Integer> freq = new HashMap<>();
+    int left = 0, count = 0;
+    for (int right = 0; right < nums.length; right++) {
+        freq.merge(nums[right], 1, Integer::sum);
+        while (freq.size() > k) {
+            int d = nums[left++];
+            freq.merge(d, -1, Integer::sum);
+            if (freq.get(d) == 0) freq.remove(d);
+        }
+        count += right - left + 1;  // all subarrays ending at right with ≤ k distinct
+    }
+    return count;
+}
+```
+
+**Why `count += right - left + 1`**: every subarray `[left..right], [left+1..right], ..., [right..right]` is valid. This counts all of them.
+
+### Trick: Monotonic Deque for Sliding Window Max/Min
+
+For maintaining max or min in a sliding window (LC 239, LC 1438):
+
+```java
+// LC 239 — Sliding Window Maximum
+Deque<Integer> deque = new ArrayDeque<>();  // stores indices, values are decreasing
+int[] result = new int[n - k + 1];
+for (int i = 0; i < n; i++) {
+    // remove elements smaller than current from back (they can never be the max)
+    while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i])
+        deque.pollLast();
+    deque.offerLast(i);
+    // remove front if out of window
+    if (deque.peekFirst() <= i - k) deque.pollFirst();
+    // record answer
+    if (i >= k - 1) result[i - k + 1] = nums[deque.peekFirst()];
+}
+```
+
+For **both max and min** (LC 1438), use two deques — one decreasing (max), one increasing (min). Shrink left when `max - min > limit`.
+
+### Key Problems
+
+| Problem | Type | Window Condition |
+|---|---|---|
+| LC 3 (Longest Substring Without Repeating) | Variable — longest | All chars unique (use Set or freq map) |
+| LC 76 (Minimum Window Substring) | Variable — shortest | Contains all chars of t (freq map + valid counter) |
+| LC 209 (Minimum Size Subarray Sum) | Variable — shortest | Sum ≥ target |
+| LC 239 (Sliding Window Maximum) | Fixed | Monotonic deque |
+| LC 567 (Permutation in String) | Fixed | Freq map matches (window size = len(s1)) |
+| LC 992 (Subarrays with Exactly K Distinct) | Variable — count | Use atMost(K) − atMost(K−1) trick |
+| LC 1438 (Longest Subarray Abs Diff ≤ K) | Variable — longest | Two monotonic deques (max and min) |
 
 ### Common Pitfalls
 - **Forgetting to remove left element from state** when shrinking — e.g., decrement freq map, remove from set
 - **Updating answer at the wrong place** — for "longest", update *after* shrinking; for "shortest", update *during* shrinking
-- **Using `if` instead of `while` for shrinking** — may need to shrink multiple times
+- **Using `if` instead of `while` for variable windows** — may need to shrink multiple times
+- **Using `while` for fixed windows** — wasteful and confusing; `if` is sufficient
 - **Off-by-one in window size** — window `[left, right]` has size `right - left + 1`
+- **Not cleaning up freq map** — after decrementing, remove key if freq hits 0 (especially for `.size()` checks)
+
+---
+
+## Prefix Sum + HashMap
+
+### When to Use
+- "Subarray with sum equals / divisible by K"
+- "Longest/shortest subarray with some sum property"
+- "Count subarrays where sum satisfies condition"
+
+The core idea: `sum(i..j) = prefix[j] - prefix[i-1]`. Instead of checking all O(n²) pairs, store prefix sums in a hashmap and look up the complement in O(1).
+
+### Variant 1: Count Subarrays with Sum = K (LC 560)
+
+Store `prefix -> count`. For each position, look up how many previous prefixes equal `prefix - k`.
+
+```java
+Map<Integer, Integer> map = new HashMap<>();
+map.put(0, 1);  // empty prefix — handles subarrays starting from index 0
+int prefix = 0, count = 0;
+
+for (int num : nums) {
+    prefix += num;
+    count += map.getOrDefault(prefix - k, 0);  // how many earlier prefixes make sum = k
+    map.merge(prefix, 1, Integer::sum);
+}
+```
+
+**Why `map.put(0, 1)` is critical**: without it, you miss subarrays that start from the beginning (where `prefix` itself equals `k`).
+
+### Variant 2: Subarray Sum Divisible by K (LC 523, LC 974)
+
+If `prefix[i] % k == prefix[j] % k`, then `sum(j+1..i)` is divisible by `k`. Store `prefix % k` instead of raw prefix.
+
+```java
+// LC 523 — Continuous Subarray Sum (length >= 2, sum is multiple of k)
+// Store prefix % k -> earliest index
+Map<Integer, Integer> map = new HashMap<>();
+map.put(0, -1);  // empty prefix at "index -1"
+int prefix = 0;
+
+for (int i = 0; i < nums.length; i++) {
+    prefix = ((prefix + nums[i]) % k + k) % k;  // handle negatives
+    if (map.containsKey(prefix)) {
+        if (i - map.get(prefix) >= 2) return true;  // length >= 2 check
+    } else {
+        map.put(prefix, i);  // only store FIRST occurrence (want longest/earliest)
+    }
+}
+return false;
+```
+
+```java
+// LC 974 — Count subarrays with sum divisible by k
+// Store prefix % k -> count (not earliest index, since we're counting)
+Map<Integer, Integer> map = new HashMap<>();
+map.put(0, 1);
+int prefix = 0, count = 0;
+
+for (int num : nums) {
+    prefix = ((prefix + num) % k + k) % k;
+    count += map.getOrDefault(prefix, 0);  // all previous same-remainder prefixes
+    map.merge(prefix, 1, Integer::sum);
+}
+```
+
+### Variant 3: Transform + Prefix Sum (LC 525)
+
+When the problem isn't directly about sums, transform it into one. LC 525 (longest subarray with equal 0s and 1s): treat 0 as -1, then "equal 0s and 1s" becomes "subarray sum = 0".
+
+```java
+// LC 525 — Contiguous Array (longest subarray with equal 0 and 1)
+Map<Integer, Integer> map = new HashMap<>();
+map.put(0, -1);  // empty prefix at index -1
+int prefix = 0, maxLen = 0;
+
+for (int i = 0; i < nums.length; i++) {
+    prefix += (nums[i] == 0) ? -1 : 1;  // transform: 0 → -1
+    if (map.containsKey(prefix)) {
+        maxLen = Math.max(maxLen, i - map.get(prefix));  // don't update map — want earliest
+    } else {
+        map.put(prefix, i);
+    }
+}
+```
+
+### What to Store in the HashMap
+
+| Goal | Key | Value | Initial Entry |
+|---|---|---|---|
+| Count subarrays (LC 560, 974) | prefix (or prefix % k) | count | `(0, 1)` |
+| Longest subarray (LC 525) | prefix | earliest index | `(0, -1)` |
+| Existence + min length (LC 523) | prefix % k | earliest index | `(0, -1)` |
+
+**Earliest index vs count** — if you're counting, store count. If you want longest/shortest, store earliest index (and never overwrite it).
+
+### Common Pitfalls
+- **Forgetting the base case** — `map.put(0, 1)` or `map.put(0, -1)` depending on variant. Without it, subarrays starting from index 0 are missed
+- **Negative modulo in Java** — `(-3) % 5 == -3` in Java, not `2`. Fix: `((prefix % k) + k) % k`
+- **Overwriting earliest index** — for longest subarray problems, only store the first occurrence. Use `putIfAbsent` or check `containsKey` before putting
+- **Order of operations** — look up the complement *before* inserting current prefix, otherwise you'd match the current index with itself
 
 ---
 
@@ -404,6 +670,42 @@ for (int coin : coins)
 // LC 1235 (Job Scheduling): sort by end, binary search for last non-overlapping
 dp[i] = max(dp[i-1], profit[i] + dp[lastNonOverlapping(i)]);
 ```
+
+### Non-Obvious DP: LC 727 — Minimum Window Subsequence
+
+This problem doesn't scream DP — the natural instinct is two pointers (forward scan to find a window, optionally backward scan to tighten). But it has an elegant DP formulation.
+
+**State**: `dp[i][j]` = rightmost starting index `k` such that `s2[0..j]` is a subsequence of `s1[k..i]`. Rightmost `k` = shortest window.
+
+**Recurrence**:
+- `s1[i] == s2[j]` → match them: `dp[i][j] = dp[i-1][j-1]` (or `i` if `j == 0`)
+- `s1[i] != s2[j]` → skip `s1[i]`: `dp[i][j] = dp[i-1][j]`
+
+**Space optimization**: only depends on previous row → use 1D array, iterate `j` backwards (same trick as 0/1 knapsack).
+
+```java
+int n = s1.length(), m = s2.length();
+int[] dp = new int[m];
+Arrays.fill(dp, -1);
+int start = 0, minLen = Integer.MAX_VALUE;
+
+for (int i = 0; i < n; i++) {
+    for (int j = m - 1; j >= 0; j--) {   // backwards — 0/1 knapsack trick
+        if (s1.charAt(i) == s2.charAt(j)) {
+            dp[j] = (j == 0) ? i : dp[j - 1];
+        }
+    }
+    if (dp[m - 1] != -1 && i - dp[m - 1] + 1 < minLen) {
+        minLen = i - dp[m - 1] + 1;
+        start = dp[m - 1];
+    }
+}
+return minLen == Integer.MAX_VALUE ? "" : s1.substring(start, start + minLen);
+```
+
+**Why it's interesting**: the state is not "optimal value" but "optimal starting position" — tracking *where* a subsequence match begins rather than *whether* it exists. This is a useful DP trick when the answer involves position/range, not just count/boolean.
+
+**Two-pointer alternative**: forward scan from each starting char, early termination if s2 can't be fully matched. Simpler to reason about, same O(n*m) complexity. Either approach is fine in an interview.
 
 ### DP is Shortest Path on a DAG
 Every DP recurrence defines a DAG. Table-filling = topological sort. If cycles exist → can't use DP, need BFS/Dijkstra.
