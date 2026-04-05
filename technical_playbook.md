@@ -9,22 +9,24 @@
 1. [Pattern Recognition Decision Tree](#pattern-recognition-decision-tree)
 2. [Two Pointers](#two-pointers)
 3. [Sliding Window](#sliding-window)
-4. [Binary Search](#binary-search)
-5. [Intervals](#intervals)
-6. [Greedy](#greedy)
-7. [Dynamic Programming](#dynamic-programming)
-8. [Backtracking](#backtracking)
-9. [Graph Algorithms](#graph-algorithms)
-10. [Union-Find](#union-find)
-11. [Topological Sort](#topological-sort)
-12. [Linked List Tricks](#linked-list-tricks)
-13. [Stack Patterns](#stack-patterns)
-14. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
-15. [Bit Manipulation](#bit-manipulation)
-16. [Matrix Tricks](#matrix-tricks)
-17. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
-18. [Data Structures Reference](#data-structures-reference)
-19. [Java Concurrency](#java-concurrency)
+4. [Prefix Sum + HashMap](#prefix-sum--hashmap)
+5. [Binary Search](#binary-search)
+6. [Intervals](#intervals)
+7. [Greedy](#greedy)
+8. [Dynamic Programming](#dynamic-programming)
+9. [Backtracking](#backtracking)
+10. [Tree](#tree)
+11. [Graph Algorithms](#graph-algorithms)
+12. [Union-Find](#union-find)
+13. [Topological Sort](#topological-sort)
+14. [Linked List Tricks](#linked-list-tricks)
+15. [Stack Patterns](#stack-patterns)
+16. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
+17. [Bit Manipulation](#bit-manipulation)
+18. [Matrix Tricks](#matrix-tricks)
+19. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
+20. [Data Structures Reference](#data-structures-reference)
+21. [Java Concurrency](#java-concurrency)
 
 ---
 
@@ -782,6 +784,18 @@ void dfs(TreeNode node) {
 }
 ```
 
+**DFS — Iterative preorder** (simplest iterative — just stack with right-then-left push):
+```java
+Deque<TreeNode> stack = new ArrayDeque<>();
+stack.push(root);
+while (!stack.isEmpty()) {
+    TreeNode node = stack.pop();
+    // process(node)
+    if (node.right != null) stack.push(node.right);  // right first
+    if (node.left != null) stack.push(node.left);     // so left is popped first
+}
+```
+
 **DFS — Iterative inorder** (useful when you need to stop early, e.g., kth smallest):
 ```java
 Deque<TreeNode> stack = new ArrayDeque<>();
@@ -794,6 +808,43 @@ while (curr != null || !stack.isEmpty()) {
     curr = stack.pop();
     // process(curr) — nodes come out in sorted order for BST
     curr = curr.right;
+}
+```
+
+**DFS — Iterative postorder** (trickiest — two approaches):
+
+Approach 1: modified preorder (root→right→left) then reverse. Simple but uses O(n) extra space.
+```java
+Deque<TreeNode> stack = new ArrayDeque<>();
+List<Integer> result = new ArrayList<>();
+stack.push(root);
+while (!stack.isEmpty()) {
+    TreeNode node = stack.pop();
+    result.add(node.val);
+    if (node.left != null) stack.push(node.left);    // left first
+    if (node.right != null) stack.push(node.right);  // so right is popped first
+}
+Collections.reverse(result);  // root→right→left reversed = left→right→root = postorder
+```
+
+Approach 2: track previous node to know if we're returning from right child. True O(1) extra space (besides stack).
+```java
+Deque<TreeNode> stack = new ArrayDeque<>();
+TreeNode curr = root, prev = null;
+while (curr != null || !stack.isEmpty()) {
+    while (curr != null) {
+        stack.push(curr);
+        curr = curr.left;
+    }
+    curr = stack.peek();
+    if (curr.right == null || curr.right == prev) {
+        // process(curr) — right subtree done or doesn't exist
+        stack.pop();
+        prev = curr;
+        curr = null;       // don't go left again
+    } else {
+        curr = curr.right; // visit right subtree first
+    }
 }
 ```
 
