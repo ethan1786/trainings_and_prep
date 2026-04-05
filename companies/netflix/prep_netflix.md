@@ -180,7 +180,33 @@ Be ready to articulate this clearly:
 
 ---
 
-## 11. Pre-Interview Checklist
+## 11. Technical Coding Prep — Netflix
+
+Netflix weights system design most heavily, then behavioral, then coding. Coding rounds lean practical. Expect design-oriented problems and streaming/data structure questions.
+
+**Frequently reported:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Content caching — very Netflix |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned data |
+| 362 | Design Hit Counter | Medium | Design, Queue | Request rate tracking |
+| 295 | Find Median from Data Stream | Hard | Heap | Streaming statistics |
+| 239 | Sliding Window Maximum | Hard | Monotonic Deque | Streaming metrics |
+| 76 | Minimum Window Substring | Hard | Sliding Window | Classic hard |
+| 42 | Trapping Rain Water | Hard | Two Pointers, Stack | Classic hard |
+| 56 | Merge Intervals | Medium | Intervals, Sorting | Time range operations |
+| 23 | Merge k Sorted Lists | Hard | Heap | k-way merge — log/event streams |
+| 347 | Top K Frequent Elements | Medium | Heap, Bucket Sort | Content ranking |
+| 297 | Serialize and Deserialize Binary Tree | Hard | Tree, Design | Data encoding |
+| 155 | Min Stack | Medium | Stack, Design | Quick design warmup |
+| 34 | Find First and Last Position | Medium | Binary Search | Boundary search |
+| 99 | Recover Binary Search Tree | Medium | Tree, Inorder | Find swapped nodes |
+| 88 | Merge Sorted Array | Easy | Two Pointers | Warmup — merge in-place |
+
+---
+
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_netflix.html

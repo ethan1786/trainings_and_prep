@@ -173,7 +173,38 @@ Pinterest explicitly tests **how you collaborate with AI**. Be ready to discuss:
 
 ---
 
-## 11. Pre-Interview Checklist
+## 11. Technical Coding Prep — Pinterest
+
+Pinterest has strong LC tag data. Leans Hard. Known for intervals, string parsing (calculator variants), and graph problems.
+
+**Pinterest classics (high frequency):**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 759 | Employee Free Time | Hard | Intervals, Heap | Merge free time across schedules |
+| 224 | Basic Calculator | Hard | Stack, Parsing | Expression evaluation |
+| 772 | Basic Calculator III | Hard | Stack, Recursion | Full expression with parentheses |
+| 770 | Basic Calculator IV | Hard | Stack, Parsing, HashMap | Symbolic computation |
+| 269 | Alien Dictionary | Hard | Topological Sort | Build order from sorted words |
+| 68 | Text Justification | Hard | String, Simulation | Line-by-line formatting |
+| 277 | Find the Celebrity | Medium | Graph, Greedy | Elimination — O(n) queries |
+| 126 | Word Ladder II | Hard | BFS + Backtracking | Find all shortest paths |
+| 632 | Smallest Range Covering K Lists | Hard | Heap, Sliding Window | k-way merge with range tracking |
+| 564 | Find the Closest Palindrome | Hard | String, Math | Edge cases are the hard part |
+
+**Also frequently asked:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Universal design |
+| 362 | Design Hit Counter | Medium | Design, Queue | Rate tracking |
+| 811 | Subdomain Visit Count | Easy | HashMap, String | Warmup — string parsing |
+| 718 | Max Length of Repeated Subarray | Medium | DP, Binary Search | Longest common subarray |
+| 698 | Partition to K Equal Sum Subsets | Medium | Backtracking, Bitmask | Subset partition |
+
+---
+
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_pinterest.html

@@ -219,7 +219,33 @@ Be ready to discuss:
 
 ---
 
-## 13. Pre-Interview Checklist
+## 13. Technical Coding Prep — Datadog
+
+Datadog uses CoderPad with their own question bank — "hybrid between practical and LeetCode-style." Two algorithmic questions per phone screen. Questions start at medium and add layers of complexity related to infrastructure/monitoring.
+
+**Reported themes and closest LC equivalents:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 588 | Design In-Memory File System | Hard | Trie, Design | File path operations — very Datadog-relevant |
+| 362 | Design Hit Counter | Medium | Design, Queue | Monitoring / metrics counting |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Time-series data lookups |
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Universal design question |
+| 341 | Flatten Nested List Iterator | Medium | Stack, Iterator | Nested data structures |
+| 394 | Decode String | Medium | Stack, Recursion | String parsing — common Datadog theme |
+| 56 | Merge Intervals | Medium | Intervals, Sorting | Alert windows, time ranges |
+| 347 | Top K Frequent Elements | Medium | Heap, Bucket Sort | Metrics aggregation |
+| 215 | Kth Largest Element | Medium | Heap, Quickselect | Top-K variant |
+| 200 | Number of Islands | Medium | Graph, BFS/DFS | Connected components |
+| 210 | Course Schedule II | Medium | Topological Sort | Dependency ordering |
+| 74 | Search a 2D Matrix | Medium | Binary Search | Sorted data lookup |
+| 23 | Merge k Sorted Lists | Hard | Heap | k-way merge — log stream merging |
+| 42 | Trapping Rain Water | Hard | Two Pointers, Stack | Classic hard |
+| 295 | Find Median from Data Stream | Hard | Heap | Streaming percentiles |
+
+---
+
+## 14. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_datadog.html

@@ -239,7 +239,33 @@ Ask this in the recruiter screen. With 13 years and Principal title, you should 
 
 ---
 
-## 13. Pre-Interview Checklist
+## 13. Technical Coding Prep — Figma
+
+Figma uses "standard algorithms and data structures, but Figma-flavored." Expect LC-medium difficulty. Problems may involve 2D canvas operations, layer management, or collaborative editing concepts.
+
+**Reported themes and closest LC equivalents:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Universal design |
+| 380 | Insert Delete GetRandom O(1) | Medium | Design, HashMap + Array | Data structure design |
+| 394 | Decode String | Medium | Stack, Recursion | Nested parsing |
+| 735 | Asteroid Collision | Medium | Stack | Collision simulation |
+| 48 | Rotate Image | Medium | Matrix | Transpose + reverse — canvas rotation |
+| 56 | Merge Intervals | Medium | Intervals, Sorting | Overlapping ranges |
+| 200 | Number of Islands | Medium | Graph, BFS/DFS | Connected regions on canvas |
+| 127 | Word Ladder | Hard | BFS, Graph | Shortest path |
+| 236 | Lowest Common Ancestor | Medium | Tree, DFS | Layer hierarchy |
+| 297 | Serialize and Deserialize Binary Tree | Hard | Tree, Design | Data encoding |
+| 102 | Binary Tree Level Order Traversal | Medium | Tree, BFS | Layer-by-layer processing |
+| 207 | Course Schedule | Medium | Topological Sort | Dependency resolution |
+| 33 | Search in Rotated Sorted Array | Medium | Binary Search | Modified binary search |
+| 153 | Find Min in Rotated Sorted Array | Medium | Binary Search | Binary search variant |
+| 322 | Coin Change | Medium | DP | Classic DP |
+
+---
+
+## 14. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_figma.html

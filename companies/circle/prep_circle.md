@@ -243,7 +243,32 @@ You don't need to be a blockchain expert, but at Circle's Distinguished level, s
 
 ---
 
-## 13. Pre-Interview Checklist
+## 13. Technical Coding Prep — Circle
+
+Circle doesn't have a dedicated LC tag. As a crypto/fintech infrastructure company, expect design-heavy problems and standard staff-level patterns.
+
+**Most likely problem types:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Universal design question |
+| 460 | LFU Cache | Hard | Design, HashMap + DLL | Harder cache variant |
+| 380 | Insert Delete GetRandom O(1) | Medium | Design, HashMap + Array | Data structure design |
+| 362 | Design Hit Counter | Medium | Design, Queue | Rate limiting — relevant to fintech |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned data — relevant to ledger systems |
+| 355 | Design Twitter | Medium | Design, Heap, HashMap | Feed ranking |
+| 297 | Serialize and Deserialize Binary Tree | Hard | Tree, DFS | Encoding/decoding |
+| 332 | Reconstruct Itinerary | Hard | Graph, DFS, Euler Path | Graph traversal |
+| 56 | Merge Intervals | Medium | Intervals, Sorting | Classic interval problem |
+| 295 | Find Median from Data Stream | Hard | Heap | Two heaps |
+| 23 | Merge k Sorted Lists | Hard | Heap, Linked List | k-way merge |
+| 127 | Word Ladder | Hard | BFS, Graph | Shortest path |
+| 208 | Implement Trie | Medium | Trie | Prefix tree fundamentals |
+| 210 | Course Schedule II | Medium | Topological Sort | Dependency ordering |
+
+---
+
+## 14. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_circle.html and cover_circle.html

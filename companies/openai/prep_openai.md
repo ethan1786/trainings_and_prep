@@ -187,7 +187,43 @@
 
 ---
 
-## 11. Pre-Interview Checklist
+## 11. Technical Coding Prep — OpenAI
+
+Extremely high technical bar. Does NOT ask string manipulation problems. Focus on practical algorithmic work: time-based data structures, versioned data stores, iterators, OOP, and concurrency. CoderPad or your own IDE.
+
+**Design + Iterator heavy (OpenAI's signature):**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned data — core OpenAI theme |
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Classic design |
+| 460 | LFU Cache | Hard | Design | Harder cache variant |
+| 588 | Design In-Memory File System | Hard | Trie, Design | File system operations |
+| 341 | Flatten Nested List Iterator | Medium | Stack, Iterator | Iterator pattern — common at OpenAI |
+| 284 | Peeking Iterator | Medium | Design, Iterator | Wrapper iterator |
+| 1472 | Design Browser History | Medium | Design, Stack/DLL | Navigation state |
+
+**Graph + Tree:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 200 | Number of Islands | Medium | Graph, BFS/DFS | Standard graph |
+| 207 | Course Schedule | Medium | Topological Sort | Dependency resolution |
+| 236 | Lowest Common Ancestor | Medium | Tree, DFS | Tree recursion |
+| 297 | Serialize and Deserialize Binary Tree | Hard | Tree, Design | Encoding/decoding |
+
+**Concurrency (unique to OpenAI among target companies):**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 1188 | Design Bounded Blocking Queue | Medium | Concurrency, Locks | Producer-consumer |
+| 1117 | Building H2O | Medium | Concurrency, Semaphore | Thread coordination |
+| 1116 | Print Zero Even Odd | Medium | Concurrency, Semaphore | Sequencing threads |
+| 1114 | Print in Order | Easy | Concurrency | Basic synchronization |
+
+---
+
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_openai.html

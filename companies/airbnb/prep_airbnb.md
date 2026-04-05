@@ -185,7 +185,43 @@
 
 ---
 
-## 11. Pre-Interview Checklist
+## 11. Technical Coding Prep — Airbnb Favorites
+
+Airbnb uses CoderPad, working code required (no pseudocode). Leans Medium-Hard. Known for string/simulation problems and graph/design questions.
+
+**Airbnb classics (high frequency):**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 68 | Text Justification | Hard | String, Simulation | Airbnb's most famous question |
+| 336 | Palindrome Pairs | Hard | Trie, Hash Map | Frequently reported |
+| 269 | Alien Dictionary | Hard | Topological Sort | Build adjacency list from adjacent word pairs |
+| 588 | Design In-Memory File System | Hard | Trie, Design | Premium — trie of directories |
+| 1166 | Design File System | Medium | Trie, Hash Map | Premium — simpler version of 588 |
+| 212 | Word Search II | Hard | Trie + Backtracking | Matrix DFS with trie pruning |
+| 787 | Cheapest Flights Within K Stops | Medium | Graph, BFS/Bellman-Ford | Modified Dijkstra or BFS with pruning |
+| 759 | Employee Free Time | Hard | Intervals, Heap | Merge intervals across multiple people |
+| 773 | Sliding Puzzle | Hard | BFS, Matrix | BFS on board states |
+| 864 | Shortest Path to Get All Keys | Hard | BFS, Bitmask | BFS with bitmask state |
+
+**Also frequently asked (covered in main study plan):**
+
+| # | Problem | Difficulty | Pattern |
+|---|---------|-----------|---------|
+| 76 | Minimum Window Substring | Hard | Sliding Window |
+| 42 | Trapping Rain Water | Hard | Two Pointers / Monotonic Stack |
+| 146 | LRU Cache | Medium | Design, HashMap + DLL |
+| 460 | LFU Cache | Hard | Design |
+| 1235 | Maximum Profit in Job Scheduling | Hard | DP + Binary Search |
+| 251 | Flatten 2D Vector | Medium | Design, Iterator |
+| 341 | Flatten Nested List Iterator | Medium | Stack, Iterator |
+| 166 | Fraction to Recurring Decimal | Medium | Hash Map, Math |
+| 875 | Koko Eating Bananas | Medium | Binary Search on Answer |
+| 39 | Combination Sum | Medium | Backtracking |
+
+---
+
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_airbnb.html

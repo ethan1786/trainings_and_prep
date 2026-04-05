@@ -202,7 +202,33 @@ You don't need to be a blockchain expert, but show baseline literacy:
 
 ---
 
-## 12. Pre-Interview Checklist
+## 12. Technical Coding Prep — Coinbase
+
+Coinbase uses CodeSignal with a "pseudo project" format — build a feature given mini-database input. 4 questions (first is warmup, rest are LC medium). Focus on clean code and practical data manipulation.
+
+**Frequently reported:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Core design question |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned lookups |
+| 362 | Design Hit Counter | Medium | Design, Queue | Rate limiting |
+| 49 | Group Anagrams | Medium | Hash Map, Sorting | String grouping |
+| 560 | Subarray Sum Equals K | Medium | Prefix Sum + HashMap | Frequency counting |
+| 238 | Product of Array Except Self | Medium | Prefix/Suffix | Array manipulation |
+| 15 | 3Sum | Medium | Two Pointers | Sorting + skip duplicates |
+| 200 | Number of Islands | Medium | Graph, BFS/DFS | Matrix traversal |
+| 133 | Clone Graph | Medium | Graph, BFS/DFS | Deep copy |
+| 207 | Course Schedule | Medium | Topological Sort | Cycle detection |
+| 79 | Word Search | Medium | Backtracking, Matrix | DFS on grid |
+| 994 | Rotting Oranges | Medium | BFS, Matrix | Multi-source BFS |
+| 322 | Coin Change | Medium | DP | Classic unbounded knapsack |
+| 139 | Word Break | Medium | DP | 1D DP with dictionary |
+| 295 | Find Median from Data Stream | Hard | Heap | Two heaps |
+
+---
+
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_coinbase.html

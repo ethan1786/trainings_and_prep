@@ -154,7 +154,39 @@
 
 ---
 
-## 10. Pre-Interview Checklist
+## 10. Technical Coding Prep — Stripe
+
+**Important: Stripe explicitly does NOT ask LeetCode questions.** Problems are practical, originating from real Stripe engineering work. Focus on hash maps, search, parsing, arrays, strings, and building small systems. Clean, readable code matters more than algorithmic tricks.
+
+**Closest LC practice problems to Stripe's style:**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 146 | LRU Cache | Medium | Design, HashMap + DLL | Core design |
+| 362 | Design Hit Counter | Medium | Design, Queue | Rate limiting — very Stripe |
+| 588 | Design In-Memory File System | Hard | Trie, Design | Path-based operations |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned data store |
+| 380 | Insert Delete GetRandom O(1) | Medium | Design, HashMap + Array | Data structure design |
+| 271 | Encode and Decode Strings | Medium | String, Design | Serialization |
+| 341 | Flatten Nested List Iterator | Medium | Stack, Iterator | Nested data handling |
+| 708 | Insert into Sorted Circular Linked List | Medium | Linked List | Edge case handling |
+
+**Parsing / String manipulation (Stripe's signature):**
+
+| # | Problem | Difficulty | Pattern | Notes |
+|---|---------|-----------|---------|-------|
+| 227 | Basic Calculator II | Medium | Stack, Parsing | Operator precedence |
+| 394 | Decode String | Medium | Stack, Recursion | Nested encoding |
+| 722 | Remove Comments | Medium | String, Parsing | State machine for `//` and `/* */` |
+| 65 | Valid Number | Hard | String, State Machine | Exhaustive validation |
+| 49 | Group Anagrams | Medium | HashMap, Sorting | String grouping |
+| 242 | Valid Anagram | Easy | HashMap | Frequency comparison |
+
+**Tip**: practice writing clean, production-quality code with good variable names and edge case handling. Stripe values code quality over speed.
+
+---
+
+## 11. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_stripe.html
