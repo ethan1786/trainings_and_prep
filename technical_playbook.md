@@ -766,6 +766,229 @@ For arrays with duplicate elements (LC 40, 47), sort first, then skip `nums[i] =
 
 ---
 
+## Tree
+
+### Traversal Templates
+
+**DFS — Recursive** (preorder/inorder/postorder just move the "process" line):
+```java
+void dfs(TreeNode node) {
+    if (node == null) return;
+    // process(node)       ← preorder
+    dfs(node.left);
+    // process(node)       ← inorder
+    dfs(node.right);
+    // process(node)       ← postorder
+}
+```
+
+**DFS — Iterative inorder** (useful when you need to stop early, e.g., kth smallest):
+```java
+Deque<TreeNode> stack = new ArrayDeque<>();
+TreeNode curr = root;
+while (curr != null || !stack.isEmpty()) {
+    while (curr != null) {
+        stack.push(curr);
+        curr = curr.left;
+    }
+    curr = stack.pop();
+    // process(curr) — nodes come out in sorted order for BST
+    curr = curr.right;
+}
+```
+
+**BFS — Level order** (LC 102):
+```java
+Queue<TreeNode> queue = new ArrayDeque<>();
+queue.offer(root);
+while (!queue.isEmpty()) {
+    int size = queue.size();
+    for (int i = 0; i < size; i++) {
+        TreeNode node = queue.poll();
+        // process(node)
+        if (node.left != null) queue.offer(node.left);
+        if (node.right != null) queue.offer(node.right);
+    }
+}
+```
+
+### Pattern: Recursive DFS with Return Value
+
+Most tree problems follow one pattern: recurse on children, combine results, return to parent.
+
+```java
+// LC 104 — Maximum Depth
+int maxDepth(TreeNode node) {
+    if (node == null) return 0;
+    return 1 + Math.max(maxDepth(node.left), maxDepth(node.right));
+}
+
+// LC 543 — Diameter of Binary Tree
+// Trick: answer isn't the return value — track it in a global variable
+int diameter = 0;
+int depth(TreeNode node) {
+    if (node == null) return 0;
+    int left = depth(node.left), right = depth(node.right);
+    diameter = Math.max(diameter, left + right);  // update answer as side effect
+    return 1 + Math.max(left, right);             // return depth to parent
+}
+
+// LC 124 — Binary Tree Maximum Path Sum (same trick)
+int maxSum = Integer.MIN_VALUE;
+int maxGain(TreeNode node) {
+    if (node == null) return 0;
+    int left = Math.max(0, maxGain(node.left));   // drop negative branches
+    int right = Math.max(0, maxGain(node.right));
+    maxSum = Math.max(maxSum, node.val + left + right);  // path through this node
+    return node.val + Math.max(left, right);              // single branch to parent
+}
+```
+
+**The "global answer vs return value" trick**: when the answer is a path that might not pass through the root (LC 543, 124), the return value serves the parent (single branch), but the actual answer is updated as a side effect (both branches).
+
+### Pattern: Build Tree from Traversals (LC 105, LC 106)
+
+**Preorder + Inorder (LC 105)**: preorder[0] is root. Find root in inorder → everything left of it is left subtree, right is right subtree.
+
+```java
+Map<Integer, Integer> inMap = new HashMap<>();  // value -> index in inorder
+int preIdx = 0;
+
+TreeNode build(int[] preorder, int[] inorder, int inLeft, int inRight) {
+    if (inLeft > inRight) return null;
+    int rootVal = preorder[preIdx++];
+    TreeNode root = new TreeNode(rootVal);
+    int inIdx = inMap.get(rootVal);
+    root.left = build(preorder, inorder, inLeft, inIdx - 1);    // left FIRST (preorder)
+    root.right = build(preorder, inorder, inIdx + 1, inRight);
+    return root;
+}
+```
+
+**Postorder + Inorder (LC 106)**: same idea but postorder's last element is root. Process right subtree FIRST (reverse postorder).
+
+```java
+int postIdx = postorder.length - 1;
+// same structure, but:
+root.right = build(...);  // right FIRST
+root.left = build(...);
+```
+
+**Why the HashMap**: finding root in inorder by linear scan is O(n) per call → O(n²) total. HashMap makes it O(1) → O(n) total.
+
+### Pattern: Lowest Common Ancestor (LCA)
+
+**LCA in a Binary Tree (LC 236):**
+
+```java
+TreeNode lca(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null || root == p || root == q) return root;
+    TreeNode left = lca(root.left, p, q);
+    TreeNode right = lca(root.right, p, q);
+    if (left != null && right != null) return root;  // p and q on different sides
+    return left != null ? left : right;               // both on same side
+}
+```
+
+**How it works**:
+- If current node is `p` or `q`, return it (found one target)
+- Recurse both sides. If both return non-null → current node is LCA (targets are split)
+- If only one side returns non-null → LCA is deeper on that side
+
+**LCA in a BST (LC 235)** — use BST property, no need to search both sides:
+
+```java
+TreeNode lcaBST(TreeNode root, TreeNode p, TreeNode q) {
+    while (root != null) {
+        if (p.val < root.val && q.val < root.val) root = root.left;       // both left
+        else if (p.val > root.val && q.val > root.val) root = root.right; // both right
+        else return root;  // split point = LCA
+    }
+    return null;
+}
+```
+
+**LCA with parent pointers (LC 1650)** — treat it like finding the intersection of two linked lists:
+
+```java
+TreeNode lcaWithParent(Node p, Node q) {
+    Node a = p, b = q;
+    while (a != b) {
+        a = (a != null) ? a.parent : q;  // when a reaches root, jump to q
+        b = (b != null) ? b.parent : p;  // when b reaches root, jump to p
+    }
+    return a;  // they meet at LCA
+}
+```
+
+**Why this works**: same trick as LC 160 (Intersection of Two Linked Lists). Path lengths from p and q to root may differ, but `path(p→root→q→LCA)` and `path(q→root→p→LCA)` are equal length.
+
+### Pattern: Serialize / Deserialize (LC 297)
+
+Preorder DFS with null markers. Use a queue for deserialization to track position.
+
+```java
+// Serialize: preorder with "null" markers
+String serialize(TreeNode root) {
+    if (root == null) return "null";
+    return root.val + "," + serialize(root.left) + "," + serialize(root.right);
+}
+
+// Deserialize: consume from queue in preorder
+TreeNode deserialize(String data) {
+    Queue<String> queue = new ArrayDeque<>(Arrays.asList(data.split(",")));
+    return buildTree(queue);
+}
+
+TreeNode buildTree(Queue<String> queue) {
+    String val = queue.poll();
+    if (val.equals("null")) return null;
+    TreeNode node = new TreeNode(Integer.parseInt(val));
+    node.left = buildTree(queue);   // left first (preorder)
+    node.right = buildTree(queue);
+    return node;
+}
+```
+
+### Pattern: Validate BST (LC 98)
+
+Pass down valid range. Common mistake: using `int` bounds overflows — use `Long` or `TreeNode`.
+
+```java
+boolean isValid(TreeNode node, long min, long max) {
+    if (node == null) return true;
+    if (node.val <= min || node.val >= max) return false;
+    return isValid(node.left, min, node.val) && isValid(node.right, node.val, max);
+}
+// call: isValid(root, Long.MIN_VALUE, Long.MAX_VALUE)
+```
+
+Alternative: iterative inorder and check that values are strictly increasing.
+
+### Key Problems
+
+| Problem | Pattern | Key Insight |
+|---|---|---|
+| LC 98 (Validate BST) | DFS with range | Pass min/max bounds down |
+| LC 102 (Level Order) | BFS | `queue.size()` to separate levels |
+| LC 105 (Construct from Pre+In) | Recursive build | HashMap for inorder index lookup |
+| LC 124 (Max Path Sum) | DFS return + global answer | Return single branch, track full path as side effect |
+| LC 230 (Kth Smallest in BST) | Iterative inorder | Stop after k pops |
+| LC 235 (LCA in BST) | BST property | Go left/right until split |
+| LC 236 (LCA in BT) | Recursive DFS | Both sides non-null = LCA |
+| LC 297 (Serialize/Deserialize) | Preorder + null markers | Queue for deserialization |
+| LC 543 (Diameter) | DFS return + global answer | Same trick as LC 124 |
+| LC 1650 (LCA with Parent) | Two-pointer intersection | Same trick as LC 160 |
+
+### Common Pitfalls
+- **Confusing return value vs answer** — for diameter/max-path-sum, the recursive return serves the parent, the answer is tracked separately
+- **BST validation with `int` bounds** — `node.val` can be `Integer.MIN_VALUE`, so use `long` for bounds
+- **Build tree: left vs right first** — preorder → process left first. Postorder → process right first (reverse consumption)
+- **Forgetting null check** — always handle `node == null` as base case
+- **Modifying tree during traversal** — e.g., flattening to linked list (LC 114) — save `node.right` before overwriting it
+
+---
+
 ## Graph Algorithms
 
 ### Algorithm Overview
@@ -916,16 +1139,144 @@ class UnionFind {
 ```
 
 ### When to Use
-- **Merge groups that share a common element** (LC 721 Accounts Merge)
-- **Detect redundant connections** (LC 684)
-- **Count connected components** (LC 323)
-- **Dynamic connectivity** — edges added one by one
+- **Count connected components** (LC 323) — BFS/DFS also works
+- **Dynamic connectivity** — edges added one by one, need to answer queries as you go
+
+### When Union-Find is the Best or Only Choice
+
+**1. Process edges incrementally and answer per-edge** (LC 684, LC 1319)
+
+BFS/DFS would need to rebuild the graph each time. Union-Find processes each edge in near O(1).
+
+```java
+// LC 684 — Redundant Connection: return the LAST edge that creates a cycle
+// Union-Find: try to union each edge; the first one that fails (returns false) = cycle
+UnionFind uf = new UnionFind(n + 1);
+for (int[] edge : edges) {
+    if (!uf.union(edge[0], edge[1])) return edge;  // already connected → redundant
+}
+
+// LC 1319 — Number of Operations to Make Network Connected
+// Need at least n-1 edges. If enough, answer is just components - 1.
+if (edges.length < n - 1) return -1;
+UnionFind uf = new UnionFind(n);
+for (int[] edge : edges) uf.union(edge[0], edge[1]);
+return uf.components - 1;
+```
+
+**2. Merge groups by shared attribute** (LC 721, LC 952)
+
+When elements belong to multiple groups and you need transitive merging — "A shares email with B, B shares with C, so A/B/C are one group." BFS/DFS requires building a graph first; Union-Find merges directly.
+
+```java
+// LC 721 — Accounts Merge: group accounts that share any email
+UnionFind uf = new UnionFind(accounts.size());
+Map<String, Integer> emailToId = new HashMap<>();
+
+for (int i = 0; i < accounts.size(); i++) {
+    for (int j = 1; j < accounts.get(i).size(); j++) {
+        String email = accounts.get(i).get(j);
+        if (emailToId.containsKey(email)) {
+            uf.union(i, emailToId.get(email));  // merge accounts
+        } else {
+            emailToId.put(email, i);
+        }
+    }
+}
+
+// collect emails by root
+Map<Integer, TreeSet<String>> groups = new HashMap<>();
+for (var entry : emailToId.entrySet()) {
+    int root = uf.find(entry.getValue());
+    groups.computeIfAbsent(root, k -> new TreeSet<>()).add(entry.getKey());
+}
+```
+
+**3. Weighted Union-Find** (LC 399 — Evaluate Division)
+
+`a / b = 2.0` means edge a→b with weight 2.0. To answer `a / c`, need the ratio along the path. BFS/DFS works but traverses the graph per query. Weighted Union-Find answers in near O(1) — store the ratio from each node to its parent, and update ratios during path compression.
+
+```java
+// Weighted Union-Find: parent map + weight-to-parent map
+Map<String, String> parent = new HashMap<>();
+Map<String, Double> weight = new HashMap<>();  // weight[x] = x / parent[x]
+
+String find(String x) {
+    if (!parent.get(x).equals(x)) {
+        String root = find(parent.get(x));
+        weight.put(x, weight.get(x) * weight.get(parent.get(x)));  // compress: x/root = x/parent * parent/root
+        parent.put(x, root);
+    }
+    return parent.get(x);
+}
+
+void union(String a, String b, double val) {  // a / b = val
+    parent.putIfAbsent(a, a); weight.putIfAbsent(a, 1.0);
+    parent.putIfAbsent(b, b); weight.putIfAbsent(b, 1.0);
+    String ra = find(a), rb = find(b);
+    if (ra.equals(rb)) return;
+    parent.put(ra, rb);
+    // ra/rb = (a/b) * (b/rb) / (a/ra) = val * weight[b] / weight[a]
+    weight.put(ra, val * weight.get(b) / weight.get(a));
+}
+
+double query(String a, String b) {
+    if (!parent.containsKey(a) || !parent.containsKey(b)) return -1.0;
+    String ra = find(a), rb = find(b);
+    if (!ra.equals(rb)) return -1.0;  // not connected
+    return weight.get(a) / weight.get(b);  // a/root ÷ b/root = a/b
+}
+```
+
+**Key insight**: after `find(x)` with path compression, `weight[x]` = `x / root`. So `a / b` = `weight[a] / weight[b]` when they share the same root. The tricky part is updating `weight` during `union` — the formula `val * weight[b] / weight[a]` connects the two roots correctly.
+
+**4. Dynamic graph with "is connected?" queries** (LC 547, LC 1101)
+
+When edges are added over time and you need to check connectivity between arbitrary nodes. BFS/DFS is O(n) per query; Union-Find is near O(1).
+
+```java
+// LC 1101 — Earliest Moment When Everyone Becomes Friends
+// Sort events by time, union each pair, return time when components == 1
+Arrays.sort(logs, (a, b) -> a[0] - b[0]);
+UnionFind uf = new UnionFind(n);
+for (int[] log : logs) {
+    uf.union(log[1], log[2]);
+    if (uf.components == 1) return log[0];
+}
+return -1;
+```
+
+**4. MST — Kruskal's algorithm** (LC 1135, LC 1584)
+
+Sort edges by weight, greedily add if it connects two components. Union-Find is the standard cycle check here.
+
+```java
+// LC 1584 — Min Cost to Connect All Points (Kruskal's)
+// Build all edges, sort by weight, add via union-find
+Arrays.sort(edges, (a, b) -> a[2] - b[2]);
+UnionFind uf = new UnionFind(n);
+int cost = 0, edgesUsed = 0;
+for (int[] edge : edges) {
+    if (uf.union(edge[0], edge[1])) {
+        cost += edge[2];
+        if (++edgesUsed == n - 1) break;
+    }
+}
+```
+
+### Union-Find vs BFS/DFS Decision
+
+| Scenario | Union-Find | BFS/DFS |
+|---|---|---|
+| Static graph, find all components | Either works | Simpler |
+| Edges added one by one, need per-edge answer | **Union-Find** | Rebuild graph each time |
+| "Is X connected to Y?" after each add | **Union-Find** — near O(1) | O(n) per query |
+| Merge groups by shared attribute | **Union-Find** | Need to build graph first |
+| MST (Kruskal's) | **Union-Find** | N/A |
+| Need to traverse/explore paths | N/A | **BFS/DFS** |
 
 ### String-Keyed Union-Find
 For problems where nodes are strings (emails, words), use `Map<String, String> parent` instead of `int[]`.
-
-### Key Signal
-"Group things together by shared attribute" → Union-Find.
 
 ### Common Pitfalls
 - **Forgetting path compression** — without it, `find()` degrades to O(n)
