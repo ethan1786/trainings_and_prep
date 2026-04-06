@@ -186,7 +186,23 @@
 
 ---
 
-## 11. Pre-Interview Checklist
+## 11. System Design Prep — Stripe
+
+Stripe has a **strong emphasis on API design** — relatively unique among companies. Expect to justify decisions from a product/developer-experience perspective. They recommend using Whimsical for diagramming.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Payment Processing System** | Idempotent charge creation, retry logic, PCI compliance, multi-provider failover |
+| **Bookkeeping / Ledger Service** | Double-entry accounting, immutable transaction log, reconciliation, audit trail |
+| **Webhook Delivery System** | At-least-once delivery, retry with exponential backoff, event ordering, endpoint health tracking |
+| **API Gateway** | Authentication, rate limiting, versioning, request routing, developer dashboard |
+| **Rate Limiter** | Distributed token bucket/sliding window, per-customer limits, grace periods |
+| **Distributed LRU Cache** | Eviction policies, consistency, partitioning, cache warming |
+| **Metrics / Monitoring Service** | High-throughput metrics collection, time-series storage, dashboards |
+
+---
+
+## 12. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_stripe.html

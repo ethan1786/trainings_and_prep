@@ -56,7 +56,19 @@
       "WebFetch(domain:www.careerflow.ai)",
       "WebFetch(domain:www.enjoyalgorithms.com)",
       "WebFetch(domain:www.bing.com)",
-      "WebFetch(domain:duckduckgo.com)"
+      "WebFetch(domain:duckduckgo.com)",
+      "WebFetch(domain:blog.pragmaticengineer.com)",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:blog.algomaster.io)",
+      "WebFetch(domain:netflixtechblog.com)",
+      "WebFetch(domain:www.interviewkickstart.com)",
+      "WebFetch(domain:www.figma.com)",
+      "WebFetch(domain:www.datadoghq.com)",
+      "WebFetch(domain:openai.com)",
+      "WebFetch(domain:www.circle.com)",
+      "WebFetch(domain:careers.circle.com)",
+      "WebFetch(domain:engineering.figma.com)",
+      "WebFetch(domain:newsletter.pragmaticengineer.com)"
     ]
   }
 }

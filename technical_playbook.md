@@ -946,6 +946,25 @@ TreeNode lca(TreeNode root, TreeNode p, TreeNode q) {
 - Recurse both sides. If both return non-null → current node is LCA (targets are split)
 - If only one side returns non-null → LCA is deeper on that side
 
+**LCA when nodes may not exist (LC 1644)** — can't return early on finding p or q. Must search the entire tree to confirm both exist.
+
+```java
+TreeNode ans = null;
+
+boolean dfs(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null) return false;
+    boolean left = dfs(root.left, p, q);
+    boolean right = dfs(root.right, p, q);
+    boolean curr = (root == p || root == q);
+    if ((left && right) || (curr && (left || right))) {
+        ans = root;  // LCA found — won't be overwritten by ancestors
+    }
+    return left || right || curr;
+}
+```
+
+**Key difference from LC 236**: return boolean (found p or q?) instead of the node. LCA is only set when both targets are confirmed — either on different sides (`left && right`), or current node is one target and the other is in a subtree (`curr && (left || right)`). If p or q doesn't exist, `ans` is never set.
+
 **LCA in a BST (LC 235)** — use BST property, no need to search both sides:
 
 ```java

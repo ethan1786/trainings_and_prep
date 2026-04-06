@@ -39,7 +39,9 @@
 
 ---
 
-## 3. Team Context — Technical Catalog / Data Platform
+## 3. Team Contexts
+
+### 3a. Technical Catalog / Data Platform (L6 — applied directly)
 
 - **Manages metadata** about Netflix's entire content catalog — titles, episodes, seasons, images, localization, relationships, content attributes
 - **Powers content discovery** — search, recommendations, browse, "because you watched...", and operational workflows
@@ -54,6 +56,38 @@
 - N+1 query prevention and batch data loading at massive scale
 - Handling the long tail of legacy catalog data while evolving the model
 - Multi-region serving with low latency for global subscriber base
+
+**Likely system design topics:**
+- Catalog metadata service — multi-region, multi-language, schema evolution
+- Content ingestion pipeline — new titles propagating across all surfaces
+- Search/discovery backend — relevance ranking, low-latency serving
+
+### 3b. Member Experience Core Systems (L5 — referred by connection)
+
+- **Owns the member-facing experience** — browse page, home feed, profiles, session management, client-server data layer
+- **Full Stack role** — expects both frontend (likely React/Node) and backend (JVM) fluency
+- **Personalization at scale** — the home page is different for every user, assembled in real-time from recommendation models + business rules
+- **A/B testing is central** — nearly every user-facing change is experimented on; this team builds and consumes that infrastructure
+
+**Likely technical challenges:**
+- Home feed assembly — merging outputs from multiple recommendation models into a coherent page
+- Client-server data contract — efficient data fetching for diverse devices (TV, mobile, web)
+- Profile and session management across devices
+- Performance optimization for low-powered devices (smart TVs, set-top boxes)
+- A/B testing infrastructure — experiment assignment, holdout groups, feature flagging
+
+**Likely system design topics:**
+- Home page feed system — personalized row assembly, ranking, caching per user
+- A/B testing platform — experiment assignment, statistical significance, feature flags
+- Profile/session service — cross-device sync, authentication, preferences
+
+### Leveling Strategy
+
+The referred L5 position may be the easier path in the door. If the recruiter reaches out about L5:
+- Be upfront: "I'm excited about Member Experience Core Systems. I also applied for the L6 Technical Catalog role — given my experience leading platform-level work at [previous companies], I believe I can contribute at staff scope. Is there flexibility to discuss leveling?"
+- Netflix often determines final level after interviews based on performance — getting in at L5 isn't necessarily a ceiling
+- But set the L6 expectation early rather than negotiating after an L5 offer
+- If both processes move forward, having two active paths gives you leverage
 
 ---
 
@@ -206,7 +240,52 @@ Netflix weights system design most heavily, then behavioral, then coding. Coding
 
 ---
 
-## 12. Pre-Interview Checklist
+## 12. System Design Prep — Netflix
+
+Netflix weighs system design very heavily. Key differences from standard interviews:
+- **Team-specific prompts** — questions come from your hiring team, not a generic bank
+- **Conversational format** — often no shared drawing tool, primarily verbal discussion
+- **Domain expertise > framework fluency** — they want to see you've genuinely built relevant systems
+
+**Prep tips**: read the Netflix Tech Blog extensively. Research your interviewers' backgrounds. Practice designing verbally without a whiteboard. Connect solutions to your real past experience.
+
+**For Technical Catalog (L6):**
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Content Catalog / Metadata Service** | Multi-region, multi-language metadata, schema evolution, GraphQL federation |
+| **Content Ingestion Pipeline** | New title metadata propagating to all surfaces, data freshness guarantees |
+| **Search / Discovery Backend** | Relevance ranking, low-latency serving, personalized browse |
+| **Federated GraphQL Platform** | Subgraph composition, N+1 prevention, batch data loading, schema registry |
+| **Event Logging System** | High-throughput ingestion, schema evolution, exactly-once processing |
+
+**For Member Experience Core Systems (L5):**
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Home Page Feed System** | Personalized row assembly from multiple recommendation models, per-user caching |
+| **A/B Testing Platform** | Experiment assignment, statistical significance, feature flagging, holdout groups |
+| **Profile / Session Service** | Cross-device sync, authentication, preferences, multi-profile per account |
+| **Client-Server Data Layer** | Efficient data fetching for diverse devices (TV, mobile, web), BFF pattern |
+| **Recommendation Serving** | Real-time model inference, fallback strategies, cold-start for new users |
+
+**General Netflix design topics (either role):**
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Video Streaming CDN** | Adaptive bitrate (ABR), edge caching (Open Connect), multi-region distribution |
+| **Video Encoding Pipeline** | Transcoding at scale, format/resolution matrix, cost optimization |
+| **Content Delivery Network** | Cache invalidation, geographic routing, failover, capacity planning |
+
+**Netflix-specific concepts to know:**
+- **Availability over consistency** (CAP) — Netflix's default trade-off. Always discuss this
+- **Chaos engineering** — Chaos Monkey, resilience testing. Discuss failure modes and graceful degradation
+- **Microservices at massive scale** — service mesh, circuit breakers, bulkheads
+- **Streaming domain**: ABR, HLS/DASH protocols, encoding ladders, Netflix Open Connect CDN
+
+---
+
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_netflix.html

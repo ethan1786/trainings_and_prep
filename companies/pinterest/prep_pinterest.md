@@ -204,7 +204,23 @@ Pinterest has strong LC tag data. Leans Hard. Known for intervals, string parsin
 
 ---
 
-## 12. Pre-Interview Checklist
+## 12. System Design Prep — Pinterest
+
+Pinterest design questions relate to visual discovery, recommendation, and ad serving. ~30 minute round, open-ended. Read the Pinterest Engineering Blog for context.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Home Feed / Recommendation** | Personalized pin ranking, real-time feed assembly, mixing organic and promoted content |
+| **Visual Search System** | Image embedding, similarity search, real-time inference pipeline, "shop the look" |
+| **Typeahead / Autocomplete** | Prefix matching, ranking suggestions, low-latency serving |
+| **Ad Serving System** | Auction-based ad selection, targeting, conversion tracking, budget pacing |
+| **Spam / Content Moderation** | ML-based classification at scale, human-in-the-loop review, false positive management |
+| **Rate Limiter** | Distributed rate limiting, IP-based and user-based throttling |
+| **Image Processing Pipeline** | Upload, resize, thumbnail generation, CDN distribution at scale |
+
+---
+
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_pinterest.html

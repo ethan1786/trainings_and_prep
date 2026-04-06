@@ -245,7 +245,23 @@ Datadog uses CoderPad with their own question bank — "hybrid between practical
 
 ---
 
-## 14. Pre-Interview Checklist
+## 14. System Design Prep — Datadog
+
+Heavily domain-specific — observability/monitoring. Expect emphasis on time-series data, high write throughput, low-latency queries, and multi-tenant architecture.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Metrics Ingestion & Aggregation** | Millions of data points/sec, time-series storage, rollups, retention policies |
+| **Log Aggregation Pipeline** | Ingesting/indexing billions of log lines, pattern detection, full-text search |
+| **Distributed Tracing System** | Span collection, trace assembly, sampling strategies (head vs tail-based) |
+| **Real-Time Alerting System** | Threshold/anomaly-based alerts, routing, deduplication, on-call notification |
+| **Multi-Tenant Data Platform** | Tenant isolation, per-tenant rate limiting, fair scheduling, noisy neighbor prevention |
+| **Dashboard Query Engine** | Fast aggregation over time-series data, caching, pre-computation |
+| **APM System** | End-to-end latency tracking, service dependency maps, error rate tracking |
+
+---
+
+## 15. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_datadog.html

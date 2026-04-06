@@ -223,7 +223,35 @@ Extremely high technical bar. Does NOT ask string manipulation problems. Focus o
 
 ---
 
-## 12. Pre-Interview Checklist
+## 12. System Design Prep — OpenAI
+
+OpenAI has **two** system design rounds (phone + onsite) plus a technical deep dive presenting past projects. Very high bar.
+
+**Key differences from standard interviews:**
+- **Full-stack thinking required** — designs should span UI wireframes through API contracts to database schemas. Backend-only answers are insufficient
+- **Scale is the central concern** — interviewers push through 10x, 100x, 1000x scenarios. Identify specific bottlenecks at each threshold (not "add more servers")
+- **Technical depth demanded** — explain internals of chosen systems (Kafka partition mechanics, K8s scheduling, Redis eviction). Surface-level fails
+- **Level determined after interviews** — not beforehand. Demonstrate staff-level judgment throughout
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Design ChatGPT** | Conversation threading, token streaming (SSE), model serving, rate limiting, session management, context window management |
+| **LLM Serving Infrastructure** | Model deployment, GPU cluster management, request routing, batching, auto-scaling, latency optimization |
+| **API Gateway** | Authentication, rate limiting, token counting, streaming responses, API versioning |
+| **High-Scale Chat System** | Real-time delivery, presence, message ordering, at massive scale |
+| **Job Scheduler** | Distributed task orchestration, priority queues, failure handling, retry policies |
+| **Notification System** | Multi-channel (push, email, in-app), delivery guarantees, user preferences, rate limiting |
+
+**OpenAI-specific concepts to know:**
+- **Model serving**: vLLM, TensorRT-LLM, KV-cache management, speculative decoding, batching strategies
+- **GPU scheduling**: load balancing for GPU workloads, cluster resource management
+- **Inference caching**: prompt caching, KV-cache reuse across requests
+- **API design**: OpenAI's business IS its API — understand rate limiting, token counting, streaming (SSE), versioning
+- **Technical deep dive**: choose a high-complexity project where YOU owned the decisions. Prepare 15-20 min presentation but leave time for aggressive follow-ups
+
+---
+
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_openai.html

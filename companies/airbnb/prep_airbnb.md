@@ -221,7 +221,23 @@ Airbnb uses CoderPad, working code required (no pseudocode). Leans Medium-Hard. 
 
 ---
 
-## 12. Pre-Interview Checklist
+## 12. System Design Prep — Airbnb
+
+Airbnb's system design questions are heavily travel/hospitality domain. Expect questions about search, booking, and payments.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Search & Discovery** | Geo-based search with filters (price, dates, amenities), ranking/relevance, availability calendar integration |
+| **Booking/Reservation System** | Double-booking prevention, calendar locking, conflict resolution, cancellation flows, idempotency |
+| **Payment System** | Split payments (host/guest), escrow, refunds, multi-currency |
+| **Messaging Service** | Real-time guest-host messaging, automated chatbot support |
+| **Recommendation Engine** | Personalized home feed, "similar listings," collaborative filtering at scale |
+| **Dynamic Pricing** | Surge pricing based on demand, seasonality, local events |
+| **Review & Trust System** | Two-sided reviews, fraud detection, trust scoring |
+
+---
+
+## 13. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_airbnb.html

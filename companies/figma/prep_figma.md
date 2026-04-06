@@ -265,7 +265,23 @@ Figma uses "standard algorithms and data structures, but Figma-flavored." Expect
 
 ---
 
-## 14. Pre-Interview Checklist
+## 14. System Design Prep — Figma
+
+Core challenges: real-time collaborative editing, multiplayer sync, browser-based rendering. Figma also has a heavily-weighted "deep dive" round on past projects — prepare a strong narrative.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Real-Time Collaborative Editing** | Conflict resolution (CRDTs vs OT), operational transforms, cursor/selection sync |
+| **Multiplayer Infrastructure** | WebSocket fan-out, presence tracking, room management, latency optimization |
+| **Real-Time Data Fetching (LiveGraph)** | Live query subscriptions, incremental updates, server-client consistency |
+| **Browser-Based Rendering Engine** | WebGL/Canvas pipeline, performance optimization, complex vector graphics |
+| **Plugin/Extension Platform** | Sandboxed execution, API surface, permission model, marketplace |
+| **Version History / Branching** | File versioning, branching for design files, diff/merge of visual documents |
+| **Comment & Annotation System** | Pinned comments on canvas coordinates, threading, real-time updates |
+
+---
+
+## 15. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_figma.html

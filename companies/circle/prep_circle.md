@@ -268,7 +268,22 @@ Circle doesn't have a dedicated LC tag. As a crypto/fintech infrastructure compa
 
 ---
 
-## 14. Pre-Interview Checklist
+## 14. System Design Prep — Circle
+
+Circle builds USDC stablecoin infrastructure. Expect strong emphasis on consistency guarantees, compliance/audit trails, and blockchain interop.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Stablecoin Minting & Redemption** | 1:1 reserve management, idempotent mint/burn, reconciliation with banking partners |
+| **Cross-Chain Transfer Protocol** | Moving USDC across 32+ chains, burn-and-mint model, finality guarantees, replay protection |
+| **Payment Settlement Network** | FX settlement between institutions, low latency, regulatory compliance |
+| **Wallet-as-a-Service** | Embedded wallets, key management, gas-free transactions, multi-chain support |
+| **KYC/AML Compliance Pipeline** | Identity verification, sanctions screening, transaction monitoring, audit logging at scale |
+| **Blockchain Transaction Monitor** | Tracking on-chain events across networks, confirmation handling, reorg detection |
+
+---
+
+## 15. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_circle.html and cover_circle.html

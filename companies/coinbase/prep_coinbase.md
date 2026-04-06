@@ -228,7 +228,22 @@ Coinbase uses CodeSignal with a "pseudo project" format — build a feature give
 
 ---
 
-## 13. Pre-Interview Checklist
+## 13. System Design Prep — Coinbase
+
+Coinbase system design targets real business challenges: crypto exchange, blockchain indexing, financial services. 60-minute 1:1 in the final round.
+
+| Topic | Key Design Challenges |
+|---|---|
+| **Crypto Exchange / Order Book** | Matching engine, order book data structure, trade execution, consistency |
+| **Real-Time Price Feed** | Aggregating prices across exchanges, WebSocket streaming, consistency |
+| **Blockchain Transaction Indexer** | Ingesting and querying on-chain data across multiple networks, reorg handling |
+| **Crypto Custody System** | Cold/hot wallet architecture, key management, withdrawal approval flows |
+| **Payment Gateway** | Fiat-to-crypto and crypto-to-fiat conversion, idempotency, reconciliation |
+| **Scale Backend 10x** | Capacity planning, horizontal scaling, database sharding strategies |
+
+---
+
+## 14. Pre-Interview Checklist
 
 - [ ] Re-read this doc
 - [ ] Re-read resume_coinbase.html
