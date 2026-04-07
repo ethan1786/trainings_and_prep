@@ -136,10 +136,13 @@ patterns and set up the recurrence. That's sufficient for staff+ level.
 - [ ] 1143. Longest Common Subsequence (Medium) — Coinbase, Netflix
 - [ ] 72. Edit Distance (Medium) — Airbnb, Stripe, OpenAI
 
-**Knapsack / Subset DP:**
+**Knapsack (0/1):**
 
-- [ ] 416. Partition Equal Subset Sum (Medium) — Coinbase, Netflix
-- [ ] 518. Coin Change II (Medium) — Stripe, Coinbase
+- [ ] 416. Partition Equal Subset Sum (Medium) — Coinbase, Netflix — boolean 0/1 knapsack
+
+**Knapsack (unbounded):**
+
+- [ ] 518. Coin Change II (Medium) — Stripe, Coinbase — counting unbounded knapsack (pairs with LC 322)
 
 ### Intervals
 
@@ -296,9 +299,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 76. Minimum Window Substring | 35 min |
-| 2 | 721. Accounts Merge | 25 min |
-| 3 | 295. Find Median from Data Stream | 25 min |
+| 1 | 992. Subarrays with Exactly K Distinct Integers | 35 min |
+| 2 | 547. Number of Provinces | 25 min |
+| 3 | 378. Kth Smallest Element in a Sorted Matrix | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -306,9 +309,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 269. Alien Dictionary | 35 min |
-| 2 | 146. LRU Cache | 25 min |
-| 3 | 416. Partition Equal Subset Sum | 25 min |
+| 1 | 310. Minimum Height Trees | 25 min |
+| 2 | 1472. Design Browser History | 25 min |
+| 3 | 494. Target Sum | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -316,9 +319,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 394. Decode String | 25 min |
-| 2 | 399. Evaluate Division | 25 min |
-| 3 | 33. Search in Rotated Sorted Array | 25 min |
+| 1 | 735. Asteroid Collision | 25 min |
+| 2 | 743. Network Delay Time | 25 min |
+| 3 | 153. Find Minimum in Rotated Sorted Array | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -326,9 +329,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 72. Edit Distance | 25 min |
-| 2 | 25. Reverse Nodes in k-Group | 35 min |
-| 3 | 994. Rotting Oranges | 25 min |
+| 1 | 97. Interleaving String | 25 min |
+| 2 | 143. Reorder List | 25 min |
+| 3 | 542. 01 Matrix | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -336,9 +339,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 1235. Maximum Profit in Job Scheduling | 35 min |
-| 2 | 208. Implement Trie | 25 min |
-| 3 | 142. Linked List Cycle II | 25 min |
+| 1 | 410. Split Array Largest Sum | 35 min |
+| 2 | 211. Design Add and Search Words | 25 min |
+| 3 | 287. Find the Duplicate Number | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -346,9 +349,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 127. Word Ladder | 35 min |
-| 2 | 56. Merge Intervals | 25 min |
-| 3 | 759. Employee Free Time | 25 min |
+| 1 | 752. Open the Lock | 25 min |
+| 2 | 986. Interval List Intersections | 25 min |
+| 3 | 767. Reorganize String | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -356,9 +359,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 42. Trapping Rain Water | 35 min |
-| 2 | 139. Word Break | 25 min |
-| 3 | 23. Merge k Sorted Lists | 35 min |
+| 1 | 11. Container With Most Water | 25 min |
+| 2 | 377. Combination Sum IV | 25 min |
+| 3 | 692. Top K Frequent Words | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -366,9 +369,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 224. Basic Calculator | 35 min |
-| 2 | 253. Meeting Rooms II | 25 min |
-| 3 | 300. Longest Increasing Subsequence | 25 min |
+| 1 | 150. Evaluate Reverse Polish Notation | 25 min |
+| 2 | 218. The Skyline Problem | 35 min |
+| 3 | 279. Perfect Squares | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -376,9 +379,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 51. N-Queens | 35 min |
-| 2 | 152. Maximum Product Subarray | 25 min |
-| 3 | 236. Lowest Common Ancestor | 25 min |
+| 1 | 78. Subsets | 25 min |
+| 2 | 309. Best Time to Buy and Sell Stock with Cooldown | 25 min |
+| 3 | 124. Binary Tree Maximum Path Sum | 35 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -386,9 +389,9 @@ Timed mock exams to review all patterns after completing the study plan.
 
 | # | Problem | Time |
 |---|---------|------|
-| 1 | 4. Median of Two Sorted Arrays | 35 min |
-| 2 | 862. Shortest Subarray with Sum at Least K | 35 min |
-| 3 | 54. Spiral Matrix | 25 min |
+| 1 | 875. Koko Eating Bananas | 25 min |
+| 2 | 907. Sum of Subarray Minimums | 25 min |
+| 3 | 73. Set Matrix Zeroes | 25 min |
 
 - [ ] Completed — Score: ___/3
 
@@ -404,16 +407,16 @@ Timed mock exams to review all patterns after completing the study plan.
 
 <details>
 
-**Day 1**: Sliding window → Union-Find → Two heaps
-**Day 2**: Topological sort → Design (HashMap + DLL) → Knapsack DP
-**Day 3**: Stack-based parsing → Weighted graph BFS → Binary search
-**Day 4**: 2D DP → Linked list reversal → Multi-source BFS
-**Day 5**: DP + binary search → Trie → Floyd's cycle detection
-**Day 6**: BFS shortest path → Sort + merge intervals → Intervals + heap
-**Day 7**: Two pointers → 1D DP → Heap merge
-**Day 8**: Stack-based parsing → Sweep line / heap → 1D DP + binary search opt
-**Day 9**: Backtracking → DP (track min/max) → Tree recursion
-**Day 10**: Binary search on two arrays → Monotonic deque + prefix sum → Matrix boundary
+**Day 1**: Sliding window (atMost trick) → Union-Find/DFS → Heap or binary search on matrix
+**Day 2**: Topological sort (leaf removal) → Design (stack/DLL) → 0/1 knapsack counting
+**Day 3**: Stack simulation → Dijkstra's shortest path → Binary search
+**Day 4**: 2D DP (interleaving) → Linked list (find middle + reverse + merge) → Multi-source BFS
+**Day 5**: Binary search on answer → Trie + DFS → Floyd's cycle detection on array
+**Day 6**: BFS shortest path → Two pointer on intervals → Heap/greedy (max frequency char)
+**Day 7**: Two pointers (shrink from both ends) → Unbounded knapsack permutation → Heap (top-k with ordering)
+**Day 8**: Stack evaluation → Sweep line + heap → BFS or DP
+**Day 9**: Backtracking (subsets) → State machine DP → Tree DFS + global answer
+**Day 10**: Binary search on answer → Monotonic stack → Matrix in-place marking
 
 </details>
 
