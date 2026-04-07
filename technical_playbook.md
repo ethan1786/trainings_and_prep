@@ -21,12 +21,13 @@
 13. [Topological Sort](#topological-sort)
 14. [Linked List Tricks](#linked-list-tricks)
 15. [Stack Patterns](#stack-patterns)
-16. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
-17. [Bit Manipulation](#bit-manipulation)
-18. [Matrix Tricks](#matrix-tricks)
-19. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
-20. [Data Structures Reference](#data-structures-reference)
-21. [Java Concurrency](#java-concurrency)
+16. [Recursive Descent / Calculator Pattern](#recursive-descent--calculator-pattern)
+17. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
+18. [Bit Manipulation](#bit-manipulation)
+19. [Matrix Tricks](#matrix-tricks)
+20. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
+21. [Data Structures Reference](#data-structures-reference)
+22. [Java Concurrency](#java-concurrency)
 
 ---
 
@@ -1588,13 +1589,95 @@ for (int i = 0; i <= heights.length; i++) {
 }
 ```
 
-### Stack-Based Parsing / Calculator Family
+### Monotonic Deque (Sliding Window Max/Min)
+```java
+Deque<Integer> deque = new ArrayDeque<>();
+for (int i = 0; i < nums.length; i++) {
+    while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i])
+        deque.pollLast();
+    deque.offerLast(i);
+    if (deque.peekFirst() <= i - k) deque.pollFirst();  // evict out-of-window
+    if (i >= k - 1) result[i - k + 1] = nums[deque.peekFirst()];
+}
+```
 
-The calculator problems form a progression. The universal pattern: **stack for operator precedence + recursion for parentheses**.
+### Key Problems
+| Problem | Pattern |
+|---|---|
+| LC 42 (Trapping Rain Water) | Monotonic decreasing stack — find boundaries on each side, compute water when popping |
+| LC 739 (Daily Temperatures) | Monotonic decreasing stack |
+| LC 84 (Largest Rectangle) | Monotonic stack with sentinel |
+| LC 895 (Max Frequency Stack) | HashMap + stack per frequency |
 
-**LC 227 (Basic Calculator II)** — `+`, `-`, `*`, `/`, no parentheses. Stack only.
+### Common Pitfalls
+- **Forgetting elements remaining in the stack after the loop** — for "next greater element", leftover items have no next greater (set to -1 or default). For histogram, use a sentinel value (height 0) at the end to flush the stack
+- **Pushing values vs indices** — push indices when you need position info (width calculation in histogram); push values when you only need comparison
+- **Wrong monotonic direction** — decreasing stack for "next greater", increasing stack for "next smaller"
 
-Track the previous operator. On `+`/`-`: push number (with sign) to defer. On `*`/`/`: pop, compute immediately, push result. Sum stack at end.
+---
+
+## Recursive Descent / Calculator Pattern
+
+### Core Idea
+
+Two orthogonal concerns: **recursion handles nesting** (`()`, `[]`), **stack handles operator precedence** (`*`/`/` before `+`/`-`). Use only what the problem needs.
+
+### Recursion Only — No Precedence
+
+When there's nesting but no operator precedence, recursion alone is enough. `(` or `[` triggers a recursive call, `)` or `]` returns.
+
+**LC 224 (Basic Calculator)** — `+`, `-`, `()`:
+
+```java
+int i = 0;
+
+int calc(String s) {
+    int result = 0, num = 0, sign = 1;
+    while (i < s.length()) {
+        char c = s.charAt(i++);
+        if (Character.isDigit(c)) num = num * 10 + (c - '0');
+        else if (c == '(') num = calc(s);         // recurse — sub-expression becomes a number
+        else if (c == ')') break;                  // return to caller
+        else if (c == '+' || c == '-') {
+            result += sign * num;
+            num = 0;
+            sign = (c == '+') ? 1 : -1;
+        }
+    }
+    return result + sign * num;
+}
+```
+
+**LC 394 (Decode String)** — `k[encoded_string]`, same recursive structure:
+
+```java
+int i = 0;
+
+String decode(String s) {
+    StringBuilder sb = new StringBuilder();
+    int num = 0;
+    while (i < s.length()) {
+        char c = s.charAt(i++);
+        if (Character.isDigit(c)) num = num * 10 + (c - '0');
+        else if (c == '[') {
+            String inner = decode(s);    // recurse — [...] becomes a string
+            sb.append(inner.repeat(num));
+            num = 0;
+        }
+        else if (c == ']') break;        // return to caller
+        else sb.append(c);
+    }
+    return sb.toString();
+}
+```
+
+**The pattern**: LC 224 and LC 394 are structurally identical — read tokens, recurse on open bracket, break on close bracket. The only difference is what you accumulate (numbers vs strings).
+
+### Stack Only — Precedence, No Nesting
+
+When there's operator precedence but no nesting, a stack is enough.
+
+**LC 227 (Basic Calculator II)** — `+`, `-`, `*`, `/`, no `()`:
 
 ```java
 public int calculate(String s) {
@@ -1608,8 +1691,8 @@ public int calculate(String s) {
             switch (op) {
                 case '+': stack.push(num); break;
                 case '-': stack.push(-num); break;
-                case '*': stack.push(stack.pop() * num); break;
-                case '/': stack.push(stack.pop() / num); break;
+                case '*': stack.push(stack.pop() * num); break;   // compute immediately
+                case '/': stack.push(stack.pop() / num); break;   // compute immediately
             }
             num = 0;
             op = c;
@@ -1619,33 +1702,11 @@ public int calculate(String s) {
 }
 ```
 
-**Why this works for precedence**: `*` and `/` are applied immediately (pop + compute + push). `+` and `-` just push — they're computed later when summing the stack. This naturally gives `*`/`/` higher precedence.
+**Why the stack gives precedence**: `*`/`/` pop and compute immediately. `+`/`-` just push — they're computed later when summing. This naturally makes `*`/`/` higher precedence.
 
-**LC 224 (Basic Calculator)** — `+`, `-`, `()`, no `*`/`/`. Stack saves state on `(`.
+### Recursion + Stack — Both Nesting and Precedence
 
-```java
-Deque<Integer> stack = new ArrayDeque<>();
-int result = 0, num = 0, sign = 1;
-for (char c : s.toCharArray()) {
-    if (Character.isDigit(c)) num = num * 10 + (c - '0');
-    else if (c == '+' || c == '-') {
-        result += sign * num;
-        num = 0;
-        sign = (c == '+') ? 1 : -1;
-    } else if (c == '(') {
-        stack.push(result);  // save current result
-        stack.push(sign);    // save current sign
-        result = 0; sign = 1;
-    } else if (c == ')') {
-        result += sign * num;
-        num = 0;
-        result = stack.pop() * result + stack.pop();  // sign * inner + outer
-    }
-}
-result += sign * num;
-```
-
-**LC 772 (Basic Calculator III)** — `+`, `-`, `*`, `/`, `()`. Combines both: recursion for `()`, stack for precedence within each level.
+**LC 772 (Basic Calculator III)** — `+`, `-`, `*`, `/`, `()`:
 
 ```java
 int i = 0;  // global pointer — advances across recursive calls
@@ -1675,45 +1736,21 @@ int calc(String s) {
 }
 ```
 
-**How `()` and precedence interact**: when `(` is encountered, the recursive call evaluates the entire sub-expression and returns it as a single number. To the caller, `(2+3)*4` becomes `5*4` — the parentheses are transparent once recursion returns.
+**Why `i == s.length()`**: flushes the last number at the top-level call. For `"1+2*3"`, after reading `'3'`, `i` becomes `s.length()`. Without this check, the final digit never triggers the switch. Recursive calls never hit this — they always exit via `c == ')'`.
 
-**The calculator family summarized:**
+### Decision Guide
 
-| Problem | Operators | `()` | Approach |
+| Problem | Nesting | Precedence | Use |
 |---|---|---|---|
-| LC 227 | `+` `-` `*` `/` | No | Stack only (precedence via immediate `*`/`/`) |
-| LC 224 | `+` `-` | Yes | Stack saves/restores state on `(`/`)` |
-| LC 772 | `+` `-` `*` `/` | Yes | Recursion for `()` + stack for precedence |
-
-### Monotonic Deque (Sliding Window Max/Min)
-```java
-Deque<Integer> deque = new ArrayDeque<>();
-for (int i = 0; i < nums.length; i++) {
-    while (!deque.isEmpty() && nums[deque.peekLast()] <= nums[i])
-        deque.pollLast();
-    deque.offerLast(i);
-    if (deque.peekFirst() <= i - k) deque.pollFirst();  // evict out-of-window
-    if (i >= k - 1) result[i - k + 1] = nums[deque.peekFirst()];
-}
-```
-
-### Key Problems
-| Problem | Pattern |
-|---|---|
-| LC 42 (Trapping Rain Water) | Monotonic decreasing stack — find boundaries on each side, compute water when popping |
-| LC 739 (Daily Temperatures) | Monotonic decreasing stack |
-| LC 84 (Largest Rectangle) | Monotonic stack with sentinel |
-| LC 227 (Basic Calculator II) | Stack for precedence (`*`/`/` immediate, `+`/`-` deferred) |
-| LC 224 (Basic Calculator) | Stack saves/restores state on `(`/`)` |
-| LC 772 (Basic Calculator III) | Recursion for `()` + stack for precedence |
-| LC 895 (Max Frequency Stack) | HashMap + stack per frequency |
+| LC 224 (Basic Calculator) | `()` | No | Recursion only |
+| LC 394 (Decode String) | `[]` | No | Recursion only (same structure as 224) |
+| LC 227 (Basic Calculator II) | No | `*`/`/` vs `+`/`-` | Stack only |
+| LC 772 (Basic Calculator III) | `()` | `*`/`/` vs `+`/`-` | Recursion + stack |
 
 ### Common Pitfalls
-- **Forgetting elements remaining in the stack after the loop** — for "next greater element", leftover items have no next greater (set to -1 or default). For histogram, use a sentinel value (height 0) at the end to flush the stack
-- **Pushing values vs indices** — push indices when you need position info (width calculation in histogram); push values when you only need comparison
-- **Wrong monotonic direction** — decreasing stack for "next greater", increasing stack for "next smaller"
-- **Calculator: not flushing the last number** — after the loop, `result += sign * num` is needed for the last pending number
-- **Calculator: operator precedence in LC 227** — `*` and `/` must be applied immediately, while `+` and `-` are deferred
+- **Not flushing the last number** — for recursion: `return result + sign * num`. For stack: the `i == s.length()` check
+- **Global `i` pointer** — must be a class field, not a local variable, so recursive calls advance the same pointer
+- **LC 394: forgetting to reset `num`** after processing `[` — the repeat count should reset to 0
 
 ---
 
