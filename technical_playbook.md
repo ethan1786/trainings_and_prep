@@ -1588,12 +1588,42 @@ for (int i = 0; i <= heights.length; i++) {
 }
 ```
 
-### Stack-Based Parsing
-For expression evaluation, calculators, nested structures:
+### Stack-Based Parsing / Calculator Family
+
+The calculator problems form a progression. The universal pattern: **stack for operator precedence + recursion for parentheses**.
+
+**LC 227 (Basic Calculator II)** — `+`, `-`, `*`, `/`, no parentheses. Stack only.
+
+Track the previous operator. On `+`/`-`: push number (with sign) to defer. On `*`/`/`: pop, compute immediately, push result. Sum stack at end.
 
 ```java
-// LC 224 (Basic Calculator) pattern:
-// Use stack to save state when entering parentheses
+public int calculate(String s) {
+    Deque<Integer> stack = new ArrayDeque<>();
+    int num = 0;
+    char op = '+';
+    for (int i = 0; i < s.length(); i++) {
+        char c = s.charAt(i);
+        if (Character.isDigit(c)) num = num * 10 + (c - '0');
+        if ((!Character.isDigit(c) && c != ' ') || i == s.length() - 1) {
+            switch (op) {
+                case '+': stack.push(num); break;
+                case '-': stack.push(-num); break;
+                case '*': stack.push(stack.pop() * num); break;
+                case '/': stack.push(stack.pop() / num); break;
+            }
+            num = 0;
+            op = c;
+        }
+    }
+    return stack.stream().mapToInt(Integer::intValue).sum();
+}
+```
+
+**Why this works for precedence**: `*` and `/` are applied immediately (pop + compute + push). `+` and `-` just push — they're computed later when summing the stack. This naturally gives `*`/`/` higher precedence.
+
+**LC 224 (Basic Calculator)** — `+`, `-`, `()`, no `*`/`/`. Stack saves state on `(`.
+
+```java
 Deque<Integer> stack = new ArrayDeque<>();
 int result = 0, num = 0, sign = 1;
 for (char c : s.toCharArray()) {
@@ -1603,17 +1633,57 @@ for (char c : s.toCharArray()) {
         num = 0;
         sign = (c == '+') ? 1 : -1;
     } else if (c == '(') {
-        stack.push(result);
-        stack.push(sign);
+        stack.push(result);  // save current result
+        stack.push(sign);    // save current sign
         result = 0; sign = 1;
     } else if (c == ')') {
         result += sign * num;
         num = 0;
-        result = stack.pop() * result + stack.pop();
+        result = stack.pop() * result + stack.pop();  // sign * inner + outer
     }
 }
 result += sign * num;
 ```
+
+**LC 772 (Basic Calculator III)** — `+`, `-`, `*`, `/`, `()`. Combines both: recursion for `()`, stack for precedence within each level.
+
+```java
+int i = 0;  // global pointer — advances across recursive calls
+
+int calc(String s) {
+    Deque<Integer> stack = new ArrayDeque<>();
+    int num = 0;
+    char op = '+';
+
+    while (i < s.length()) {
+        char c = s.charAt(i++);
+        if (Character.isDigit(c)) num = num * 10 + (c - '0');
+        if (c == '(') num = calc(s);           // recurse — () becomes a number
+        if (c == ')' || i == s.length() || (!Character.isDigit(c) && c != ' ')) {
+            switch (op) {
+                case '+': stack.push(num); break;
+                case '-': stack.push(-num); break;
+                case '*': stack.push(stack.pop() * num); break;
+                case '/': stack.push(stack.pop() / num); break;
+            }
+            num = 0;
+            op = c;
+            if (c == ')') break;               // return to caller
+        }
+    }
+    return stack.stream().mapToInt(Integer::intValue).sum();
+}
+```
+
+**How `()` and precedence interact**: when `(` is encountered, the recursive call evaluates the entire sub-expression and returns it as a single number. To the caller, `(2+3)*4` becomes `5*4` — the parentheses are transparent once recursion returns.
+
+**The calculator family summarized:**
+
+| Problem | Operators | `()` | Approach |
+|---|---|---|---|
+| LC 227 | `+` `-` `*` `/` | No | Stack only (precedence via immediate `*`/`/`) |
+| LC 224 | `+` `-` | Yes | Stack saves/restores state on `(`/`)` |
+| LC 772 | `+` `-` `*` `/` | Yes | Recursion for `()` + stack for precedence |
 
 ### Monotonic Deque (Sliding Window Max/Min)
 ```java
@@ -1633,7 +1703,9 @@ for (int i = 0; i < nums.length; i++) {
 | LC 42 (Trapping Rain Water) | Monotonic decreasing stack — find boundaries on each side, compute water when popping |
 | LC 739 (Daily Temperatures) | Monotonic decreasing stack |
 | LC 84 (Largest Rectangle) | Monotonic stack with sentinel |
-| LC 224 (Basic Calculator) | Stack for parentheses state |
+| LC 227 (Basic Calculator II) | Stack for precedence (`*`/`/` immediate, `+`/`-` deferred) |
+| LC 224 (Basic Calculator) | Stack saves/restores state on `(`/`)` |
+| LC 772 (Basic Calculator III) | Recursion for `()` + stack for precedence |
 | LC 895 (Max Frequency Stack) | HashMap + stack per frequency |
 
 ### Common Pitfalls
