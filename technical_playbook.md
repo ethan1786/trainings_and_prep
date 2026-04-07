@@ -652,20 +652,112 @@ else dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
 ```
 
 **3. Knapsack (0/1)** — each item used at most once → iterate **right to left**
+
+The classic: given items with weight and value, maximize value without exceeding capacity. Each item used at most once.
+
 ```java
-// LC 416 (Partition Equal Subset Sum)
+// 2D version (clearer to understand):
+// dp[i][w] = max value using items 0..i-1 with capacity w
+for (int i = 1; i <= n; i++)
+    for (int w = 0; w <= capacity; w++) {
+        dp[i][w] = dp[i-1][w];                          // skip item i
+        if (w >= weight[i-1])
+            dp[i][w] = Math.max(dp[i][w], dp[i-1][w - weight[i-1]] + value[i-1]); // take item i
+    }
+
+// 1D optimization — iterate RIGHT to LEFT so each item is used at most once:
+for (int i = 0; i < n; i++)
+    for (int w = capacity; w >= weight[i]; w--)  // RIGHT to LEFT
+        dp[w] = Math.max(dp[w], dp[w - weight[i]] + value[i]);
+```
+
+**Why right to left**: if you go left to right, `dp[w - weight[i]]` may already include item `i` from this round, effectively using item `i` multiple times. Right to left ensures `dp[w - weight[i]]` is still from the previous round (without item `i`).
+
+**0/1 knapsack variants:**
+
+```java
+// LC 416 (Partition Equal Subset Sum) — "can we reach target sum?"
+// dp[j] = can we form sum j? (boolean knapsack)
+boolean[] dp = new boolean[target + 1];
+dp[0] = true;
 for (int num : nums)
     for (int j = target; j >= num; j--)  // RIGHT to LEFT
         dp[j] = dp[j] || dp[j - num];
+
+// LC 494 (Target Sum) — "how many ways to reach target?"
+// dp[j] = number of ways to form sum j (counting knapsack)
+int[] dp = new int[target + 1];
+dp[0] = 1;
+for (int num : nums)
+    for (int j = target; j >= num; j--)  // RIGHT to LEFT
+        dp[j] += dp[j - num];
+
+// LC 474 (Ones and Zeroes) — 2D 0/1 knapsack with two constraints
+// dp[i][j] = max items using at most i zeros and j ones
+for (String s : strs) {
+    int zeros = count0(s), ones = count1(s);
+    for (int i = m; i >= zeros; i--)      // RIGHT to LEFT (both dimensions)
+        for (int j = n; j >= ones; j--)
+            dp[i][j] = Math.max(dp[i][j], dp[i - zeros][j - ones] + 1);
+}
 ```
 
 **4. Knapsack (unbounded)** — items reusable → iterate **left to right**
+
+Same structure, but each item can be used unlimited times.
+
 ```java
-// LC 322 (Coin Change)
+// 1D — iterate LEFT to RIGHT so dp[w - weight[i]] includes item i from this round:
+for (int i = 0; i < n; i++)
+    for (int w = weight[i]; w <= capacity; w++)  // LEFT to RIGHT
+        dp[w] = Math.max(dp[w], dp[w - weight[i]] + value[i]);
+```
+
+**Unbounded variants:**
+
+```java
+// LC 322 (Coin Change) — minimum coins to reach amount
+int[] dp = new int[amount + 1];
+Arrays.fill(dp, amount + 1);  // use amount+1 as "impossible" (avoids Integer.MAX_VALUE overflow)
+dp[0] = 0;
 for (int coin : coins)
     for (int j = coin; j <= amount; j++)  // LEFT to RIGHT
         dp[j] = Math.min(dp[j], dp[j - coin] + 1);
+
+// LC 518 (Coin Change II) — count number of combinations
+// Outer loop = coins, inner loop = amount → combinations (order doesn't matter)
+int[] dp = new int[amount + 1];
+dp[0] = 1;
+for (int coin : coins)
+    for (int j = coin; j <= amount; j++)
+        dp[j] += dp[j - coin];
+
+// LC 377 (Combination Sum IV) — count number of permutations
+// Outer loop = amount, inner loop = coins → permutations (order matters)
+int[] dp = new int[target + 1];
+dp[0] = 1;
+for (int j = 1; j <= target; j++)
+    for (int num : nums)
+        if (j >= num) dp[j] += dp[j - num];
 ```
+
+**Combinations vs Permutations — loop order matters:**
+
+| Goal | Outer Loop | Inner Loop | Why |
+|---|---|---|---|
+| Combinations (LC 518) | items | capacity | Each item considered once in order → {1,2} and {2,1} counted as same |
+| Permutations (LC 377) | capacity | items | For each capacity, try all items → {1,2} and {2,1} counted separately |
+
+### Knapsack Decision Guide
+
+| Signal | Type | Direction | Example |
+|---|---|---|---|
+| Each item used once | 0/1 | Right to left | LC 416, 494, 474 |
+| Items reusable | Unbounded | Left to right | LC 322, 518, 377 |
+| "Can we reach X?" | Boolean | `dp[j] = dp[j] \|\| dp[j-w]` | LC 416 |
+| "How many ways?" | Counting | `dp[j] += dp[j-w]` | LC 494, 518 |
+| "Min/max to reach X?" | Optimization | `dp[j] = min/max(dp[j], dp[j-w] + v)` | LC 322 |
+| Two constraints | 2D knapsack | Both dimensions R→L (0/1) | LC 474 |
 
 **5. DP + Binary Search** (sorted intervals/sequences)
 ```java
