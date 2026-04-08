@@ -1186,17 +1186,21 @@ while (!queue.isEmpty()) {
 ```
 
 ### Dijkstra's
+
+Shortest path from one source to all nodes. **Requires non-negative weights.** Greedy — always process the node with smallest known distance next.
+
 ```java
+// LC 743 — Network Delay Time
 int[] dist = new int[n];
 Arrays.fill(dist, Integer.MAX_VALUE);
 dist[src] = 0;
-PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]); // [dist, node]
 pq.offer(new int[]{0, src});
 
 while (!pq.isEmpty()) {
     int[] curr = pq.poll();
     int d = curr[0], u = curr[1];
-    if (d > dist[u]) continue;  // stale entry
+    if (d > dist[u]) continue;  // stale entry — already found a shorter path
     for (int[] edge : graph.getOrDefault(u, List.of())) {
         int v = edge[0], w = edge[1];
         if (dist[u] + w < dist[v]) {
@@ -1207,7 +1211,28 @@ while (!pq.isEmpty()) {
 }
 ```
 
+**Why the stale check**: Java's PQ doesn't support decrease-key. Instead, we add a new entry with the updated distance. Old entries with larger distances remain in the PQ — the `d > dist[u]` check skips them.
+
+**Why negative weights break Dijkstra's**: Dijkstra assumes once a node is popped (smallest distance), its distance is final. With negative edges, a later path through a negative edge could produce a shorter distance — but we've already "finalized" the node.
+
+**Dijkstra's variants in interviews:**
+
+```java
+// LC 787 — Cheapest Flights Within K Stops
+// Modified: limit number of edges (stops). Can't use standard Dijkstra
+// because we might skip a longer path that uses fewer stops.
+// Use Bellman-Ford with K+1 rounds instead (see below).
+
+// LC 1631 — Path With Minimum Effort
+// Modified: edge weight = max absolute height difference along the path.
+// Change relaxation: dist[v] = min(dist[v], max(dist[u], w))
+// Still works with Dijkstra because "max" is monotonically non-decreasing.
+```
+
 ### Bellman-Ford
+
+Shortest path from one source. **Handles negative weights.** Relaxes all edges V-1 times. Slower than Dijkstra but more flexible.
+
 ```java
 int[] dist = new int[n];
 Arrays.fill(dist, Integer.MAX_VALUE);
@@ -1218,35 +1243,112 @@ for (int i = 0; i < n - 1; i++)       // V-1 rounds
             dist[e[1]] = dist[e[0]] + e[2];
 ```
 
-### Kruskal's (MST)
+**Why V-1 rounds**: in the worst case (a straight line graph), shortest path to the farthest node passes through V-1 edges. Each round guarantees at least one more node gets its correct distance.
+
+**Two cases where Bellman-Ford is preferred over Dijkstra:**
+
+**1. Negative edge weights** — Dijkstra breaks, Bellman-Ford handles correctly:
 ```java
-Arrays.sort(edges, (a, b) -> a[2] - b[2]);  // sort by weight
+// After V-1 rounds, run one more round to detect negative cycles:
+for (int[] e : edges)
+    if (dist[e[0]] != Integer.MAX_VALUE && dist[e[0]] + e[2] < dist[e[1]])
+        return -1;  // negative cycle exists — distance can decrease infinitely
+```
+
+**2. Limited number of steps** (LC 787 — Cheapest Flights Within K Stops):
+```java
+// Only relax K+1 rounds instead of V-1. This gives shortest path using at most K+1 edges.
+// IMPORTANT: copy dist array each round to prevent cascading relaxations within one round.
+int[] dist = new int[n];
+Arrays.fill(dist, Integer.MAX_VALUE);
+dist[src] = 0;
+
+for (int i = 0; i <= k; i++) {          // K+1 rounds, not V-1
+    int[] prev = dist.clone();           // snapshot — prevent chain relaxation
+    for (int[] e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        if (prev[u] != Integer.MAX_VALUE && prev[u] + w < dist[v])
+            dist[v] = prev[u] + w;       // use prev[], not dist[]
+    }
+}
+return dist[dst] == Integer.MAX_VALUE ? -1 : dist[dst];
+```
+
+**Why `prev.clone()`**: without it, a chain A→B→C→D could all relax in one round, effectively using multiple edges in a single round. Cloning ensures each round adds at most one more edge to the path.
+
+**Dijkstra vs Bellman-Ford:**
+
+| | Dijkstra | Bellman-Ford |
+|---|---|---|
+| Time | O(E log V) | O(V × E) |
+| Negative weights | Breaks silently | Handles correctly |
+| Negative cycle detection | No | Yes (extra round) |
+| Limited stops/edges | Hard to adapt | Just change number of rounds |
+| Interview frequency | Higher (LC 743, 1631) | Lower (LC 787 is the main one) |
+
+### Minimum Spanning Tree (MST)
+
+MST = connect all nodes with minimum total edge weight. Two approaches:
+
+**Kruskal's** — sort all edges, greedily add smallest that doesn't create a cycle. Union-Find checks connectivity.
+
+```java
+// LC 1584 — Min Cost to Connect All Points
+// Step 1: build all edges (n² edges for complete graph)
+List<int[]> edges = new ArrayList<>();
+for (int i = 0; i < n; i++)
+    for (int j = i + 1; j < n; j++)
+        edges.add(new int[]{i, j, Math.abs(points[i][0]-points[j][0]) + Math.abs(points[i][1]-points[j][1])});
+
+// Step 2: sort by weight, greedily union
+edges.sort((a, b) -> a[2] - b[2]);
 UnionFind uf = new UnionFind(n);
 int total = 0, count = 0;
 for (int[] e : edges) {
-    if (uf.union(e[0], e[1])) {
+    if (uf.union(e[0], e[1])) {      // returns false if already connected
         total += e[2];
-        if (++count == n - 1) break;
+        if (++count == n - 1) break;  // MST has exactly n-1 edges
     }
 }
 ```
 
-### Prim's (MST)
+**Why Union-Find**: when adding edge (u, v), you need to know if u and v are already connected (cycle check). `boolean[]` can't do this — it tracks "visited" not "connected." Union-Find tracks components, so `find(u) == find(v)` means they're already in the same tree.
+
+**Prim's** — grow one tree from a starting node. Always add the cheapest edge from the tree to an unvisited node.
+
 ```java
+// LC 1584 — Prim's (better for dense graphs, avoids building all edges upfront)
 boolean[] inMST = new boolean[n];
+// pq: [cost, node]
 PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-pq.offer(new int[]{0, 0});
+pq.offer(new int[]{0, 0});  // start from node 0
 int total = 0, count = 0;
-while (!pq.isEmpty() && count < n) {
+
+while (count < n) {
     int[] curr = pq.poll();
-    if (inMST[curr[1]]) continue;
+    if (inMST[curr[1]]) continue;  // already in tree
     inMST[curr[1]] = true;
     total += curr[0];
     count++;
-    for (int[] edge : graph.getOrDefault(curr[1], List.of()))
-        if (!inMST[edge[0]]) pq.offer(new int[]{edge[1], edge[0]});
+    // add edges from new node to all unvisited nodes
+    for (int j = 0; j < n; j++)
+        if (!inMST[j])
+            pq.offer(new int[]{Math.abs(points[curr[1]][0]-points[j][0]) + Math.abs(points[curr[1]][1]-points[j][1]), j});
 }
 ```
+
+**Why `boolean[]` works for Prim's but not Kruskal's**: Prim's grows a single connected tree — every added node connects to the existing tree. Kruskal's picks globally smallest edges, which can create disconnected fragments that need Union-Find to track.
+
+**Kruskal's vs Prim's:**
+
+| | Kruskal's | Prim's |
+|---|---|---|
+| Approach | Sort all edges, add greedily | Grow from one node |
+| Data structure | Union-Find | PriorityQueue + boolean[] |
+| Better for | Sparse graphs (fewer edges) | Dense graphs (many edges) |
+| LC 1584 | O(n² log n²) — build + sort n² edges | O(n² log n) — avoids sorting all edges upfront |
+
+For LC 1584 (complete graph with n² edges), Prim's is slightly better since it avoids building and sorting all edges upfront.
 
 ### When to Use Which
 ```
@@ -1256,8 +1358,8 @@ Shortest path?
 └── Negative weights → Bellman-Ford
 
 MST?
-├── Edge list / sparse → Kruskal's
-└── Adjacency list / dense → Prim's
+├── Edge list / sparse → Kruskal's (Union-Find)
+└── Adjacency list / dense → Prim's (PQ + visited)
 ```
 
 ### Common Pitfalls

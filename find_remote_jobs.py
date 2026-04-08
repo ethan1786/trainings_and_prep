@@ -39,13 +39,16 @@ from typing import Optional
 # ── Configuration ───────────────────────────────────────────────────────────
 
 # Target companies for the default scan-all mode
+# Already applied: airbnb, coinbase, datadog, figma, netflix, stripe
 TARGET_COMPANIES = [
-    "airbnb",
-    "coinbase",
-    "datadog",
-    "figma",
-    "netflix",
-    "stripe",
+    "anthropic",
+    "databricks",
+    "discord",
+    "notion",
+    "plaid",
+    "reddit",
+    "scale",
+    "vercel",
 ]
 
 # Default filters for scan-all mode
@@ -67,6 +70,7 @@ COMPANY_BOARDS = {
     "discord":    {"ats": "greenhouse", "board": "discord"},
     "figma":      {"ats": "greenhouse", "board": "figma"},
     "notion":     {"ats": "greenhouse", "board": "notion"},
+    "plaid":      {"ats": "greenhouse", "board": "plaid"},
     "ramp":       {"ats": "greenhouse", "board": "ramp"},
     "reddit":     {"ats": "greenhouse", "board": "reddit"},
     "replit":     {"ats": "greenhouse", "board": "replit"},
