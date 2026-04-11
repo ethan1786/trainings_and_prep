@@ -492,6 +492,50 @@ return lo;
 | LC 4 (Median of Two Sorted Arrays) | Binary search on partition of shorter array |
 | LC 528 (Random Pick with Weight) | Prefix sum + binary search for random value |
 
+### Trick: Median of Two Sorted Arrays (LC 4)
+
+Binary search on the shorter array to find the correct partition. Split both arrays into left/right halves such that left half has `(m+n+1)/2` elements and everything in left ≤ everything in right.
+
+```java
+public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    if (nums1.length > nums2.length) return findMedianSortedArrays(nums2, nums1);
+    int m = nums1.length, n = nums2.length;
+    int half = (m + n + 1) / 2;
+    int left = 0, right = m;
+
+    while (left <= right) {
+        int pA = left + (right - left) / 2;  // partition in nums1
+        int pB = half - pA;                   // partition in nums2 (determined)
+        // sentinels handle boundary cases — no if/else needed
+        int leftA  = (pA == 0) ? Integer.MIN_VALUE : nums1[pA - 1];
+        int rightA = (pA == m) ? Integer.MAX_VALUE : nums1[pA];
+        int leftB  = (pB == 0) ? Integer.MIN_VALUE : nums2[pB - 1];
+        int rightB = (pB == n) ? Integer.MAX_VALUE : nums2[pB];
+
+        if (leftA <= rightB && leftB <= rightA) {          // valid partition
+            if ((m + n) % 2 == 0)
+                return (Math.max(leftA, leftB) + Math.min(rightA, rightB)) / 2d;
+            else
+                return Math.max(leftA, leftB);
+        } else if (leftB > rightA) {
+            left = pA + 1;   // pA too small
+        } else {
+            right = pA - 1;  // pA too big
+        }
+    }
+    return 0d;
+}
+```
+
+**Key ideas:**
+- **Search on shorter array** — ensures `pB = half - pA` is always non-negative
+- **`(m+n+1)/2`** — the `+1` biases left half to have the extra element when total is odd, so median = `max(leftA, leftB)`
+- **Sentinel values** (`MIN_VALUE`/`MAX_VALUE`) — cleanly handle boundary cases where one array contributes nothing to left or right half, avoiding if/else chains
+- **Valid partition**: cross-check `leftA <= rightB` and `leftB <= rightA` — left elements of each array ≤ right elements of the other
+- **`/ 2d` not `/ 2`** — integer division truncates; must use double
+
+**Time: O(log(min(m, n)))**, Space: O(1).
+
 ### Trick: Rotated Array (LC 33)
 One half is always sorted. Check which, then decide if target is in that half.
 ```java
@@ -1943,13 +1987,30 @@ while (!pq.isEmpty()) {
 
 ## Matrix Tricks
 
+### Transpose vs Rotation
+
+Transpose is a **reflection** along the main diagonal, not a rotation.
+
+```
+Original:       Transpose:       90° CW:          90° CCW:
+1 2 3            1 4 7            7 4 1            3 6 9
+4 5 6            2 5 8            8 5 2            2 5 8
+7 8 9            3 6 9            9 6 3            1 4 7
+```
+
+| Transformation | Steps |
+|---|---|
+| **90° CW** | Transpose + reverse each row |
+| **90° CCW** | Transpose + reverse each column |
+| **180°** | Reverse each row + reverse each column |
+
 ### Rotate Image 90° CW (LC 48)
 ```java
 // Step 1: Transpose (swap [i][j] with [j][i])
-// Step 2: Reverse each row
 for (int i = 0; i < n; i++)
     for (int j = i + 1; j < n; j++)
         swap(matrix[i][j], matrix[j][i]);
+// Step 2: Reverse each row
 for (int[] row : matrix)
     reverse(row);
 ```
