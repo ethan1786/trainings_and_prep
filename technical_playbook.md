@@ -1584,8 +1584,52 @@ for (int[] edge : edges) {
 | MST (Kruskal's) | **Union-Find** | N/A |
 | Need to traverse/explore paths | N/A | **BFS/DFS** |
 
-### String-Keyed Union-Find
-For problems where nodes are strings (emails, words), use `Map<String, String> parent` instead of `int[]`.
+### Map-Based Union-Find (String or Non-Contiguous Keys)
+
+When nodes are strings, or IDs aren't contiguous `0..n-1`, use `Map` instead of `int[]`. Nodes are lazily initialized on first access.
+
+```java
+class MapUnionFind<T> {
+    Map<T, T> parent = new HashMap<>();
+    Map<T, Integer> rank = new HashMap<>();
+    int components = 0;
+
+    T find(T x) {
+        parent.putIfAbsent(x, x);       // lazy init
+        rank.putIfAbsent(x, 0);
+        if (!parent.get(x).equals(x)) {
+            parent.put(x, find(parent.get(x)));  // path compression
+        }
+        return parent.get(x);
+    }
+
+    boolean union(T a, T b) {
+        T ra = find(a), rb = find(b);
+        if (ra.equals(rb)) return false;
+        int rankA = rank.get(ra), rankB = rank.get(rb);
+        if (rankA < rankB) parent.put(ra, rb);
+        else if (rankA > rankB) parent.put(rb, ra);
+        else { parent.put(rb, ra); rank.put(ra, rankA + 1); }
+        components--;
+        return true;
+    }
+}
+```
+
+**Key differences from array-based:**
+- `==` becomes `.equals()` — critical for String comparison
+- `putIfAbsent` for lazy init — no need to know all nodes upfront
+- `components` tracking needs care — increment in `find` on first-seen, decrement in `union`
+
+**When to use Map vs array:**
+| Scenario | Use |
+|---|---|
+| Nodes are 0..n-1 integers | `int[]` — faster, simpler |
+| Nodes are strings (LC 399, LC 721 emails) | `Map<String, String>` |
+| Nodes are sparse/large integers | `Map<Integer, Integer>` |
+| Nodes created dynamically (don't know all upfront) | `Map` with lazy init |
+
+**LC 399 (Evaluate Division)** uses Map-based weighted UF — see template above. **LC 721 (Accounts Merge)** can go either way: map emails directly, or map email→accountIndex and use array-based UF on account indices (shown above).
 
 ### Common Pitfalls
 - **Forgetting path compression** — without it, `find()` degrades to O(n)
@@ -1935,14 +1979,54 @@ while (!pq.isEmpty()) {
 }
 ```
 
+**Kth smallest via BFS + min-heap (frontier expansion)** (LC 378, LC 373, LC 786):
+
+Turn a structured space (sorted matrix, pair sums) into a graph problem. Start from the smallest element, expand neighbors, pop k times.
+
+```java
+// LC 378 — Kth Smallest in Sorted Matrix
+PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+boolean[][] visited = new boolean[n][n];
+pq.offer(new int[]{matrix[0][0], 0, 0});
+visited[0][0] = true;
+
+while (--k > 0) {
+    int[] curr = pq.poll();
+    int r = curr[1], c = curr[2];
+    if (r + 1 < n && !visited[r+1][c]) {  // expand down
+        visited[r+1][c] = true;
+        pq.offer(new int[]{matrix[r+1][c], r+1, c});
+    }
+    if (c + 1 < n && !visited[r][c+1]) {  // expand right
+        visited[r][c+1] = true;
+        pq.offer(new int[]{matrix[r][c+1], r, c+1});
+    }
+}
+return pq.peek()[0];
+```
+
+**Why it works**: sorted rows + columns mean the next smallest must be a neighbor of something already popped. The heap holds the frontier — its min is always the global next smallest. O(k log n).
+
+**When to use**: kth element from a structured/virtual matrix where you can't afford to materialize the whole thing. Same pattern applies to:
+- **LC 373** (K Smallest Pairs) — `sum[i][j] = a[i] + b[j]`, expand `(i+1,j)` and `(i,j+1)`
+- **LC 786** (Kth Smallest Prime Fraction) — sorted fractions as virtual matrix
+
+**Two approaches to "kth smallest in sorted structure":**
+| Approach | How | When |
+|---|---|---|
+| Min-heap + BFS frontier | Pop k times, expand neighbors | k is small relative to n² |
+| Binary search on value | Count elements ≤ mid, O(n) per count | k is large, need O(n log(range)) |
+
 ### Key Problems
 | Problem | Pattern |
 |---|---|
-| LC 215 (Kth Largest) | Min-heap of size k |
+| LC 215 (Kth Largest) | Max-heap of size k (evict smallest) |
 | LC 347 (Top K Frequent) | Frequency map + min-heap |
 | LC 295 (Find Median) | Two heaps (max + min) |
 | LC 23 (Merge K Sorted) | Min-heap of heads |
 | LC 253 (Meeting Rooms II) | Min-heap of end times |
+| LC 378 (Kth Smallest in Matrix) | BFS + min-heap frontier / binary search on value |
+| LC 373 (K Smallest Pairs) | BFS + min-heap frontier |
 
 ### PriorityQueue Gotchas
 - `remove(obj)` is **O(n)** — prefer `TreeMap` when you need arbitrary removal
@@ -1986,6 +2070,69 @@ while (!pq.isEmpty()) {
 ---
 
 ## Matrix Tricks
+
+### Row/Column Sorted Matrix Patterns
+
+When rows and columns are independently sorted (not fully sorted like LC 74), three techniques exploit this structure:
+
+**1. Staircase Walk — search or count in O(m + n)** (LC 240, LC 378)
+
+Start from **top-right** (or bottom-left). Left decreases value, down increases — each step eliminates a row or column.
+
+```java
+// LC 240 — Search a 2D Matrix II: find if target exists
+public boolean searchMatrix(int[][] matrix, int target) {
+    int row = 0, col = matrix[0].length - 1;  // start top-right
+    while (row < matrix.length && col >= 0) {
+        if (matrix[row][col] == target) return true;
+        if (matrix[row][col] > target) col--;  // too big → eliminate column
+        else row++;                              // too small → eliminate row
+    }
+    return false;
+}
+
+// Count elements <= target — O(n), used in LC 378 binary search approach
+int countLessOrEqual(int[][] matrix, int target) {
+    int count = 0, col = matrix.length - 1;
+    for (int row = 0; row < matrix.length; row++) {
+        while (col >= 0 && matrix[row][col] > target) col--;  // col never resets
+        count += col + 1;
+    }
+    return count;
+}
+```
+
+**Key insight**: `col` never increases across rows. If `matrix[row][col] > target`, then `matrix[row+1][col] > target` too (column sorted), so a column once passed never comes back. Total: O(m + n).
+
+**2. Binary Search on Value — kth smallest in O(n × log(range))** (LC 378)
+
+Binary search on the answer value, use staircase walk to count elements ≤ mid:
+
+```java
+int lo = matrix[0][0], hi = matrix[n-1][n-1];
+while (lo < hi) {
+    int mid = lo + (hi - lo) / 2;
+    if (countLessOrEqual(matrix, mid) < k) lo = mid + 1;
+    else hi = mid;
+}
+return lo;  // converges to an actual matrix value
+```
+
+**Why `lo` is always a real value**: at the boundary, count jumps from `< k` to `≥ k` exactly at a value that exists in the matrix.
+
+**3. BFS + Min-Heap Frontier — kth smallest in O(k log n)** (LC 378, LC 373)
+
+Start from smallest `[0][0]`, expand right and down, pop k times. See Heap section for full template.
+
+**When to use which:**
+| Task | Technique | Time |
+|---|---|---|
+| Search for a value | Staircase walk | O(m + n) |
+| Count elements ≤ value | Staircase walk | O(m + n) |
+| Kth smallest (k is large) | Binary search on value + staircase count | O(n log(range)) |
+| Kth smallest (k is small) | BFS + min-heap frontier | O(k log n) |
+
+**Related — fully sorted matrix** (LC 74): each row starts after the previous row ends. Treat as a flat sorted array, binary search with `matrix[mid/cols][mid%cols]`. O(log(m×n)).
 
 ### Transpose vs Rotation
 
