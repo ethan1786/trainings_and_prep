@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Staff Software Engineer · Large-Scale Distributed Systems · 13 Years</div>
+    <div class="tagline">Staff Software Engineer · Platform Infrastructure &amp; Experimentation · 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -245,37 +245,37 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Staff-level backend &amp; platform engineer with 13 years designing, building, and operating large-scale
-  distributed systems. Proven track record leading complex cross-team technical initiatives: redesigned a
-  high-traffic API serving millions of daily requests (p99 250ms&rarr;50ms, availability 98%&rarr;99.9%),
-  built a federated GraphQL gateway consolidating 12 downstream services, and established architecture
-  standards adopted across 10+ teams and 3 departments. Experience spans early-stage hypergrowth (Toast,
-  first customer to hundreds), platform modernization at scale, and recent AI-integrated systems (MCP server,
-  GenAI evaluation platform). Combines deep hands-on technical skills with cross-organizational leadership.
+  Staff-level platform engineer with 13 years building internal developer infrastructure, experimentation
+  systems, and large-scale distributed services in Java. Built an experimentation and evaluation platform
+  with A/B testing, parameter search, and automated analysis. Led cross-team redesign of a high-traffic
+  API serving millions of daily requests (p99 250ms&rarr;50ms, availability 98%&rarr;99.9%), validating
+  the migration at 50% production traffic through parity testing and controlled rollout. Established
+  architecture standards and observability practices adopted across 10+ teams and 3 departments.
+  Combines deep hands-on Java engineering with cross-organizational technical leadership and mentoring.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Led cross-team redesign of highest-traffic API: p99 latency 5&times; reduction, 99.9% availability</li>
-  <li>Drove architecture standards for API design, caching, and orchestration across 10+ teams, 3 departments</li>
-  <li>Built federated GraphQL gateway (Netflix DGS), shared platform services, and internal developer tooling</li>
-  <li>Mentored senior engineers to Principal-level scope; authored design docs, RFCs, and decision records</li>
+  <li>Built experimentation platform with A/B testing, parameter search, and automated evaluation pipelines</li>
+  <li>Led cross-team API redesign validated via controlled rollout at 50% traffic: p99 5&times; reduction, 99.9% availability</li>
+  <li>Drove architecture and observability standards across 10+ teams, 3 departments via RFCs and design docs</li>
+  <li>Mentored senior engineers to Principal-level scope; built shared platform services and internal developer tooling</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
   Java, Spring Boot, GraphQL (Netflix DGS), Python, Node.js &middot; AWS, Kubernetes, Kafka, Redis, PostgreSQL &middot;
-  Microservices, Event-Driven, CQRS &middot; Datadog, Grafana, Distributed Tracing &middot; CI/CD, Docker
+  Microservices, Event-Driven, CQRS &middot; A/B Testing, Experimentation &middot; Datadog, Grafana, OpenTelemetry, Distributed Tracing &middot; CI/CD, Docker
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
 <div class="section-title">Independent Project</div>
 <div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Decision Engine &amp; Evaluation Platform</span>
+  <span class="project-name">Experimentation &amp; Evaluation Platform</span>
   <ul>
-    <li>Architected a hybrid rules + multi-path inference engine with a policy overlay over heterogeneous data sources, producing explainable real-time decisions with full observability and auditability.</li>
-    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions.</li>
-    <li>Built an evaluation and experimentation system for end-to-end simulation, offline backtesting, and parameter search (grid &amp; Bayesian optimization) with multi-provider LLM support.</li>
+    <li>Built an end-to-end experimentation system for decision evaluation: A/B simulation, offline backtesting, parameter search (grid &amp; Bayesian optimization), and automated analysis with configurable metrics and thresholds.</li>
+    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions — enabling safe, data-driven iteration.</li>
+    <li>Architected a hybrid rules + multi-path inference engine over heterogeneous data sources with full observability, telemetry collection, and auditability across the entire experiment lifecycle.</li>
   </ul>
 </div>
 
@@ -290,11 +290,11 @@
   </div>
 
   <div class="project">
-    <span class="project-name">High-Traffic API Modernization</span>
+    <span class="project-name">High-Traffic API Modernization — Experiment-Driven Migration</span>
     <ul>
-      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); the new implementation handled 50% of traffic during A/B testing.</li>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); validated the new implementation at 50% production traffic via controlled A/B experiment.</li>
       <li>Introduced a new orchestration service and GraphQL boundary, consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes.</li>
-      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
+      <li>Built a parity-testing framework that automatically compared new vs. legacy responses across full payload and data-integrity dimensions, enabling safe, data-driven rollout decisions.</li>
     </ul>
     <div class="metrics">
       <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
@@ -302,7 +302,7 @@
       <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
     </div>
     <ul style="margin-left:12px; margin-top:2px;">
-      <li>Defined architectural standards for new microservices; built a parity-testing framework validating full payload and data-integrity against the legacy stack; removed years of hidden domain logic with clear documentation.</li>
+      <li>Defined architectural standards and observability requirements for new microservices; instrumented services with structured logging, distributed tracing, and SLO-based latency budgets per downstream dependency.</li>
     </ul>
   </div>
 
@@ -323,18 +323,18 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Digital Shopping &amp; Online Leads Products</span>
+    <span class="project-name">Digital Shopping &amp; Online Leads — Rapid Experimentation</span>
     <ul>
       <li>Led backend design for a new digital shopping product launched during the pandemic, using microservice and event-driven architecture for inventory, merchandising, and lead flows.</li>
-      <li>Subsequently led backend work for additional commerce experiments, enabling rapid product launches without destabilizing core systems.</li>
+      <li>Built infrastructure for rapid product experimentation — enabling the company to quickly launch, measure, and safely retire product bets without destabilizing core systems.</li>
     </ul>
   </div>
 
   <div class="project compact">
-    <span class="project-name">Cross-Org Platform &amp; API Leadership</span>
+    <span class="project-name">Cross-Org Platform Leadership &amp; Observability Standards</span>
     <ul>
-      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and decision records driving consensus across platform and product teams.</li>
-      <li>Mentored multiple senior engineers on system design, performance work, and path to Principal-level scope.</li>
+      <li>Established patterns for API design, observability, caching, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and decision records driving consensus.</li>
+      <li>Drove adoption of structured logging, distributed tracing, and metrics-driven development practices. Mentored senior engineers on system design and path to Principal-level scope.</li>
     </ul>
   </div>
 </div>

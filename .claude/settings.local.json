@@ -68,7 +68,9 @@
       "WebFetch(domain:www.circle.com)",
       "WebFetch(domain:careers.circle.com)",
       "WebFetch(domain:engineering.figma.com)",
-      "WebFetch(domain:newsletter.pragmaticengineer.com)"
+      "WebFetch(domain:newsletter.pragmaticengineer.com)",
+      "WebFetch(domain:www.metacareers.com)",
+      "WebFetch(domain:careers.google.com)"
     ]
   }
 }

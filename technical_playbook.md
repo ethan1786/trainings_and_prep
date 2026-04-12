@@ -8,26 +8,63 @@
 
 1. [Pattern Recognition Decision Tree](#pattern-recognition-decision-tree)
 2. [Two Pointers](#two-pointers)
+   - Templates (opposite, same-direction), LC 42 cross-ref
 3. [Sliding Window](#sliding-window)
+   - Variable longest/shortest, fixed window templates
+   - LC 76 pattern (freq map + valid counter)
+   - atMost(K) − atMost(K−1) trick (LC 992, 1248, 930)
+   - atMost vs Prefix Sum + HashMap decision guide
+   - Monotonic deque for window max/min (LC 239, 1438)
 4. [Prefix Sum + HashMap](#prefix-sum--hashmap)
+   - Count subarrays sum=K (LC 560), divisible by K (LC 523, 974)
+   - Transform trick (LC 525)
 5. [Binary Search](#binary-search)
+   - Templates, rotated array (LC 33)
+   - Median of two sorted arrays (LC 4)
 6. [Intervals](#intervals)
+   - Merge, insert, non-overlapping, sweep line, sort by start vs end
 7. [Greedy](#greedy)
 8. [Dynamic Programming](#dynamic-programming)
+   - Five core patterns, top-down vs bottom-up
+   - Knapsack: 0/1 (2D→1D), unbounded, combinations vs permutations
+   - Non-obvious DP (LC 727), DP as shortest path on DAG
 9. [Backtracking](#backtracking)
+   - Template, avoiding duplicates
 10. [Tree](#tree)
+    - Traversals (recursive + iterative), DFS with return value
+    - LCA (3 variants including node-not-exist LC 1644)
+    - Build tree from traversals, serialize/deserialize
 11. [Graph Algorithms](#graph-algorithms)
+    - BFS template, Dijkstra, Bellman-Ford
+    - MST (Kruskal's + Prim's), when to use which
 12. [Union-Find](#union-find)
+    - Array template, Map-based template (string/non-contiguous keys)
+    - Incremental edges, merge by shared attribute, weighted UF (LC 399)
+    - MST (Kruskal's), UF vs BFS/DFS decision table
 13. [Topological Sort](#topological-sort)
+    - Kahn's BFS, DFS post-order, lexicographic variant
 14. [Linked List Tricks](#linked-list-tricks)
+    - Core patterns (dummy head, fast/slow, reverse), cycle detection (LC 142)
 15. [Stack Patterns](#stack-patterns)
+    - Monotonic stack (next greater/smaller, LC 42)
 16. [Recursive Descent / Calculator Pattern](#recursive-descent--calculator-pattern)
+    - Recursion for nesting (LC 224, 394), stack for precedence (LC 227), both (LC 772)
 17. [Heap / Priority Queue Patterns](#heap--priority-queue-patterns)
+    - Top K, two heaps for median, merge K sorted
+    - BFS + min-heap frontier for kth smallest (LC 378, 373, 786)
 18. [Bit Manipulation](#bit-manipulation)
+    - Essential tricks, key problems
 19. [Matrix Tricks](#matrix-tricks)
+    - Row/col sorted matrix: staircase walk (LC 240), binary search on value (LC 378), BFS frontier
+    - Transpose vs rotation, spiral, 4-directional traversal
 20. [Minor Patterns & One-Trick Techniques](#minor-patterns--one-trick-techniques)
+    - Boyer-Moore voting, Kadane's, Dutch National Flag, reservoir sampling
+    - Bucket sort, next permutation, Trie + wildcard DFS
 21. [Data Structures Reference](#data-structures-reference)
+    - Map utility methods, TreeMap, ArrayDeque, PriorityQueue, Trie
 22. [Java Concurrency](#java-concurrency)
+    - synchronized, ReentrantLock, Semaphore, CyclicBarrier
+    - volatile, Future/CompletableFuture, concurrent collections, deadlock
 
 ---
 
@@ -271,12 +308,15 @@ public String minWindow(String s, String t) {
 
 ### Trick: Exactly K = atMost(K) − atMost(K − 1)
 
-When asked "subarrays with **exactly** K distinct values" (LC 992), a direct sliding window is tricky because shrinking skips valid windows. Instead:
+When asked "count subarrays with **exactly** K [something]", a direct sliding window is hard — when you hit exactly K, the left pointer has a range of valid positions, not just one. Instead, decompose:
 
-```java
-// LC 992 — Subarrays with Exactly K Distinct Integers
-return atMost(nums, k) - atMost(nums, k - 1);
 ```
+exact(K) = atMost(K) - atMost(K - 1)
+```
+
+**Why exact K is hard**: at a valid window `[left, right]` with exactly K distinct, left could potentially move right and still stay at K. You'd need a second pointer to find the range — messy.
+
+**Why atMost K is easy**: every position from `left` to `right` is valid. No ambiguity — just `count += right - left + 1`.
 
 ```java
 int atMost(int[] nums, int k) {
@@ -284,10 +324,9 @@ int atMost(int[] nums, int k) {
     int left = 0, count = 0;
     for (int right = 0; right < nums.length; right++) {
         freq.merge(nums[right], 1, Integer::sum);
-        while (freq.size() > k) {
+        while (freq.size() > k && left <= right) {
             int d = nums[left++];
-            freq.merge(d, -1, Integer::sum);
-            if (freq.get(d) == 0) freq.remove(d);
+            if (freq.merge(d, -1, Integer::sum) == 0) freq.remove(d);
         }
         count += right - left + 1;  // all subarrays ending at right with ≤ k distinct
     }
@@ -295,7 +334,27 @@ int atMost(int[] nums, int k) {
 }
 ```
 
-**Why `count += right - left + 1`**: every subarray `[left..right], [left+1..right], ..., [right..right]` is valid. This counts all of them.
+**Why `count += right - left + 1`**: every subarray `[left..right], [left+1..right], ..., [right..right]` is valid. This counts all of them. Subtraction removes subarrays with fewer than K, leaving exactly K.
+
+**Problems that use this trick:**
+| Problem | "Exactly K" of what |
+|---|---|
+| LC 992 | K distinct integers |
+| LC 1248 | K odd numbers |
+| LC 930 | sum equals K (binary array) |
+
+### atMost(K) vs Prefix Sum + HashMap
+
+Both solve "count subarrays with exactly K [something]" — different strengths:
+
+| | Prefix Sum + HashMap | atMost(K) − atMost(K−1) |
+|---|---|---|
+| **Best for** | "Subarray sum == K" | "Exactly K distinct/odd/etc" |
+| **Negative values** | Works | Breaks (window not monotonic) |
+| **Space** | O(n) | O(k) |
+| **Key idea** | `prefix[j] - prefix[i] == K` | Inclusion-exclusion on window counts |
+
+**Rule of thumb**: if the problem says "sum", reach for prefix + HashMap. If it says "exactly K [countable property]", reach for atMost. LC 930 sits in the overlap (binary array: sum == count of 1s) — prefix + HashMap is simpler there.
 
 ### Trick: Monotonic Deque for Sliding Window Max/Min
 
@@ -1675,11 +1734,6 @@ return order;
 - **Prerequisites / dependencies**: LC 207, 210
 - **Alien dictionary**: LC 269 (compare adjacent words → edges)
 - **Build order / compilation**
-
-### Common Mistakes
-- Reversing edge direction: "prereq → course", not "course → prereq"
-- Forgetting isolated nodes
-- Not checking for cycles (`order.size() == n`)
 
 ### Variant: Lexicographic Order
 Replace `ArrayDeque` with `PriorityQueue` — always picks smallest available node. O(V log V) instead of O(V).

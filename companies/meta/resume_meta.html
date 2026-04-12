@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Staff Software Engineer · Large-Scale Backend &amp; Platform Systems · 13 Years</div>
+    <div class="tagline">Staff Software Engineer · Infrastructure &amp; AI-Integrated Platform Systems · 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -245,37 +245,38 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Staff-level backend &amp; platform engineer with 13 years building and shipping large-scale distributed
-  systems. Led cross-team redesign of a high-traffic API serving millions of daily requests (p99 250ms&rarr;50ms,
-  availability 98%&rarr;99.9%), built a federated GraphQL gateway consolidating 12 downstream services,
-  and established architecture standards across 10+ teams and 3 departments. Experience shipping 0&rarr;1
-  products at scale (digital commerce, MCP server, GenAI platform) and leading platform modernization
-  with measurable business impact. Early engineer at Toast through hypergrowth; combines deep hands-on
-  engineering with cross-organizational technical leadership.
+  Staff-level infrastructure engineer with 13 years building large-scale distributed systems and integrating
+  AI into engineering workflows. Led cross-team redesign of a high-traffic API serving millions of daily
+  requests (p99 250ms&rarr;50ms, availability 98%&rarr;99.9%), built a federated GraphQL gateway consolidating
+  12 downstream services, and established architecture standards across 10+ teams and 3 departments.
+  Built an MCP server for agent orchestration and a GenAI evaluation platform with prompt engineering,
+  multi-provider LLM integration, and automated quality assessment. Uses AI tools daily to accelerate
+  development. Early engineer at Toast through hypergrowth; ships fast with measurable impact.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
   <li>Led cross-team redesign of highest-traffic API: p99 latency 5&times; reduction, 99.9% availability</li>
-  <li>Shipped 0&rarr;1 products end-to-end: digital commerce platform, MCP server, GenAI evaluation system</li>
-  <li>Drove architecture standards for API design, caching, and orchestration across 10+ teams, 3 departments</li>
-  <li>Mentored senior engineers to Principal-level scope; authored design docs, RFCs, and architecture standards</li>
+  <li>Built MCP server for agent orchestration and GenAI platform with prompt engineering and LLM evaluation</li>
+  <li>Drove architecture standards across 10+ teams, 3 departments; uses AI tools daily to optimize workflows</li>
+  <li>Mentored senior engineers to Principal-level scope; ships 0&rarr;1 products fast with measurable impact</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
   Java, Spring Boot, GraphQL (Netflix DGS), Python, Node.js &middot; AWS, Kubernetes, Kafka, Redis, PostgreSQL &middot;
-  Microservices, Event-Driven, CQRS &middot; Datadog, Grafana, Distributed Tracing &middot; CI/CD, Docker
+  Microservices, Event-Driven, CQRS &middot; MCP/Agent Orchestration, Prompt Engineering, LLM Evaluation &middot;
+  Datadog, Grafana, Distributed Tracing &middot; CI/CD, Docker
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
 <div class="section-title">Independent Project</div>
 <div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Decision Engine &amp; Evaluation Platform</span>
+  <span class="project-name">GenAI Decision Engine &amp; LLM Evaluation Platform</span>
   <ul>
-    <li>Architected a hybrid rules + multi-path inference engine with a policy overlay over heterogeneous data sources, producing explainable real-time decisions with full observability and auditability.</li>
-    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions.</li>
-    <li>Built an evaluation and experimentation system for end-to-end simulation, offline backtesting, and parameter search (grid &amp; Bayesian optimization) with multi-provider LLM support.</li>
+    <li>Architected a hybrid rules + multi-path GenAI inference engine with prompt/context engineering, producing explainable real-time decisions with full observability, bias monitoring, and quality assessment.</li>
+    <li>Designed a configurable policy framework with DB-backed configs and a scheduler-driven tuning loop — enabling safe, iterative prompt optimization and responsible AI deployment with measurable quality gates.</li>
+    <li>Built an LLM evaluation system for automated accuracy/quality reviews, offline backtesting, and parameter search (grid &amp; Bayesian optimization) across multiple LLM providers.</li>
   </ul>
 </div>
 
@@ -290,11 +291,11 @@
   </div>
 
   <div class="project">
-    <span class="project-name">High-Traffic API Modernization</span>
+    <span class="project-name">High-Traffic API Modernization — Drove Change Across the Organization</span>
     <ul>
-      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); the new implementation handled 50% of traffic during A/B testing.</li>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); validated at 50% traffic via controlled rollout.</li>
       <li>Introduced a new orchestration service and GraphQL boundary, consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes.</li>
-      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
+      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months — ahead of schedule. Identified and resolved performance and scalability bottlenecks throughout.</li>
     </ul>
     <div class="metrics">
       <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
@@ -302,7 +303,7 @@
       <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
     </div>
     <ul style="margin-left:12px; margin-top:2px;">
-      <li>Defined architectural standards for new microservices; built a parity-testing framework validating full payload and data-integrity against the legacy stack; removed years of hidden domain logic with clear documentation.</li>
+      <li>Built a parity-testing framework for automated quality and accuracy validation; defined architectural standards and reduced years of technical debt with clear documentation.</li>
     </ul>
   </div>
 
@@ -315,10 +316,10 @@
   </div>
 
   <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server (0&rarr;1)</span>
+    <span class="project-name">MCP Server — Agent Orchestration &amp; Tool Calling (0&rarr;1)</span>
     <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, exposing CarGurus capabilities into ChatGPT as a high-visibility proof-of-concept.</li>
-      <li>Delivered a performant implementation iterating on ambiguous requirements; designed for safe, incremental production rollout alongside existing APIs.</li>
+      <li>Sole backend engineer designing and implementing an MCP server for agent orchestration, exposing CarGurus capabilities as tools callable by AI agents (ChatGPT via OpenAI Apps SDK).</li>
+      <li>Applied prompt/context engineering to optimize agent-tool interactions; designed for safe, incremental rollout with quality monitoring and responsible AI practices.</li>
     </ul>
   </div>
 
