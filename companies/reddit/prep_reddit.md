@@ -91,7 +91,7 @@ Reddit's interview process typically has **4-5 rounds** on-site:
 | High-traffic platform infrastructure | API serving millions of daily requests, p99 5x improvement (250ms→50ms), 99.9% availability |
 | Cross-team influence | Architecture standards across 10+ teams, 3 departments |
 | Experimentation & A/B testing | Parity testing framework, controlled rollout at 50% traffic, experimentation platform |
-| Ads/monetization platform thinking | Digital Shopping product (revenue-generating), commerce experimentation |
+| Ads/monetization platform thinking | Built Facebook Ads integration pipeline (MediaMath, budget allocation, impression/CTR tracking); Digital Shopping (revenue-generating product) |
 | Observability & reliability | Distributed tracing, SLO-based latency budgets, structured logging |
 | 0→1 product building | MCP server, Digital Shopping, GenAI platform — all from scratch |
 | Java expertise | 13+ years production Java — Reddit accepts Java for backend/ads |
@@ -114,7 +114,7 @@ Reddit's interview process typically has **4-5 rounds** on-site:
 - Start with requirements, propose high-level design quickly, then deep-dive
 - Quantify scale: "At 100M+ DAU, if 10% upvote daily, that's 10M+ write events/day..."
 - Discuss operational model: monitoring, deployment, rollback, experimentation
-- Consider ads-specific: budget pacing, impression tracking, click-through attribution
+- Consider ads-specific: budget pacing, impression tracking, click-through attribution — you have direct experience with these from your Facebook Ads / MediaMath integration work
 - Social platform-specific: hot/trending algorithms, content ranking, spam/abuse
 
 **Behavioral — Reddit culture:**
@@ -175,7 +175,7 @@ Reddit's interview process typically has **4-5 rounds** on-site:
 ## 10. Addressing Potential Concerns
 
 ### "You don't have ads platform experience"
-> "I've built the exact type of infrastructure that ads platforms run on: high-traffic APIs serving millions of requests with strict latency requirements, experimentation frameworks for A/B testing and controlled rollout, and platform services that multiple teams depend on. At CarGurus, I also led the Digital Shopping product — a revenue-generating commerce platform — so I understand the monetization mindset. The domain is new; the engineering patterns are ones I've been doing for 13 years."
+> "Actually, I do have some direct ads experience — when I first joined CarGurus, I built the initial Facebook Ads integration pipeline, working with MediaMath for budget allocation, impression tracking, and click-through rate calculation. It was about six months of work, but it gave me hands-on exposure to ads concepts like budget pacing, impression delivery, and CTR optimization. Beyond that, I've built the exact type of infrastructure that ads platforms run on: high-traffic APIs with strict latency requirements, experimentation frameworks for A/B testing and controlled rollout, and platform services that multiple teams depend on. I also led the Digital Shopping product — a revenue-generating commerce platform. The ads domain vocabulary isn't new to me; I'm ready to go deeper at Reddit's scale."
 
 ### "Your primary language is Java, but Reddit uses Go"
 > "I've been writing production Java for 13 years, which means I understand strongly-typed, compiled languages at a deep level — concurrency, memory management, performance tuning. Go shares those fundamentals. I'm already writing Go for personal projects, and at this level, the value I bring is in system design, platform architecture, and cross-team leadership, not syntax familiarity. I'll be productive in Go within weeks."
@@ -289,6 +289,7 @@ Reddit system design expects social platform thinking: massive content graph, re
 - [ ] Practice driving system design conversations
 - [ ] Review system_design_playbook.md: Rate Limiter, URL Shortener, Chat System
 - [ ] Have "Why Reddit?" answer ready (30 sec version)
+- [ ] Review your Facebook Ads / MediaMath integration experience — be ready to mention it naturally when ads domain comes up (budget allocation, impression tracking, CTR)
 - [ ] Prepare behavioral answers with data/metrics focus
 - [ ] Prepare 2-3 questions per interviewer
 - [ ] Research Reddit's recent earnings/strategy (public company since March 2024)

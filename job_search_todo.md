@@ -7,11 +7,11 @@
 ## This Week (Apr 13–19)
 
 ### Reddit — Apply + Outreach
-- [ ] Apply to **Staff SWE, Ads Engineering** (3 openings) — primary target
-- [ ] Apply to **Senior Staff Engineer, Cloud Economics**
-- [ ] Apply to **Staff SWE, Ads Growth**
-- [ ] Find 3–4 Reddit engineering recruiters on LinkedIn
-- [ ] Send connection requests with note:
+- [x] Apply to **Staff SWE, Ads Engineering** (3 openings) — primary target
+- [x] Apply to **Senior Staff Engineer, Cloud Economics**
+- [x] Apply to **Staff SWE, Ads Growth**
+- [x] Find 3–4 Reddit engineering recruiters on LinkedIn
+- [x] Send connection requests with note:
   > Hi [Name] — I just applied for the Staff SWE, Ads Engineering role at Reddit. I'm a Principal Engineer with 13 years building high-traffic platform infrastructure in Java. Would love to connect and learn more about the team.
 - [ ] If accepted (or via InMail), send longer follow-up:
   > Hi [Name],
@@ -25,9 +25,9 @@
   > Best, Yifei
 
 ### Confluent — Apply + Outreach
-- [ ] Apply to **Staff SWE, Flink Control Plane**
-- [ ] Find 2–3 Confluent engineering recruiters on LinkedIn
-- [ ] Send connection requests with note:
+- [x] Apply to **Staff SWE, Flink Control Plane**
+- [x] Find 2–3 Confluent engineering recruiters on LinkedIn
+- [x] Send connection requests with note:
   > Hi [Name] — I just applied for the Staff SWE, Flink Control Plane role at Confluent. I'm a Principal Engineer with 13 years building distributed systems orchestration and cloud-native infrastructure. Would love to connect.
 - [ ] If accepted (or via InMail), send longer follow-up:
   > Hi [Name],
@@ -42,13 +42,13 @@
 
 ### Coinbase — Retry at Staff Level (Platform Roles)
 Target these Staff Platform roles (all Remote USA):
-- [ ] **Staff SWE Backend - Platform (FinHub Tooling)** — platform tooling, financial infra
+- [x] **Staff SWE Backend - Platform (FinHub Tooling)** — platform tooling, financial infra
   https://job-boards.greenhouse.io/coinbase/jobs/7744147
-- [ ] **Staff SWE Backend - Platform (Overseer)** — platform monitoring/oversight
+- [x] **Staff SWE Backend - Platform (Overseer)** — platform monitoring/oversight
   https://job-boards.greenhouse.io/coinbase/jobs/7769929
-- [ ] **Staff SWE Backend - Platform (Payment Rails)** — payment infrastructure
+- [x] **Staff SWE Backend - Platform (Payment Rails)** — payment infrastructure
   https://job-boards.greenhouse.io/coinbase/jobs/7789395
-- [ ] Message the recruiter you're connected with on LinkedIn:
+- [x] Message the recruiter you're connected with on LinkedIn:
   > Hi [Name],
   >
   > I applied for a Senior Staff role a few weeks ago and understand that level wasn't the right fit. I've since seen Staff-level Platform Backend openings that align well with my background — I'm a Principal Engineer with 13 years building high-traffic API and platform infrastructure, and my most impactful project was a cross-org API redesign that cut p99 latency by 5x and achieved 99.9% availability.
@@ -62,6 +62,7 @@ Target these Staff Platform roles (all Remote USA):
   https://www.github.careers/careers-home/jobs/5101
   Note: Level is a stretch (Principal ≈ Senior Staff) but role content is a strong fit.
   Use Google or Meta resume — backend platform infrastructure framing works as-is.
+- [ ] **Ask your Microsoft connection for a referral** — GitHub is a Microsoft subsidiary, internal referral should apply. Send them the role link and req #5101.
 - [ ] Find 2–3 GitHub/Microsoft engineering recruiters on LinkedIn
 - [ ] Send connection requests with note:
   > Hi [Name] — I just applied for the Principal SWE, Core Platform Infrastructure role at GitHub. I'm a Principal Engineer with 13 years building large-scale distributed systems and platform infrastructure. Would love to connect and learn more about the team.
@@ -106,7 +107,7 @@ Target these Staff Platform roles (all Remote USA):
 
 ### Stripe Follow-Up (connection went silent)
 Your connection hasn't responded since last check-in. Send a follow-up via her work email.
-- [ ] Send email to [Name]@stripe.com:
+- [x] Send email to [Name]@stripe.com:
   > **Subject:** Quick follow-up — Staff Engineer application
   >
   > Hi [Name],
