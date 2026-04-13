@@ -57,6 +57,25 @@ Target these Staff Platform roles (all Remote USA):
   >
   > Best, Yifei
 
+### GitHub — Apply + Outreach
+- [ ] Apply to **Principal SWE, Core Platform Infrastructure** (Remote US, $160K–$425K)
+  https://www.github.careers/careers-home/jobs/5101
+  Note: Level is a stretch (Principal ≈ Senior Staff) but role content is a strong fit.
+  Use Google or Meta resume — backend platform infrastructure framing works as-is.
+- [ ] Find 2–3 GitHub/Microsoft engineering recruiters on LinkedIn
+- [ ] Send connection requests with note:
+  > Hi [Name] — I just applied for the Principal SWE, Core Platform Infrastructure role at GitHub. I'm a Principal Engineer with 13 years building large-scale distributed systems and platform infrastructure. Would love to connect and learn more about the team.
+- [ ] If accepted (or via InMail), send longer follow-up:
+  > Hi [Name],
+  >
+  > I recently applied for the Principal Software Engineer role on GitHub's Core Platform Infrastructure team and wanted to reach out directly. I'm a Principal Engineer at CarGurus with 13 years building large-scale distributed systems and platform infrastructure.
+  >
+  > The role is a strong match for my background — I led a cross-org redesign of our most critical API serving millions of daily requests, reducing p99 latency by 5x and improving availability to 99.9%. I've driven architecture and observability standards across 10+ teams, built service orchestration infrastructure on Kubernetes, and mentored engineers to Principal-level scope.
+  >
+  > I'm excited about the challenge of keeping GitHub's platform reliable and performant for 180M+ developers. Happy to share more context or jump on a quick call.
+  >
+  > Best, Yifei
+
 ### Google & Meta — Find Referrals
 - [ ] Search your LinkedIn connections for anyone at Google (target: Search Experiments or Observability/OTel roles, Cambridge MA)
 - [ ] Search your LinkedIn connections for anyone at Meta (target: SWE Infrastructure)
@@ -83,7 +102,22 @@ Target these Staff Platform roles (all Remote USA):
 | **Netflix** | Preetam referred + pinged HM | Yes | Follow up with Preetam if 2+ weeks | Check date |
 | **Figma** | Messaged 2 AI Platform directors | Yes | Send brief follow-up to whoever accepted | **~Apr 16** |
 | **Circle** | Applied Staff SWE + messaged VP of Eng | Yes (this week) | Wait | **~Apr 19** |
-| **Stripe** | Applied, handling personally | Yes | Find recruiter/engineer connection | **Apr 19** |
+| **Stripe** | Applied, connection went silent | Yes | Follow up with connection or find new recruiter | **Apr 14** |
+
+### Stripe Follow-Up (connection went silent)
+Your connection hasn't responded since last check-in. Send a follow-up via her work email.
+- [ ] Send email to [Name]@stripe.com:
+  > **Subject:** Quick follow-up — Staff Engineer application
+  >
+  > Hi [Name],
+  >
+  > Hope you're doing well! I wanted to follow up — I applied for the Staff Engineer, Workflow Engine role a few weeks ago and haven't heard anything back yet. Would you be able to check if the role is still active, or point me toward the right recruiter to connect with?
+  >
+  > Totally understand if you're busy — any help at all would be great. Thanks so much!
+  >
+  > Best,
+  > Yifei
+- [ ] If no reply within a week, find a Stripe engineering recruiter on LinkedIn and reach out directly. Mention you already applied and reference the specific role.
 
 ### Pinterest Follow-Up Message (use Wed Apr 16 if no reply)
 > Hey Nick, just circling back — totally understand if there's no update yet. If the timing isn't right for that role, I'm also open to other teams if anything comes to mind. Either way, thanks again for the help!
@@ -129,6 +163,7 @@ Previously rejected at Staff (cold). Do NOT cold apply again — will get auto-f
 | **Meta** | E6 (Staff) | Done | Done | No | Need referral | Find referral, then apply |
 | **Reddit** | Staff | Done | Done | No | Need recruiter | Apply + outreach this week |
 | **Confluent** | Staff | Done | Done | No | Need recruiter | Apply + outreach this week |
+| **GitHub** | Principal (stretch) | Use Google/Meta | — | No | Need recruiter | Apply + outreach this week |
 | **OpenAI** | — | Done | — | Yes | Vishal + Josh | Waiting |
 | **Netflix** | — | Done | — | Yes | Preetam (referral) | Waiting |
 | **Pinterest** | — | Done | — | Yes | Nick (referral) | Waiting, follow up Apr 16 |

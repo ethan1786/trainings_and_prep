@@ -75,7 +75,8 @@
       "Bash(curl -s -o /dev/null -w '%{http_code}' 'https://api.ashbyhq.com/posting-api/job-board/__TRACKED_VAR__?includeCompensation=true')",
       "Bash(python3:*)",
       "WebFetch(domain:jobs.ashbyhq.com)",
-      "Bash(ls /Users/yfsun/projects/preps/interview_prep/*.md /Users/yfsun/projects/preps/interview_prep/*.txt)"
+      "Bash(ls /Users/yfsun/projects/preps/interview_prep/*.md /Users/yfsun/projects/preps/interview_prep/*.txt)",
+      "WebFetch(domain:www.github.careers)"
     ]
   }
 }
