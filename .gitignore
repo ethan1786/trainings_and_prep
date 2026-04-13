@@ -1,3 +1,4 @@
 jobs_all_targets.txt
 job_shortlist_check.txt
 jobs_*.txt
+__pycache__/

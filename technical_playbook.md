@@ -27,13 +27,14 @@
 8. [Dynamic Programming](#dynamic-programming)
    - Five core patterns, top-down vs bottom-up
    - Knapsack: 0/1 (2D→1D), unbounded, combinations vs permutations
-   - Non-obvious DP (LC 727), DP as shortest path on DAG
+   - Non-obvious DP (LC 727), top-down → bottom-up conversion (LC 494)
 9. [Backtracking](#backtracking)
-   - Template, avoiding duplicates
+   - Template, avoiding duplicates, backtracking vs DP decision
 10. [Tree](#tree)
     - Traversals (recursive + iterative), DFS with return value
     - LCA (3 variants including node-not-exist LC 1644)
     - Build tree from traversals, serialize/deserialize
+    - Leaf peeling / boundary inward (LC 310)
 11. [Graph Algorithms](#graph-algorithms)
     - BFS template, Dijkstra, Bellman-Ford
     - MST (Kruskal's + Prim's), when to use which
@@ -905,6 +906,43 @@ return minLen == Integer.MAX_VALUE ? "" : s1.substring(start, start + minLen);
 
 **Two-pointer alternative**: forward scan from each starting char, early termination if s2 can't be fully matched. Simpler to reason about, same O(n*m) complexity. Either approach is fine in an interview.
 
+### Top-Down → Bottom-Up Conversion
+
+Mechanical steps to convert memoized recursion into iterative DP:
+
+| Top-down | Bottom-up |
+|---|---|
+| State = recursive parameters | State = table dimensions |
+| Base case = recursion termination | Base case = initial table values |
+| Recurse on `index + 1` | Loop `index` from 0 to n |
+| Memo map/array | DP table (array or map) |
+| Return `memo[start state]` | Read `dp[target state]` |
+
+**Example: LC 494 (Target Sum)** — choose +/- for each number, count ways to reach target.
+
+```java
+// Top-down: (index, currentSum) → count
+// Bottom-up: push forward from base case
+
+Map<Integer, Integer> dp = new HashMap<>();
+dp.put(0, 1);  // base: sum=0 has 1 way before picking any number
+
+for (int i = 0; i < nums.length; i++) {
+    Map<Integer, Integer> next = new HashMap<>();
+    for (var entry : dp.entrySet()) {
+        int sum = entry.getKey(), count = entry.getValue();
+        next.merge(sum + nums[i], count, Integer::sum);
+        next.merge(sum - nums[i], count, Integer::sum);
+    }
+    dp = next;
+}
+return dp.getOrDefault(target, 0);
+```
+
+**When state space is sparse** (not all sums reachable), use `Map`. When dense (knapsack with small capacity), use array.
+
+**Mental shift**: top-down asks "what do I need?" and pulls answers up. Bottom-up asks "what can I build?" and pushes answers forward.
+
 ### DP is Shortest Path on a DAG
 Every DP recurrence defines a DAG. Table-filling = topological sort. If cycles exist → can't use DP, need BFS/Dijkstra.
 
@@ -952,6 +990,15 @@ void backtrack(List<List<Integer>> result, List<Integer> path, /* state */) {
 | LC 51 (N-Queens) | Track columns + diagonals with sets |
 | LC 79 (Word Search) | Mark visited in grid, restore on backtrack |
 | LC 17 (Letter Combinations) | Map digit → letters, recurse |
+
+### Backtracking vs DP: "Choose for Each Element" Problems
+
+Problems like LC 494 (Target Sum) feel like permutations — for each element, choose +/-. But if you only care about the **count** (not all actual configurations), it's DP, not backtracking. The clue: overlapping subproblems (many paths reach the same `(index, sum)` state).
+
+- **Need all configurations** → backtracking (generate each one)
+- **Need count / min / max** → DP with memoization (states collapse)
+
+Top-down memoized recursion is natural for these. See [Top-Down → Bottom-Up Conversion](#top-down--bottom-up-conversion) in the DP section for converting to iterative.
 
 ### Trick: Avoiding Duplicates
 For arrays with duplicate elements (LC 40, 47), sort first, then skip `nums[i] == nums[i-1]` at the same recursion level.
@@ -1231,6 +1278,46 @@ boolean isValid(TreeNode node, long min, long max) {
 
 Alternative: iterative inorder and check that values are strictly increasing.
 
+### Pattern: Leaf Peeling (LC 310 — Minimum Height Trees)
+
+Topological sort on an undirected tree — peel degree-1 nodes (leaves) layer by layer until 1-2 nodes remain. Those are the center of the tree.
+
+```java
+if (n == 1) return List.of(0);
+Map<Integer, Set<Integer>> adj = new HashMap<>();
+for (int[] e : edges) {
+    adj.computeIfAbsent(e[0], k -> new HashSet<>()).add(e[1]);
+    adj.computeIfAbsent(e[1], k -> new HashSet<>()).add(e[0]);
+}
+Deque<Integer> queue = new ArrayDeque<>();
+for (var entry : adj.entrySet())
+    if (entry.getValue().size() == 1) queue.offer(entry.getKey());
+
+int remaining = n;
+while (remaining > 2) {
+    remaining -= queue.size();
+    Deque<Integer> next = new ArrayDeque<>();
+    while (!queue.isEmpty()) {
+        int leaf = queue.poll();
+        for (int neighbor : adj.get(leaf)) {
+            adj.get(neighbor).remove(leaf);
+            if (adj.get(neighbor).size() == 1) next.offer(neighbor);
+        }
+    }
+    queue = next;
+}
+return new ArrayList<>(queue);
+```
+
+**Why it works**: minimum height tree roots are the center of the longest path. Peeling leaves inward finds the center — like finding the middle of a rope by burning from both ends.
+
+**Same pattern applies to**:
+- **Kahn's algorithm** (LC 207/210) — peel in-degree 0 nodes in directed graphs
+- **LC 802 (Eventual Safe States)** — reverse edges, peel out-degree 0
+- **LC 2603 (Collect Coins)** — peel leaves without coins first, then peel 2 more layers
+
+**Key idea**: when you can't compute a property top-down (because root is unknown), work from the boundary inward.
+
 ### Key Problems
 
 | Problem | Pattern | Key Insight |
@@ -1243,6 +1330,7 @@ Alternative: iterative inorder and check that values are strictly increasing.
 | LC 235 (LCA in BST) | BST property | Go left/right until split |
 | LC 236 (LCA in BT) | Recursive DFS | Both sides non-null = LCA |
 | LC 297 (Serialize/Deserialize) | Preorder + null markers | Queue for deserialization |
+| LC 310 (Min Height Trees) | Leaf peeling | Peel degree-1 nodes until ≤ 2 remain |
 | LC 543 (Diameter) | DFS return + global answer | Same trick as LC 124 |
 | LC 1650 (LCA with Parent) | Two-pointer intersection | Same trick as LC 160 |
 

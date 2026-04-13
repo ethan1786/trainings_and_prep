@@ -40,15 +40,22 @@ from typing import Optional
 
 # Target companies for the default scan-all mode
 # Already applied: airbnb, coinbase, datadog, figma, netflix, stripe
+# Manual check (no API): apple, microsoft, linkedin, salesforce, bytedance/tiktok, spotify
+# No remote roles: snap, palantir, plaid
 TARGET_COMPANIES = [
     "anthropic",
+    "block",
+    "confluent",
     "databricks",
-    "discord",
+    "doordash",
+    "elastic",
+    "lyft",
     "notion",
-    "plaid",
     "reddit",
+    "robinhood",
     "scale",
-    "vercel",
+    "snowflake",
+    "uber",
 ]
 
 # Default filters for scan-all mode
@@ -64,17 +71,26 @@ COMPANY_BOARDS = {
     # Greenhouse
     "airbnb":     {"ats": "greenhouse", "board": "airbnb"},
     "anthropic":  {"ats": "greenhouse", "board": "anthropic"},
+    "block":      {"ats": "greenhouse", "board": "block"},
     "coinbase":   {"ats": "greenhouse", "board": "coinbase"},
+    "confluent":  {"ats": "ashby", "board": "confluent"},
     "datadog":    {"ats": "greenhouse", "board": "datadog"},
     "databricks": {"ats": "greenhouse", "board": "databricks"},
     "discord":    {"ats": "greenhouse", "board": "discord"},
+    "doordash":   {"ats": "greenhouse", "board": "doordashusa"},
+    "elastic":    {"ats": "greenhouse", "board": "elastic"},
     "figma":      {"ats": "greenhouse", "board": "figma"},
-    "notion":     {"ats": "greenhouse", "board": "notion"},
+    "lyft":       {"ats": "greenhouse", "board": "lyft"},
+    "notion":     {"ats": "ashby", "board": "notion"},
+    "palantir":   {"ats": "greenhouse", "board": "palantir"},
     "plaid":      {"ats": "greenhouse", "board": "plaid"},
     "ramp":       {"ats": "greenhouse", "board": "ramp"},
     "reddit":     {"ats": "greenhouse", "board": "reddit"},
     "replit":     {"ats": "greenhouse", "board": "replit"},
+    "robinhood":  {"ats": "greenhouse", "board": "robinhood"},
     "scale":      {"ats": "greenhouse", "board": "scaleai"},
+    "snap":       {"ats": "greenhouse", "board": "snap"},
+    "spotify":    {"ats": "greenhouse", "board": "spotify"},
     "stripe":     {"ats": "greenhouse", "board": "stripe"},
     "vercel":     {"ats": "greenhouse", "board": "vercel"},
     # Ashby
