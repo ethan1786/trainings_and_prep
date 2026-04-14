@@ -15,35 +15,49 @@
 
 ## This Week (Apr 13–19)
 
-### Coinbase — Recruiter Screen Prep ⚡ HIGHEST PRIORITY
-Recruiter responded same day after reapplying at Staff level.
-- [ ] Schedule recruiter screen (if not already scheduled)
+### Monday Apr 14 — Airbnb + Figma
+
+**Airbnb — Message Connection 1 (referral before applying)**
+- [ ] Send message to Connection 1 (Sr Staff SWE, ex-Applause) — see message template below
+- [ ] Wait for response before applying
+
+**Figma — Cold apply now (no prior rejection, clean slate)**
+- [ ] Apply to **Software Engineer, Developer Experience** (8+ yrs, $185K–$376K)
+  https://job-boards.greenhouse.io/figma/jobs/5790627004
+- [ ] Apply to **Software Engineer, Distributed Systems** ($153K–$376K)
+  https://job-boards.greenhouse.io/figma/jobs/5552549004
+
+### Wednesday Apr 16 — Coinbase Screen + Outreach
+
+**Coinbase — Recruiter Screen ⚡ HIGHEST PRIORITY**
 - [ ] Review prep doc (`companies/coinbase/prep_coinbase.md`) — fully updated for Platform Backend
 - [ ] Practice Stories 1 (API Modernization), 3 (Parity Testing), 9 (Digital Shopping) aloud
 - [ ] Have "Why Coinbase?" ready, know which role to lean toward (Overseer > FinHub > Payment Rails)
 - [ ] Know the leveling story: "Staff Platform is a better match — I want to be hands-on building infrastructure"
+- [ ] **Recruiter screen (Wed)**
 
-### Pinterest — Message Nick + Apply Activation Role
+**Pinterest — Message Nick (after Coinbase screen)**
 Nick referred you for Agent Foundations (AI role) — no reply since Apr 9.
 - [ ] Send follow-up to Nick mentioning the Activation role (see message below)
 - [ ] If Nick responds positively, apply to **Staff SWE, Activation Team** (Remote)
 - [ ] Also consider: **Staff SWE, Ads Measurement Products** (Remote) — weaker fit but worth mentioning
+
+**Stripe — Message YiYi (after Coinbase screen)**
+Your connection confirmed the Workflow Engine role is still open.
+- [ ] Send gratitude reply to YiYi
+- [ ] Ask for referral for Workflow Engine
+- [ ] Also mention **Staff SWE, Stream Compute** (Remote US) — Flink/Kafka/Java, excellent fit
+  https://stripe.com/jobs/listing/staff-software-engineer-stream-compute/7767063
 
 **Message to Nick:**
 > Hey Nick — hope you're doing well! I've been thinking more about where I'd have the strongest impact, and I think backend platform roles are a better fit for me than AI-focused ones. I noticed the **Staff Software Engineer, Activation Team** opening — the backend systems work (APIs, event pipelines, signal infrastructure) maps really well to what I've been doing for the past several years.
 >
 > Would you be able to refer me for that role? And if you know of any other backend platform or infrastructure openings that might be a fit, I'd love to hear about those too. Really appreciate your help either way!
 
-### Stripe — Follow Up + Apply New Roles
-Your connection confirmed the Workflow Engine role is still open.
-- [ ] Send gratitude reply to your connection (if not already done)
-- [ ] In 3-5 days, ask her for a referral for Workflow Engine
-- [ ] Also ask about these roles:
-  - **Staff SWE, Stream Compute** (Remote US) — Flink/Kafka/Java, excellent fit
-    https://stripe.com/jobs/listing/staff-software-engineer-stream-compute/7767063
-  - **Backend/API Engineer, Money as a Service** (Remote US) — broad level band, could land Staff
-    https://stripe.com/jobs/listing/backend-api-engineer-money-as-a-service/6176758
-- [ ] If no reply within a week from connection, find a Stripe engineering recruiter on LinkedIn
+### Meanwhile This Week — GitHub Referral
+- [ ] Message your Microsoft engineer friend about GitHub referral — send role link and req #5101
+  https://www.github.careers/careers-home/jobs/5101
+  Principal SWE, Core Platform Infrastructure — level stretch but strong content fit
 
 ### Airbnb — Referral First, Then Apply (DO NOT cold apply)
 Previously rejected at Staff (GenAI, cold). Two connections found.
