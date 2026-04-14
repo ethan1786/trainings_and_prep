@@ -76,7 +76,10 @@
       "Bash(python3:*)",
       "WebFetch(domain:jobs.ashbyhq.com)",
       "Bash(ls /Users/yfsun/projects/preps/interview_prep/*.md /Users/yfsun/projects/preps/interview_prep/*.txt)",
-      "WebFetch(domain:www.github.careers)"
+      "WebFetch(domain:www.github.careers)",
+      "WebFetch(domain:boards-api.greenhouse.io)",
+      "WebFetch(domain:stripe.com)",
+      "WebFetch(domain:careers.airbnb.com)"
     ]
   }
 }
