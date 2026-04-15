@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Principal Software Engineer &middot; GenAI Automation &amp; Backend Platform Architecture &middot; 13 Years</div>
+    <div class="tagline">Principal Software Engineer &middot; Backend Platform Infrastructure &amp; Distributed Systems &middot; 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -246,37 +246,26 @@
 <div class="section-title">Summary</div>
 <p class="summary">
   Principal-level backend &amp; platform engineer with 13 years of experience building scalable distributed systems
-  and AI-driven automation platforms. Recent work centers on agentic AI infrastructure &mdash; designing and shipping
-  an MCP server with tool calling for conversational AI integration, building a GenAI automation platform
-  with RAG-augmented inference, prompt optimization, and multi-provider LLM evaluation, and architecting
-  foundational backend services consumed across the organization. Track record of leading cross-functional
-  platform initiatives spanning 10+ teams, driving technical direction via RFCs, and delivering complex
-  0&rarr;1 systems from inception through production.
+  and high-traffic platform infrastructure. Led the redesign of a critical API orchestration layer serving
+  millions of daily requests, reducing p99 latency 5&times; and achieving 99.9% availability across 10+ teams.
+  Built GraphQL federation gateways (Netflix DGS), event-driven microservice platforms, and observability
+  standards adopted org-wide. Track record of leading cross-functional platform initiatives spanning
+  multiple departments, driving technical direction via RFCs, and delivering complex 0&rarr;1 systems
+  from inception through production.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Designed and shipped agentic AI components: MCP tool-calling server, RAG-augmented inference, prompt evaluation harness</li>
-  <li>Led multi-team platform migrations spanning 10+ engineering teams across 3 departments</li>
+  <li>Led cross-org platform modernization spanning 10+ engineering teams across 3 departments with measurable impact</li>
+  <li>Built GraphQL federation gateway (Netflix DGS), unified serving layer for frontend, backend, and API consumers</li>
   <li>Defined technical roadmaps and architectural standards adopted org-wide via RFCs and design docs</li>
   <li>Mentored senior engineers toward Principal-level scope; drove cross-org technical alignment</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, Python, Node.js &middot; OpenAI/ChatGPT, MCP Protocol, RAG, Prompt Engineering, LLM Orchestration &middot;
-  AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL &middot; GraphQL (Netflix DGS), Microservices, Event-Driven &middot; Datadog, Grafana
-</div>
-
-<!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
-<div class="section-title">Independent Project</div>
-<div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Automation Platform &amp; Evaluation System</span>
-  <ul>
-    <li>Architected an automation platform with hybrid rules + multi-path LLM inference (fast vs. deep), RAG-augmented retrieval over heterogeneous data sources, and a policy overlay &mdash; producing explainable, grounded real-time recommendations.</li>
-    <li>Built an evaluation harness ("Prompt Lab") for end-to-end simulation, offline backtesting, and prompt/parameter optimization (grid &amp; Bayesian search) with robust observability, hallucination detection, and multi-provider LLM support.</li>
-    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions &mdash; enabling safe, iterative automation improvement.</li>
-  </ul>
+  Java, Spring Boot, Python, Node.js &middot; GraphQL (Netflix DGS), API Gateway, Service Orchestration &middot;
+  AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL &middot; Microservices, Event-Driven, CQRS &middot; Datadog, Grafana, Distributed Tracing
 </div>
 
 <!-- ═══════════════════ EXPERIENCE ══════════════════════════════ -->
@@ -287,15 +276,6 @@
   <div class="job-header">
     <div><span class="company">CarGurus</span><span class="role">— Principal Software Engineer / Technical Lead</span></div>
     <span class="dates">Oct 2019 – Present</span>
-  </div>
-
-  <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server &mdash; Conversational AI Integration (0&rarr;1)</span>
-    <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, exposing CarGurus capabilities as tools callable by conversational AI agents &mdash; defining tool schemas, serving infrastructure, and request/response contracts.</li>
-      <li>Delivered a production-grade implementation under ambiguity; iterated rapidly with PMs and directors on tool definitions and agent behavior; designed for safe, incremental rollout alongside existing APIs.</li>
-      <li>Served as key engineering representative for AI automation strategy, shaping the technical roadmap for LLM/agent integration across the company.</li>
-    </ul>
   </div>
 
   <div class="project">
@@ -331,6 +311,13 @@
     <ul>
       <li>Defined technical roadmap and architectural standards for platform services &mdash; API design, caching, distributed orchestration &mdash; adopted across multiple teams via RFCs and design docs.</li>
       <li>Mentored multiple senior engineers on system design, performance, and path to Principal-level scope.</li>
+    </ul>
+  </div>
+
+  <div class="project compact">
+    <span class="project-name">AI Integration &mdash; MCP Server &amp; GenAI Platform</span>
+    <ul>
+      <li>Sole backend engineer for an MCP server on the OpenAI Apps SDK, exposing platform capabilities as tools callable by AI agents. Separately built a GenAI automation platform with multi-provider LLM orchestration, RAG-augmented inference, and an evaluation harness.</li>
     </ul>
   </div>
 </div>

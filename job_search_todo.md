@@ -18,14 +18,15 @@
 ### Monday Apr 14 — Airbnb + Figma
 
 **Airbnb — Message Connection 1 (referral before applying)**
-- [ ] Send message to Connection 1 (Sr Staff SWE, ex-Applause) — see message template below
-- [ ] Wait for response before applying
+- [x] Send message to Connection 1 (Sr Staff SWE, ex-Applause) — sent Apr 14
+- [x] Connection 1 replied — can't formally refer but shared HM name: **Whitney Rogers** (Director of Eng, GraphQL Platform org). Keep confidential.
+- [x] Applied to 3 roles: GraphQL, Hosting Services, Reservations & Additional Products
+- [ ] If no recruiter response in 1-2 weeks, find recruiter on Whitney's GraphQL Platform org to message
 
 **Figma — Cold apply now (no prior rejection, clean slate)**
-- [ ] Apply to **Software Engineer, Developer Experience** (8+ yrs, $185K–$376K)
-  https://job-boards.greenhouse.io/figma/jobs/5790627004
-- [ ] Apply to **Software Engineer, Distributed Systems** ($153K–$376K)
-  https://job-boards.greenhouse.io/figma/jobs/5552549004
+- [x] Apply to **Software Engineer, Developer Experience** (8+ yrs, $185K–$376K)
+- [x] Apply to **Software Engineer, Distributed Systems** ($153K–$376K)
+- [x] Apply to **Software Engineer, Production Engineering** ($153K–$376K)
 
 ### Wednesday Apr 16 — Coinbase Screen + Outreach
 
@@ -151,6 +152,7 @@ Applied to Flink Control Plane, connection-requested 4 recruiters + InMailed 1.
 
 | Company | Status | Applied | Contact | Next Action | When |
 |---|---|---|---|---|---|
+| **Airbnb** | Applied 3 backend roles | GraphQL, Hosting Svcs, Reservations | Know HM (Whitney Rogers) | Follow up if no response | **~Apr 28** |
 | **Coinbase** | Recruiter responded ✅ | Staff Platform (x3) | Recruiter | Prep for recruiter screen | **ASAP** |
 | **Pinterest** | Nick referred, no reply since Apr 9 | Agent Foundations | Nick | Message about Activation role | **Now** |
 | **Reddit** | InMailed 4 recruiters | Staff (x3) + Senior Staff (x2) | Recruiters | Follow up if no reply | **Apr 20** |
@@ -215,8 +217,8 @@ Applied to Flink Control Plane, connection-requested 4 recruiters + InMailed 1.
 | **Pinterest** | Staff | Activation (pivot from AI) | Done | Done | Agent Foundations | Nick (referral) | Pivoting to Activation |
 | **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Not yet | Microsoft friend | Apply + referral |
 | **Stripe** | Staff | Workflow Engine + Stream Compute | Done | — | Workflow Engine | Connection | Follow up for referral |
-| **Airbnb** | Staff (retry) | GraphQL, Performance, Auth | — | — | GenAI (rejected) | Need referral | Find connection first |
-| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | — | — | AI (pivoting) | AI directors | Pivot to backend |
+| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
+| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors | Waiting |
 | **OpenAI** | — | — | Done | — | Yes | Vishal + Josh | Waiting |
 | **Netflix** | — | — | Done | — | Yes | Preetam (referral) | Confirm level |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting |
