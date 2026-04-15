@@ -118,9 +118,11 @@
 - Distributed message queue / event-driven architecture
 - Real-time monitoring and alerting system
 
-## 5a. Recruiter Screen — What to Expect
+## 5a. Round-by-Round Guide
 
-This is your first call. The recruiter reached out proactively after you applied to 3 roles, which is a strong signal. Expect:
+### Round 1: Recruiter Screen (Wed Apr 16)
+
+This is your first call. The recruiter reached out proactively after you applied to 3 roles, which is a strong signal. This round is non-technical — it's a background check, leveling conversation, and mutual fit assessment.
 
 **What they'll ask:**
 - Walk me through your background (2-3 min — lead with platform infrastructure, scale, cross-team impact)
@@ -136,13 +138,71 @@ This is your first call. The recruiter reached out proactively after you applied
 - How new are these teams? Are these backfills or new headcount?
 - What's the team size for each role?
 - Is there flexibility on leveling if my interview performance warrants it?
-- What's the remote work setup — how often are offsites?
+- Coinbase mentions an intense work culture on the careers page — what does that look like in practice for the Platform teams?
+- How does the team handle flexibility around schedules? Is it more async or do people tend to work set hours?
 
 **Tips:**
 - Be enthusiastic but not desperate — they came back to you, the leverage is more balanced now
 - Mention you were previously considered for Senior Staff — shows the company already vetted your profile
 - Don't badmouth the previous rejection — "I realized Staff-level Platform roles are a better match for what I want to do day-to-day"
 - If they ask about crypto knowledge, be honest: "I understand the fundamentals but I'm not a crypto native — my value is in the platform engineering, not the domain"
+- Do NOT bring up Glassdoor reviews or specific complaints — ask neutral questions (see above) and let them volunteer the details
+- Do NOT ask about personal scheduling flexibility (e.g. leaving early for family) — save for after an offer
+
+### Round 2: Hiring Manager
+
+This is where you assess the team, the work, and the manager. Be more direct with questions here — the HM will give you a more candid picture than the recruiter.
+
+**What they'll ask:**
+- Deep dive on your background — expect follow-ups on specific projects
+- Why this role / this team specifically?
+- How do you approach building platform infrastructure?
+- Technical judgment questions — trade-off discussions, architectural decisions
+- What does your first 90 days look like?
+
+**What you should ask:**
+- What's the biggest reliability or correctness challenge your team is facing right now?
+- How does this team interact with Risk, Compliance, and Operations stakeholders? What does that collaboration look like day-to-day?
+- What does the current observability and monitoring setup look like for fund movements? Where are the gaps?
+- How much autonomy does this role have in defining the technical direction vs. executing a defined roadmap?
+- How do you measure success for this role in the first 6-12 months?
+- What's the on-call model — how does the team handle incidents in a 24/7 crypto market? What's the rotation like?
+- What does the day-to-day pace look like on this team? How does the "intense culture" Coinbase talks about play out here?
+
+**Tips:**
+- This is where you can probe work-life balance more directly — "What does on-call look like? How often do people work weekends?"
+- Ask about team tenure and turnover — "How long have most people been on this team?"
+- If you get bad vibes about pace/burnout, take it seriously — Glassdoor complaints exist for a reason
+
+### Round 3: Technical Interviews (Coding + System Design)
+
+**Coding (CodeSignal):**
+- 4 questions, first is warmup, rest are LC medium
+- "Pseudo project" format — build a feature given mini-database input
+- Clean code and practical data manipulation — not tricky algorithm puzzles
+- See Section 12 for problem list
+
+**System Design (60 min, 1:1):**
+- Expect financial/crypto domain: payment system, exchange, blockchain indexer
+- Drive the conversation — propose trade-offs with conviction
+- Lead with correctness and fault tolerance (financial systems can't be eventually correct)
+- See Section 13 for topic list
+
+**Behavioral:**
+- See Section 6 for STAR stories ranked by relevance
+- Lead with metrics and data in every answer
+- Show platform thinking, cross-team leadership, AI proficiency
+
+### Round 4: Offer Negotiation
+
+**Only when you have an offer in hand:**
+- The band is $218K–$256.5K base + equity + bonus
+- You were previously considered for Senior Staff — don't let the re-application anchor you to the bottom of the Staff band
+- If you have competing offers or active processes (Reddit, Stripe, Airbnb, etc.), mention them — "I'm in late stages with a couple of other companies" creates urgency
+- This is the right time to ask about personal scheduling flexibility: "I have young kids — if I need to step out for a couple hours during the day and make up the time in the evening, is that how the team works?"
+- Ask about equity vesting schedule, refreshers, and performance review cadence
+- Remote offsites: how many per year, where, how long?
+- Ask about promotion velocity — what does Senior Staff scope look like from this role?
 
 ---
 
@@ -175,23 +235,9 @@ This is your first call. The recruiter reached out proactively after you applied
 
 ## 7. Questions to Ask Interviewers
 
-### Recruiter Screen
-(See Section 5a for detailed recruiter screen prep)
-- Which of the 3 roles (FinHub Tooling, Overseer, Payment Rails) do you think is the best fit for my background?
-- What does the interview process look like — how many rounds, timeline?
-- Are these backfills or new headcount? What's driving the hire?
-- How does team matching work — do I interview for one role or all three?
-- What's the remote work setup — how often are offsites?
+All questions are organized by round in Section 5a. Additional questions for technical interviewers:
 
-### Hiring Manager
-- What's the biggest reliability or correctness challenge your team is facing right now?
-- How does this team interact with Risk, Compliance, and Operations stakeholders? What does that collaboration look like day-to-day?
-- What does the current observability and monitoring setup look like for fund movements? Where are the gaps?
-- How much autonomy does this role have in defining the technical direction vs. executing a defined roadmap?
-- How do you measure success for this role in the first 6-12 months?
-- What's the on-call model — how does the team handle incidents in a 24/7 crypto market?
-
-### Team Match / Technical
+### Technical / Team Match
 - What's the current tech stack? (Confirming Go, Kafka, PostgreSQL, etc.)
 - How does reconciliation work today — is there an existing correctness verification layer, or is that being built?
 - What's the biggest pain point for internal teams that depend on this platform?
