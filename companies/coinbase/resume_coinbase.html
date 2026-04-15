@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Principal Software Engineer · AI Automation &amp; Platform Architecture · 13 Years</div>
+    <div class="tagline">Principal Software Engineer · Backend Platform Infrastructure &amp; Distributed Systems · 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -245,38 +245,28 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Principal-level backend &amp; platform engineer with 13 years building distributed systems and shipping
-  LLM-powered applications to production. Recent work centers on agentic AI — designing an MCP server with
-  tool-calling orchestration for ChatGPT integration, and building an AI automation platform with evaluation,
-  multi-provider LLM support, and configurable policy frameworks. Track record of standing up greenfield
-  platforms from day 1, defining primitives and orchestration layers that scale across organizations,
-  and driving cross-functional alignment across 10+ teams. Thrives in ambiguous, high-impact 0&rarr;1 environments.
+  Principal-level backend &amp; platform engineer with 13 years building fault-tolerant distributed systems
+  and high-traffic platform infrastructure. Led the redesign of a critical API orchestration layer serving
+  millions of daily requests, reducing p99 latency 5&times; and achieving 99.9% availability across 10+ teams.
+  Built correctness verification frameworks, event-driven architectures (Kafka, CQRS), and observability
+  standards adopted org-wide. Track record of building platform infrastructure that multiple teams depend on,
+  driving cross-functional alignment across departments, and delivering complex 0&rarr;1 systems from inception
+  through production.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Shipped LLM-powered agent systems to production: MCP tool-calling server, AI evaluation harness, multi-provider orchestration</li>
-  <li>Built greenfield platforms from day 1 — defined primitives, APIs, and orchestration patterns adopted org-wide</li>
-  <li>Led cross-org platform initiatives spanning 10+ engineering teams across 3 departments</li>
+  <li>Led cross-org platform modernization spanning 10+ engineering teams across 3 departments with measurable reliability impact</li>
+  <li>Built correctness verification framework — automated validation at 50% production traffic for safe, data-driven migrations</li>
+  <li>Designed event-driven architectures (Kafka, CQRS) and observability standards (distributed tracing, SLO-based latency budgets)</li>
   <li>Mentored senior engineers toward Principal-level scope; drove architectural standards via RFCs and design docs</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, Python, Node.js · OpenAI/ChatGPT, MCP Protocol, LLM Orchestration, Agent Evaluation ·
+  Java, Spring Boot, Python, Node.js · Service Orchestration, API Design, Fault Tolerance, Idempotency ·
   AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL · GraphQL (Netflix DGS), Microservices, Event-Driven, CQRS ·
-  Datadog, Grafana · Keycloak, SSO, OAuth 2.0
-</div>
-
-<!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
-<div class="section-title">Independent Project</div>
-<div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Automation Platform &amp; Evaluation System</span>
-  <ul>
-    <li>Architected an agentic AI platform with hybrid rules + multi-path LLM inference (fast vs. deep), policy overlay, and tool-calling orchestration — producing explainable, grounded recommendations over heterogeneous data sources.</li>
-    <li>Built an evaluation harness ("Prompt Lab") for end-to-end simulation, offline backtesting, hallucination detection, and prompt/parameter search (grid &amp; Bayesian optimization) with observability and multi-provider LLM support.</li>
-    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop — enabling safe, iterative improvement of AI-driven automation without manual intervention.</li>
-  </ul>
+  Datadog, Grafana, Distributed Tracing · Keycloak, SSO, OAuth 2.0
 </div>
 
 <!-- ═══════════════════ EXPERIENCE ══════════════════════════════ -->
@@ -290,19 +280,10 @@
   </div>
 
   <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server — Agentic Tool Calling (0&rarr;1)</span>
-    <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, enabling ChatGPT agents to autonomously invoke CarGurus capabilities via structured tool calls — defining tool schemas, orchestration logic, and request/response contracts.</li>
-      <li>Shipped to production under high ambiguity; iterated rapidly with PMs and directors on tool definitions and agent behavior; designed for safe, incremental rollout alongside existing APIs and clients.</li>
-      <li>Served as key engineering representative for AI agent strategy, shaping the technical roadmap for agentic AI integration across the company.</li>
-    </ul>
-  </div>
-
-  <div class="project">
-    <span class="project-name">High-Traffic Platform Modernization — Orchestration &amp; Automation</span>
+    <span class="project-name">High-Traffic Platform Modernization — Orchestration &amp; Fault Tolerance</span>
     <ul>
       <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core platform behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions).</li>
-      <li>Introduced a new orchestration service consolidating 12 downstream integrations into 5 well-defined services — defining the primitives, orchestration layer, and tools that enabled teams across the org to build on top of the platform.</li>
+      <li>Introduced a new orchestration service consolidating 12 downstream integrations into 5 well-defined services with circuit breaking, fault isolation, and idempotent retry — defining the platform infrastructure that teams across the org depend on.</li>
       <li>Produced initial architecture in ~2 weeks; shipped first milestone in 6 months; completed ahead of schedule.</li>
     </ul>
     <div class="metrics">
@@ -327,11 +308,25 @@
     </ul>
   </div>
 
-  <div class="project compact">
-    <span class="project-name">Cross-Org Platform Leadership &amp; Automation Standards</span>
+  <div class="project">
+    <span class="project-name">Parity Testing Framework — Correctness Verification at Scale</span>
     <ul>
-      <li>Defined platform primitives and architectural standards — API design, caching, distributed orchestration — adopted across multiple teams via RFCs and design docs; built parity-testing framework for safe, automated migration validation.</li>
+      <li>Built an automated correctness verification framework that validated new system output against legacy at 50% production traffic — catching data integrity issues before they reached users and enabling safe, data-driven migration rollout.</li>
+    </ul>
+  </div>
+
+  <div class="project compact">
+    <span class="project-name">Cross-Org Platform Leadership &amp; Technical Direction</span>
+    <ul>
+      <li>Defined architectural standards — API design, caching, distributed orchestration, observability — adopted across multiple teams via RFCs and design docs.</li>
       <li>Mentored senior engineers on system design, performance, and path to Principal-level scope.</li>
+    </ul>
+  </div>
+
+  <div class="project compact">
+    <span class="project-name">AI Integration — MCP Server &amp; GenAI Platform</span>
+    <ul>
+      <li>Sole backend engineer for an MCP server on the OpenAI Apps SDK, exposing platform capabilities as tools callable by AI agents. Separately built a GenAI automation platform with multi-provider LLM orchestration, RAG-augmented inference, and an evaluation harness.</li>
     </ul>
   </div>
 </div>

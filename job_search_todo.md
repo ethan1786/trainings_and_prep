@@ -1,6 +1,6 @@
 # Job Search — Master Todo List
 
-> Last updated: April 13, 2026
+> Last updated: April 16, 2026
 
 ---
 
@@ -13,185 +13,136 @@
 
 ---
 
-## This Week (Apr 13–19)
+## Immediate — Take-Home Assessments
 
-### Monday Apr 14 — Airbnb + Figma
+### Coinbase — Take-Home Assessments (next week)
+Recruiter screen done Apr 16. Role not pre-assigned — team matching after assessments.
+- [ ] Cognitive + Culture assessment (30 min)
+- [ ] Technical on CodeSignal (60 min) — AI copilot enabled, start simple then add details
+- [ ] Review prep doc Section 5a and Section 12 before CodeSignal
+- After assessments: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
 
-**Airbnb — Message Connection 1 (referral before applying)**
-- [x] Send message to Connection 1 (Sr Staff SWE, ex-Applause) — sent Apr 14
-- [x] Connection 1 replied — can't formally refer but shared HM name: **Whitney Rogers** (Director of Eng, GraphQL Platform org). Keep confidential.
-- [x] Applied to 3 roles: GraphQL, Hosting Services, Reservations & Additional Products
-- [ ] If no recruiter response in 1-2 weeks, find recruiter on Whitney's GraphQL Platform org to message
+---
 
-**Figma — Cold apply now (no prior rejection, clean slate)**
-- [x] Apply to **Software Engineer, Developer Experience** (8+ yrs, $185K–$376K)
-- [x] Apply to **Software Engineer, Distributed Systems** ($153K–$376K)
-- [x] Apply to **Software Engineer, Production Engineering** ($153K–$376K)
+## This Week (Apr 16–19) — Remaining Actions
 
-### Wednesday Apr 16 — Coinbase Screen + Outreach
-
-**Coinbase — Recruiter Screen ⚡ HIGHEST PRIORITY**
-- [ ] Review prep doc (`companies/coinbase/prep_coinbase.md`) — fully updated for Platform Backend
-- [ ] Practice Stories 1 (API Modernization), 3 (Parity Testing), 9 (Digital Shopping) aloud
-- [ ] Have "Why Coinbase?" ready, know which role to lean toward (Overseer > FinHub > Payment Rails)
-- [ ] Know the leveling story: "Staff Platform is a better match — I want to be hands-on building infrastructure"
-- [ ] **Recruiter screen (Wed)**
-
-**Pinterest — Message Nick (after Coinbase screen)**
-Nick referred you for Agent Foundations (AI role) — no reply since Apr 9.
-- [ ] Send follow-up to Nick mentioning the Activation role (see message below)
+### Pinterest — Waiting on Nick
+- [x] Sent note to Nick about Activation Team role
 - [ ] If Nick responds positively, apply to **Staff SWE, Activation Team** (Remote)
-- [ ] Also consider: **Staff SWE, Ads Measurement Products** (Remote) — weaker fit but worth mentioning
+- [ ] If no reply by Apr 20, send light follow-up
 
-**Stripe — Message YiYi (after Coinbase screen)**
-Your connection confirmed the Workflow Engine role is still open.
-- [ ] Send gratitude reply to YiYi
-- [ ] Ask for referral for Workflow Engine
-- [ ] Also mention **Staff SWE, Stream Compute** (Remote US) — Flink/Kafka/Java, excellent fit
-  https://stripe.com/jobs/listing/staff-software-engineer-stream-compute/7767063
-
-**Message to Nick:**
-> Hey Nick — hope you're doing well! I've been thinking more about where I'd have the strongest impact, and I think backend platform roles are a better fit for me than AI-focused ones. I noticed the **Staff Software Engineer, Activation Team** opening — the backend systems work (APIs, event pipelines, signal infrastructure) maps really well to what I've been doing for the past several years.
->
-> Would you be able to refer me for that role? And if you know of any other backend platform or infrastructure openings that might be a fit, I'd love to hear about those too. Really appreciate your help either way!
-
-### Meanwhile This Week — GitHub Referral
-- [ ] Message your Microsoft engineer friend about GitHub referral — send role link and req #5101
+### GitHub — Waiting on Microsoft Friend
+- [x] Sent referral request to Microsoft friend
+- [ ] If he agrees, apply to **Principal SWE, Core Platform Infrastructure** (req #5101)
   https://www.github.careers/careers-home/jobs/5101
-  Principal SWE, Core Platform Infrastructure — level stretch but strong content fit
+- [ ] Also find 2-3 GitHub/Microsoft recruiters on LinkedIn for outreach
 
-### Airbnb — Referral First, Then Apply (DO NOT cold apply)
-Previously rejected at Staff (GenAI, cold). Two connections found.
-**Important:** Get referral BEFORE applying. Apply to 2-3 roles max — focus, not volume.
+### Google — Waiting on Connection
+- [x] Sent message to former CarGurus coworker (now EM at Google)
+- [ ] If he agrees, send resume and apply. Target role:
+  - **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — L6 Staff
+    https://www.google.com/about/careers/applications/jobs/results/119717481349554886
+    Java, distributed systems, experimentation infra. Strong fit.
+  - Note: Google does team matching after offer, so this is a starting point
+- [ ] If no reply by end of week, reach out to other Google connections (you have many)
 
-**Step 1: Message Connection 1 today**
-**Connection 1 (PRIMARY): Sr Staff SWE at Airbnb, former Applause tech lead/EM**
-LinkedIn: https://www.linkedin.com/in/lubavin/
-No direct overlap (he left before you joined), but same company is a legitimate connection.
-- [ ] Send message to Connection 1 (see message below)
-- [ ] If he says yes, ask how Airbnb's referral process works (one per role or multiple?)
-- [ ] Apply to **2-3 roles with his referral** — GraphQL (#1), then pick from Hosting Services or Core Entities (#2-3)
-
-**Step 2: If no response within a week, try Connection 2**
-**Connection 2 (BACKUP): Senior Analytics Engineer at Airbnb, ex-CarGurus**
-LinkedIn: https://www.linkedin.com/in/bryanlkaufman/
-2 years overlap, different teams (eng vs data). Weaker referral but usable.
-- [ ] If Connection 1 doesn't respond by Apr 20, reach out to Connection 2
-
-**Step 3: If neither responds, recruiter outreach on LinkedIn**
-
-**Message to Connection 1:**
-> Hi [Name] — I hope you're doing well! We didn't overlap directly at Applause, but I joined the engineering team shortly after you moved on and heard great things about the foundation you helped build there.
->
-> I'm currently a Principal Engineer at CarGurus and exploring Staff-level backend platform roles. I came across a couple of openings at Airbnb that are a strong fit for my background — particularly the Staff SWE, GraphQL role. I've spent the last several years building high-traffic API orchestration infrastructure and have direct GraphQL federation experience (Netflix DGS), so it maps really well to what that team is doing.
->
-> Would you be open to referring me, or pointing me toward the right person to talk to? Happy to send my resume or chat if that's easier. Either way, really appreciate it!
->
-> Best, Yifei
-
-**Target roles (apply 2-3 after referral secured):**
-
-| Priority | Role | Why | URL |
-|---|---|---|---|
-| **#1** | Staff SWE, **GraphQL** | Your DGS federation experience is rare — bullseye | https://job-boards.greenhouse.io/airbnb/jobs/7719366 |
-| **#2** | Staff Backend, **Hosting Services** | Closest to current work, backend SOA at scale | https://careers.airbnb.com/positions/7609100/ |
-| **#3** | Staff Backend, **Reservations & Additional Products** | Java/Kotlin explicit, core backend | https://careers.airbnb.com/positions/7763307/ |
-| Backup | Staff SWE, **Authorization** | Auth modernization from Applause (Keycloak SSO) | https://job-boards.greenhouse.io/airbnb/jobs/7782308 |
-| Backup | Staff Backend, **Core Entities Data Foundation** | Platform, data infrastructure | https://job-boards.greenhouse.io/airbnb/jobs/7774153 |
-
-### Figma — Pivot to Backend Roles
-Previous outreach was to AI Platform directors — pivot to backend.
-- [ ] If AI directors replied by Apr 16, ask about backend platform teams
-- [ ] If no reply, find backend/infrastructure engineering contacts on LinkedIn
-- [ ] Target these roles (Figma doesn't use "Staff" titles — leveling happens in interview):
-
-| Role | Comp Band | URL |
-|---|---|---|
-| **Software Engineer, Developer Experience** (8+ yrs) | $185K–$376K | https://job-boards.greenhouse.io/figma/jobs/5790627004 |
-| **Software Engineer, Distributed Systems** | $153K–$376K | https://job-boards.greenhouse.io/figma/jobs/5552549004 |
-| **Software Engineer, Production Engineering** | $153K–$376K | https://job-boards.greenhouse.io/figma/jobs/5551649004 |
-
-### GitHub — Apply + Microsoft Referral
-Principal SWE, Core Platform Infrastructure — level stretch but strong content fit.
-- [ ] Ask your Microsoft engineer friend for a referral — send role link and req #5101
-  https://www.github.careers/careers-home/jobs/5101
-- [ ] Apply to the role
-- [ ] Find 2–3 GitHub/Microsoft engineering recruiters on LinkedIn
-- [ ] Send connection requests with note:
-  > Hi [Name] — I just applied for the Principal SWE, Core Platform Infrastructure role at GitHub. I'm a Principal Engineer with 13 years building large-scale distributed systems and platform infrastructure. Would love to connect.
-- [ ] If accepted, send longer follow-up:
-  > Hi [Name],
-  >
-  > I recently applied for the Principal Software Engineer role on GitHub's Core Platform Infrastructure team and wanted to reach out directly. I'm a Principal Engineer at CarGurus with 13 years building large-scale distributed systems and platform infrastructure.
-  >
-  > The role is a strong match for my background — I led a cross-org redesign of our most critical API serving millions of daily requests, reducing p99 latency by 5x and improving availability to 99.9%. I've driven architecture and observability standards across 10+ teams, built service orchestration infrastructure on Kubernetes, and mentored engineers to Principal-level scope.
-  >
-  > I'm excited about the challenge of keeping GitHub's platform reliable and performant for 180M+ developers. Happy to share more context or jump on a quick call.
-  >
-  > Best, Yifei
-
-### Google & Meta — Find Referrals
-- [ ] Search LinkedIn connections for anyone at Google (target: backend platform/infra roles, Staff L6)
-- [ ] Search LinkedIn connections for anyone at Meta (target: backend infra, Staff E6)
-- [ ] If referral found: ask for referral, then apply
-- [ ] If no referral by end of week: apply cold (both process cold apps well)
-
-### Reddit — Recruiter Follow-Up
-Applied to 5 roles, InMailed 4 recruiters. Wait for responses.
-- [ ] If any recruiter responds, schedule screen
-- [ ] If no response by Apr 20, send follow-up to the 2 Ads team recruiters
-
-### Confluent — Recruiter Follow-Up
-Applied to Flink Control Plane, connection-requested 4 recruiters + InMailed 1.
-- [ ] If connection requests accepted, send longer follow-up message
-- [ ] If no response by Apr 20, find additional recruiters
+### Meta — Waiting on Connection
+- [x] Reached out to Meta connection
+- [ ] If connection agrees, apply for E6 (Staff) backend infra roles
+- [ ] If no reply by end of week, find other connections or apply cold
 
 ---
 
-## Waiting — Follow Up If No Response
+## Silent / Stale — Follow Up Needed
 
-| Company | Status | Applied | Contact | Next Action | When |
-|---|---|---|---|---|---|
-| **Airbnb** | Applied 3 backend roles | GraphQL, Hosting Svcs, Reservations | Know HM (Whitney Rogers) | Follow up if no response | **~Apr 28** |
-| **Coinbase** | Recruiter responded ✅ | Staff Platform (x3) | Recruiter | Prep for recruiter screen | **ASAP** |
-| **Pinterest** | Nick referred, no reply since Apr 9 | Agent Foundations | Nick | Message about Activation role | **Now** |
-| **Reddit** | InMailed 4 recruiters | Staff (x3) + Senior Staff (x2) | Recruiters | Follow up if no reply | **Apr 20** |
-| **Confluent** | 4 connection requests + 1 InMail | Staff, Flink CP | Recruiters | Follow up when accepted | **Apr 20** |
-| **OpenAI** | Connected with Vishal + recruiter Josh | Yes | Josh | Follow up if 2+ weeks | Check date |
-| **Netflix** | Preetam referred + pinged HM | Yes | Preetam | Confirm role + level | **This week** |
-| **Figma** | Messaged 2 AI Platform directors | Yes | Directors | Pivot to backend roles | **Apr 16** |
-| **Circle** | Applied + messaged VP of Eng | Staff SWE | VP of Eng | Wait | **~Apr 19** |
-| **Stripe** | Connection confirmed role open | Workflow Engine | Connection | Thank, then ask for referral | **3-5 days** |
+These have been quiet for 1+ weeks. Time to act.
+
+| Company | Applied | Days Silent | Contact | Action |
+|---|---|---|---|---|
+| **Reddit** | 5 roles, InMailed 4 recruiters | ~3 days | Recruiters | Follow up with 2 Ads team recruiters by **Apr 20** |
+| **Confluent** | Flink Control Plane, 4 connection requests + 1 InMail | ~3 days | Recruiters | Follow up when connections accepted, or find new recruiters by **Apr 20** |
+| **OpenAI** | Yes, connected with Vishal + recruiter Josh | 2+ weeks? | Josh | **Follow up with Josh now** — if no response, this is likely dead |
+| **Netflix** | Yes, Preetam referred + pinged HM | 2+ weeks? | Preetam | **Message Preetam to confirm status** — is the referral still active? What role/level? |
+| **Figma** | 3 backend roles (cold, Apr 14) | 2 days | AI directors (old outreach) | Too early to follow up. If AI directors reply, pivot conversation to backend teams |
+| **Circle** | Staff SWE, messaged VP of Eng | 1+ week | VP of Eng | **Send light follow-up to VP by Apr 19** if no response |
+| **Airbnb** | 3 backend roles (cold, Apr 14) | 2 days | Know HM (Whitney Rogers) | Too early. Follow up ~Apr 28 if no response. Find recruiter on GraphQL Platform org. |
+
+**Priority follow-ups this week:**
+
+**1. OpenAI — message Josh (NOW)**
+> Hi Josh — hope you're doing well! I wanted to follow up on our earlier conversation. I'm still very interested in the opportunity and wanted to check if there are any updates on timing or next steps. Happy to provide any additional information if helpful. Thanks!
+
+- [ ] Send follow-up to Josh
+
+**2. Netflix — message Preetam (NOW)**
+> Hey Preetam — just wanted to check in on the referral. Any update from the team or hiring manager? Also wanted to confirm — what role and level did you put me in for? I want to make sure I'm prepping for the right thing. Appreciate the help either way!
+
+- [ ] Send follow-up to Preetam
+
+**3. Circle — follow up with VP of Eng (by Apr 19)**
+> Hi [Name] — just circling back on my application for the Staff SWE role. I'm still very interested and wanted to see if you had a chance to take a look. Happy to chat if it would be helpful to share more about my background. Thanks!
+
+- [ ] Send follow-up to VP of Eng if still silent by Apr 19
+
+**4. Reddit — follow up with 2 Ads team recruiters (by Apr 20)**
+> Hi [Name] — I reached out last week about the Staff SWE, Ads Engineering roles at Reddit. I'm a Principal Engineer with 13 years building high-traffic platform infrastructure in Java, and I think the ads platform work is a strong fit. Would love to connect if you have a moment. Thanks!
+
+- [ ] Send follow-up to Ads team recruiter #1
+- [ ] Send follow-up to Ads team recruiter #2
+
+**5. Confluent — follow up with recruiters who accepted connection (by Apr 20)**
+> Hi [Name] — thanks for connecting! I recently applied for the Staff SWE, Flink Control Plane role at Confluent. I'm a Principal Engineer with 13 years building distributed systems orchestration and cloud-native infrastructure in Java — the control plane work is a strong match for my background. Would love to learn more about the team and process. Thanks!
+
+- [ ] Send follow-up to any recruiters who accepted connection requests
 
 ---
 
-## New Roles to Apply (Backend Platform Focus)
+## Stripe — On Hold
 
-### Stripe — New Targets
-| Role | Location | Level | URL |
-|---|---|---|---|
-| Staff SWE, Stream Compute | Remote US | Staff | https://stripe.com/jobs/listing/staff-software-engineer-stream-compute/7767063 |
-| Backend/API Engineer, Money as a Service | Remote US | Staff (broad band) | https://stripe.com/jobs/listing/backend-api-engineer-money-as-a-service/6176758 |
+- [x] Original role (Workflow Engine) appears filled — removed from job board
+- Stream Compute role is a stretch (needs deep Flink/streaming infra experience you don't have)
+- **Strategy:** Monitor Stripe job board for new backend platform roles. When a good one appears, message YiYi (connection) with a specific ask.
+- YiYi knows you're interested and has confirmed willingness to help — don't waste the connection on a weak match.
 
-### Figma — New Targets
-| Role | Location | Comp | URL |
-|---|---|---|---|
-| SE, Developer Experience (8+ yrs) | Remote US | $185K–$376K | https://job-boards.greenhouse.io/figma/jobs/5790627004 |
-| SE, Distributed Systems | Remote US | $153K–$376K | https://job-boards.greenhouse.io/figma/jobs/5552549004 |
-| SE, Production Engineering | Remote US | $153K–$376K | https://job-boards.greenhouse.io/figma/jobs/5551649004 |
+---
 
-### Pinterest — New Targets
-| Role | Location | Level |
-|---|---|---|
-| Staff SWE, Activation Team | Remote (quarterly SF/SEA/NYC) | Staff |
+## Waiting — Status Tracker
 
-### Airbnb — Retry Targets (need referral first)
-| Priority | Role | URL |
-|---|---|---|
-| #1 | Staff SWE, GraphQL | https://job-boards.greenhouse.io/airbnb/jobs/7719366 |
-| #2 | Staff SWE, Performance | https://job-boards.greenhouse.io/airbnb/jobs/6996864 |
-| #3 | Staff SWE, Authorization | https://job-boards.greenhouse.io/airbnb/jobs/7782308 |
-| #4 | Staff Backend, Core Entities Data Foundation | https://job-boards.greenhouse.io/airbnb/jobs/7774153 |
+| Company | Status | Roles Applied | Next Action | When |
+|---|---|---|---|---|
+| **Coinbase** | Recruiter screen ✅ | Staff Platform (x3) | Take-home assessments | **Next week** |
+| **Airbnb** | Applied (cold) | GraphQL, Hosting Svcs, Reservations | Wait, then follow up | **~Apr 28** |
+| **Figma** | Applied (cold) | DevEx, Distributed Sys, Prod Eng | Wait | **~Apr 28** |
+| **Pinterest** | Messaged Nick about Activation | Agent Foundations (old) | Wait for Nick | **Apr 20** |
+| **Reddit** | InMailed 4 recruiters | Staff (x3) + Senior Staff (x2) | Follow up recruiters | **Apr 20** |
+| **Confluent** | 4 connection requests + 1 InMail | Staff, Flink CP | Follow up recruiters | **Apr 20** |
+| **GitHub** | Referral requested | Not yet applied | Wait for friend | **Apr 20** |
+| **Google** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
+| **Meta** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
+| **OpenAI** | 2+ weeks silent | Yes | Follow up with Josh | **Now** |
+| **Netflix** | 2+ weeks silent | Yes | Follow up with Preetam | **Now** |
+| **Circle** | 1+ week silent | Staff SWE | Follow up with VP | **Apr 19** |
+| **Stripe** | Original role filled | Workflow Engine (filled) | Monitor board | Ongoing |
+
+---
+
+## All Companies — Status Summary
+
+| Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
+|---|---|---|---|---|---|---|---|
+| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Take-home assessments** |
+| **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting — follow up Apr 20 |
+| **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
+| **Pinterest** | Staff | Activation (pivot from AI) | Done | Done | Agent Foundations | Nick (referral) | Waiting on Nick |
+| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Not yet | Microsoft friend | Waiting on referral |
+| **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
+| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
+| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
+| **OpenAI** | — | — | Done | — | Yes | Vishal + Josh | **Follow up now** |
+| **Netflix** | — | — | Done | — | Yes | Preetam (referral) | **Follow up now** |
+| **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
+| **Google** | L6 (Staff) | Search Experiments + team match | Done | Done | Not yet | Ex-CarGurus EM | Waiting on referral |
+| **Meta** | E6 (Staff) | Backend Infra | Done | Done | Not yet | Connection | Waiting on referral |
 
 ---
 
@@ -200,30 +151,10 @@ Applied to Flink Control Plane, connection-requested 4 recruiters + InMailed 1.
 | Company | Previous Level/Role | Outcome | Notes |
 |---|---|---|---|
 | **Coinbase** | Senior Staff, Core Automation | Rejected | Retried at Staff Platform ✅ |
-| **Airbnb** | Staff, GenAI | Rejected (cold) | Retry with referral at backend roles |
+| **Airbnb** | Staff, GenAI | Rejected (cold) | Retried with backend roles |
 | **Datadog** | Staff (cold) | Rejected | Skip — NYC in-office, no connection |
 | **Snap, Palantir, Plaid** | — | Skipped | No remote roles |
 | **Discord, Vercel, Ramp/Juno** | — | Skipped | Stack mismatch (Python/TypeScript) |
-
----
-
-## All Companies — Status Summary
-
-| Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
-|---|---|---|---|---|---|---|---|
-| **Coinbase** | Staff | Platform Backend (x3) | Done | Done ✅ | Yes | Recruiter ✅ | **Recruiter screen upcoming** |
-| **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting |
-| **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting |
-| **Pinterest** | Staff | Activation (pivot from AI) | Done | Done | Agent Foundations | Nick (referral) | Pivoting to Activation |
-| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Not yet | Microsoft friend | Apply + referral |
-| **Stripe** | Staff | Workflow Engine + Stream Compute | Done | — | Workflow Engine | Connection | Follow up for referral |
-| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
-| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors | Waiting |
-| **OpenAI** | — | — | Done | — | Yes | Vishal + Josh | Waiting |
-| **Netflix** | — | — | Done | — | Yes | Preetam (referral) | Confirm level |
-| **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting |
-| **Google** | L6 (Staff) | Backend Platform/Infra | Done | Done | No | Need referral | Find referral |
-| **Meta** | E6 (Staff) | Backend Infra | Done | Done | No | Need referral | Find referral |
 
 ---
 
@@ -237,7 +168,7 @@ Applied to Flink Control Plane, connection-requested 4 recruiters + InMailed 1.
 
 ---
 
-## Manual Career Page Check (30 min)
+## Manual Career Page Check (30 min — not yet done)
 
 - [ ] Apple — careers.apple.com
 - [ ] Microsoft — careers.microsoft.com

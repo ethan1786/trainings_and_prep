@@ -120,42 +120,59 @@
 
 ## 5a. Round-by-Round Guide
 
-### Round 1: Recruiter Screen (Wed Apr 16)
+### Round 1: Recruiter Screen ✅ DONE (Apr 16)
 
-This is your first call. The recruiter reached out proactively after you applied to 3 roles, which is a strong signal. This round is non-technical — it's a background check, leveling conversation, and mutual fit assessment.
+Completed. Key takeaways:
+- Role is not pre-assigned — recruiter is hiring for the whole Platform team with multiple roles to fill
+- Team matching happens after take-home assessments
+- Comp is set for Staff level, Boston area, not negotiable
+- Next step: 2 take-home assessments
 
-**What they'll ask:**
-- Walk me through your background (2-3 min — lead with platform infrastructure, scale, cross-team impact)
-- Why Coinbase? (see Section 8)
-- Why are you looking to leave CarGurus?
-- What interests you about these roles? (mention all 3, lean toward Overseer or FinHub Tooling)
-- Compensation expectations (the band is $218K–$256.5K base + equity + bonus — don't lowball yourself)
-- Timeline — are you interviewing elsewhere? (be honest: "yes, I'm in early stages with a few companies")
+### Round 2: Take-Home Assessments (NEXT)
 
-**What you should ask:**
-- Which of the 3 roles do you think is the best fit for my background?
-- What does the interview process look like — how many rounds, timeline?
-- How new are these teams? Are these backfills or new headcount?
-- What's the team size for each role?
-- Is there flexibility on leveling if my interview performance warrants it?
-- Coinbase mentions an intense work culture on the careers page — what does that look like in practice for the Platform teams?
-- How does the team handle flexibility around schedules? Is it more async or do people tend to work set hours?
+Two separate assessments to complete:
 
-**Tips:**
-- Be enthusiastic but not desperate — they came back to you, the leverage is more balanced now
-- Mention you were previously considered for Senior Staff — shows the company already vetted your profile
-- Don't badmouth the previous rejection — "I realized Staff-level Platform roles are a better match for what I want to do day-to-day"
-- If they ask about crypto knowledge, be honest: "I understand the fundamentals but I'm not a crypto native — my value is in the platform engineering, not the domain"
-- Do NOT bring up Glassdoor reviews or specific complaints — ask neutral questions (see above) and let them volunteer the details
-- Do NOT ask about personal scheduling flexibility (e.g. leaving early for family) — save for after an offer
+**Assessment A: Cognitive + Culture (30 min total)**
+- Non-technical — personality/culture fit and cognitive reasoning
+- Don't overthink this — answer honestly and consistently
+- Coinbase values: intensity, accountability, speed, AI-first mindset
 
-### Round 2: Hiring Manager
+**Assessment B: Technical on CodeSignal (60 min)**
+- AI copilot is enabled — use it to generate code and expand on questions
+- Recruiter's advice: **start simple, then add more details**
 
-This is where you assess the team, the work, and the manager. Be more direct with questions here — the HM will give you a more candid picture than the recruiter.
+**Strategy:**
+- Get a working solution first, then iterate to add edge cases, optimizations, and cleaner code
+- Use the AI copilot to scaffold boilerplate, but make sure you understand and can explain what it generates
+- Don't spend too long on perfection in early questions — budget time for all questions
+- See Section 12 for likely problem patterns (LC medium, practical data manipulation, "pseudo project" format)
+
+**How to use the AI copilot effectively:**
+- You're the senior engineer. AI is a fast but careless junior — you direct, review, and correct
+- Assume Coinbase can see your full interaction (prompts + code). Behave accordingly.
+- Good prompts show engineering judgment: "Implement a min-heap solution with O(n log k)" or "Refactor to handle the empty input edge case"
+- Bad prompts show you can't think: "Solve this for me" or "What algorithm should I use"
+- Looking up syntax is fine ("What's the syntax for TreeMap's floorEntry?"). Not knowing fundamentals is not.
+- Use AI to validate your approach: "I'm thinking HashMap for frequency, then iterate where count > k — does this miss any edge cases?"
+- Read and verify everything AI generates — it misreads edge cases regularly
+
+**When you get access to the environment (recruiter will send examples):**
+- Check: Is it a chat interface or inline autocomplete?
+- Check: Can you type natural language prompts, or does it only suggest code as you type?
+- Check: Is there a "run tests" button and what do test cases look like?
+- Check: Time visibility — remaining time per question or just total?
+- Spend the first 2 minutes of the actual assessment understanding the tool — don't discover its limitations on question 3
+- Pick Java as your language
+
+**After assessments:** Recruiter matches you to a specific team/role based on results, then you talk to the actual hiring manager.
+
+### Round 3: Hiring Manager Call
+
+This happens after assessment results, with the HM for your matched team. This is where you assess the team, the work, and the manager.
 
 **What they'll ask:**
 - Deep dive on your background — expect follow-ups on specific projects
-- Why this role / this team specifically?
+- Why this role / this team specifically? (you'll know which team by now)
 - How do you approach building platform infrastructure?
 - Technical judgment questions — trade-off discussions, architectural decisions
 - What does your first 90 days look like?
@@ -174,31 +191,47 @@ This is where you assess the team, the work, and the manager. Be more direct wit
 - Ask about team tenure and turnover — "How long have most people been on this team?"
 - If you get bad vibes about pace/burnout, take it seriously — Glassdoor complaints exist for a reason
 
-### Round 3: Technical Interviews (Coding + System Design)
+### Round 4: Virtual On-Site (4 rounds)
 
-**Coding (CodeSignal):**
-- 4 questions, first is warmup, rest are LC medium
-- "Pseudo project" format — build a feature given mini-database input
-- Clean code and practical data manipulation — not tricky algorithm puzzles
+| # | Round | Duration | Focus |
+|---|---|---|---|
+| 1 | **Behavioral** | 45 min | With hiring manager — STAR stories, leadership, culture fit |
+| 2 | **Coding** | 60 min | Live coding — algorithm + data structures |
+| 3 | **System Design** | 60 min | Design a large-scale system |
+| 4 | **Reverse System Design** | 60 min | They present their system, you ask questions and identify improvements |
+
+**Round 4.1 — Behavioral (45 min with HM):**
+- This is the formal STAR interview — have Stories 1, 3, 9, 4 polished
+- Lead with metrics and data in every answer
+- Show platform thinking, cross-team leadership
+- See Section 6 for story ranking and selection strategy
+
+**Round 4.2 — Coding (60 min):**
+- Likely LC medium, similar to CodeSignal assessment but live with an interviewer
+- Write clean, compilable code — talk through your approach
 - See Section 12 for problem list
 
-**System Design (60 min, 1:1):**
+**Round 4.3 — System Design (60 min):**
 - Expect financial/crypto domain: payment system, exchange, blockchain indexer
 - Drive the conversation — propose trade-offs with conviction
 - Lead with correctness and fault tolerance (financial systems can't be eventually correct)
+- Quantify scale: "At Coinbase's volume, if we process X transactions/second..."
 - See Section 13 for topic list
 
-**Behavioral:**
-- See Section 6 for STAR stories ranked by relevance
-- Lead with metrics and data in every answer
-- Show platform thinking, cross-team leadership, AI proficiency
+**Round 4.4 — Reverse System Design (60 min):**
+- They walk you through one of their actual systems
+- Your job: ask smart questions, identify bottlenecks, suggest improvements
+- This tests your **architectural judgment and curiosity**, not your ability to design from scratch
+- Prep tips:
+  - Practice asking probing questions: "What happens when X fails?" "How do you handle Y at scale?" "What's the bottleneck today?"
+  - Think about observability, fault tolerance, scalability, and correctness — your usual lens
+  - Don't be afraid to say "I'd want to understand X before suggesting changes"
+  - Draw on your own experience — "At CarGurus, we had a similar challenge and we solved it by..."
+  - This is where your parity testing / correctness verification experience shines — ask about how they verify correctness
 
-### Round 4: Offer Negotiation
+### Round 5: Offer
 
-**Only when you have an offer in hand:**
-- The band is $218K–$256.5K base + equity + bonus
-- You were previously considered for Senior Staff — don't let the re-application anchor you to the bottom of the Staff band
-- If you have competing offers or active processes (Reddit, Stripe, Airbnb, etc.), mention them — "I'm in late stages with a couple of other companies" creates urgency
+- Comp is set for Staff level, Boston area — not negotiable per recruiter
 - This is the right time to ask about personal scheduling flexibility: "I have young kids — if I need to step out for a couple hours during the day and make up the time in the evening, is that how the team works?"
 - Ask about equity vesting schedule, refreshers, and performance review cadence
 - Remote offsites: how many per year, where, how long?
