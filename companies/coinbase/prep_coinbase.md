@@ -338,14 +338,30 @@ You don't need to be a blockchain expert, but show baseline literacy:
 
 ## 12. Technical Coding Prep — Coinbase
 
-Coinbase uses CodeSignal with a "pseudo project" format — build a feature given mini-database input. 4 questions (first is warmup, rest are LC medium). Focus on clean code and practical data manipulation.
+### CodeSignal Take-Home Assessment (60 min)
+- "Pseudo project" format — you're given a scenario with mini-database input and build features incrementally
+- 4 questions: first is warmup, rest are LC medium
+- AI copilot enabled (see Section 5a for strategy)
+- Recruiter's tip: "start simple, then add more details"
 
-**Frequently reported:**
+**What "pseudo project" format looks like:**
+- You're given a class or set of functions to implement
+- Questions build on each other — Q1 is basic CRUD, Q2 adds filtering/sorting, Q3 adds more complex logic, Q4 adds edge cases or optimization
+- Think: "build a simplified version of a real system" — e.g., transaction ledger, order book, key-value store with versioning
+- Focus on: clean data structures, correct logic, handling edge cases, readable code
+
+**Coinbase-specific themes to practice:**
+- Transaction processing — balance updates, transfers between accounts, idempotent operations
+- Ledger operations — credit/debit, running balances, transaction history queries
+- Time-series data — price lookups by timestamp, versioned state
+- Rule evaluation — checking constraints/invariants on data (relevant to Overseer)
+
+**Frequently reported LC patterns:**
 
 | # | Problem | Difficulty | Pattern | Notes |
 |---|---------|-----------|---------|-------|
 | 146 | LRU Cache | Medium | Design, HashMap + DLL | Core design question |
-| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned lookups |
+| 981 | Time Based Key-Value Store | Medium | Design, Binary Search | Versioned lookups — very Coinbase |
 | 362 | Design Hit Counter | Medium | Design, Queue | Rate limiting |
 | 49 | Group Anagrams | Medium | Hash Map, Sorting | String grouping |
 | 560 | Subarray Sum Equals K | Medium | Prefix Sum + HashMap | Frequency counting |
@@ -360,20 +376,199 @@ Coinbase uses CodeSignal with a "pseudo project" format — build a feature give
 | 139 | Word Break | Medium | DP | 1D DP with dictionary |
 | 295 | Find Median from Data Stream | Hard | Heap | Two heaps |
 
+**Time management:**
+- ~15 min per question (60 min / 4 questions)
+- Q1 should take 5-8 min — don't gold-plate it
+- Save 5 min at the end to review and clean up
+
+### On-Site Coding Round (60 min, live)
+- Likely LC medium, possibly medium-hard
+- Live with an interviewer — communication matters as much as correctness
+- Talk through your approach before coding
+- Write clean, compilable Java — not pseudocode
+- After solving, discuss time/space complexity and edge cases
+- Staff expectation: you should finish with time to discuss optimizations and alternative approaches
+
 ---
 
 ## 13. System Design Prep — Coinbase
 
-Coinbase system design targets real business challenges: crypto exchange, blockchain indexing, financial services. 60-minute 1:1 in the final round.
+60-minute 1:1 in the on-site. Coinbase system design targets real business challenges: crypto exchange, blockchain indexing, financial services.
 
-| Topic | Key Design Challenges |
-|---|---|
-| **Crypto Exchange / Order Book** | Matching engine, order book data structure, trade execution, consistency |
-| **Real-Time Price Feed** | Aggregating prices across exchanges, WebSocket streaming, consistency |
-| **Blockchain Transaction Indexer** | Ingesting and querying on-chain data across multiple networks, reorg handling |
-| **Crypto Custody System** | Cold/hot wallet architecture, key management, withdrawal approval flows |
-| **Payment Gateway** | Fiat-to-crypto and crypto-to-fiat conversion, idempotency, reconciliation |
-| **Scale Backend 10x** | Capacity planning, horizontal scaling, database sharding strategies |
+### Likely Topics
+
+| Topic | Key Design Challenges | Your Experience to Reference |
+|---|---|---|
+| **Payment Gateway / Settlement System** | Fiat-to-crypto and crypto-to-fiat, idempotency, reconciliation, multi-day settlement | Your API orchestration, fault tolerance |
+| **Crypto Exchange / Order Book** | Matching engine, order book data structure, trade execution, consistency | High-throughput systems, low-latency |
+| **Financial Correctness / Reconciliation System** | Invariant enforcement, real-time vs batch verification, discrepancy detection | Your parity testing framework |
+| **Blockchain Transaction Indexer** | Ingesting on-chain data across multiple networks, reorg handling, eventual consistency | Event-driven architecture, Kafka |
+| **Crypto Custody System** | Cold/hot wallet architecture, key management, withdrawal approval flows | Security, operational tooling |
+| **Internal Platform / Operational Tooling** | Multi-tenant platform serving eng + compliance + risk, dashboards, alerting | Your cross-team platform work |
+| **Real-Time Price Feed** | Aggregating prices across exchanges, WebSocket streaming, staleness detection | Real-time systems, caching |
+| **Rate Limiter / API Gateway** | Distributed, multi-tier, sliding window, per-user/per-API limits | Standard system design topic |
+
+### How to Approach (Staff Level)
+
+**First 5 minutes — Requirements:**
+- Clarify functional vs non-functional requirements
+- Ask about scale: "How many transactions per second? How many users?"
+- Ask about correctness: "What's the tolerance for inconsistency? Can we lose a transaction?"
+- For financial systems, always ask: "What happens when something goes wrong? What's the recovery path?"
+
+**Next 10 minutes — High-Level Design:**
+- Draw the major components and data flows
+- Identify the hard problems upfront: "The interesting challenge here is X"
+- For financial systems, lead with: correctness → availability → performance (in that order)
+
+**Next 30 minutes — Deep Dive:**
+- Pick the most interesting/hardest component and go deep
+- Discuss: data model, API contracts, failure modes, consistency guarantees
+- For Coinbase specifically, always address:
+  - **Idempotency** — every write operation must be safely retryable
+  - **Reconciliation** — how do you verify the system is correct?
+  - **Audit trail** — every state change must be traceable
+  - **Fault isolation** — one failure shouldn't cascade
+
+**Last 15 minutes — Operational Excellence:**
+- Monitoring and alerting — what are the key metrics?
+- Deployment safety — how do you roll out changes to a financial system?
+- On-call — what does an incident look like? How do you detect and respond?
+- Scaling — what breaks first at 10x load?
+
+### Coinbase-Specific Design Principles to Weave In
+- **Money can't go missing.** Every design should account for: what if this fails midway? Can we recover?
+- **Blockchain finality is not instant.** Design for the gap between "submitted" and "confirmed."
+- **Multi-chain complexity.** Bitcoin, Ethereum, Solana, Base L2 — different confirmation models, different APIs.
+- **Regulatory compliance.** AML/KYC shapes what data you can store, how long, and who can access it.
+- **24/7 operations.** Crypto markets never close — your system can't have maintenance windows.
+
+---
+
+## 13a. Reverse System Design Prep — Coinbase
+
+This is the unique round (60 min). They walk you through one of their actual systems and you ask questions, identify issues, and suggest improvements.
+
+### What It Tests
+- **Architectural judgment** — can you spot design trade-offs and potential issues?
+- **Curiosity and depth** — do you ask the right follow-up questions?
+- **Communication** — can you articulate concerns clearly and propose alternatives?
+- **Experience** — can you draw parallels to systems you've built?
+
+### How to Approach
+
+**First 10 minutes — Listen and Understand:**
+- Let them present the system — take notes
+- Ask clarifying questions: "What's the traffic pattern?" "What's the SLA?" "How many teams depend on this?"
+- Don't jump to critique too early — understand before you judge
+
+**Next 30 minutes — Probe and Identify:**
+Ask questions in these categories:
+
+**Reliability & Failure Modes:**
+- "What happens when [component X] goes down?"
+- "Is there a single point of failure here?"
+- "How do you handle partial failures in this pipeline?"
+- "What's the blast radius of a bad deployment?"
+
+**Correctness & Data Integrity:**
+- "How do you verify that the data flowing through is correct?"
+- "Is there reconciliation between these two data stores?"
+- "What happens if a message is processed twice?"
+- "How do you detect silent data corruption?"
+
+**Scalability & Performance:**
+- "What's the bottleneck today?"
+- "What happens at 10x current load?"
+- "Are there hot keys or hot partitions?"
+- "How do you handle thundering herd / cache stampede?"
+
+**Observability & Operations:**
+- "How do you know if this is healthy? What metrics do you watch?"
+- "What does an incident look like? How long to detect, how long to mitigate?"
+- "How do you deploy changes safely? Canary? Blue-green?"
+
+**Developer Experience:**
+- "How easy is it for a new team to onboard onto this platform?"
+- "What are the most common complaints from internal consumers?"
+
+**Last 20 minutes — Suggest Improvements:**
+- Don't just list problems — propose solutions with trade-offs
+- Reference your experience: "At CarGurus, we had a similar challenge and solved it by..."
+- Be specific: "I'd add a reconciliation job that compares X with Y on a 5-minute interval"
+- Acknowledge what's good: "This part is well-designed because..."
+
+### What They Might Show You
+Based on the Platform Backend roles, likely systems include:
+- **Fund movement pipeline** — how money flows from user deposit to internal ledger to blockchain
+- **Operational tooling dashboard** — how internal teams (risk, compliance) monitor transactions
+- **Reconciliation system** — how they verify internal state matches external (blockchain) state
+- **Event-driven processing pipeline** — Kafka-based system for processing financial events
+
+### Your Strongest Cards to Play
+- **Parity testing framework** — "I built exactly this kind of correctness verification. Here's what I'd look for..."
+- **Distributed tracing** — "How do you trace a single transaction end-to-end? At CarGurus we used..."
+- **Circuit breaking / fault isolation** — "What happens when a downstream dependency is slow? We solved this by..."
+- **SLO-based monitoring** — "Are your alerts based on SLOs or raw thresholds? SLO-based alerting catches degradation earlier because..."
+
+---
+
+## 13b. Behavioral Interview Prep — Coinbase
+
+45 minutes with the hiring manager. This is a formal STAR interview — structured, scored, and important.
+
+### Coinbase Values to Signal
+
+| Value | What They Look For | Your Story |
+|---|---|---|
+| **Clear communication** | Can you explain complex trade-offs clearly? Do you drive alignment? | Story 1 (API Modernization — 10+ teams), Story 12 (RFCs) |
+| **Efficient execution** | Do you ship? Do you prioritize ruthlessly? | Story 9 (Digital Shopping — 0→1 under pressure) |
+| **Act like an owner** | Do you go beyond your job description? Do you take responsibility? | Story 1 (drove cross-org initiative nobody asked for) |
+| **High bar for quality** | Do you build reliable systems? Do you leave things better? | Story 3 (Parity Testing — correctness at scale) |
+| **Positive energy** | Are you someone people want to work with? | All stories — lead with collaboration, not heroism |
+
+### Common Behavioral Questions at Coinbase
+
+**Platform / Impact:**
+- "Tell me about a system you built that other teams depended on."
+  → Story 1 (API Modernization — platform infrastructure 10+ teams used)
+- "Tell me about a time you improved reliability or performance significantly."
+  → Story 1 (p99 5x improvement, 98% → 99.9% availability)
+- "Describe a technical decision you made that had org-wide impact."
+  → Story 4 (Architectural Standards / RFC Process)
+
+**Greenfield / 0→1:**
+- "Tell me about a time you built something from scratch."
+  → Story 9 (Digital Shopping) or Story 5 (MCP Server)
+- "How do you approach building in an ambiguous environment?"
+  → Story 5 (MCP Server — sole backend engineer, no precedent)
+
+**Data-Driven / Correctness:**
+- "Tell me about a time you used data to make a technical decision."
+  → Story 3 (Parity Testing — automated validation at 50% traffic)
+- "How do you ensure correctness in a system?"
+  → Story 3 (Parity Testing) + mention reconciliation, idempotency principles
+
+**Leadership / Conflict:**
+- "Tell me about a time you disagreed with a colleague or stakeholder."
+  → Story 19 (Disagree and Commit)
+- "Tell me about a time you mentored someone."
+  → Story 11 (Mentoring to Principal Level)
+- "Tell me about a time a project failed or didn't go as planned."
+  → Story 20 (Failure & Learning)
+
+**Coinbase-Specific:**
+- "Why Coinbase?" → Section 8
+- "Why are you leaving CarGurus?" → "I've outgrown the problems. I want to build at higher stakes."
+- "What do you know about crypto?" → Be honest, lead with platform engineering value
+- "How do you use AI in your daily work?" → MCP server, GenAI platform, daily AI tools usage
+
+### Tips for This Round
+- **Every answer needs metrics.** "p99 went from 250ms to 50ms," "10+ teams adopted," "99.9% availability."
+- **2 minutes per story max.** Situation (15 sec), Task (15 sec), Action (60 sec), Result (30 sec).
+- **Don't monologue.** After your STAR answer, pause and let them ask follow-ups.
+- **Show self-awareness.** If they ask about failure, own it genuinely — don't give a "fake weakness" answer.
+- **Connect every answer to Coinbase.** "...and that experience is directly relevant to what Overseer does with financial correctness."
 
 ---
 

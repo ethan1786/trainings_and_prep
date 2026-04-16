@@ -81,7 +81,24 @@
       "WebFetch(domain:stripe.com)",
       "WebFetch(domain:careers.airbnb.com)",
       "WebFetch(domain:netflix.wd1.myworkdayjobs.com)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "WebFetch(domain:blog.coinbase.com)",
+      "WebFetch(domain:www.codesignal.com)",
+      "WebFetch(domain:www.pramp.com)",
+      "WebFetch(domain:www.hackerrank.com)",
+      "WebFetch(domain:blog.pramp.com)",
+      "WebFetch(domain:careercup.com)",
+      "WebFetch(domain:www.quora.com)",
+      "WebFetch(domain:codesignal.com)",
+      "WebFetch(domain:www.techrepublic.com)",
+      "WebFetch(domain:techcrunch.com)",
+      "WebFetch(domain:support.codesignal.com)",
+      "WebFetch(domain:coinbase.com)",
+      "WebFetch(domain:www.jointaro.com)",
+      "WebFetch(domain:nilsandrey.medium.com)",
+      "WebFetch(domain:taro.com)",
+      "WebFetch(domain:www.pathrise.com)",
+      "WebFetch(domain:www.ycombinator.com)"
     ]
   }
 }

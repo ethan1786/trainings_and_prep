@@ -26,10 +26,10 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
 
 ## This Week (Apr 16–19) — Remaining Actions
 
-### Pinterest — Waiting on Nick
+### Pinterest — Today is the deadline
 - [x] Sent note to Nick about Activation Team role
-- [ ] If Nick responds positively, apply to **Staff SWE, Activation Team** (Remote)
-- [ ] If no reply by Apr 20, send light follow-up
+- [ ] If Nick responds today, apply with his referral
+- [ ] If no reply by end of day, apply directly to **Staff SWE, Activation Team** (Remote)
 
 ### GitHub — Waiting on Microsoft Friend
 - [x] Sent referral request to Microsoft friend
@@ -37,14 +37,12 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
   https://www.github.careers/careers-home/jobs/5101
 - [ ] Also find 2-3 GitHub/Microsoft recruiters on LinkedIn for outreach
 
-### Google — Waiting on Connection
+### Google — Today is the deadline
 - [x] Sent message to former CarGurus coworker (now EM at Google)
-- [ ] If he agrees, send resume and apply. Target role:
-  - **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — L6 Staff
-    https://www.google.com/about/careers/applications/jobs/results/119717481349554886
-    Java, distributed systems, experimentation infra. Strong fit.
-  - Note: Google does team matching after offer, so this is a starting point
-- [ ] If no reply by end of week, reach out to other Google connections (you have many)
+- [ ] If he responds today, send resume and apply with referral
+- [ ] If no reply by end of day, reach out to other Google connections (you have many)
+- Target role: **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — L6 Staff
+  https://www.google.com/about/careers/applications/jobs/results/119717481349554886
 
 ### Meta — Waiting on Connection
 - [x] Reached out to Meta connection
@@ -67,36 +65,15 @@ These have been quiet for 1+ weeks. Time to act.
 | **Circle** | Staff SWE, messaged VP of Eng | 1+ week | VP of Eng | **Send light follow-up to VP by Apr 19** if no response |
 | **Airbnb** | 3 backend roles (cold, Apr 14) | 2 days | Know HM (Whitney Rogers) | Too early. Follow up ~Apr 28 if no response. Find recruiter on GraphQL Platform org. |
 
-**Priority follow-ups this week:**
-
-**1. OpenAI — message Vishal (NOW)**
-Josh (recruiter) never accepted LinkedIn invite — follow up through Vishal who referred you.
-> Hey Vishal — just wanted to check in on the referral. Have you heard anything back from the team or recruiter? I also tried connecting with Josh but he hasn't accepted. If there's a better way to follow up on my application, I'm happy to try that. Thanks again for putting me in!
-
-- [ ] Send follow-up to Vishal
-
-**2. Netflix — messaged Preetam ✅**
+**Netflix — messaged Preetam ✅**
 Sent message with 3 L5 target roles:
 - #1: **Experimentation Platform** (JR39712) — top pick, parity testing + feature flags
 - #2: **Content & Business Products** (JR28754) — Content Finance Core team, Java + GraphQL platform
 - #3: **Games Systems** (JR39604) — backend platform infra (auth, control plane, APIs)
 - [x] Send follow-up to Preetam — done Apr 16
 
-**3. Circle — follow up with VP of Eng (by Apr 19)**
-> Hi [Name] — just circling back on my application for the Staff SWE role. I'm still very interested and wanted to see if you had a chance to take a look. Happy to chat if it would be helpful to share more about my background. Thanks!
-
-- [ ] Send follow-up to VP of Eng if still silent by Apr 19
-
-**4. Reddit — follow up with 2 Ads team recruiters (by Apr 20)**
-> Hi [Name] — I reached out last week about the Staff SWE, Ads Engineering roles at Reddit. I'm a Principal Engineer with 13 years building high-traffic platform infrastructure in Java, and I think the ads platform work is a strong fit. Would love to connect if you have a moment. Thanks!
-
-- [ ] Send follow-up to Ads team recruiter #1
-- [ ] Send follow-up to Ads team recruiter #2
-
-**5. Confluent — follow up with recruiters who accepted connection (by Apr 20)**
-> Hi [Name] — thanks for connecting! I recently applied for the Staff SWE, Flink Control Plane role at Confluent. I'm a Principal Engineer with 13 years building distributed systems orchestration and cloud-native infrastructure in Java — the control plane work is a strong match for my background. Would love to learn more about the team and process. Thanks!
-
-- [ ] Send follow-up to any recruiters who accepted connection requests
+**Deprioritized — no more follow-ups:**
+Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap layoffs, Meta potential layoffs). Not worth chasing — if they respond, great.
 
 ---
 
