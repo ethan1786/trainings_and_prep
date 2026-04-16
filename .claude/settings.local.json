@@ -79,7 +79,9 @@
       "WebFetch(domain:www.github.careers)",
       "WebFetch(domain:boards-api.greenhouse.io)",
       "WebFetch(domain:stripe.com)",
-      "WebFetch(domain:careers.airbnb.com)"
+      "WebFetch(domain:careers.airbnb.com)",
+      "WebFetch(domain:netflix.wd1.myworkdayjobs.com)",
+      "Bash(python *)"
     ]
   }
 }

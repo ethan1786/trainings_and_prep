@@ -69,15 +69,18 @@ These have been quiet for 1+ weeks. Time to act.
 
 **Priority follow-ups this week:**
 
-**1. OpenAI — message Josh (NOW)**
-> Hi Josh — hope you're doing well! I wanted to follow up on our earlier conversation. I'm still very interested in the opportunity and wanted to check if there are any updates on timing or next steps. Happy to provide any additional information if helpful. Thanks!
+**1. OpenAI — message Vishal (NOW)**
+Josh (recruiter) never accepted LinkedIn invite — follow up through Vishal who referred you.
+> Hey Vishal — just wanted to check in on the referral. Have you heard anything back from the team or recruiter? I also tried connecting with Josh but he hasn't accepted. If there's a better way to follow up on my application, I'm happy to try that. Thanks again for putting me in!
 
-- [ ] Send follow-up to Josh
+- [ ] Send follow-up to Vishal
 
-**2. Netflix — message Preetam (NOW)**
-> Hey Preetam — just wanted to check in on the referral. Any update from the team or hiring manager? Also wanted to confirm — what role and level did you put me in for? I want to make sure I'm prepping for the right thing. Appreciate the help either way!
-
-- [ ] Send follow-up to Preetam
+**2. Netflix — messaged Preetam ✅**
+Sent message with 3 L5 target roles:
+- #1: **Experimentation Platform** (JR39712) — top pick, parity testing + feature flags
+- #2: **Content & Business Products** (JR28754) — Content Finance Core team, Java + GraphQL platform
+- #3: **Games Systems** (JR39604) — backend platform infra (auth, control plane, APIs)
+- [x] Send follow-up to Preetam — done Apr 16
 
 **3. Circle — follow up with VP of Eng (by Apr 19)**
 > Hi [Name] — just circling back on my application for the Staff SWE role. I'm still very interested and wanted to see if you had a chance to take a look. Happy to chat if it would be helpful to share more about my background. Thanks!
@@ -97,12 +100,18 @@ These have been quiet for 1+ weeks. Time to act.
 
 ---
 
-## Stripe — On Hold
+## On Hold — Monitor Periodically
 
+### Stripe
 - [x] Original role (Workflow Engine) appears filled — removed from job board
 - Stream Compute role is a stretch (needs deep Flink/streaming infra experience you don't have)
 - **Strategy:** Monitor Stripe job board for new backend platform roles. When a good one appears, message YiYi (connection) with a specific ask.
-- YiYi knows you're interested and has confirmed willingness to help — don't waste the connection on a weak match.
+
+### OpenAI
+- Vishal referred you, but recruiter Josh never accepted LinkedIn invite. Application likely stale.
+- No remote backend platform roles that fit your profile — their stack is Python/Go, roles are AI-infra or security focused
+- **Strategy:** Send thank-you to Vishal, check board occasionally, but don't invest active effort.
+- [ ] Send thank-you/check-in message to Vishal (see message template in follow-ups section)
 
 ---
 
@@ -119,8 +128,8 @@ These have been quiet for 1+ weeks. Time to act.
 | **GitHub** | Referral requested | Not yet applied | Wait for friend | **Apr 20** |
 | **Google** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
 | **Meta** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
-| **OpenAI** | 2+ weeks silent | Yes | Follow up with Josh | **Now** |
-| **Netflix** | 2+ weeks silent | Yes | Follow up with Preetam | **Now** |
+| **OpenAI** | 2+ weeks silent, no fit | Yes | Deprioritized — send Vishal thank-you | On hold |
+| **Netflix** | Messaged Preetam with 3 L5 roles | Yes | Wait for Preetam | **~Apr 23** |
 | **Circle** | 1+ week silent | Staff SWE | Follow up with VP | **Apr 19** |
 | **Stripe** | Original role filled | Workflow Engine (filled) | Monitor board | Ongoing |
 
@@ -138,8 +147,8 @@ These have been quiet for 1+ weeks. Time to act.
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
-| **OpenAI** | — | — | Done | — | Yes | Vishal + Josh | **Follow up now** |
-| **Netflix** | — | — | Done | — | Yes | Preetam (referral) | **Follow up now** |
+| **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
+| **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Pending (3 new) | Preetam (referral) | Waiting on Preetam |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
 | **Google** | L6 (Staff) | Search Experiments + team match | Done | Done | Not yet | Ex-CarGurus EM | Waiting on referral |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | Not yet | Connection | Waiting on referral |
