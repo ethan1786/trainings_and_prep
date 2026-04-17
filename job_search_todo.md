@@ -17,10 +17,14 @@
 
 ### Coinbase — Take-Home Assessments (next week)
 Recruiter screen done Apr 16. Role not pre-assigned — team matching after assessments.
+- [ ] **Apr 17 — Email recruiter about CodeSignal practice examples** (he mentioned he'd send them, hasn't yet)
 - [ ] Cognitive + Culture assessment (30 min)
 - [ ] Technical on CodeSignal (60 min) — AI copilot enabled, start simple then add details
 - [ ] Review prep doc Section 5a and Section 12 before CodeSignal
 - After assessments: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
+
+**Email to recruiter (send Apr 17):**
+> Hi [Name] — thanks again for the great conversation on Wednesday! I'm looking forward to the assessments. You mentioned you'd send over some CodeSignal practice examples — just wanted to follow up on that so I can start preparing. Thanks!
 
 ---
 
@@ -37,12 +41,12 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
   https://www.github.careers/careers-home/jobs/5101
 - [ ] Also find 2-3 GitHub/Microsoft recruiters on LinkedIn for outreach
 
-### Google — Today is the deadline
-- [x] Sent message to former CarGurus coworker (now EM at Google)
-- [ ] If he responds today, send resume and apply with referral
-- [ ] If no reply by end of day, reach out to other Google connections (you have many)
-- Target role: **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — L6 Staff
-  https://www.google.com/about/careers/applications/jobs/results/119717481349554886
+### Google — Applied ✅
+- [x] Got referral from another Google connection
+- [x] Applied to 2 roles with referral:
+  - **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — experimentation infra, Java
+  - **Staff SWE, Observability / OpenTelemetry** (Cambridge, MA) — observability, full stack
+- Team matching happens after hiring committee decision — 2 roles is enough
 
 ### Meta — Waiting on Connection
 - [x] Reached out to Meta connection
@@ -127,7 +131,7 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
 | **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Pending (3 new) | Preetam (referral) | Waiting on Preetam |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
-| **Google** | L6 (Staff) | Search Experiments + team match | Done | Done | Not yet | Ex-CarGurus EM | Waiting on referral |
+| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done ✅ | Done | Yes (x2) | Referral ✅ | **Applied — waiting** |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | Not yet | Connection | Waiting on referral |
 
 ---

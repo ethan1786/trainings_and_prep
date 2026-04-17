@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Principal Software Engineer · Agent &amp; AI Platform Architecture · 13 Years</div>
+    <div class="tagline">Principal Software Engineer · Backend Platform Infrastructure &amp; Growth Systems · 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -246,36 +246,26 @@
 <div class="section-title">Summary</div>
 <p class="summary">
   Principal-level backend &amp; platform engineer with 13 years of experience building scalable distributed systems
-  and leading cross-org platform initiatives. Recent work centers on AI agent infrastructure — designing and shipping
-  an MCP server with tool calling for ChatGPT integration, building an agent evaluation and experimentation platform
-  with multi-provider LLM support, and architecting foundational platform services consumed by engineering teams
-  across the organization. Track record of defining technical direction, driving alignment across 10+ teams,
-  and delivering complex 0&rarr;1 platform investments from inception through production.
+  and high-traffic backend infrastructure. Led the redesign of a critical API orchestration layer serving
+  millions of daily requests, reducing p99 latency 5&times; and achieving 99.9% availability across 10+ teams.
+  Built event pipelines, signal infrastructure, and experimentation frameworks that enabled data-driven
+  product decisions at scale. Track record of defining technical direction, driving alignment across
+  multiple departments, and delivering complex 0&rarr;1 systems from inception through production.
+  Combines deep hands-on backend engineering with cross-organizational technical leadership.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Designed and shipped agent/LLM platform components: MCP tool-calling server, evaluation harness, multi-provider serving</li>
-  <li>Led multi-team platform migrations spanning 10+ engineering teams across 3 departments</li>
+  <li>Led cross-org backend platform modernization spanning 10+ engineering teams across 3 departments with measurable growth impact</li>
+  <li>Built event pipelines, signal infrastructure, and experimentation frameworks enabling data-driven product launches and rollouts</li>
   <li>Defined technical roadmaps and architectural standards adopted org-wide via RFCs and design docs</li>
   <li>Mentored senior engineers toward Principal-level scope; drove cross-org technical alignment</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, Python, Node.js · OpenAI/ChatGPT, MCP Protocol, LLM Orchestration, Agent Evaluation ·
-  AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL · GraphQL (Netflix DGS), Microservices, Event-Driven · Datadog, Grafana
-</div>
-
-<!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
-<div class="section-title">Independent Project</div>
-<div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Agent Platform &amp; Evaluation System</span>
-  <ul>
-    <li>Architected an agent platform with hybrid rules + multi-path LLM inference (fast vs. deep), policy overlay, and tool-calling orchestration — producing explainable real-time recommendations over heterogeneous telemetry.</li>
-    <li>Built an agent evaluation harness ("Prompt Lab") for end-to-end decision simulation, offline backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with robust observability and multi-provider LLM support.</li>
-    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions — enabling safe, iterative agent improvement.</li>
-  </ul>
+  Java, Spring Boot, Python, Node.js · API Design, Event Pipelines, Service Orchestration, Feature Flags ·
+  AWS, Kubernetes, Docker, Kafka, Redis, PostgreSQL · GraphQL (Netflix DGS), Microservices, Event-Driven · Datadog, Grafana, Distributed Tracing
 </div>
 
 <!-- ═══════════════════ EXPERIENCE ══════════════════════════════ -->
@@ -289,24 +279,7 @@
   </div>
 
   <div class="project">
-    <span class="project-name">ChatGPT Apps SDK MCP Server — Agent Tool Calling (0&rarr;1)</span>
-    <ul>
-      <li>Sole backend engineer designing and implementing an MCP server compatible with the OpenAI Apps SDK, exposing CarGurus capabilities as tools callable by ChatGPT agents — defining the tool schema, serving infrastructure, and request/response contracts.</li>
-      <li>Delivered a production-grade implementation under ambiguity; iterated rapidly with PMs and directors on tool definitions and agent behavior; designed for safe, incremental rollout alongside existing APIs.</li>
-      <li>Served as key engineering representative for AI agent strategy, shaping the technical roadmap for LLM/agent integration across the company.</li>
-    </ul>
-  </div>
-
-  <div class="project">
-    <span class="project-name">GraphQL Federation — Agent &amp; Consumer Serving Layer</span>
-    <ul>
-      <li>Designed and integrated a Netflix DGS subgraph into CarGurus' federated GraphQL gateway, creating a unified serving layer for frontend, backend, and AI agent consumers from a single graph.</li>
-      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies; built load tests and staging integration tests to ensure production-grade reliability.</li>
-    </ul>
-  </div>
-
-  <div class="project">
-    <span class="project-name">High-Traffic Platform Modernization — Scalable Serving Infrastructure</span>
+    <span class="project-name">High-Traffic Platform Modernization — Backend Infrastructure &amp; Growth</span>
     <ul>
       <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core serving infrastructure behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions).</li>
       <li>Introduced a new orchestration service consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes. Produced initial architecture in ~2 weeks; shipped first milestone in 6 months.</li>
@@ -321,7 +294,16 @@
   <div class="project">
     <span class="project-name">Digital Commerce Platform &amp; Experimentation</span>
     <ul>
-      <li>Led backend design and launch of multiple new products using microservice and event-driven architecture; enabled the company to quickly test, launch, and safely retire product experiments without destabilizing core systems.</li>
+      <li>Led backend design and launch of multiple new products using microservice and event-driven architecture; built signal infrastructure to capture user intent and drive data-driven product decisions.</li>
+      <li>Enabled the company to quickly test, launch, and safely retire product experiments without destabilizing core systems — directly impacting user activation and retention metrics.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">GraphQL Federation — Unified Serving Layer</span>
+    <ul>
+      <li>Designed and integrated a Netflix DGS subgraph into a federated GraphQL gateway, creating a unified serving layer for frontend, backend, and recommendation consumers from a single graph.</li>
+      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies; built load tests ensuring production-grade reliability.</li>
     </ul>
   </div>
 
@@ -329,7 +311,14 @@
     <span class="project-name">Cross-Org Platform Leadership &amp; Technical Direction</span>
     <ul>
       <li>Defined technical roadmap and architectural standards for platform services — API design, caching, distributed orchestration — adopted across multiple teams via RFCs and design docs.</li>
-      <li>Led day-to-day technical alignment across teams; mentored senior engineers on system design, performance, and path to Principal-level scope.</li>
+      <li>Mentored senior engineers on system design, performance, and path to Principal-level scope.</li>
+    </ul>
+  </div>
+
+  <div class="project compact">
+    <span class="project-name">AI Integration — MCP Server &amp; GenAI Platform</span>
+    <ul>
+      <li>Sole backend engineer for an MCP server on the OpenAI Apps SDK, exposing platform capabilities as tools callable by AI agents. Separately built a GenAI automation platform with multi-provider LLM orchestration and evaluation harness.</li>
     </ul>
   </div>
 </div>
