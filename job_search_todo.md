@@ -30,16 +30,13 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
 
 ## This Week (Apr 16–19) — Remaining Actions
 
-### Pinterest — Today is the deadline
-- [x] Sent note to Nick about Activation Team role
-- [ ] If Nick responds today, apply with his referral
-- [ ] If no reply by end of day, apply directly to **Staff SWE, Activation Team** (Remote)
+### Pinterest — Applied ✅
+- [x] Sent note to Nick about Activation Team role — no response
+- [x] Applied directly to **Staff SWE, Activation Team** (Remote)
 
-### GitHub — Waiting on Microsoft Friend
-- [x] Sent referral request to Microsoft friend
-- [ ] If he agrees, apply to **Principal SWE, Core Platform Infrastructure** (req #5101)
-  https://www.github.careers/careers-home/jobs/5101
-- [ ] Also find 2-3 GitHub/Microsoft recruiters on LinkedIn for outreach
+### GitHub — Applied cold ✅
+- [x] Microsoft friend can't refer from Microsoft side, no internal path
+- [x] Applied directly to **Principal SWE, Core Platform Infrastructure** (req #5101)
 
 ### Google — Applied ✅
 - [x] Got referral from another Google connection
@@ -123,16 +120,16 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Take-home assessments** |
 | **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting — follow up Apr 20 |
 | **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
-| **Pinterest** | Staff | Activation (pivot from AI) | Done | Done | Agent Foundations | Nick (referral) | Waiting on Nick |
-| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Not yet | Microsoft friend | Waiting on referral |
+| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Applied — waiting** |
+| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
 | **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
 | **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Pending (3 new) | Preetam (referral) | Waiting on Preetam |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
-| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done ✅ | Done | Yes (x2) | Referral ✅ | **Applied — waiting** |
-| **Meta** | E6 (Staff) | Backend Infra | Done | Done | Not yet | Connection | Waiting on referral |
+| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done ✅ | Done | Yes (x2) + assessment ✅ | Referral ✅ | **Assessment done — waiting** |
+| **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **Friend handling it** |
 
 ---
 
