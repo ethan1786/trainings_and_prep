@@ -98,7 +98,10 @@
       "WebFetch(domain:nilsandrey.medium.com)",
       "WebFetch(domain:taro.com)",
       "WebFetch(domain:www.pathrise.com)",
-      "WebFetch(domain:www.ycombinator.com)"
+      "WebFetch(domain:www.ycombinator.com)",
+      "WebFetch(domain:levelup.gitconnected.com)",
+      "WebFetch(domain:news.ycombinator.com)",
+      "WebFetch(domain:web.archive.org)"
     ]
   }
 }

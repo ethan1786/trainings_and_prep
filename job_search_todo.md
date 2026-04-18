@@ -38,12 +38,10 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
 - [x] Microsoft friend can't refer from Microsoft side, no internal path
 - [x] Applied directly to **Principal SWE, Core Platform Infrastructure** (req #5101)
 
-### Google — Applied ✅
-- [x] Got referral from another Google connection
-- [x] Applied to 2 roles with referral:
-  - **Full Stack Tech Lead, Search Experiments** (Cambridge, MA) — experimentation infra, Java
-  - **Staff SWE, Observability / OpenTelemetry** (Cambridge, MA) — observability, full stack
-- Team matching happens after hiring committee decision — 2 roles is enough
+### Google — Rejected ❌
+- [x] Got referral, applied to 2 roles, completed online assessment
+- ❌ Rejected — failed Google Hiring Assessment (30-min cognitive/behavioral screen)
+- Cooldown period likely 6-12 months before reapplying
 
 ### Meta — Waiting on Connection
 - [x] Reached out to Meta connection
@@ -66,12 +64,17 @@ These have been quiet for 1+ weeks. Time to act.
 | **Circle** | Staff SWE, messaged VP of Eng | 1+ week | VP of Eng | **Send light follow-up to VP by Apr 19** if no response |
 | **Airbnb** | 3 backend roles (cold, Apr 14) | 2 days | Know HM (Whitney Rogers) | Too early. Follow up ~Apr 28 if no response. Find recruiter on GraphQL Platform org. |
 
-**Netflix — messaged Preetam ✅**
+**Netflix — waiting on Preetam, apply cold if no response**
 Sent message with 3 L5 target roles:
 - #1: **Experimentation Platform** (JR39712) — top pick, parity testing + feature flags
+  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer--L5----Experimentation-Platform_JR39712-1
 - #2: **Content & Business Products** (JR28754) — Content Finance Core team, Java + GraphQL platform
+  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5_JR28754
 - #3: **Games Systems** (JR39604) — backend platform infra (auth, control plane, APIs)
+  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5---Games-Systems_JR39604
 - [x] Send follow-up to Preetam — done Apr 16
+- [ ] If Preetam responds with referral → apply with it
+- [ ] **If no response by Apr 21 → apply cold to all 3**
 
 **Deprioritized — no more follow-ups:**
 Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap layoffs, Meta potential layoffs). Not worth chasing — if they respond, great.
@@ -107,7 +110,7 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **Google** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
 | **Meta** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
 | **OpenAI** | 2+ weeks silent, no fit | Yes | Deprioritized — send Vishal thank-you | On hold |
-| **Netflix** | Messaged Preetam with 3 L5 roles | Yes | Wait for Preetam | **~Apr 23** |
+| **Netflix** | Messaged Preetam with 3 L5 roles | Not yet | Wait for Preetam, apply cold if no reply | **Apr 21** |
 | **Circle** | 1+ week silent | Staff SWE | Follow up with VP | **Apr 19** |
 | **Stripe** | Original role filled | Workflow Engine (filled) | Monitor board | Ongoing |
 
@@ -126,9 +129,9 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
 | **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
-| **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Pending (3 new) | Preetam (referral) | Waiting on Preetam |
+| **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Not yet (apply by Apr 21) | Preetam (referral) | Waiting on Preetam, cold apply if no reply |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
-| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done ✅ | Done | Yes (x2) + assessment ✅ | Referral ✅ | **Assessment done — waiting** |
+| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done | Done | Yes (x2) | Referral | **Rejected — failed online assessment** |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **Friend handling it** |
 
 ---

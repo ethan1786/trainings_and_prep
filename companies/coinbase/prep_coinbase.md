@@ -138,23 +138,29 @@ Two separate assessments to complete:
 - Coinbase values: intensity, accountability, speed, AI-first mindset
 
 **Assessment B: Technical on CodeSignal (60 min)**
-- AI copilot is enabled — use it to generate code and expand on questions
+- Gamified physics-based simulation — NOT standard LeetCode
+- AI chat assistant (Cosmo) is embedded — conversational, not autocomplete
 - Recruiter's advice: **start simple, then add more details**
+- Proctored — no external resources allowed
 
 **Strategy:**
 - Get a working solution first, then iterate to add edge cases, optimizations, and cleaner code
 - Use the AI copilot to scaffold boilerplate, but make sure you understand and can explain what it generates
 - Don't spend too long on perfection in early questions — budget time for all questions
-- See Section 12 for likely problem patterns (LC medium, practical data manipulation, "pseudo project" format)
+- See Section 12 for assessment details (gamified simulation format, Cosmo AI assistant strategy)
 
-**How to use the AI copilot effectively:**
-- You're the senior engineer. AI is a fast but careless junior — you direct, review, and correct
-- Assume Coinbase can see your full interaction (prompts + code). Behave accordingly.
-- Good prompts show engineering judgment: "Implement a min-heap solution with O(n log k)" or "Refactor to handle the empty input edge case"
-- Bad prompts show you can't think: "Solve this for me" or "What algorithm should I use"
-- Looking up syntax is fine ("What's the syntax for TreeMap's floorEntry?"). Not knowing fundamentals is not.
-- Use AI to validate your approach: "I'm thinking HashMap for frequency, then iterate where count > k — does this miss any edge cases?"
-- Read and verify everything AI generates — it misreads edge cases regularly
+**How to use Cosmo effectively:**
+- **Coinbase sees your full Cosmo chat log** — every question you ask is part of your evaluation. Treat it like pair-programming while your manager reads the conversation.
+- Cosmo has context on the problem prompt and your current code (per email)
+- Cosmo will NOT generate full solutions — it deliberately gives partial/pseudocode answers
+- Cosmo cannot run or test code
+- Good: "I'm thinking of using BFS here because the graph is unweighted — does that make sense?"
+- Good: "My character overshoots at high velocity — what are common pitfalls with deceleration logic?"
+- Good: "What edge cases should I consider for negative values here?"
+- Good: Syntax/API lookups: "What's Java's Math method for clamping a value to a range?"
+- Bad: "Solve this for me" or "Write the complete solution" — flagged and Cosmo will likely refuse
+- Bad: Pasting the full problem and asking for an answer
+- Show your reasoning in the chat — the conversation log demonstrates your thought process to reviewers
 
 **When you get access to the environment (recruiter will send examples):**
 - Check: Is it a chat interface or inline autocomplete?
@@ -339,24 +345,51 @@ You don't need to be a blockchain expert, but show baseline literacy:
 ## 12. Technical Coding Prep — Coinbase
 
 ### CodeSignal Take-Home Assessment (60 min)
-- "Pseudo project" format — you're given a scenario with mini-database input and build features incrementally
-- 4 questions: first is warmup, rest are LC medium
-- AI copilot enabled (see Section 5a for strategy)
+
+**Format: AI-Assisted Gamified Simulation** (NOT standard LeetCode)
+- Single-file coding environment with an AI chat assistant called **Cosmo**
+- You write code to control a character through a physics-based simulation
+- Strategy/optimization problem — not pattern-matching to known LC problems
+- Languages: Java, Python 3, JavaScript, TypeScript, C++
+- Proctored — no external resources, no second monitor, no phone, scratch paper OK
 - Recruiter's tip: "start simple, then add more details"
 
-**What "pseudo project" format looks like:**
-- You're given a class or set of functions to implement
-- Questions build on each other — Q1 is basic CRUD, Q2 adds filtering/sorting, Q3 adds more complex logic, Q4 adds edge cases or optimization
-- Think: "build a simplified version of a real system" — e.g., transaction ledger, order book, key-value store with versioning
-- Focus on: clean data structures, correct logic, handling edge cases, readable code
+**What Cosmo (AI assistant) can do:**
+- Chat panel in the IDE — not autocomplete, it's conversational
+- Has context on the problem prompt and your current code
+- Use it to: clarify the problem, brainstorm approaches, debug errors, check edge cases
+- Has a reset button to clear context
+- "You are encouraged (and may need) to use Cosmo to complete the assessment"
 
-**Coinbase-specific themes to practice:**
-- Transaction processing — balance updates, transfers between accounts, idempotent operations
-- Ledger operations — credit/debit, running balances, transaction history queries
-- Time-series data — price lookups by timestamp, versioned state
-- Rule evaluation — checking constraints/invariants on data (relevant to Overseer)
+**What they're evaluating:**
+- Problem decomposition and algorithmic reasoning
+- Effective collaboration with AI tools
+- Balancing solution correctness with execution efficiency
+- Optimizing strategies under real-world constraints
 
-**Frequently reported LC patterns:**
+**Strategy:**
+1. **Read the full problem carefully** — understand the simulation physics, constraints, and scoring
+2. **Get a working solution first** — a basic strategy that completes the simulation, even if not optimal
+3. **Iterate with Cosmo** — ask it to help identify weaknesses: "my character fails when X, what should I change?"
+4. **Optimize incrementally** — improve one aspect at a time (speed, accuracy, edge cases)
+5. **Think about trade-offs explicitly** — they're testing whether you can reason about correctness vs performance, not just code
+
+**How to use Cosmo effectively:**
+- Good: "The character overshoots at high velocity — how should I adjust the deceleration logic?"
+- Good: "What edge cases does my current strategy miss?"
+- Good: "Explain this physics formula so I can implement the movement correctly"
+- Bad: "Write the entire solution for me"
+- Review everything Cosmo suggests — it can be wrong, and blindly accepting bad suggestions is worse than not using it
+
+**Prep: Practice environment available** — use it to learn the IDE and Cosmo interface before the timed assessment. Real questions will be different but the tool interaction will be the same.
+
+**Time management (60 min, no pause):**
+- First 5–10 min: read problem, understand simulation rules and scoring
+- Next 15 min: implement basic working strategy
+- Next 25 min: iterate and optimize with Cosmo's help
+- Last 10 min: test edge cases, clean up, final improvements
+
+**LC problems still relevant for on-site coding round (not this assessment):**
 
 | # | Problem | Difficulty | Pattern | Notes |
 |---|---------|-----------|---------|-------|
@@ -376,10 +409,121 @@ You don't need to be a blockchain expert, but show baseline literacy:
 | 139 | Word Break | Medium | DP | 1D DP with dictionary |
 | 295 | Find Median from Data Stream | Hard | Heap | Two heaps |
 
-**Time management:**
-- ~15 min per question (60 min / 4 questions)
-- Q1 should take 5-8 min — don't gold-plate it
-- Save 5 min at the end to review and clean up
+### Deep Dive: LC 2043 — Simple Bank System (Follow-Up Progression)
+
+LC 2043 is a simple design question, but Coinbase interviewers can push it to staff-level depth. Practice walking through each level — the basic solution is just the starting point.
+
+**Level 0: Basic Solution**
+```java
+class Bank {
+    long[] balances;
+    Bank(long[] balance) { this.balances = balance; }
+
+    boolean transfer(int from, int to, long amount) {
+        if (!valid(from) || !valid(to) || balances[from - 1] < amount) return false;
+        balances[from - 1] -= amount;
+        balances[to - 1] += amount;
+        return true;
+    }
+    boolean deposit(int account, long amount) {
+        if (!valid(account)) return false;
+        balances[account - 1] += amount;
+        return true;
+    }
+    boolean withdraw(int account, long amount) {
+        if (!valid(account) || balances[account - 1] < amount) return false;
+        balances[account - 1] -= amount;
+        return true;
+    }
+    boolean valid(int account) { return account >= 1 && account <= balances.length; }
+}
+```
+
+**Level 1: Concurrency — Per-Account Locking**
+
+"How do you handle concurrent transfers from the same account?"
+
+`transfer()` is check-then-act — read balance, check sufficient, update. Not atomic. `ConcurrentHashMap` alone doesn't help because the compound operation isn't atomic.
+
+```java
+ReentrantLock[] locks; // one per account
+
+boolean transfer(int from, int to, long amount) {
+    // Lock ordering prevents deadlock (A→B and B→A simultaneously)
+    int first = Math.min(from, to), second = Math.max(from, to);
+    locks[first].lock();
+    locks[second].lock();
+    try {
+        if (balances[from - 1] < amount) return false;
+        balances[from - 1] -= amount;
+        balances[to - 1] += amount;
+        return true;
+    } finally {
+        locks[second].unlock();
+        locks[first].unlock();
+    }
+}
+```
+
+**Key insight**: always acquire locks in a consistent order (lower account first) to prevent deadlock.
+
+**Level 2: Atomicity Without Locks**
+
+"Can you do this lock-free?"
+
+- `AtomicLong` with CAS works for single-account ops (deposit/withdraw)
+- Cross-account transfer can't be a single CAS — two accounts must update atomically
+- Options: software transactional memory, or move to an event-sourcing / command pattern where a single-threaded processor handles all transfers sequentially
+
+**Level 3: Distributed — Accounts on Different Servers**
+
+"Accounts are on different servers. How do you transfer?"
+
+| Approach | Consistency | Availability | How it works |
+|---|---|---|---|
+| **2PC (Two-Phase Commit)** | Strong | Low (blocking) | Coordinator asks both to prepare → both commit. Blocks if coordinator crashes. |
+| **Saga + Compensation** | Eventual | High | Debit first → credit second. If credit fails, compensate (refund debit). |
+| **Event Sourcing / Ledger** | Strong (append-only) | High | Append transfer event to log. Balances derived from log. Single source of truth. |
+
+**2PC**: simple but the coordinator is a single point of failure. If it crashes between prepare and commit, participants are stuck holding locks.
+
+**Saga**: higher availability but temporarily inconsistent — between debit and credit, the money "disappears." Need a clear state machine: `INITIATED → DEBITED → CREDITED → COMPLETED` (or `→ COMPENSATED` on failure).
+
+**Event sourcing**: the real answer for financial systems. Never mutate balances directly. Append `TransferRequested` event → processor validates → appends `TransferCompleted` or `TransferRejected`. Balances are materialized views of the event log.
+
+**Level 4: Idempotency**
+
+"User clicks transfer twice. What happens?"
+
+Every request carries a unique `transactionId` (client-generated UUID). Before processing:
+```java
+if (processedTransactions.contains(transactionId)) {
+    return previousResult(transactionId);  // return same result
+}
+```
+
+Store processed IDs with their results. This is critical for financial systems — retries (network timeout, client retry) must not double-charge.
+
+**Level 5: Audit Trail & Compliance**
+
+"Regulators want to see every transaction."
+
+- Append-only ledger — never delete or mutate transaction records
+- Every state change logged with: who, what, when, why (request context)
+- Balances derived from the ledger, not stored separately — the ledger IS the source of truth
+- Retention policy driven by regulatory requirements (SOX, AML)
+- This is why event sourcing is the natural architecture for financial systems
+
+**The progression in an interview:**
+```
+Basic solution (5 min)
+  → "What about concurrency?" → Lock ordering (5 min)
+  → "What about distributed?" → 2PC vs Saga vs Event Sourcing (10 min)
+  → "What about retries?" → Idempotency keys (5 min)
+  → "What about compliance?" → Append-only ledger, audit trail (5 min)
+```
+
+Each level tests a different skill: correctness → concurrency → distributed systems → fault tolerance → domain awareness. Getting through Level 3 cleanly is staff-level.
 
 ### On-Site Coding Round (60 min, live)
 - Likely LC medium, possibly medium-hard
