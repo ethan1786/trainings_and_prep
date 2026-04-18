@@ -137,6 +137,56 @@ Two separate assessments to complete:
 - Don't overthink this — answer honestly and consistently
 - Coinbase values: intensity, accountability, speed, AI-first mindset
 
+**Assessment A Details: CCAT + Situational Judgment**
+
+The 30-minute non-technical assessment has two parts:
+
+**Part 1: CCAT (Criteria Cognitive Aptitude Test)**
+
+50 questions in 15 minutes. You are NOT expected to finish — average score is ~24/50, target 30+.
+
+Three question types:
+- **Verbal:** analogies, vocabulary, sentence completion
+- **Math/logic:** word problems, number series, basic algebra
+- **Spatial:** pattern matching, shape rotation, next-in-sequence
+
+Strategy:
+- ~18 seconds per question — if you don't see it in 10s, skip and come back
+- No penalty for blanks — skip aggressively
+- Do your strongest category first to bank easy points
+- Check the clock at question 15 and 30
+- Don't overthink spatial questions — trust first instinct
+
+Practice:
+- CriteriaCorp official free practice test (one attempt)
+- YouTube: search "CCAT practice test" for full walkthroughs
+- Any generic aptitude test prep (number series, verbal analogies) transfers directly
+
+**Part 2: Situational Judgment Test (SJT) — Google Hiring Assessment style**
+
+Workplace scenarios where you rank or select the best/worst response from 4-5 options.
+
+What they score: collaboration, direct communication, ownership, bias toward action.
+
+Rules of thumb:
+| When in doubt... | Prefer | Over |
+|---|---|---|
+| Fix vs escalate | Fix + inform the person | Escalate to manager immediately |
+| Solo vs collaborate | Loop others in | Hero it alone |
+| Confront vs avoid | Address it directly and respectfully | Wait and see / hope it resolves |
+| Process vs action | Take action first, create process after | Schedule a meeting to discuss |
+| Perfect vs shipped | Ship with known tradeoffs stated | Block on perfection |
+
+Coinbase values to filter through:
+- **Act like an owner** — take responsibility, don't defer to someone else
+- **Clear communication** — direct > indirect, explicit > assumed
+- **Positive energy** — assume good intent from teammates
+- **Efficient execution** — fix it, don't just talk about fixing it
+
+The key insight: there's no trick. They want people who communicate directly, take ownership, and don't create drama. If your answer feels like what a mature Staff engineer would actually do on a normal workday, it's probably right.
+
+Practice: search "Google Hiring Assessment practice" or "SJT practice test software engineer" — the format is nearly identical.
+
 **Assessment B: Technical on CodeSignal (60 min)**
 - Gamified physics-based simulation — NOT standard LeetCode
 - AI chat assistant (Cosmo) is embedded — conversational, not autocomplete
