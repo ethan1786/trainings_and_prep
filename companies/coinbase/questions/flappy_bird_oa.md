@@ -40,80 +40,155 @@ Physics per frame (verify exact constants against OA):
 
 ## Approach 1: Simple Heuristic
 
-Fast, near-O(1). Targets the center of the gap and adds emergency overrides.
+Fast, O(1). Predict next frame's position for both actions, use boundary overrides + core rule.
 
 ```java
+static final double GRAVITY = 1.0;
+static final double JUMP_IMPULSE = -8.0;
+
 boolean shouldJump(GameState state) {
     double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
 
-    // Emergency: about to hit the floor
-    if (state.birdY > state.screenHeight * 0.85 && state.birdV > 0) return true;
+    // predict next position if we DON'T jump
+    double nextV = state.birdV + GRAVITY;
+    double nextY = state.birdY + nextV;
 
-    // Emergency: about to hit the ceiling
-    if (state.birdY < state.screenHeight * 0.15 && state.birdV < 0) return false;
+    // predict next position if we DO jump
+    double jumpV = JUMP_IMPULSE + GRAVITY;
+    double jumpY = state.birdY + jumpV;
 
-    // Jump if below gap center and falling
-    if (state.birdY > gapCenter && state.birdV > 0) return true;
+    // boundary override: don't jump into ceiling
+    if (jumpY <= 0) return false;
 
-    return false;
+    // boundary override: must jump if about to hit floor
+    if (nextY >= state.screenHeight) return true;
+
+    // core rule: jump if below gap center
+    return state.birdY > gapCenter;
 }
 ```
 
-Weakness: ignores trajectory — may commit to a jump that overshoots the gap.
+Good enough to get a passing score. Weakness: ignores momentum — if the bird has high downward velocity, one jump isn't enough to reach the gap. That's what Approach 2 fixes.
 
 ---
 
-## Approach 2: Lookahead Simulation
+## Approach 2: Lookahead Simulation (Recommended)
 
-Simulate N frames for both actions, score the outcomes, pick the better one.
+Simulate N frames for both "jump now" vs "don't jump now", score each trajectory, pick the better one. **Key insight:** this only decides the current frame — next frame we re-evaluate from scratch with fresh state. The simulation is a heuristic for comparing two immediate actions, not a plan for the future.
+
+Decision priority:
+1. Both alive → pick higher score
+2. One alive, one dead → pick alive
+3. Both dead → pick the one that survived longer
 
 ```java
-static final double GRAVITY = 0.5;
-static final double JUMP_IMPULSE = -8.0;
-static final int LOOKAHEAD_FRAMES = 20;
+class FlappyAgent {
+    static final double GRAVITY = 1.0;
+    static final double JUMP_IMPULSE = -8.0;
+    static final int LOOKAHEAD = 25;
+    static final double V_MARGIN = 3.0;   // safety margin for boundary/pipe collision
+    static final double H_MARGIN = 1.0;
+    static final double EMERGENCY_DIST = 18.0;
 
-double simulate(double birdY, double birdV, boolean jumpNow, GameState state, int frames) {
-    double y = birdY, v = birdV;
-    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
-    Pipe pipe = state.nextPipe;
+    boolean shouldJump(GameState state) {
+        Pipe pipe = state.nextPipe;
+        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
 
-    for (int i = 0; i < frames; i++) {
-        if (i == 0 && jumpNow) v = JUMP_IMPULSE;
-        v += GRAVITY;
-        y += v;
+        // emergency: about to hit floor
+        if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
 
-        // Death check
-        if (y <= 0 || y >= state.screenHeight) return Double.NEGATIVE_INFINITY;
-
-        // Pipe collision (rough: check if bird x overlaps pipe)
-        if (pipe.x <= state.birdX && state.birdX <= pipe.x + pipe.width) {
-            if (y < pipe.gapTop || y > pipe.gapBottom) return Double.NEGATIVE_INFINITY;
+        // emergency: near pipe and too low
+        double distX = pipe.x - state.birdX;
+        if (distX <= EMERGENCY_DIST && state.birdY > gapCenter + V_MARGIN && state.birdV >= 0) {
+            return true;
         }
+
+        // simulate both actions
+        SimResult jumpRes = simulate(state, true);
+        SimResult noopRes = simulate(state, false);
+
+        // survival takes priority over score
+        if (!noopRes.alive && jumpRes.alive) return true;
+        if (noopRes.alive && !jumpRes.alive) return false;
+
+        return jumpRes.score > noopRes.score;
     }
 
-    // Score: proximity to gap center
-    return -Math.abs(y - gapCenter);
-}
+    SimResult simulate(GameState state, boolean jumpNow) {
+        double y = state.birdY, v = state.birdV, x = state.birdX;
+        Pipe pipe = state.nextPipe;
+        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
 
-boolean shouldJump(GameState state) {
-    double scoreJump = simulate(state.birdY, state.birdV, true, state, LOOKAHEAD_FRAMES);
-    double scoreNoop = simulate(state.birdY, state.birdV, false, state, LOOKAHEAD_FRAMES);
-    return scoreJump > scoreNoop;
+        if (jumpNow) v = JUMP_IMPULSE;
+
+        double totalScore = 0;
+        double minClearance = Double.MAX_VALUE;
+        int survived = 0;
+
+        for (int step = 0; step < LOOKAHEAD; step++) {
+            y += v;
+            v += GRAVITY;
+
+            // boundary death (with safety margin)
+            if (y <= V_MARGIN || y >= state.screenHeight - V_MARGIN) {
+                return new SimResult(false, -1000 + survived, minClearance);
+            }
+
+            // pipe zone check (pipe moves left each frame — adjust speed to match OA)
+            double pipeX = pipe.x - step;  // assumes pipe speed = 1 px/frame
+            if (pipeX - H_MARGIN <= x && x <= pipeX + pipe.width + H_MARGIN) {
+                double clearance = Math.min(y - pipe.gapTop, pipe.gapBottom - y);
+                minClearance = Math.min(minClearance, clearance);
+
+                // pipe collision (with safety margin)
+                if (y <= pipe.gapTop + V_MARGIN || y >= pipe.gapBottom - V_MARGIN) {
+                    return new SimResult(false, -1000 + survived, minClearance);
+                }
+
+                // in pipe zone: reward center proximity + clearance
+                totalScore += 20.0 - Math.abs(y - gapCenter) + clearance * 0.3;
+            } else {
+                // outside pipe: gently steer toward gap center
+                totalScore += 5.0 - Math.abs(y - gapCenter) * 0.15;
+            }
+            survived++;
+        }
+
+        // bonus for sustained clearance
+        if (minClearance < Double.MAX_VALUE) totalScore += minClearance * 0.5;
+
+        return new SimResult(true, totalScore, minClearance);
+    }
+
+    static class SimResult {
+        boolean alive;
+        double score;
+        double minClearance;
+        SimResult(boolean alive, double score, double minClearance) {
+            this.alive = alive;
+            this.score = score;
+            this.minClearance = minClearance;
+        }
+    }
 }
 ```
 
-Tune `LOOKAHEAD_FRAMES` and scoring weights against the simulator.
+**Tuning notes:**
+- `GRAVITY` and `JUMP_IMPULSE` must match the OA's physics — verify by simulating freefall and comparing to expected position
+- `pipe_x - step` assumes pipe moves 1px/frame — replace with actual pipe speed from the OA
+- Physics order (`y += v` then `v += gravity` vs the reverse) matters — verify against the OA spec
+- Scoring weights (20.0, 0.3, 5.0, 0.15) are starting points — tune against the simulator
 
 ---
 
 ## Approach 3: Minimax Tree Search
 
-Enumerate all binary jump/no-jump sequences over a horizon. Use when simple lookahead oscillates or fails edge cases.
+Enumerate all binary jump/no-jump sequences over a short horizon. Use when Approach 2 oscillates or fails on tricky pipe configurations.
 
 ```java
-static final double GRAVITY = 0.5;
+static final double GRAVITY = 1.0;
 static final double JUMP_IMPULSE = -8.0;
-static final int HORIZON = 15;
+static final int HORIZON = 12;  // 2^12 = 4K nodes — fast enough
 
 boolean shouldJump(GameState state) {
     double scoreJump = search(state.birdY, state.birdV, HORIZON, true, state);
@@ -121,18 +196,17 @@ boolean shouldJump(GameState state) {
     return scoreJump > scoreNoop;
 }
 
-double search(double y, double v, int depth, boolean jumpedThisFrame, GameState state) {
-    if (jumpedThisFrame) v = JUMP_IMPULSE;
-    v += GRAVITY;
+double search(double y, double v, int depth, boolean jumped, GameState state) {
+    if (jumped) v = JUMP_IMPULSE;
     y += v;
+    v += GRAVITY;
 
-    if (isDead(y, v, state.nextPipe, state.birdX, state.screenHeight)) {
-        return Double.NEGATIVE_INFINITY;
+    if (isDead(y, state.nextPipe, state.birdX, state.screenHeight)) {
+        return -1000 + (HORIZON - depth); // survived longer = less bad
     }
     if (depth == 0) {
         return score(y, v, state.nextPipe);
     }
-
     return Math.max(
         search(y, v, depth - 1, false, state),
         search(y, v, depth - 1, true, state)
@@ -144,7 +218,7 @@ double score(double y, double v, Pipe pipe) {
     return -Math.abs(y - gapCenter) - Math.abs(v) * 0.1;
 }
 
-boolean isDead(double y, double v, Pipe pipe, double birdX, double screenHeight) {
+boolean isDead(double y, Pipe pipe, double birdX, double screenHeight) {
     if (y <= 0 || y >= screenHeight) return true;
     if (pipe.x <= birdX && birdX <= pipe.x + pipe.width) {
         if (y < pipe.gapTop || y > pipe.gapBottom) return true;
@@ -153,7 +227,7 @@ boolean isDead(double y, double v, Pipe pipe, double birdX, double screenHeight)
 }
 ```
 
-Note: 2^15 = 32K nodes per frame. Add memoization or alpha-beta pruning if this is too slow for the OA's time budget.
+Note: Horizon 12 = 4K nodes per frame. If too slow, reduce to 8 (256 nodes). This is the fallback if Approach 2's scoring heuristic fails — minimax finds the optimal action sequence by exhaustive search.
 
 ---
 
