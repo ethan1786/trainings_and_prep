@@ -125,6 +125,7 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
 | **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Applied — waiting** |
 | **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
+| **NVIDIA** | Senior (Staff-adjacent) | Cloud Software Engineer | Done ✅ | — | Yes (cold) | No referral | **Applied — waiting** |
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |

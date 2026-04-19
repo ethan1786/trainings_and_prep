@@ -58,55 +58,63 @@ Output: RANDOM: Ears=Wide,Eyes=Green
 ## Solution Approach
 
 ### Level 1
-**Core Idea:** Parse K categories, compute Cartesian product with `itertools.product` (or DFS backtracking).
+**Core Idea:** Parse K categories, compute Cartesian product with DFS backtracking.
 
-```python
-import sys
-from itertools import product
+```java
+import java.util.*;
 
-def solve():
-    data = sys.stdin.read().split('\n')
-    idx = 0
-    k = int(data[idx]); idx += 1
-    categories = []
-    for _ in range(k):
-        name = data[idx].strip(); idx += 1
-        m = int(data[idx]); idx += 1
-        values = [data[idx + i].strip() for i in range(m)]
-        idx += m
-        categories.append((name, values))
+class NFTGenerator {
+    static void solve(Scanner sc) {
+        int k = sc.nextInt(); sc.nextLine();
+        List<String> names = new ArrayList<>();
+        List<List<String>> categories = new ArrayList<>();
 
-    combos = list(product(*[cat[1] for cat in categories]))
-    print(len(combos))
-    for combo in combos:
-        print(",".join(f"{categories[i][0]}={v}" for i, v in enumerate(combo)))
+        for (int i = 0; i < k; i++) {
+            names.add(sc.nextLine().trim());
+            int m = Integer.parseInt(sc.nextLine().trim());
+            List<String> values = new ArrayList<>();
+            for (int j = 0; j < m; j++) values.add(sc.nextLine().trim());
+            categories.add(values);
+        }
 
-solve()
-```
+        List<List<String>> combos = new ArrayList<>();
+        generateCombos(categories, 0, new ArrayList<>(), combos);
+        System.out.println(combos.size());
+        for (List<String> combo : combos) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < combo.size(); i++) {
+                if (i > 0) sb.append(',');
+                sb.append(names.get(i)).append('=').append(combo.get(i));
+            }
+            System.out.println(sb);
+        }
+    }
 
-**DFS alternative (no itertools):**
-```python
-def generate_combos(categories):
-    results = []
-    def dfs(idx, current):
-        if idx == len(categories):
-            results.append(current[:])
-            return
-        for v in categories[idx][1]:
-            current.append(v)
-            dfs(idx + 1, current)
-            current.pop()
-    dfs(0, [])
-    return results
+    static void generateCombos(List<List<String>> categories, int idx,
+                                List<String> current, List<List<String>> results) {
+        if (idx == categories.size()) {
+            results.add(new ArrayList<>(current));
+            return;
+        }
+        for (String v : categories.get(idx)) {
+            current.add(v);
+            generateCombos(categories, idx + 1, current, results);
+            current.remove(current.size() - 1);
+        }
+    }
+}
 ```
 
 **Complexity:** O(prod(Mi)) time and space — Mi = values in category i
 
 ### Level 2
-**Core Idea:** Deduplicate each category's values before computing the product. Use `dict.fromkeys()` to preserve insertion order while removing duplicates.
+**Core Idea:** Deduplicate each category's values before computing the product. Use `LinkedHashMap` to preserve insertion order while removing duplicates.
 
-```python
-unique_values = list(dict.fromkeys(values))
+```java
+// Dedup preserving order — drop-in replacement for values list in Level 1
+List<String> dedup(List<String> values) {
+    return new ArrayList<>(new LinkedHashSet<>(values));
+}
 ```
 
 Drop-in replacement for the values list in Level 1. The rest of the logic is unchanged.
@@ -114,44 +122,69 @@ Drop-in replacement for the values list in Level 1. The rest of the logic is unc
 **Complexity:** O(prod(Ui)) — Ui = unique values in category i
 
 ### Level 3
-**Core Idea:** Aggregate weights for duplicate values using a dict, then use `random.choices` (Python 3.6+) for weighted sampling.
+**Core Idea:** Aggregate weights for duplicate values using a `LinkedHashMap`, then use weighted random sampling via cumulative distribution.
 
-```python
-import random
+```java
+import java.util.*;
 
-def weighted_sample(values_with_weights):
-    values = [v for v, _ in values_with_weights]
-    weights = [w for _, w in values_with_weights]
-    return random.choices(values, weights=weights, k=1)[0]
+class NFTGenerator {
+    static void solve(Scanner sc) {
+        int k = sc.nextInt(); sc.nextLine();
+        List<String> names = new ArrayList<>();
+        List<List<String>> uniqueValues = new ArrayList<>();
+        List<List<double[]>> weightedValues = new ArrayList<>(); // {value_index, weight}
 
-def solve():
-    data = sys.stdin.read().split('\n')
-    idx = 0
-    k = int(data[idx]); idx += 1
-    categories = []
-    for _ in range(k):
-        name = data[idx].strip(); idx += 1
-        m = int(data[idx]); idx += 1
-        weight_map = {}
-        for _ in range(m):
-            parts = data[idx].strip().split()
-            v, w = parts[0], float(parts[1])
-            weight_map[v] = weight_map.get(v, 0) + w
-            idx += 1
-        unique_values = list(weight_map.keys())
-        weighted = list(weight_map.items())
-        categories.append((name, unique_values, weighted))
+        for (int i = 0; i < k; i++) {
+            names.add(sc.nextLine().trim());
+            int m = Integer.parseInt(sc.nextLine().trim());
+            LinkedHashMap<String, Double> weightMap = new LinkedHashMap<>();
+            for (int j = 0; j < m; j++) {
+                String[] parts = sc.nextLine().trim().split(" ");
+                String v = parts[0];
+                double w = Double.parseDouble(parts[1]);
+                weightMap.merge(v, w, Double::sum);
+            }
+            List<String> vals = new ArrayList<>(weightMap.keySet());
+            List<double[]> weighted = new ArrayList<>();
+            for (Map.Entry<String, Double> e : weightMap.entrySet()) {
+                weighted.add(new double[]{vals.indexOf(e.getKey()), e.getValue()});
+            }
+            uniqueValues.add(vals);
+            weightedValues.add(weighted);
+        }
 
-    combos = list(product(*[cat[1] for cat in categories]))
-    print(len(combos))
-    for combo in combos:
-        print(",".join(f"{categories[i][0]}={v}" for i, v in enumerate(combo)))
+        List<List<String>> combos = new ArrayList<>();
+        generateCombos(uniqueValues, 0, new ArrayList<>(), combos);
+        System.out.println(combos.size());
+        for (List<String> combo : combos) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < combo.size(); i++) {
+                if (i > 0) sb.append(',');
+                sb.append(names.get(i)).append('=').append(combo.get(i));
+            }
+            System.out.println(sb);
+        }
 
-    random_parts = [f"{name}={weighted_sample(weighted)}"
-                    for name, _, weighted in categories]
-    print(f"RANDOM: {','.join(random_parts)}")
+        StringBuilder random = new StringBuilder("RANDOM: ");
+        for (int i = 0; i < k; i++) {
+            if (i > 0) random.append(',');
+            random.append(names.get(i)).append('=')
+                  .append(weightedSample(uniqueValues.get(i), weightedValues.get(i)));
+        }
+        System.out.println(random);
+    }
 
-solve()
+    static String weightedSample(List<String> values, List<double[]> weighted) {
+        double total = weighted.stream().mapToDouble(e -> e[1]).sum();
+        double r = Math.random() * total;
+        double cumulative = 0;
+        for (double[] entry : weighted) {
+            cumulative += entry[1];
+            if (r <= cumulative) return values.get((int) entry[0]);
+        }
+        return values.get(values.size() - 1); // fallback for float precision
+    }
+}
 ```
 
 **Complexity:** O(sum(Mi)) parse + O(prod(Ui)) enumerate + O(K * max(Ui)) sample
@@ -162,16 +195,16 @@ solve()
 
 ### Production Concerns
 - **Combinatorial explosion:** With 20 categories of 50 values each, there are 50^20 combinations — printing them is infeasible. For large collections, generate lazily or only generate the random sample.
-- **Lazy generation:** Use `itertools.product` as a generator (don't call `list()` on it) to stream one combination at a time without holding the entire space in memory.
+- **Lazy generation:** Instead of collecting all combos into a list, use an iterator or stream that yields one combination at a time without holding the entire space in memory.
 - **Unique random NFT minting:** To generate N distinct NFTs without collision, use a set of seen combinations and retry on collision. For high-uniqueness-ratio collections (few collisions), rejection sampling works. For near-saturation, track remaining valid combos explicitly.
-- **Reproducible randomness:** NFT collections need auditable randomness. The `random` module is not cryptographically secure. Use a CSPRNG seed (committed before reveal) or verifiable randomness (Chainlink VRF) for production NFT drops.
-- **Weight normalization:** Weights don't need to sum to 1 — `random.choices` normalizes internally. But floating-point weights can accumulate rounding errors; work in integers when possible.
+- **Reproducible randomness:** NFT collections need auditable randomness. `Math.random()` is not cryptographically secure. Use `SecureRandom` with a committed seed or verifiable randomness (Chainlink VRF) for production NFT drops.
+- **Weight normalization:** Weights don't need to sum to 1 — the cumulative sampling normalizes internally. But floating-point weights can accumulate rounding errors; work in integers when possible.
 
 ### Common Interview Traps
 - **Duplicate weight aggregation:** "Blue" appearing twice with weight 1 each should yield total weight 2, not two separate entries. Forgetting to aggregate means overrepresentation of duplicated traits.
 - **Empty category:** If any category has zero values after dedup, the product is empty (0 combos). Handle this gracefully.
-- **Floating-point rounding in `weighted_sample`:** The manual cumulative-sum approach can miss the last item due to float precision. Always include a fallback `return values_with_weights[-1][0]` or use `random.choices` which handles this.
-- **Output ordering:** The problem implies deterministic ordering for the enumeration. `itertools.product` respects insertion order — make sure dedup preserves order (`dict.fromkeys`, not `set`).
+- **Floating-point rounding in `weightedSample`:** The manual cumulative-sum approach can miss the last item due to float precision. Always include a fallback `return values.get(values.size() - 1)` or pre-normalize weights.
+- **Output ordering:** The problem implies deterministic ordering for the enumeration. `LinkedHashSet`/`LinkedHashMap` respects insertion order — make sure dedup preserves order (not `HashSet`).
 
 ### How to Push Forward as Staff+
 - **Name the pattern:** "This is a Cartesian product problem. The DFS solution generalizes to any combinatorial search with pruning — useful if we add constraints like 'Laser Eyes cannot appear with Sunglasses'."

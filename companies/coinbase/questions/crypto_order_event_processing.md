@@ -21,34 +21,31 @@ Example: `"1234, BUY, BTC, 10, NEW"`
 
 ### Level 1: Basic Order Tracking
 
-```python
-class OrderEventProcessor:
-    def consume_messages(self, messages: list[str]) -> None:
-        """
-        Process a batch of Kafka messages.
-        Message format: "orderId, operation, symbol, quantity, orderType"
-        orderType is one of: NEW, FILLED
-        """
+```java
+class OrderEventProcessor {
+    void consumeMessages(List<String> messages);
+    // Process a batch of Kafka messages.
+    // Message format: "orderId, operation, symbol, quantity, orderType"
+    // orderType is one of: NEW, FILLED
 
-    def get_order_status(self, order_id: str) -> str:
-        """
-        Returns: "NEW" | "IN_PROGRESS" | "COMPLETED" | "NOT_FOUND"
-        
-        Status rules:
-          NEW        — order placed, no fills yet
-          IN_PROGRESS — partially filled (filled_qty < total_qty)
-          COMPLETED  — fully filled (filled_qty >= total_qty)
-        """
+    String getOrderStatus(String orderId);
+    // Returns: "NEW" | "IN_PROGRESS" | "COMPLETED" | "NOT_FOUND"
+    //
+    // Status rules:
+    //   NEW         — order placed, no fills yet
+    //   IN_PROGRESS — partially filled (filledQty < totalQty)
+    //   COMPLETED   — fully filled (filledQty >= totalQty)
+}
 ```
 
 ### Level 2: Cancellations
 
 Add support for `CANCEL` events. A cancel only succeeds if the order has not been partially or fully filled. Cancelled orders remain queryable.
 
-```python
-# Additional orderType: CANCEL
-# New status: "CANCELLED"
-# Rule: only orders in NEW state can be cancelled.
+```java
+// Additional orderType: CANCEL
+// New status: "CANCELLED"
+// Rule: only orders in NEW state can be cancelled.
 ```
 
 ---
@@ -57,53 +54,57 @@ Add support for `CANCEL` events. A cancel only succeeds if the order has not bee
 
 ### Level 1
 
-**Core Idea:** Maintain a `dict[order_id -> Order]`. `Order` encapsulates all state and fill logic. Status is computed from `filled_quantity` vs `total_quantity`.
+**Core Idea:** Maintain a `Map<String, Order>`. `Order` encapsulates all state and fill logic. Status is computed from `filledQty` vs `totalQty`.
 
 **Data Structures:** Single HashMap; O(1) lookup for status queries.
 
-```python
-from enum import Enum
+```java
+enum OrderStatus { NEW, IN_PROGRESS, COMPLETED }
 
-class OrderStatus(Enum):
-    NEW = "NEW"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
+class Order {
+    String orderId, operation, symbol;
+    int totalQty, filledQty;
+    OrderStatus status;
 
-class Order:
-    def __init__(self, order_id: str, operation: str, symbol: str, total_qty: int):
-        self.order_id = order_id
-        self.operation = operation
-        self.symbol = symbol
-        self.total_qty = total_qty
-        self.filled_qty = 0
-        self.status = OrderStatus.NEW
+    Order(String orderId, String operation, String symbol, int totalQty) {
+        this.orderId = orderId;
+        this.operation = operation;
+        this.symbol = symbol;
+        this.totalQty = totalQty;
+        this.filledQty = 0;
+        this.status = OrderStatus.NEW;
+    }
 
-    def fill(self, quantity: int) -> None:
-        self.filled_qty += quantity
-        self.status = (
-            OrderStatus.COMPLETED if self.filled_qty >= self.total_qty
-            else OrderStatus.IN_PROGRESS
-        )
+    void fill(int quantity) {
+        filledQty += quantity;
+        status = filledQty >= totalQty ? OrderStatus.COMPLETED : OrderStatus.IN_PROGRESS;
+    }
+}
 
-class OrderEventProcessor:
-    def __init__(self):
-        self.orders: dict[str, Order] = {}
+class OrderEventProcessor {
+    private Map<String, Order> orders = new HashMap<>();
 
-    def consume_messages(self, messages: list[str]) -> None:
-        for msg in messages:
-            parts = [p.strip() for p in msg.split(",")]
-            order_id, operation, symbol = parts[0], parts[1], parts[2]
-            quantity, order_type = int(parts[3]), parts[4]
+    void consumeMessages(List<String> messages) {
+        for (String msg : messages) {
+            String[] parts = Arrays.stream(msg.split(","))
+                .map(String::trim).toArray(String[]::new);
+            String orderId = parts[0], operation = parts[1], symbol = parts[2];
+            int quantity = Integer.parseInt(parts[3]);
+            String orderType = parts[4];
 
-            if order_type == "NEW":
-                self.orders[order_id] = Order(order_id, operation, symbol, quantity)
-            elif order_type == "FILLED" and order_id in self.orders:
-                self.orders[order_id].fill(quantity)
+            if (orderType.equals("NEW")) {
+                orders.put(orderId, new Order(orderId, operation, symbol, quantity));
+            } else if (orderType.equals("FILLED") && orders.containsKey(orderId)) {
+                orders.get(orderId).fill(quantity);
+            }
+        }
+    }
 
-    def get_order_status(self, order_id: str) -> str:
-        if order_id not in self.orders:
-            return "NOT_FOUND"
-        return self.orders[order_id].status.value
+    String getOrderStatus(String orderId) {
+        Order order = orders.get(orderId);
+        return order == null ? "NOT_FOUND" : order.status.name();
+    }
+}
 ```
 
 **Example trace:**
@@ -113,13 +114,13 @@ class OrderEventProcessor:
 "1234, BUY, BTC, 3, FILLED"  → filled=8,  status=IN_PROGRESS
 "1234, BUY, BTC, 2, FILLED"  → filled=10, status=COMPLETED
 
-get_order_status("0000")  → "NEW"       (no fills)
-get_order_status("1234")  → "COMPLETED"
-get_order_status("1111")  → "IN_PROGRESS" (filled 5 of 10)
-get_order_status("9999")  → "NOT_FOUND"
+getOrderStatus("0000")  → "NEW"         (no fills)
+getOrderStatus("1234")  → "COMPLETED"
+getOrderStatus("1111")  → "IN_PROGRESS" (filled 5 of 10)
+getOrderStatus("9999")  → "NOT_FOUND"
 ```
 
-**Complexity:** consume_messages O(M), get_order_status O(1). M = messages in batch, N = unique orders in memory.
+**Complexity:** consumeMessages O(M), getOrderStatus O(1). M = messages in batch, N = unique orders in memory.
 
 ### Level 2
 
@@ -127,61 +128,68 @@ get_order_status("9999")  → "NOT_FOUND"
 
 **Key Decisions:** Status check inside `Order.cancel()` keeps the state machine logic co-located with the state. The processor stays a thin dispatcher.
 
-```python
-from enum import Enum
+```java
+enum OrderStatus { NEW, IN_PROGRESS, COMPLETED, CANCELLED }
 
-class OrderStatus(Enum):
-    NEW = "NEW"
-    IN_PROGRESS = "IN_PROGRESS"
-    COMPLETED = "COMPLETED"
-    CANCELLED = "CANCELLED"
+class Order {
+    // ... same fields and constructor as Level 1 ...
 
-class Order:
-    # ... same __init__ and fill() as Level 1 ...
+    void fill(int quantity) {
+        filledQty += quantity;
+        status = filledQty >= totalQty ? OrderStatus.COMPLETED : OrderStatus.IN_PROGRESS;
+    }
 
-    def cancel(self) -> bool:
-        if self.status == OrderStatus.NEW:
-            self.status = OrderStatus.CANCELLED
-            return True
-        return False  # Cannot cancel IN_PROGRESS or COMPLETED orders
+    boolean cancel() {
+        if (status == OrderStatus.NEW) {
+            status = OrderStatus.CANCELLED;
+            return true;
+        }
+        return false; // Cannot cancel IN_PROGRESS or COMPLETED orders
+    }
+}
 
-class OrderEventProcessor:
-    def __init__(self):
-        self.orders: dict[str, Order] = {}
+class OrderEventProcessor {
+    private Map<String, Order> orders = new HashMap<>();
 
-    def consume_messages(self, messages: list[str]) -> None:
-        for msg in messages:
-            parts = [p.strip() for p in msg.split(",")]
-            order_id, operation, symbol = parts[0], parts[1], parts[2]
-            quantity, order_type = int(parts[3]), parts[4]
+    void consumeMessages(List<String> messages) {
+        for (String msg : messages) {
+            String[] parts = Arrays.stream(msg.split(","))
+                .map(String::trim).toArray(String[]::new);
+            String orderId = parts[0], operation = parts[1], symbol = parts[2];
+            int quantity = Integer.parseInt(parts[3]);
+            String orderType = parts[4];
 
-            if order_type == "NEW":
-                self.orders[order_id] = Order(order_id, operation, symbol, quantity)
-            elif order_type == "FILLED" and order_id in self.orders:
-                self.orders[order_id].fill(quantity)
-            elif order_type == "CANCEL" and order_id in self.orders:
-                self.orders[order_id].cancel()  # Silently ignored if not cancellable
+            if (orderType.equals("NEW")) {
+                orders.put(orderId, new Order(orderId, operation, symbol, quantity));
+            } else if (orderType.equals("FILLED") && orders.containsKey(orderId)) {
+                orders.get(orderId).fill(quantity);
+            } else if (orderType.equals("CANCEL") && orders.containsKey(orderId)) {
+                orders.get(orderId).cancel(); // Silently ignored if not cancellable
+            }
+        }
+    }
 
-    def get_order_status(self, order_id: str) -> str:
-        if order_id not in self.orders:
-            return "NOT_FOUND"
-        return self.orders[order_id].status.value
+    String getOrderStatus(String orderId) {
+        Order order = orders.get(orderId);
+        return order == null ? "NOT_FOUND" : order.status.name();
+    }
+}
 ```
 
 **Cancel example trace:**
 ```
 "1234, BUY, BTC, 10, NEW"
 "1234, BUY, BTC, 5, FILLED"   → IN_PROGRESS
-"1234, BUY, BTC, 10, CANCEL"  → cancel() returns False (IN_PROGRESS), status unchanged
+"1234, BUY, BTC, 10, CANCEL"  → cancel() returns false (IN_PROGRESS), status unchanged
 
 "5678, SELL, BTC, 20, NEW"
-"5678, SELL, BTC, 20, CANCEL" → cancel() returns True (NEW → CANCELLED)
+"5678, SELL, BTC, 20, CANCEL" → cancel() returns true (NEW → CANCELLED)
 
-get_order_status("1234") → "IN_PROGRESS"
-get_order_status("5678") → "CANCELLED"
+getOrderStatus("1234") → "IN_PROGRESS"
+getOrderStatus("5678") → "CANCELLED"
 ```
 
-**Complexity:** consume_messages O(M), get_order_status O(1). Unchanged from Level 1.
+**Complexity:** consumeMessages O(M), getOrderStatus O(1). Unchanged from Level 1.
 
 ---
 

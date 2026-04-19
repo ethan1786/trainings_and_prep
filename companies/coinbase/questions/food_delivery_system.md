@@ -14,39 +14,37 @@ Build an in-memory food delivery system that manages restaurants, menus, and ord
 ## Requirements
 
 ### Level 1: Find Food
-```python
-class FoodDeliverySystem:
-    def __init__(self, user_x: float, user_y: float,
-                 restaurants: list[tuple[int, float, float]],
-                 menu: list[tuple[int, str, float]]): ...
+```java
+class FoodDeliverySystem {
+    FoodDeliverySystem(double userX, double userY,
+                       List<int[]> restaurants,   // {id, x, y}
+                       List<Object[]> menu) {}    // {restaurantId, itemName, price}
 
-    def find_cheapest(self, item_name: str) -> tuple[int, float] | None: ...
-    # Returns (restaurant_id, price) or None
-
-    def find_nearest(self, item_name: str) -> tuple[int, float] | None: ...
-    # Returns (restaurant_id, distance) using Euclidean distance, or None
+    int[] findCheapest(String itemName) {...}     // returns {restaurantId, price} or null
+    double[] findNearest(String itemName) {...}   // returns {restaurantId, distance} or null
+}
 ```
 
 ### Level 2: Order Analytics
-```python
-def load_orders(self, orders: list[tuple[int, int, float, int]]) -> None: ...
-# orders: list of (order_id, item_id, total_price, timestamp)
-# Multiple line items can share an order_id
+```java
+void loadOrders(List<int[]> orders) {}
+// orders: list of {orderId, itemId, totalPrice, timestamp}
+// Multiple line items can share an orderId
 
-def get_order_analytics(self, start: int, end: int) -> tuple[int, float, float]: ...
-# Returns (order_count, total_revenue, avg_order_value) for [start, end]
+double[] getOrderAnalytics(int start, int end) {}
+// Returns {orderCount, totalRevenue, avgOrderValue} for [start, end]
 ```
 
 ### Level 3: Top-K Orders
-```python
-def top_k_orders(self, start: int, end: int, k: int) -> list[tuple[int, float]]: ...
-# Returns top K (order_id, revenue) pairs sorted by revenue desc
+```java
+List<long[]> topKOrders(int start, int end, int k) {}
+// Returns top K {orderId, revenue} pairs sorted by revenue desc
 ```
 
 ### Level 4: Top-K Items
-```python
-def top_k_items(self, start: int, end: int, k: int) -> list[tuple[int, float]]: ...
-# Returns top K (item_id, total_sales_volume) pairs sorted by volume desc
+```java
+List<double[]> topKItems(int start, int end, int k) {}
+// Returns top K {itemId, totalSalesVolume} pairs sorted by volume desc
 ```
 
 ---
@@ -57,59 +55,86 @@ def top_k_items(self, start: int, end: int, k: int) -> list[tuple[int, float]]: 
 **Core Idea:** Preprocess menu into an item -> [(restaurant_id, price)] index at construction time. Both queries are linear scans over that list.
 
 **Data Structures:**
-- `restaurant_coords: dict[int, (float, float)]` — O(1) distance lookup
-- `item_to_restaurants: dict[str, list[(int, float)]]` — per-item candidate list
+- `restaurantCoords: Map<Integer, double[]>` — O(1) distance lookup
+- `itemToRestaurants: Map<String, List<int[]>>` — per-item candidate list
 
-```python
-import math
+```java
+import java.util.*;
 
-class FoodDeliverySystem:
-    def __init__(self, user_x, user_y, restaurants, menu):
-        self.user_x = user_x
-        self.user_y = user_y
-        self.restaurant_coords = {r_id: (x, y) for r_id, x, y in restaurants}
-        self.item_to_restaurants = {}
-        for r_id, item_name, price in menu:
-            self.item_to_restaurants.setdefault(item_name, []).append((r_id, price))
+class FoodDeliverySystem {
+    private final double userX, userY;
+    private final Map<Integer, double[]> restaurantCoords = new HashMap<>();
+    private final Map<String, List<int[]>> itemToRestaurants = new HashMap<>();
 
-    def _distance(self, r_id):
-        x, y = self.restaurant_coords[r_id]
-        return math.sqrt((x - self.user_x) ** 2 + (y - self.user_y) ** 2)
+    FoodDeliverySystem(double userX, double userY,
+                       List<int[]> restaurants, List<Object[]> menu) {
+        this.userX = userX;
+        this.userY = userY;
+        for (int[] r : restaurants) {
+            restaurantCoords.put(r[0], new double[]{r[1], r[2]});
+        }
+        for (Object[] entry : menu) {
+            int rId = (int) entry[0];
+            String item = (String) entry[1];
+            int price = (int) entry[2];
+            itemToRestaurants.computeIfAbsent(item, k -> new ArrayList<>())
+                             .add(new int[]{rId, price});
+        }
+    }
 
-    def find_cheapest(self, item_name):
-        entries = self.item_to_restaurants.get(item_name)
-        return min(entries, key=lambda e: e[1]) if entries else None
+    private double distance(int rId) {
+        double[] coords = restaurantCoords.get(rId);
+        return Math.sqrt(Math.pow(coords[0] - userX, 2) + Math.pow(coords[1] - userY, 2));
+    }
 
-    def find_nearest(self, item_name):
-        entries = self.item_to_restaurants.get(item_name)
-        if not entries:
-            return None
-        best = min(entries, key=lambda e: self._distance(e[0]))
-        return (best[0], self._distance(best[0]))
+    int[] findCheapest(String itemName) {
+        List<int[]> entries = itemToRestaurants.get(itemName);
+        if (entries == null) return null;
+        return entries.stream().min(Comparator.comparingInt(e -> e[1])).orElse(null);
+    }
+
+    double[] findNearest(String itemName) {
+        List<int[]> entries = itemToRestaurants.get(itemName);
+        if (entries == null) return null;
+        int[] best = entries.stream()
+            .min(Comparator.comparingDouble(e -> distance(e[0]))).orElse(null);
+        return best == null ? null : new double[]{best[0], distance(best[0])};
+    }
+}
 ```
 
 **Complexity:** O(M) init, O(K) per query — M = menu size, K = restaurants per item
 
 ### Level 2
-**Core Idea:** Aggregate line items into per-order totals using a dict. Range queries scan all orders.
+**Core Idea:** Aggregate line items into per-order totals using a map. Range queries scan all orders.
 
-```python
-def load_orders(self, orders):
-    self.orders = {}
-    self.line_items = orders  # keep raw for Level 4
-    for order_id, item_id, price, ts in orders:
-        if order_id not in self.orders:
-            self.orders[order_id] = {"timestamp": ts, "total": 0.0}
-        self.orders[order_id]["total"] += price
+```java
+private Map<Integer, long[]> orders;   // orderId -> {timestamp, totalPrice * 100}
+private List<int[]> lineItems;         // {orderId, itemId, price, timestamp}
 
-def get_order_analytics(self, start, end):
-    count, revenue = 0, 0.0
-    for data in self.orders.values():
-        if start <= data["timestamp"] <= end:
-            count += 1
-            revenue += data["total"]
-    avg = revenue / count if count else 0.0
-    return (count, revenue, avg)
+void loadOrders(List<int[]> rawOrders) {
+    this.lineItems = rawOrders;
+    this.orders = new HashMap<>();
+    for (int[] row : rawOrders) {
+        int orderId = row[0], ts = row[3];
+        long price = row[2];
+        orders.merge(orderId, new long[]{ts, price},
+                     (existing, val) -> { existing[1] += val[1]; return existing; });
+    }
+}
+
+double[] getOrderAnalytics(int start, int end) {
+    int count = 0;
+    double revenue = 0;
+    for (long[] data : orders.values()) {
+        if (data[0] >= start && data[0] <= end) {
+            count++;
+            revenue += data[1];
+        }
+    }
+    double avg = count > 0 ? revenue / count : 0.0;
+    return new double[]{count, revenue, avg};
+}
 ```
 
 **Complexity:** O(L) load, O(N) query — L = line items, N = unique orders
@@ -117,18 +142,25 @@ def get_order_analytics(self, start, end):
 ### Level 3
 **Core Idea:** Min-heap of size K. When heap is full and current order beats the minimum, replace it. Avoids sorting all N orders.
 
-```python
-import heapq
-
-def top_k_orders(self, start, end, k):
-    heap = []
-    for order_id, data in self.orders.items():
-        if start <= data["timestamp"] <= end:
-            if len(heap) < k:
-                heapq.heappush(heap, (data["total"], order_id))
-            elif data["total"] > heap[0][0]:
-                heapq.heapreplace(heap, (data["total"], order_id))
-    return sorted([(oid, t) for t, oid in heap], key=lambda x: -x[1])
+```java
+List<long[]> topKOrders(int start, int end, int k) {
+    // Min-heap keyed on revenue
+    PriorityQueue<long[]> heap = new PriorityQueue<>(Comparator.comparingLong(e -> e[1]));
+    for (Map.Entry<Integer, long[]> entry : orders.entrySet()) {
+        long[] data = entry.getValue();
+        if (data[0] < start || data[0] > end) continue;
+        long[] candidate = {entry.getKey(), data[1]};
+        if (heap.size() < k) {
+            heap.offer(candidate);
+        } else if (data[1] > heap.peek()[1]) {
+            heap.poll();
+            heap.offer(candidate);
+        }
+    }
+    List<long[]> result = new ArrayList<>(heap);
+    result.sort((a, b) -> Long.compare(b[1], a[1]));
+    return result;
+}
 ```
 
 **Complexity:** O(N log K) time, O(K) space
@@ -136,22 +168,29 @@ def top_k_orders(self, start, end, k):
 ### Level 4
 **Core Idea:** Scan raw line items to aggregate per-item volume, then apply the same top-K heap pattern.
 
-```python
-from collections import defaultdict
+```java
+List<double[]> topKItems(int start, int end, int k) {
+    Map<Integer, Double> itemVolume = new HashMap<>();
+    for (int[] row : lineItems) {
+        if (row[3] >= start && row[3] <= end) {
+            itemVolume.merge(row[1], (double) row[2], Double::sum);
+        }
+    }
 
-def top_k_items(self, start, end, k):
-    item_volume = defaultdict(float)
-    for order_id, item_id, price, ts in self.line_items:
-        if start <= ts <= end:
-            item_volume[item_id] += price
-
-    heap = []
-    for item_id, vol in item_volume.items():
-        if len(heap) < k:
-            heapq.heappush(heap, (vol, item_id))
-        elif vol > heap[0][0]:
-            heapq.heapreplace(heap, (vol, item_id))
-    return sorted([(iid, v) for v, iid in heap], key=lambda x: -x[1])
+    PriorityQueue<double[]> heap = new PriorityQueue<>(Comparator.comparingDouble(e -> e[1]));
+    for (Map.Entry<Integer, Double> entry : itemVolume.entrySet()) {
+        double[] candidate = {entry.getKey(), entry.getValue()};
+        if (heap.size() < k) {
+            heap.offer(candidate);
+        } else if (entry.getValue() > heap.peek()[1]) {
+            heap.poll();
+            heap.offer(candidate);
+        }
+    }
+    List<double[]> result = new ArrayList<>(heap);
+    result.sort((a, b) -> Double.compare(b[1], a[1]));
+    return result;
+}
 ```
 
 **Complexity:** O(L + I log K) time, O(I) space — I = distinct items in range
@@ -161,17 +200,17 @@ def top_k_items(self, start, end, k):
 ## Follow-Up Discussion (Staff+ Depth)
 
 ### Production Concerns
-- **Concurrency:** `load_orders` replaces the entire `orders` dict — concurrent reads mid-swap will see stale or partial data. Use a read-write lock or swap atomically with a reference replace.
+- **Concurrency:** `loadOrders` replaces the entire `orders` map — concurrent reads mid-swap will see stale or partial data. Use a read-write lock or swap atomically with a reference replace.
 - **Analytics at scale:** O(N) scans per query don't scale to millions of orders. Sort orders by timestamp on load, then use binary search to narrow the window. Or use a sorted structure like a SortedList (from `sortedcontainers`).
 - **Streaming orders:** Real systems get orders as a stream. Maintain a sorted list or time-partitioned structure that supports O(log N) inserts and O(log N + K) range queries.
 - **Geo queries:** Euclidean distance doesn't scale. Production would use a spatial index (R-tree, geohash, PostGIS) for nearest-neighbor lookups.
 - **Price volatility:** Menu prices change. If prices are cached at init time, find_cheapest will return stale results. Design for invalidation or reindexing.
 
 ### Common Interview Traps
-- **Order aggregation:** The input has multiple line items per order_id. Forgetting to aggregate by order_id makes order_count wrong in `get_order_analytics`.
+- **Order aggregation:** The input has multiple line items per order_id. Forgetting to aggregate by order_id makes order_count wrong in `getOrderAnalytics`.
 - **Top-K sort direction:** The heap returns smallest-first by default. Easy to return the list in the wrong order.
-- **Tie-breaking in find_cheapest/find_nearest:** If two restaurants have the same price or distance, which wins? Clarify with the interviewer.
-- **`load_orders` idempotency:** Should calling `load_orders` twice append or replace? The naive implementation replaces — make this explicit.
+- **Tie-breaking in findCheapest/findNearest:** If two restaurants have the same price or distance, which wins? Clarify with the interviewer.
+- **`loadOrders` idempotency:** Should calling `loadOrders` twice append or replace? The naive implementation replaces — make this explicit.
 
 ### How to Push Forward as Staff+
 - **Proactively flag the O(N) scan:** "For an analytics query in production, I'd sort orders by timestamp at load time so range queries are O(log N + K). I'll implement the simple version first to get correctness."

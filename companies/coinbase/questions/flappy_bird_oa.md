@@ -13,21 +13,21 @@ Implement `shouldJump(state) -> bool` for a Flappy Bird agent. Given the current
 
 ## Game State & Physics
 
-```python
-@dataclass
-class GameState:
-    bird_y: float        # vertical position (0 = top)
-    bird_v: float        # vertical velocity (positive = falling)
-    bird_x: float        # horizontal position (may be fixed)
-    screen_height: float
-    next_pipe: Pipe
+```java
+class GameState {
+    double birdY;         // vertical position (0 = top)
+    double birdV;         // vertical velocity (positive = falling)
+    double birdX;         // horizontal position (may be fixed)
+    double screenHeight;
+    Pipe nextPipe;
+}
 
-@dataclass
-class Pipe:
-    x: float             # left edge of pipe
-    width: float
-    gap_top: float       # y of top edge of gap
-    gap_bottom: float    # y of bottom edge of gap
+class Pipe {
+    double x;             // left edge of pipe
+    double width;
+    double gapTop;        // y of top edge of gap
+    double gapBottom;     // y of bottom edge of gap
+}
 ```
 
 Physics per frame (verify exact constants against OA):
@@ -42,23 +42,21 @@ Physics per frame (verify exact constants against OA):
 
 Fast, near-O(1). Targets the center of the gap and adds emergency overrides.
 
-```python
-def shouldJump(state) -> bool:
-    gap_center = (state.next_pipe.gap_top + state.next_pipe.gap_bottom) / 2
+```java
+boolean shouldJump(GameState state) {
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
 
-    # Emergency: about to hit the floor
-    if state.bird_y > state.screen_height * 0.85 and state.bird_v > 0:
-        return True
+    // Emergency: about to hit the floor
+    if (state.birdY > state.screenHeight * 0.85 && state.birdV > 0) return true;
 
-    # Emergency: about to hit the ceiling
-    if state.bird_y < state.screen_height * 0.15 and state.bird_v < 0:
-        return False
+    // Emergency: about to hit the ceiling
+    if (state.birdY < state.screenHeight * 0.15 && state.birdV < 0) return false;
 
-    # Jump if below gap center and falling
-    if state.bird_y > gap_center and state.bird_v > 0:
-        return True
+    // Jump if below gap center and falling
+    if (state.birdY > gapCenter && state.birdV > 0) return true;
 
-    return False
+    return false;
+}
 ```
 
 Weakness: ignores trajectory — may commit to a jump that overshoots the gap.
@@ -69,38 +67,39 @@ Weakness: ignores trajectory — may commit to a jump that overshoots the gap.
 
 Simulate N frames for both actions, score the outcomes, pick the better one.
 
-```python
-GRAVITY = 0.5
-JUMP_IMPULSE = -8.0
-LOOKAHEAD_FRAMES = 20
+```java
+static final double GRAVITY = 0.5;
+static final double JUMP_IMPULSE = -8.0;
+static final int LOOKAHEAD_FRAMES = 20;
 
-def simulate(bird_y, bird_v, jump_now, state, frames):
-    y, v = bird_y, bird_v
-    gap_center = (state.next_pipe.gap_top + state.next_pipe.gap_bottom) / 2
-    pipe = state.next_pipe
+double simulate(double birdY, double birdV, boolean jumpNow, GameState state, int frames) {
+    double y = birdY, v = birdV;
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
+    Pipe pipe = state.nextPipe;
 
-    for i in range(frames):
-        if i == 0 and jump_now:
-            v = JUMP_IMPULSE
-        v += GRAVITY
-        y += v
+    for (int i = 0; i < frames; i++) {
+        if (i == 0 && jumpNow) v = JUMP_IMPULSE;
+        v += GRAVITY;
+        y += v;
 
-        # Death check
-        if y <= 0 or y >= state.screen_height:
-            return -float('inf')
+        // Death check
+        if (y <= 0 || y >= state.screenHeight) return Double.NEGATIVE_INFINITY;
 
-        # Pipe collision (rough: check if bird x overlaps pipe)
-        if pipe.x <= state.bird_x <= pipe.x + pipe.width:
-            if y < pipe.gap_top or y > pipe.gap_bottom:
-                return -float('inf')
+        // Pipe collision (rough: check if bird x overlaps pipe)
+        if (pipe.x <= state.birdX && state.birdX <= pipe.x + pipe.width) {
+            if (y < pipe.gapTop || y > pipe.gapBottom) return Double.NEGATIVE_INFINITY;
+        }
+    }
 
-    # Score: proximity to gap center + upward bias when below center
-    return -(abs(y - gap_center))
+    // Score: proximity to gap center
+    return -Math.abs(y - gapCenter);
+}
 
-def shouldJump(state) -> bool:
-    score_jump = simulate(state.bird_y, state.bird_v, True, state, LOOKAHEAD_FRAMES)
-    score_noop = simulate(state.bird_y, state.bird_v, False, state, LOOKAHEAD_FRAMES)
-    return score_jump > score_noop
+boolean shouldJump(GameState state) {
+    double scoreJump = simulate(state.birdY, state.birdV, true, state, LOOKAHEAD_FRAMES);
+    double scoreNoop = simulate(state.birdY, state.birdV, false, state, LOOKAHEAD_FRAMES);
+    return scoreJump > scoreNoop;
+}
 ```
 
 Tune `LOOKAHEAD_FRAMES` and scoring weights against the simulator.
@@ -111,47 +110,47 @@ Tune `LOOKAHEAD_FRAMES` and scoring weights against the simulator.
 
 Enumerate all binary jump/no-jump sequences over a horizon. Use when simple lookahead oscillates or fails edge cases.
 
-```python
-from functools import lru_cache
+```java
+static final double GRAVITY = 0.5;
+static final double JUMP_IMPULSE = -8.0;
+static final int HORIZON = 15;
 
-GRAVITY = 0.5
-JUMP_IMPULSE = -8.0
-HORIZON = 15
+boolean shouldJump(GameState state) {
+    double scoreJump = search(state.birdY, state.birdV, HORIZON, true, state);
+    double scoreNoop = search(state.birdY, state.birdV, HORIZON, false, state);
+    return scoreJump > scoreNoop;
+}
 
-def shouldJump(state) -> bool:
-    gap_center = (state.next_pipe.gap_top + state.next_pipe.gap_bottom) / 2
+double search(double y, double v, int depth, boolean jumpedThisFrame, GameState state) {
+    if (jumpedThisFrame) v = JUMP_IMPULSE;
+    v += GRAVITY;
+    y += v;
 
-    def score(y, v, pipe):
-        return -(abs(y - gap_center)) - abs(v) * 0.1
+    if (isDead(y, v, state.nextPipe, state.birdX, state.screenHeight)) {
+        return Double.NEGATIVE_INFINITY;
+    }
+    if (depth == 0) {
+        return score(y, v, state.nextPipe);
+    }
 
-    def is_dead(y, v, pipe, bird_x):
-        if y <= 0 or y >= state.screen_height:
-            return True
-        if pipe.x <= bird_x <= pipe.x + pipe.width:
-            if y < pipe.gap_top or y > pipe.gap_bottom:
-                return True
-        return False
+    return Math.max(
+        search(y, v, depth - 1, false, state),
+        search(y, v, depth - 1, true, state)
+    );
+}
 
-    def search(y, v, depth, jumped_this_frame):
-        nonlocal state
-        if jumped_this_frame:
-            v = JUMP_IMPULSE
-        v += GRAVITY
-        y += v
+double score(double y, double v, Pipe pipe) {
+    double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
+    return -Math.abs(y - gapCenter) - Math.abs(v) * 0.1;
+}
 
-        if is_dead(y, v, state.next_pipe, state.bird_x):
-            return -float('inf')
-        if depth == 0:
-            return score(y, v, state.next_pipe)
-
-        return max(
-            search(y, v, depth - 1, False),
-            search(y, v, depth - 1, True)
-        )
-
-    score_jump = search(state.bird_y, state.bird_v, HORIZON, True)
-    score_noop = search(state.bird_y, state.bird_v, HORIZON, False)
-    return score_jump > score_noop
+boolean isDead(double y, double v, Pipe pipe, double birdX, double screenHeight) {
+    if (y <= 0 || y >= screenHeight) return true;
+    if (pipe.x <= birdX && birdX <= pipe.x + pipe.width) {
+        if (y < pipe.gapTop || y > pipe.gapBottom) return true;
+    }
+    return false;
+}
 ```
 
 Note: 2^15 = 32K nodes per frame. Add memoization or alpha-beta pruning if this is too slow for the OA's time budget.

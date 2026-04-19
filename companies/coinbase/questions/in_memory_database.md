@@ -15,53 +15,53 @@ Build an in-memory key-field-value store — think of it as a nested HashMap whe
 
 ### Level 1: Basic Operations
 
-```python
-class InMemoryDB:
-    def set(self, timestamp: int, key: str, field: str, value: str) -> None
-    # Upsert; clears any existing TTL on the field
+```java
+class InMemoryDB {
+    void set(int timestamp, String key, String field, String value)
+    // Upsert; clears any existing TTL on the field
 
-    def get(self, timestamp: int, key: str, field: str) -> str
-    # Returns "" if missing or expired
+    String get(int timestamp, String key, String field)
+    // Returns "" if missing or expired
 
-    def delete(self, timestamp: int, key: str, field: str) -> bool
-    # Returns False if missing or already expired
+    boolean delete(int timestamp, String key, String field)
+    // Returns false if missing or already expired
 
-    def compare_and_set(self, timestamp: int, key: str, field: str,
-                        expected_value: str, new_value: str) -> bool
-    # Updates only if current value == expected_value; False if missing/expired
+    boolean compareAndSet(int timestamp, String key, String field,
+                          String expectedValue, String newValue)
+    // Updates only if current value == expectedValue; false if missing/expired
+}
 ```
 
 ### Level 2: Scan and Filter
 
-```python
-def scan(self, timestamp: int, key: str) -> list[str]
-# Returns ["field(value)", ...] sorted alphabetically by field; omits expired
+```java
+List<String> scan(int timestamp, String key)
+// Returns ["field(value)", ...] sorted alphabetically by field; omits expired
 
-def scan_with_prefix(self, timestamp: int, key: str, prefix: str) -> list[str]
-# Same as scan but only fields starting with prefix
+List<String> scanWithPrefix(int timestamp, String key, String prefix)
+// Same as scan but only fields starting with prefix
 ```
 
 ### Level 3: TTL
 
-```python
-def set_with_ttl(self, timestamp: int, key: str, field: str,
-                 value: str, ttl: int) -> None
-# Field expires at timestamp + ttl (expiry inclusive: expired when current >= expiry)
+```java
+void setWithTtl(int timestamp, String key, String field, String value, int ttl)
+// Field expires at timestamp + ttl (expiry inclusive: expired when current >= expiry)
 
-def compare_and_set_with_ttl(self, timestamp: int, key: str, field: str,
-                              expected_value: str, new_value: str, ttl: int) -> bool
-# CAS + sets new TTL on success; fails if field missing or expired
+boolean compareAndSetWithTtl(int timestamp, String key, String field,
+                              String expectedValue, String newValue, int ttl)
+// CAS + sets new TTL on success; fails if field missing or expired
 ```
 
 ### Level 4: Backup and Restore
 
-```python
-def backup(self, timestamp: int) -> None
-# Snapshot current live (non-expired) state including TTL metadata
+```java
+void backup(int timestamp)
+// Snapshot current live (non-expired) state including TTL metadata
 
-def restore(self, timestamp: int, backup_timestamp: int) -> None
-# Restore from latest backup at or before backup_timestamp
-# TTLs in the restored snapshot remain as originally set (not shifted)
+void restore(int timestamp, int backupTimestamp)
+// Restore from latest backup at or before backupTimestamp
+// TTLs in the restored snapshot remain as originally set (not shifted)
 ```
 
 ---
@@ -70,66 +70,77 @@ def restore(self, timestamp: int, backup_timestamp: int) -> None
 
 ### Level 1
 
-**Core Idea:** Two parallel nested dicts — one for values, one for expiry times.
+**Core Idea:** Two parallel nested maps — one for values, one for expiry times.
 
 **Data Structures:**
-- `data: dict[str, dict[str, str]]` — `data[key][field] = value`
-- `expiry: dict[str, dict[str, int]]` — `expiry[key][field] = expiry_timestamp`
+- `data: Map<String, Map<String, String>>` — `data[key][field] = value`
+- `expiry: Map<String, Map<String, Integer>>` — `expiry[key][field] = expiryTimestamp`
 
-```python
-class InMemoryDB:
-    def __init__(self):
-        self.data = {}
-        self.expiry = {}
+```java
+class InMemoryDB {
+    private final Map<String, Map<String, String>> data = new HashMap<>();
+    private final Map<String, Map<String, Integer>> expiry = new HashMap<>();
 
-    def _is_expired(self, key: str, field: str, ts: int) -> bool:
-        return (key in self.expiry
-                and field in self.expiry[key]
-                and ts >= self.expiry[key][field])
+    private boolean isExpired(String key, String field, int ts) {
+        Map<String, Integer> keyExpiry = expiry.get(key);
+        if (keyExpiry == null) return false;
+        Integer exp = keyExpiry.get(field);
+        return exp != null && ts >= exp;
+    }
 
-    def _remove(self, key: str, field: str):
-        if key in self.data:
-            self.data[key].pop(field, None)
-            if not self.data[key]:
-                del self.data[key]
-        if key in self.expiry:
-            self.expiry[key].pop(field, None)
-            if not self.expiry[key]:
-                del self.expiry[key]
+    private void remove(String key, String field) {
+        Map<String, String> keyData = data.get(key);
+        if (keyData != null) {
+            keyData.remove(field);
+            if (keyData.isEmpty()) data.remove(key);
+        }
+        Map<String, Integer> keyExpiry = expiry.get(key);
+        if (keyExpiry != null) {
+            keyExpiry.remove(field);
+            if (keyExpiry.isEmpty()) expiry.remove(key);
+        }
+    }
 
-    def set(self, timestamp: int, key: str, field: str, value: str) -> None:
-        self.data.setdefault(key, {})[field] = value
-        if key in self.expiry:
-            self.expiry[key].pop(field, None)
+    public void set(int timestamp, String key, String field, String value) {
+        data.computeIfAbsent(key, k -> new HashMap<>()).put(field, value);
+        Map<String, Integer> keyExpiry = expiry.get(key);
+        if (keyExpiry != null) keyExpiry.remove(field);
+    }
 
-    def get(self, timestamp: int, key: str, field: str) -> str:
-        if key not in self.data or field not in self.data[key]:
-            return ""
-        if self._is_expired(key, field, timestamp):
-            self._remove(key, field)
-            return ""
-        return self.data[key][field]
+    public String get(int timestamp, String key, String field) {
+        Map<String, String> keyData = data.get(key);
+        if (keyData == null || !keyData.containsKey(field)) return "";
+        if (isExpired(key, field, timestamp)) {
+            remove(key, field);
+            return "";
+        }
+        return keyData.get(field);
+    }
 
-    def delete(self, timestamp: int, key: str, field: str) -> bool:
-        if key not in self.data or field not in self.data[key]:
-            return False
-        if self._is_expired(key, field, timestamp):
-            self._remove(key, field)
-            return False
-        self._remove(key, field)
-        return True
+    public boolean delete(int timestamp, String key, String field) {
+        Map<String, String> keyData = data.get(key);
+        if (keyData == null || !keyData.containsKey(field)) return false;
+        if (isExpired(key, field, timestamp)) {
+            remove(key, field);
+            return false;
+        }
+        remove(key, field);
+        return true;
+    }
 
-    def compare_and_set(self, timestamp: int, key: str, field: str,
-                        expected_value: str, new_value: str) -> bool:
-        if key not in self.data or field not in self.data[key]:
-            return False
-        if self._is_expired(key, field, timestamp):
-            self._remove(key, field)
-            return False
-        if self.data[key][field] != expected_value:
-            return False
-        self.data[key][field] = new_value
-        return True
+    public boolean compareAndSet(int timestamp, String key, String field,
+                                 String expectedValue, String newValue) {
+        Map<String, String> keyData = data.get(key);
+        if (keyData == null || !keyData.containsKey(field)) return false;
+        if (isExpired(key, field, timestamp)) {
+            remove(key, field);
+            return false;
+        }
+        if (!keyData.get(field).equals(expectedValue)) return false;
+        keyData.put(field, newValue);
+        return true;
+    }
+}
 ```
 
 **Complexity:** O(1) per operation
@@ -138,24 +149,26 @@ class InMemoryDB:
 
 **Core Idea:** Sort fields at read time — writes are more frequent so we pay the sort cost on scan.
 
-```python
-def scan(self, timestamp: int, key: str) -> list[str]:
-    if key not in self.data:
-        return []
-    result = []
-    for field, value in sorted(self.data[key].items()):
-        if not self._is_expired(key, field, timestamp):
-            result.append(f"{field}({value})")
-    return result
+```java
+public List<String> scan(int timestamp, String key) {
+    Map<String, String> keyData = data.get(key);
+    if (keyData == null) return Collections.emptyList();
+    return keyData.entrySet().stream()
+        .filter(e -> !isExpired(key, e.getKey(), timestamp))
+        .sorted(Map.Entry.comparingByKey())
+        .map(e -> e.getKey() + "(" + e.getValue() + ")")
+        .collect(Collectors.toList());
+}
 
-def scan_with_prefix(self, timestamp: int, key: str, prefix: str) -> list[str]:
-    if key not in self.data:
-        return []
-    return [
-        f"{field}({value})"
-        for field, value in sorted(self.data[key].items())
-        if field.startswith(prefix) and not self._is_expired(key, field, timestamp)
-    ]
+public List<String> scanWithPrefix(int timestamp, String key, String prefix) {
+    Map<String, String> keyData = data.get(key);
+    if (keyData == null) return Collections.emptyList();
+    return keyData.entrySet().stream()
+        .filter(e -> e.getKey().startsWith(prefix) && !isExpired(key, e.getKey(), timestamp))
+        .sorted(Map.Entry.comparingByKey())
+        .map(e -> e.getKey() + "(" + e.getValue() + ")")
+        .collect(Collectors.toList());
+}
 ```
 
 **Complexity:** O(F log F) where F = fields on the key
@@ -164,67 +177,79 @@ def scan_with_prefix(self, timestamp: int, key: str, prefix: str) -> list[str]:
 
 **Core Idea:** Lazy expiration — check and clean on access rather than running a background sweeper.
 
-```python
-def set_with_ttl(self, timestamp: int, key: str, field: str,
-                 value: str, ttl: int) -> None:
-    self.data.setdefault(key, {})[field] = value
-    self.expiry.setdefault(key, {})[field] = timestamp + ttl
+```java
+public void setWithTtl(int timestamp, String key, String field, String value, int ttl) {
+    data.computeIfAbsent(key, k -> new HashMap<>()).put(field, value);
+    expiry.computeIfAbsent(key, k -> new HashMap<>()).put(field, timestamp + ttl);
+}
 
-def compare_and_set_with_ttl(self, timestamp: int, key: str, field: str,
-                              expected_value: str, new_value: str, ttl: int) -> bool:
-    if key not in self.data or field not in self.data[key]:
-        return False
-    if self._is_expired(key, field, timestamp):
-        self._remove(key, field)
-        return False
-    if self.data[key][field] != expected_value:
-        return False
-    self.data[key][field] = new_value
-    self.expiry.setdefault(key, {})[field] = timestamp + ttl
-    return True
+public boolean compareAndSetWithTtl(int timestamp, String key, String field,
+                                    String expectedValue, String newValue, int ttl) {
+    Map<String, String> keyData = data.get(key);
+    if (keyData == null || !keyData.containsKey(field)) return false;
+    if (isExpired(key, field, timestamp)) {
+        remove(key, field);
+        return false;
+    }
+    if (!keyData.get(field).equals(expectedValue)) return false;
+    keyData.put(field, newValue);
+    expiry.computeIfAbsent(key, k -> new HashMap<>()).put(field, timestamp + ttl);
+    return true;
+}
 ```
 
 **Complexity:** O(1) per operation
 
 ### Level 4
 
-**Core Idea:** Store snapshots keyed by timestamp; use `bisect` for O(log B) lookup of latest backup at or before a given time. Use `deepcopy` to prevent snapshot aliasing.
+**Core Idea:** Store snapshots keyed by timestamp in a `TreeMap` for O(log B) lookup of latest backup at or before a given time. Use deep copies to prevent snapshot aliasing.
 
-```python
-import bisect
-import copy
+```java
+// Additional fields in InMemoryDB:
+private final TreeMap<Integer, Object[]> snapshots = new TreeMap<>();
+// snapshots[ts] = [deepCopyOfData, deepCopyOfExpiry]
 
-class InMemoryDB:
-    def __init__(self):
-        self.data = {}
-        self.expiry = {}
-        self.backup_times = []          # sorted list
-        self.snapshots = {}             # ts -> (data_copy, expiry_copy)
+public void backup(int timestamp) {
+    Map<String, Map<String, String>> dataSnap = new HashMap<>();
+    Map<String, Map<String, Integer>> expirySnap = new HashMap<>();
+    for (Map.Entry<String, Map<String, String>> entry : data.entrySet()) {
+        String key = entry.getKey();
+        Map<String, String> liveFields = new HashMap<>();
+        for (Map.Entry<String, String> fe : entry.getValue().entrySet()) {
+            if (!isExpired(key, fe.getKey(), timestamp)) {
+                liveFields.put(fe.getKey(), fe.getValue());
+            }
+        }
+        if (!liveFields.isEmpty()) {
+            dataSnap.put(key, liveFields);
+            Map<String, Integer> keyExpiry = expiry.get(key);
+            if (keyExpiry != null) {
+                Map<String, Integer> expSnap = new HashMap<>();
+                for (String field : liveFields.keySet()) {
+                    if (keyExpiry.containsKey(field)) expSnap.put(field, keyExpiry.get(field));
+                }
+                if (!expSnap.isEmpty()) expirySnap.put(key, expSnap);
+            }
+        }
+    }
+    snapshots.put(timestamp, new Object[]{dataSnap, expirySnap});
+}
 
-    def backup(self, timestamp: int) -> None:
-        data_snap, expiry_snap = {}, {}
-        for key, fields in self.data.items():
-            live = {f: v for f, v in fields.items()
-                    if not self._is_expired(key, f, timestamp)}
-            if live:
-                data_snap[key] = live
-                if key in self.expiry:
-                    expiry_snap[key] = {
-                        f: self.expiry[key][f]
-                        for f in live if f in self.expiry.get(key, {})
-                    }
-        self.snapshots[timestamp] = (copy.deepcopy(data_snap),
-                                     copy.deepcopy(expiry_snap))
-        bisect.insort(self.backup_times, timestamp)
-
-    def restore(self, timestamp: int, backup_timestamp: int) -> None:
-        idx = bisect.bisect_right(self.backup_times, backup_timestamp) - 1
-        if idx < 0:
-            return
-        ts = self.backup_times[idx]
-        data_snap, expiry_snap = self.snapshots[ts]
-        self.data = copy.deepcopy(data_snap)
-        self.expiry = copy.deepcopy(expiry_snap)
+@SuppressWarnings("unchecked")
+public void restore(int timestamp, int backupTimestamp) {
+    Map.Entry<Integer, Object[]> entry = snapshots.floorEntry(backupTimestamp);
+    if (entry == null) return;
+    Object[] snap = entry.getValue();
+    // Deep copy to avoid aliasing
+    Map<String, Map<String, String>> dataSnap = (Map<String, Map<String, String>>) snap[0];
+    Map<String, Map<String, Integer>> expirySnap = (Map<String, Map<String, Integer>>) snap[1];
+    data.clear();
+    expiry.clear();
+    for (Map.Entry<String, Map<String, String>> e : dataSnap.entrySet())
+        data.put(e.getKey(), new HashMap<>(e.getValue()));
+    for (Map.Entry<String, Map<String, Integer>> e : expirySnap.entrySet())
+        expiry.put(e.getKey(), new HashMap<>(e.getValue()));
+}
 ```
 
 **Complexity:** backup O(N), restore O(N + log B) where N = total fields, B = number of backups
@@ -236,17 +261,17 @@ class InMemoryDB:
 ### Production Concerns
 
 - **Lazy vs. eager expiration:** Lazy expiration (used here) means expired entries occupy memory until accessed. At Coinbase scale — millions of session tokens or short-lived API keys — this is a real memory leak. Production Redis uses both lazy expiration on access *and* a probabilistic background sweep that samples random keys to reap. The sweep rate is tunable to trade CPU for memory.
-- **Snapshot memory cost:** `deepcopy` on every backup is O(N) memory. With frequent backups, you hold multiple full copies. Real systems use incremental snapshots (WAL/journal) or copy-on-write pages. Redis RDB vs AOF is the canonical tradeoff discussion.
-- **CAS and atomicity:** `compare_and_set` is only safe in a single-threaded context. In a multi-threaded or distributed setting, two threads can both read the same `expected_value` and both succeed the comparison before either writes. You need either a mutex per key or true atomic hardware CAS. This is the foundation of optimistic locking in distributed databases.
+- **Snapshot memory cost:** Deep copying on every backup is O(N) memory. With frequent backups, you hold multiple full copies. Real systems use incremental snapshots (WAL/journal) or copy-on-write pages. Redis RDB vs AOF is the canonical tradeoff discussion.
+- **CAS and atomicity:** `compareAndSet` is only safe in a single-threaded context. In a multi-threaded or distributed setting, two threads can both read the same `expectedValue` and both succeed the comparison before either writes. You need either a mutex per key or true atomic hardware CAS. This is the foundation of optimistic locking in distributed databases.
 - **TTL precision:** The problem uses integer timestamps. Real-world TTL bugs often come from clock skew across nodes or from using wall-clock time vs. monotonic time. For a system tracking API rate limits or auth tokens at Coinbase, even 1-second skew can cause incorrect rejects or security gaps.
-- **Binary search on backup timestamps:** `bisect_right(...) - 1` correctly returns the latest backup at or before the requested time. Edge case: if `backup_timestamp` is before all backups, `idx = -1` and we return early — make sure this is tested.
+- **Binary search on backup timestamps:** `TreeMap.floorEntry(backupTimestamp)` correctly returns the latest backup at or before the requested time. Edge case: if `backupTimestamp` is before all backups, `floorEntry` returns `null` and we return early — make sure this is tested.
 
 ### Common Interview Traps
 
-- `set()` must clear any existing TTL on the field — forgetting this means a `set()` after `set_with_ttl()` will still expire, silently breaking the contract.
-- `delete()` on an expired field should return `False`, not `True` — the field was already gone from the caller's perspective.
-- `compare_and_set` on a missing key must return `False` — not raise a KeyError. Guard both key and field presence before comparing.
-- Backup should exclude already-expired entries. If you `deepcopy` the raw data dict, you snapshot expired garbage that will incorrectly reappear after restore.
+- `set()` must clear any existing TTL on the field — forgetting this means a `set()` after `setWithTtl()` will still expire, silently breaking the contract.
+- `delete()` on an expired field should return `false`, not `true` — the field was already gone from the caller's perspective.
+- `compareAndSet` on a missing key must return `false` — not throw a NullPointerException. Guard both key and field presence before comparing.
+- Backup should exclude already-expired entries. If you copy the raw data map, you snapshot expired garbage that will incorrectly reappear after restore.
 - After restore, the TTL absolute timestamps are preserved, not shifted. A field that expires at time 22 in the backup still expires at time 22 after restore — it's not re-anchored to the restore timestamp.
 
 ### How to Push Forward as Staff+

@@ -12,57 +12,58 @@
 Build an in-memory recipe management system with progressive complexity: basic CRUD, search and sort, user authentication, and version-controlled edits with rollback.
 
 Each recipe has:
-- `recipe_id: str` — unique identifier
-- `name: str` — unique (case-insensitive)
-- `ingredients: list[str]`
+- `recipeId: String` — unique identifier
+- `name: String` — unique (case-insensitive)
+- `ingredients: List<String>`
 
 ## Requirements
 
 ### Level 1: Basic CRUD
-```python
-class RecipeManager:
-    def add_recipe(self, recipe_id: str, name: str, ingredients: list[str]) -> bool
-    # False if recipe_id already exists OR name is taken (case-insensitive)
+```java
+class RecipeManager {
+    boolean addRecipe(String recipeId, String name, List<String> ingredients)
+    // false if recipeId already exists OR name is taken (case-insensitive)
 
-    def get_recipe(self, recipe_id: str) -> dict | None
-    # Returns {id, name, ingredients} or None
+    Map<String, Object> getRecipe(String recipeId)
+    // Returns {id, name, ingredients} or null
 
-    def update_recipe(self, recipe_id: str, name: str, ingredients: list[str]) -> bool
-    # False if recipe_id not found OR new name is taken by a different recipe
+    boolean updateRecipe(String recipeId, String name, List<String> ingredients)
+    // false if recipeId not found OR new name is taken by a different recipe
 
-    def delete_recipe(self, recipe_id: str) -> bool
-    # False if not found
+    boolean deleteRecipe(String recipeId)
+    // false if not found
+}
 ```
 
 ### Level 2: Search and Sort
-```python
-def search_recipes(self, query: str) -> list[dict]
-# Case-insensitive substring match on name
+```java
+List<Map<String, Object>> searchRecipes(String query)
+// Case-insensitive substring match on name
 
-def get_all_recipes(self) -> list[dict]
-# Both return list sorted by: (ingredient_count ASC, recipe_id ASC)
-# recipe_id: numeric sort if all digits, else lexicographic
+List<Map<String, Object>> getAllRecipes()
+// Both return list sorted by: (ingredient_count ASC, recipe_id ASC)
+// recipeId: numeric sort if all digits, else lexicographic
 ```
 
 ### Level 3: User System
-```python
-def add_user(self, user_id: str, username: str) -> bool
+```java
+boolean addUser(String userId, String username)
 
-def edit_recipe(self, user_id: str, recipe_id: str, name: str, ingredients: list[str]) -> bool
-# Fails if user_id not found; otherwise behaves like update_recipe
-# (In Level 4, this appends to history instead of overwriting)
+boolean editRecipe(String userId, String recipeId, String name, List<String> ingredients)
+// Fails if userId not found; otherwise behaves like updateRecipe
+// (In Level 4, this appends to history instead of overwriting)
 ```
 
 ### Level 4: Version History
-```python
-def edit_recipe(...)  # Now appends a new version; version numbers start at 1
+```java
+boolean editRecipe(...)  // Now appends a new version; version numbers start at 1
 
-def get_recipe_history(self, recipe_id: str) -> list[dict] | None
-# Returns [{version, name, ingredients}, ...] or None if recipe not found
+List<Map<String, Object>> getRecipeHistory(String recipeId)
+// Returns [{version, name, ingredients}, ...] or null if recipe not found
 
-def rollback_recipe(self, user_id: str, recipe_id: str, version: int) -> bool
-# Copies old version's data as a new (latest) version — does not delete newer versions
-# Fails if version out of range, user invalid, or rolled-back name conflicts with another recipe
+boolean rollbackRecipe(String userId, String recipeId, int version)
+// Copies old version's data as a new (latest) version — does not delete newer versions
+// Fails if version out of range, user invalid, or rolled-back name conflicts with another recipe
 ```
 
 ---
@@ -70,156 +71,198 @@ def rollback_recipe(self, user_id: str, recipe_id: str, version: int) -> bool
 ## Solution Approach
 
 ### Level 1
-**Core Idea:** Two dicts: `recipes` (id -> data) and `name_to_id` (lowercase name -> id). The second dict makes name-uniqueness checks O(1) instead of O(R).
+**Core Idea:** Two maps: `recipes` (id -> data) and `nameToId` (lowercase name -> id). The second map makes name-uniqueness checks O(1) instead of O(R).
 
-```python
-class RecipeManager:
-    def __init__(self):
-        self.recipes = {}      # recipe_id -> {id, history: [{name, ingredients}]}
-        self.name_to_id = {}   # name.lower() -> recipe_id
+```java
+import java.util.*;
 
-    def add_recipe(self, recipe_id, name, ingredients):
-        if recipe_id in self.recipes or name.lower() in self.name_to_id:
-            return False
-        self.recipes[recipe_id] = {
-            'id': recipe_id,
-            'history': [{'name': name, 'ingredients': ingredients.copy()}]
-        }
-        self.name_to_id[name.lower()] = recipe_id
-        return True
+class RecipeManager {
+    // recipeId -> {id, history: List<{name, ingredients}>}
+    private final Map<String, Map<String, Object>> recipes = new HashMap<>();
+    private final Map<String, String> nameToId = new HashMap<>(); // name.lower() -> recipeId
 
-    def get_recipe(self, recipe_id):
-        if recipe_id not in self.recipes:
-            return None
-        current = self.recipes[recipe_id]['history'][-1]
-        return {'id': recipe_id, 'name': current['name'],
-                'ingredients': current['ingredients'].copy()}
+    boolean addRecipe(String recipeId, String name, List<String> ingredients) {
+        if (recipes.containsKey(recipeId) || nameToId.containsKey(name.toLowerCase()))
+            return false;
+        List<Map<String, Object>> history = new ArrayList<>();
+        history.add(Map.of("name", name, "ingredients", new ArrayList<>(ingredients)));
+        recipes.put(recipeId, new HashMap<>(Map.of("id", recipeId, "history", history)));
+        nameToId.put(name.toLowerCase(), recipeId);
+        return true;
+    }
 
-    def update_recipe(self, recipe_id, name, ingredients):
-        if recipe_id not in self.recipes:
-            return False
-        existing_id = self.name_to_id.get(name.lower())
-        if existing_id is not None and existing_id != recipe_id:
-            return False
-        old_name = self.recipes[recipe_id]['history'][-1]['name']
-        del self.name_to_id[old_name.lower()]
-        self.recipes[recipe_id]['history'] = [{'name': name, 'ingredients': ingredients.copy()}]
-        self.name_to_id[name.lower()] = recipe_id
-        return True
+    Map<String, Object> getRecipe(String recipeId) {
+        if (!recipes.containsKey(recipeId)) return null;
+        List<Map<String, Object>> history = getHistory(recipeId);
+        Map<String, Object> current = history.get(history.size() - 1);
+        return Map.of("id", recipeId, "name", current.get("name"),
+                      "ingredients", new ArrayList<>((List<?>) current.get("ingredients")));
+    }
 
-    def delete_recipe(self, recipe_id):
-        if recipe_id not in self.recipes:
-            return False
-        current_name = self.recipes[recipe_id]['history'][-1]['name']
-        del self.name_to_id[current_name.lower()]
-        del self.recipes[recipe_id]
-        return True
+    boolean updateRecipe(String recipeId, String name, List<String> ingredients) {
+        if (!recipes.containsKey(recipeId)) return false;
+        String existingId = nameToId.get(name.toLowerCase());
+        if (existingId != null && !existingId.equals(recipeId)) return false;
+        List<Map<String, Object>> history = getHistory(recipeId);
+        String oldName = (String) history.get(history.size() - 1).get("name");
+        nameToId.remove(oldName.toLowerCase());
+        history.clear();
+        history.add(Map.of("name", name, "ingredients", new ArrayList<>(ingredients)));
+        nameToId.put(name.toLowerCase(), recipeId);
+        return true;
+    }
+
+    boolean deleteRecipe(String recipeId) {
+        if (!recipes.containsKey(recipeId)) return false;
+        List<Map<String, Object>> history = getHistory(recipeId);
+        String currentName = (String) history.get(history.size() - 1).get("name");
+        nameToId.remove(currentName.toLowerCase());
+        recipes.remove(recipeId);
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getHistory(String recipeId) {
+        return (List<Map<String, Object>>) recipes.get(recipeId).get("history");
+    }
+}
 ```
 
 **Complexity:** O(1) per method
 
 ### Level 2
-**Core Idea:** Linear scan for search (substring match), then sort with a custom key that handles numeric vs. string IDs.
+**Core Idea:** Linear scan for search (substring match), then sort with a custom comparator that handles numeric vs. string IDs.
 
-```python
-def _sort_key(self, r):
-    rid = r['id']
-    return (len(r['ingredients']), 0, int(rid), '') if rid.isdigit() \
-           else (len(r['ingredients']), 1, 0, rid)
+```java
+private Comparator<Map<String, Object>> sortKey() {
+    return (a, b) -> {
+        List<?> ai = (List<?>) a.get("ingredients");
+        List<?> bi = (List<?>) b.get("ingredients");
+        if (ai.size() != bi.size()) return Integer.compare(ai.size(), bi.size());
+        String aid = (String) a.get("id"), bid = (String) b.get("id");
+        boolean aNum = aid.chars().allMatch(Character::isDigit);
+        boolean bNum = bid.chars().allMatch(Character::isDigit);
+        if (aNum && bNum) return Long.compare(Long.parseLong(aid), Long.parseLong(bid));
+        if (aNum) return -1;
+        if (bNum) return 1;
+        return aid.compareTo(bid);
+    };
+}
 
-def _to_dict(self, recipe_id):
-    current = self.recipes[recipe_id]['history'][-1]
-    return {'id': recipe_id, 'name': current['name'],
-            'ingredients': current['ingredients'].copy()}
+private Map<String, Object> toDict(String recipeId) {
+    List<Map<String, Object>> history = getHistory(recipeId);
+    Map<String, Object> current = history.get(history.size() - 1);
+    return Map.of("id", recipeId, "name", current.get("name"),
+                  "ingredients", new ArrayList<>((List<?>) current.get("ingredients")));
+}
 
-def search_recipes(self, query):
-    q = query.lower()
-    matches = [self._to_dict(rid) for rid, r in self.recipes.items()
-               if q in r['history'][-1]['name'].lower()]
-    return sorted(matches, key=self._sort_key)
+List<Map<String, Object>> searchRecipes(String query) {
+    String q = query.toLowerCase();
+    List<Map<String, Object>> matches = new ArrayList<>();
+    for (Map.Entry<String, Map<String, Object>> entry : recipes.entrySet()) {
+        List<Map<String, Object>> history = getHistory(entry.getKey());
+        String name = (String) history.get(history.size() - 1).get("name");
+        if (name.toLowerCase().contains(q)) matches.add(toDict(entry.getKey()));
+    }
+    matches.sort(sortKey());
+    return matches;
+}
 
-def get_all_recipes(self):
-    return sorted([self._to_dict(rid) for rid in self.recipes], key=self._sort_key)
+List<Map<String, Object>> getAllRecipes() {
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (String rid : recipes.keySet()) result.add(toDict(rid));
+    result.sort(sortKey());
+    return result;
+}
 ```
 
 **Complexity:** O(R log R) — R = total recipes
 
 ### Level 3
-**Core Idea:** Add a `users` dict. `edit_recipe` is a user-gated `update_recipe`. At Level 4 it will append to history instead of overwriting.
+**Core Idea:** Add a `users` map. `editRecipe` is a user-gated `updateRecipe`. At Level 4 it will append to history instead of overwriting.
 
-```python
-def add_user(self, user_id, username):
-    if user_id in self.users:
-        return False
-    self.users[user_id] = {'id': user_id, 'username': username}
-    return True
+```java
+private final Map<String, Map<String, String>> users = new HashMap<>();
 
-def edit_recipe(self, user_id, recipe_id, name, ingredients):
-    if user_id not in self.users or recipe_id not in self.recipes:
-        return False
-    existing_id = self.name_to_id.get(name.lower())
-    if existing_id is not None and existing_id != recipe_id:
-        return False
-    old_name = self.recipes[recipe_id]['history'][-1]['name']
-    del self.name_to_id[old_name.lower()]
-    self.recipes[recipe_id]['history'].append({'name': name, 'ingredients': ingredients.copy()})
-    self.name_to_id[name.lower()] = recipe_id
-    return True
+boolean addUser(String userId, String username) {
+    if (users.containsKey(userId)) return false;
+    users.put(userId, Map.of("id", userId, "username", username));
+    return true;
+}
+
+boolean editRecipe(String userId, String recipeId, String name, List<String> ingredients) {
+    if (!users.containsKey(userId) || !recipes.containsKey(recipeId)) return false;
+    String existingId = nameToId.get(name.toLowerCase());
+    if (existingId != null && !existingId.equals(recipeId)) return false;
+    List<Map<String, Object>> history = getHistory(recipeId);
+    String oldName = (String) history.get(history.size() - 1).get("name");
+    nameToId.remove(oldName.toLowerCase());
+    history.add(Map.of("name", name, "ingredients", new ArrayList<>(ingredients)));
+    nameToId.put(name.toLowerCase(), recipeId);
+    return true;
+}
 ```
 
 **Complexity:** O(1)
 
 ### Level 4
-**Core Idea:** `edit_recipe` already appends (Level 3 implementation above). Add `get_recipe_history` and `rollback_recipe`. Rollback appends a copy of the target version as the new head — does not truncate.
+**Core Idea:** `editRecipe` already appends (Level 3 implementation above). Add `getRecipeHistory` and `rollbackRecipe`. Rollback appends a copy of the target version as the new head — does not truncate.
 
-```python
-def get_recipe_history(self, recipe_id):
-    if recipe_id not in self.recipes:
-        return None
-    return [{'version': i + 1, 'name': v['name'], 'ingredients': v['ingredients'].copy()}
-            for i, v in enumerate(self.recipes[recipe_id]['history'])]
+```java
+List<Map<String, Object>> getRecipeHistory(String recipeId) {
+    if (!recipes.containsKey(recipeId)) return null;
+    List<Map<String, Object>> history = getHistory(recipeId);
+    List<Map<String, Object>> result = new ArrayList<>();
+    for (int i = 0; i < history.size(); i++) {
+        Map<String, Object> v = history.get(i);
+        result.add(Map.of("version", i + 1, "name", v.get("name"),
+                          "ingredients", new ArrayList<>((List<?>) v.get("ingredients"))));
+    }
+    return result;
+}
 
-def rollback_recipe(self, user_id, recipe_id, version):
-    if user_id not in self.users or recipe_id not in self.recipes:
-        return False
-    history = self.recipes[recipe_id]['history']
-    if version < 1 or version > len(history):
-        return False
-    target = history[version - 1]
-    current_name = history[-1]['name']
-    if target['name'].lower() != current_name.lower():
-        conflict = self.name_to_id.get(target['name'].lower())
-        if conflict is not None and conflict != recipe_id:
-            return False
-    del self.name_to_id[current_name.lower()]
-    history.append({'name': target['name'], 'ingredients': target['ingredients'].copy()})
-    self.name_to_id[target['name'].lower()] = recipe_id
-    return True
+boolean rollbackRecipe(String userId, String recipeId, int version) {
+    if (!users.containsKey(userId) || !recipes.containsKey(recipeId)) return false;
+    List<Map<String, Object>> history = getHistory(recipeId);
+    if (version < 1 || version > history.size()) return false;
+    Map<String, Object> target = history.get(version - 1);
+    String targetName = (String) target.get("name");
+    String currentName = (String) history.get(history.size() - 1).get("name");
+    if (!targetName.equalsIgnoreCase(currentName)) {
+        String conflict = nameToId.get(targetName.toLowerCase());
+        if (conflict != null && !conflict.equals(recipeId)) return false;
+    }
+    nameToId.remove(currentName.toLowerCase());
+    history.add(Map.of("name", targetName,
+                       "ingredients", new ArrayList<>((List<?>) target.get("ingredients"))));
+    nameToId.put(targetName.toLowerCase(), recipeId);
+    return true;
+}
 ```
 
-**Complexity:** O(V) for `get_recipe_history`, O(1) for `rollback_recipe` — V = versions
+**Complexity:** O(V) for `getRecipeHistory`, O(1) for `rollbackRecipe` — V = versions
 
 ---
 
 ## Follow-Up Discussion (Staff+ Depth)
 
 ### Production Concerns
-- **Concurrency:** `edit_recipe` is a multi-step read-modify-write on `recipes` and `name_to_id`. Concurrent edits to the same recipe will corrupt both structures. Use a per-recipe lock or optimistic concurrency (version counter + CAS).
-- **name_to_id consistency:** Every mutating operation must maintain `name_to_id` in sync. If any code path raises mid-operation (e.g., after `del name_to_id[old]` but before inserting the new name), the index is corrupted. Wrap in a try/except with rollback, or restructure to be crash-safe.
+- **Concurrency:** `editRecipe` is a multi-step read-modify-write on `recipes` and `nameToId`. Concurrent edits to the same recipe will corrupt both structures. Use a per-recipe lock (`ReentrantLock`) or optimistic concurrency (version counter + CAS).
+- **nameToId consistency:** Every mutating operation must maintain `nameToId` in sync. If any code path throws mid-operation (e.g., after `nameToId.remove(old)` but before inserting the new name), the index is corrupted. Wrap in a try/finally with rollback, or restructure to be crash-safe.
 - **Memory for version history:** Storing full snapshots per version is O(V * size_of_recipe). For large ingredient lists, store diffs (deltas) instead. Tradeoff: cheaper storage, more expensive reconstruction.
 - **Persistence:** In-memory state is lost on restart. Production would back this with a DB. Version history maps naturally to an append-only log or event-sourced model.
 - **Search at scale:** Linear scan is O(R) per query. For large recipe sets, index names in a trie or full-text search engine (Elasticsearch, Postgres tsvector). The case-insensitive substring match is essentially `ILIKE '%query%'` in SQL.
 
 ### Common Interview Traps
-- **Same-recipe name update:** `update_recipe("1", "Pasta", [...])` when recipe 1's current name IS "Pasta" (just different capitalization) must succeed. The check `existing_id != recipe_id` handles this — verify you include it.
-- **`name_to_id` not cleaned up on delete:** Forgetting to remove the name entry on delete means the name is permanently reserved even after the recipe is gone.
-- **`update_recipe` vs. `edit_recipe` history behavior:** Level 1's `update_recipe` overwrites (resets history to one entry). Level 3's `edit_recipe` appends. This distinction is subtle and easy to conflate.
-- **Rollback name conflict:** Rolling back to version 1 ("Pasta") when another recipe has since taken that name must return False. Don't skip this check because "it's my own recipe" — the name could now belong to a different recipe_id.
-- **Version numbers are 1-indexed:** Off-by-one on `history[version - 1]` is an easy mistake under pressure.
+- **Same-recipe name update:** `updateRecipe("1", "Pasta", [...])` when recipe 1's current name IS "Pasta" (just different capitalization) must succeed. The check `!existingId.equals(recipeId)` handles this — verify you include it.
+- **`nameToId` not cleaned up on delete:** Forgetting to remove the name entry on delete means the name is permanently reserved even after the recipe is gone.
+- **`updateRecipe` vs. `editRecipe` history behavior:** Level 1's `updateRecipe` overwrites (resets history to one entry). Level 3's `editRecipe` appends. This distinction is subtle and easy to conflate.
+- **Rollback name conflict:** Rolling back to version 1 ("Pasta") when another recipe has since taken that name must return false. Don't skip this check because "it's my own recipe" — the name could now belong to a different recipeId.
+- **Version numbers are 1-indexed:** Off-by-one on `history.get(version - 1)` is an easy mistake under pressure.
 
 ### How to Push Forward as Staff+
-- **Flag the dual-dict invariant immediately:** "I'm maintaining two data structures that must stay in sync — `recipes` and `name_to_id`. Every mutating method is essentially a transaction. In production, I'd either use a DB transaction or design the mutation order so partial failure is recoverable."
-- **Propose event sourcing:** "Version history is a natural fit for an event-sourced model — `add_recipe` and `edit_recipe` are events, current state is a projection. This also gives us an audit log, which is critical in a financial context."
+- **Flag the dual-map invariant immediately:** "I'm maintaining two data structures that must stay in sync — `recipes` and `nameToId`. Every mutating method is essentially a transaction. In production, I'd either use a DB transaction or design the mutation order so partial failure is recoverable."
+- **Propose event sourcing:** "Version history is a natural fit for an event-sourced model — `addRecipe` and `editRecipe` are events, current state is a projection. This also gives us an audit log, which is critical in a financial context."
 - **Connect to Coinbase domain:** User-owned assets with version-controlled state is directly analogous to Coinbase's wallet configuration, API key management, or any user-facing resource that needs an audit trail and rollback capability. Regulatory requirements (SOX, BSA) demand exactly this kind of audit history for financial systems.
 - **Sorting edge case — mixed IDs:** The sort key handles numeric IDs and string IDs separately. Proactively clarify: "I'm assuming IDs are either all-numeric or all-alphabetic. If they can mix (e.g., 'r1', '2'), I need a different sort key." Show you anticipate ambiguity.
 - **Search improvement:** "The current search is O(R) substring scan. If search is frequent, I'd add a trie on recipe names — O(Q) lookup where Q = query length. Trade memory for query speed."

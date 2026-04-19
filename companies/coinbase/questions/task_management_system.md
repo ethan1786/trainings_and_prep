@@ -15,51 +15,52 @@ Build a task management system that supports creating and querying tasks, assign
 
 ### Level 1: Core Task CRUD
 
-```python
-class TaskManager:
-    def create_task(self, task_id: str, name: str, priority: int) -> bool
-    # Returns False if task_id already exists
+```java
+class TaskManager {
+    boolean createTask(String taskId, String name, int priority)
+    // Returns false if taskId already exists
 
-    def get_task(self, task_id: str) -> str
-    # Returns "task_id: name (priority P)" or "" if not found
+    String getTask(String taskId)
+    // Returns "taskId: name (priority P)" or "" if not found
 
-    def update_task(self, task_id: str, name: str, priority: int) -> bool
-    # Returns False if task_id not found
+    boolean updateTask(String taskId, String name, int priority)
+    // Returns false if taskId not found
+}
 ```
 
 ### Level 2: Listing and Filtering
 
-```python
-def list_tasks(self, n: int, substr: str = "") -> list[str]
-# Top N tasks by priority DESC, then task_id ASC on ties
-# Filter to tasks whose name contains substr (case-sensitive)
-# Format: "task_id: name (priority P)"
+```java
+List<String> listTasks(int n, String substr)
+// Top N tasks by priority DESC, then taskId ASC on ties
+// Filter to tasks whose name contains substr (case-sensitive)
+// Format: "taskId: name (priority P)"
 ```
 
 ### Level 3: Users, Quotas, and TTL Assignments
 
-```python
-def add_user(self, user_id: str, quota: int) -> bool
-# Returns False if user already exists
+```java
+boolean addUser(String userId, int quota)
+// Returns false if user already exists
 
-def assign_task(self, timestamp: int, user_id: str, task_id: str, ttl: int) -> bool
-# Assign task to user; expires at timestamp + ttl (exclusive: active while expiry > timestamp)
-# Fails if: user/task missing, quota reached, or task already actively assigned to user
+boolean assignTask(int timestamp, String userId, String taskId, int ttl)
+// Assign task to user; expires at timestamp + ttl (exclusive: active while expiry > timestamp)
+// Fails if: user/task missing, quota reached, or task already actively assigned to user
 
-def list_user_tasks(self, timestamp: int, user_id: str) -> list[str]
-# Active (non-expired, non-completed) assignments, sorted by priority DESC then task_id ASC
+List<String> listUserTasks(int timestamp, String userId)
+// Active (non-expired, non-completed) assignments, sorted by priority DESC then taskId ASC
 ```
 
 ### Level 4: Completion and Expiry Tracking
 
-```python
-def complete_task(self, timestamp: int, user_id: str, task_id: str) -> bool
-# Marks the earliest active assignment of task_id for user as completed
-# Returns False if no active assignment exists
+```java
+boolean completeTask(int timestamp, String userId, String taskId)
+// Marks the earliest active assignment of taskId for user as completed
+// Returns false if no active assignment exists
 
-def list_expired_tasks(self, timestamp: int, user_id: str) -> list[str]
-# Tasks whose assignment expired (expiry_time <= timestamp) without completion
-# Sorted by priority DESC then task_id ASC
+List<String> listExpiredTasks(int timestamp, String userId)
+// Tasks whose assignment expired (expiryTime <= timestamp) without completion
+// Sorted by priority DESC then taskId ASC
 ```
 
 ---
@@ -68,32 +69,38 @@ def list_expired_tasks(self, timestamp: int, user_id: str) -> list[str]
 
 ### Level 1
 
-**Core Idea:** Dict from `task_id` to task metadata. All operations are O(1).
+**Core Idea:** Map from `taskId` to task metadata. All operations are O(1).
 
-```python
-class TaskManager:
-    def __init__(self):
-        self.tasks = {}        # task_id -> {"name": str, "priority": int}
-        self.users = {}        # user_id -> {"quota": int}
-        self.assignments = {}  # user_id -> [assignment_dict]
+```java
+class TaskManager {
+    private record Task(String name, int priority) {}
 
-    def create_task(self, task_id: str, name: str, priority: int) -> bool:
-        if task_id in self.tasks:
-            return False
-        self.tasks[task_id] = {"name": name, "priority": priority}
-        return True
+    private record Assignment(String taskId, int startTime, int expiryTime, boolean completed) {
+        Assignment withCompleted() { return new Assignment(taskId, startTime, expiryTime, true); }
+    }
 
-    def get_task(self, task_id: str) -> str:
-        if task_id not in self.tasks:
-            return ""
-        t = self.tasks[task_id]
-        return f"{task_id}: {t['name']} (priority {t['priority']})"
+    private final Map<String, Task> tasks = new HashMap<>();
+    private final Map<String, Integer> users = new HashMap<>();          // userId -> quota
+    private final Map<String, List<Assignment>> assignments = new HashMap<>();
 
-    def update_task(self, task_id: str, name: str, priority: int) -> bool:
-        if task_id not in self.tasks:
-            return False
-        self.tasks[task_id] = {"name": name, "priority": priority}
-        return True
+    public boolean createTask(String taskId, String name, int priority) {
+        if (tasks.containsKey(taskId)) return false;
+        tasks.put(taskId, new Task(name, priority));
+        return true;
+    }
+
+    public String getTask(String taskId) {
+        Task t = tasks.get(taskId);
+        if (t == null) return "";
+        return taskId + ": " + t.name() + " (priority " + t.priority() + ")";
+    }
+
+    public boolean updateTask(String taskId, String name, int priority) {
+        if (!tasks.containsKey(taskId)) return false;
+        tasks.put(taskId, new Task(name, priority));
+        return true;
+    }
+}
 ```
 
 **Complexity:** O(1) per operation
@@ -102,17 +109,18 @@ class TaskManager:
 
 **Core Idea:** Linear filter + sort. A heap would help for pure top-K, but substring filtering requires scanning all tasks anyway, so sort dominates.
 
-```python
-def list_tasks(self, n: int, substr: str = "") -> list[str]:
-    matching = [
-        (tid, t) for tid, t in self.tasks.items()
-        if not substr or substr in t["name"]
-    ]
-    matching.sort(key=lambda x: (-x[1]["priority"], x[0]))
-    return [
-        f"{tid}: {t['name']} (priority {t['priority']})"
-        for tid, t in matching[:n]
-    ]
+```java
+public List<String> listTasks(int n, String substr) {
+    return tasks.entrySet().stream()
+        .filter(e -> substr.isEmpty() || e.getValue().name().contains(substr))
+        .sorted((a, b) -> {
+            int cmp = Integer.compare(b.getValue().priority(), a.getValue().priority());
+            return cmp != 0 ? cmp : a.getKey().compareTo(b.getKey());
+        })
+        .limit(n)
+        .map(e -> e.getKey() + ": " + e.getValue().name() + " (priority " + e.getValue().priority() + ")")
+        .collect(Collectors.toList());
+}
 ```
 
 **Complexity:** O(T log T) where T = total tasks
@@ -121,88 +129,101 @@ def list_tasks(self, n: int, substr: str = "") -> list[str]:
 
 **Core Idea:** Track per-user assignments as a list of records. Quota and duplicate checks scan only the active subset (lazy expiration).
 
-```python
-def _is_active(self, a: dict, ts: int) -> bool:
-    return not a["completed"] and a["expiry_time"] > ts
+```java
+private boolean isActive(Assignment a, int ts) {
+    return !a.completed() && a.expiryTime() > ts;
+}
 
-def add_user(self, user_id: str, quota: int) -> bool:
-    if user_id in self.users:
-        return False
-    self.users[user_id] = {"quota": quota}
-    self.assignments[user_id] = []
-    return True
+public boolean addUser(String userId, int quota) {
+    if (users.containsKey(userId)) return false;
+    users.put(userId, quota);
+    assignments.put(userId, new ArrayList<>());
+    return true;
+}
 
-def assign_task(self, timestamp: int, user_id: str, task_id: str, ttl: int) -> bool:
-    if user_id not in self.users or task_id not in self.tasks:
-        return False
-    active_count = 0
-    for a in self.assignments[user_id]:
-        if self._is_active(a, timestamp):
-            if a["task_id"] == task_id:
-                return False  # already active
-            active_count += 1
-    if active_count >= self.users[user_id]["quota"]:
-        return False
-    self.assignments[user_id].append({
-        "task_id": task_id,
-        "start_time": timestamp,
-        "expiry_time": timestamp + ttl,
-        "completed": False,
-    })
-    return True
+public boolean assignTask(int timestamp, String userId, String taskId, int ttl) {
+    if (!users.containsKey(userId) || !tasks.containsKey(taskId)) return false;
+    int activeCount = 0;
+    for (Assignment a : assignments.get(userId)) {
+        if (isActive(a, timestamp)) {
+            if (a.taskId().equals(taskId)) return false;  // already active
+            activeCount++;
+        }
+    }
+    if (activeCount >= users.get(userId)) return false;
+    assignments.get(userId).add(new Assignment(taskId, timestamp, timestamp + ttl, false));
+    return true;
+}
 
-def list_user_tasks(self, timestamp: int, user_id: str) -> list[str]:
-    if user_id not in self.users:
-        return []
-    seen, result = set(), []
-    for a in self.assignments[user_id]:
-        tid = a["task_id"]
-        if self._is_active(a, timestamp) and tid not in seen and tid in self.tasks:
-            seen.add(tid)
-            result.append(tid)
-    result.sort(key=lambda tid: (-self.tasks[tid]["priority"], tid))
-    return [f"{tid}: {self.tasks[tid]['name']} (priority {self.tasks[tid]['priority']})"
-            for tid in result]
+public List<String> listUserTasks(int timestamp, String userId) {
+    if (!users.containsKey(userId)) return Collections.emptyList();
+    Set<String> seen = new HashSet<>();
+    List<String> result = new ArrayList<>();
+    for (Assignment a : assignments.get(userId)) {
+        if (isActive(a, timestamp) && seen.add(a.taskId()) && tasks.containsKey(a.taskId())) {
+            result.add(a.taskId());
+        }
+    }
+    result.sort((a, b) -> {
+        int cmp = Integer.compare(tasks.get(b).priority(), tasks.get(a).priority());
+        return cmp != 0 ? cmp : a.compareTo(b);
+    });
+    return result.stream()
+        .map(tid -> tid + ": " + tasks.get(tid).name() + " (priority " + tasks.get(tid).priority() + ")")
+        .collect(Collectors.toList());
+}
 ```
 
-**Complexity:** assign_task O(A), list_user_tasks O(A log A) where A = assignments for that user
+**Complexity:** assignTask O(A), listUserTasks O(A log A) where A = assignments for that user
 
 ### Level 4
 
-**Core Idea:** Add a `completed` flag and separate helper to classify each assignment's state. `complete_task` targets the earliest active assignment (handles re-assignment after expiry).
+**Core Idea:** Add a `completed` flag and separate helper to classify each assignment's state. `completeTask` targets the earliest active assignment (handles re-assignment after expiry).
 
-```python
-def _is_expired(self, a: dict, ts: int) -> bool:
-    return not a["completed"] and a["expiry_time"] <= ts
+```java
+private boolean isExpired(Assignment a, int ts) {
+    return !a.completed() && a.expiryTime() <= ts;
+}
 
-def complete_task(self, timestamp: int, user_id: str, task_id: str) -> bool:
-    if user_id not in self.users or task_id not in self.tasks:
-        return False
-    best = None
-    for a in self.assignments[user_id]:
-        if a["task_id"] == task_id and self._is_active(a, timestamp):
-            if best is None or a["start_time"] < best["start_time"]:
-                best = a
-    if best is None:
-        return False
-    best["completed"] = True
-    return True
+public boolean completeTask(int timestamp, String userId, String taskId) {
+    if (!users.containsKey(userId) || !tasks.containsKey(taskId)) return false;
+    List<Assignment> userAssignments = assignments.get(userId);
+    Assignment best = null;
+    int bestIdx = -1;
+    for (int i = 0; i < userAssignments.size(); i++) {
+        Assignment a = userAssignments.get(i);
+        if (a.taskId().equals(taskId) && isActive(a, timestamp)) {
+            if (best == null || a.startTime() < best.startTime()) {
+                best = a;
+                bestIdx = i;
+            }
+        }
+    }
+    if (bestIdx == -1) return false;
+    userAssignments.set(bestIdx, best.withCompleted());
+    return true;
+}
 
-def list_expired_tasks(self, timestamp: int, user_id: str) -> list[str]:
-    if user_id not in self.users:
-        return []
-    seen, result = set(), []
-    for a in self.assignments[user_id]:
-        tid = a["task_id"]
-        if self._is_expired(a, timestamp) and tid not in seen and tid in self.tasks:
-            seen.add(tid)
-            result.append(tid)
-    result.sort(key=lambda tid: (-self.tasks[tid]["priority"], tid))
-    return [f"{tid}: {self.tasks[tid]['name']} (priority {self.tasks[tid]['priority']})"
-            for tid in result]
+public List<String> listExpiredTasks(int timestamp, String userId) {
+    if (!users.containsKey(userId)) return Collections.emptyList();
+    Set<String> seen = new HashSet<>();
+    List<String> result = new ArrayList<>();
+    for (Assignment a : assignments.get(userId)) {
+        if (isExpired(a, timestamp) && seen.add(a.taskId()) && tasks.containsKey(a.taskId())) {
+            result.add(a.taskId());
+        }
+    }
+    result.sort((a, b) -> {
+        int cmp = Integer.compare(tasks.get(b).priority(), tasks.get(a).priority());
+        return cmp != 0 ? cmp : a.compareTo(b);
+    });
+    return result.stream()
+        .map(tid -> tid + ": " + tasks.get(tid).name() + " (priority " + tasks.get(tid).priority() + ")")
+        .collect(Collectors.toList());
+}
 ```
 
-**Complexity:** complete_task O(A), list_expired_tasks O(A log A)
+**Complexity:** completeTask O(A), listExpiredTasks O(A log A)
 
 ---
 
@@ -210,24 +231,24 @@ def list_expired_tasks(self, timestamp: int, user_id: str) -> list[str]:
 
 ### Production Concerns
 
-- **Assignment list growth:** The list never shrinks — completed and expired records accumulate forever. At scale, a user with thousands of past assignments will cause O(A) scans on every `assign_task` call. Production fix: periodically archive old terminal records to a separate store (or a `history` list) so the active list stays bounded.
-- **Quota race condition:** `assign_task` reads `active_count`, then writes. Two concurrent requests for the same user both pass the quota check before either commits. Requires per-user locking (mutex) or an atomic counter with compare-and-swap. Same pattern as Coinbase's order submission rate limits.
+- **Assignment list growth:** The list never shrinks — completed and expired records accumulate forever. At scale, a user with thousands of past assignments will cause O(A) scans on every `assignTask` call. Production fix: periodically archive old terminal records to a separate store (or a `history` list) so the active list stays bounded.
+- **Quota race condition:** `assignTask` reads `activeCount`, then writes. Two concurrent requests for the same user both pass the quota check before either commits. Requires per-user locking (mutex) or an atomic counter with compare-and-swap. Same pattern as Coinbase's order submission rate limits.
 - **TTL precision and wall-clock drift:** The problem uses logical timestamps, but in a distributed deployment, monotonic logical timestamps diverge from wall time. If TTLs represent real-time durations (e.g., "this task expires in 30 seconds"), you need wall-clock TTLs with NTP-synchronized time sources — and accept ±1s of uncertainty.
-- **`update_task` invalidates list_user_tasks:** If a task's priority changes after being assigned, `list_user_tasks` sees the new priority immediately. This is correct but worth stating — there's no "snapshot at assignment time" semantics. If that's needed, store priority at assignment time.
-- **State machine correctness:** The three states (active, completed, expired) are mutually exclusive. The `completed` flag gates both `_is_active` and `_is_expired`, so setting `completed=True` on an already-expired assignment is harmless — `_is_expired` returns `False` for completed records regardless. Verify this invariant holds during `complete_task`.
+- **`updateTask` invalidates listUserTasks:** If a task's priority changes after being assigned, `listUserTasks` sees the new priority immediately. This is correct but worth stating — there's no "snapshot at assignment time" semantics. If that's needed, store priority at assignment time.
+- **State machine correctness:** The three states (active, completed, expired) are mutually exclusive. The `completed` flag gates both `isActive` and `isExpired`, so marking an already-expired assignment as completed is harmless — `isExpired` returns `false` for completed records regardless. Verify this invariant holds during `completeTask`.
 
 ### Common Interview Traps
 
-- **Expiry boundary:** Active means `expiry_time > timestamp` (strict), expired means `expiry_time <= timestamp`. Confirm inclusive/exclusive with the interviewer — using `>=` vs `>` is the most common off-by-one.
-- **`list_expired_tasks` vs `list_user_tasks`:** These are almost identical loops with different classification predicates. Factor out a `_classify_assignments` helper to avoid duplicating the seen-set deduplication logic.
-- **`complete_task` and multiple assignments:** If a user is assigned the same task twice (first assignment expired, then re-assigned), both records exist in the list. `complete_task` must target the *active* one, not the expired one. Filtering by `_is_active` before selecting by `start_time` handles this correctly.
-- **`add_user` deduplication:** `add_user` for an existing user should return `False`. Don't accidentally reset their quota or wipe their assignments.
-- **Substring match is case-sensitive:** `substr in task["name"]` uses Python's case-sensitive `in`. Confirm with the interviewer whether it should be case-insensitive.
+- **Expiry boundary:** Active means `expiryTime > timestamp` (strict), expired means `expiryTime <= timestamp`. Confirm inclusive/exclusive with the interviewer — using `>=` vs `>` is the most common off-by-one.
+- **`listExpiredTasks` vs `listUserTasks`:** These are almost identical loops with different classification predicates. Factor out a `classifyAssignments` helper to avoid duplicating the seen-set deduplication logic.
+- **`completeTask` and multiple assignments:** If a user is assigned the same task twice (first assignment expired, then re-assigned), both records exist in the list. `completeTask` must target the *active* one, not the expired one. Filtering by `isActive` before selecting by `startTime` handles this correctly.
+- **`addUser` deduplication:** `addUser` for an existing user should return `false`. Don't accidentally reset their quota or wipe their assignments.
+- **Substring match is case-sensitive:** `name.contains(substr)` uses Java's case-sensitive `contains`. Confirm with the interviewer whether it should be case-insensitive.
 
 ### How to Push Forward as Staff+
 
-- **Name the growth problem proactively:** "The assignment list grows unbounded. I'd split it into `active_assignments` (bounded by quota) and `history` (append-only archive). Quota checks become O(quota) instead of O(all-time assignments)."
-- **Propose a heap for priority queue operations:** "If `list_tasks` is called frequently and tasks rarely change, I'd maintain a sorted structure (e.g., a `SortedList` from `sortedcontainers`) to avoid O(T log T) on each call. The tradeoff is O(log T) writes vs. O(T log T) reads."
-- **Connect to Coinbase domain:** This system maps cleanly to Coinbase's trading infrastructure: tasks are open orders, users are traders, quota is position limits, TTL is order expiry (GTC vs. day orders), and `complete_task` is order fill. `list_expired_tasks` is the audit trail of unfilled orders — a regulatory requirement.
-- **Distributed sharding:** "In production, I'd shard by `user_id` — all assignments for a user live on one shard to avoid cross-shard quota checks. The `tasks` dict is read-heavy and can be replicated to all shards or cached."
+- **Name the growth problem proactively:** "The assignment list grows unbounded. I'd split it into `activeAssignments` (bounded by quota) and `history` (append-only archive). Quota checks become O(quota) instead of O(all-time assignments)."
+- **Propose a heap for priority queue operations:** "If `listTasks` is called frequently and tasks rarely change, I'd maintain a sorted structure (e.g., a `TreeSet` with a custom comparator) to avoid O(T log T) on each call. The tradeoff is O(log T) writes vs. O(T log T) reads."
+- **Connect to Coinbase domain:** This system maps cleanly to Coinbase's trading infrastructure: tasks are open orders, users are traders, quota is position limits, TTL is order expiry (GTC vs. day orders), and `completeTask` is order fill. `listExpiredTasks` is the audit trail of unfilled orders — a regulatory requirement.
+- **Distributed sharding:** "In production, I'd shard by `userId` — all assignments for a user live on one shard to avoid cross-shard quota checks. The `tasks` map is read-heavy and can be replicated to all shards or cached."
 - **Observability:** "I'd track quota utilization per user as a histogram metric. A user consistently at 100% quota signals either too-low quota or tasks not completing — both worth alerting on."

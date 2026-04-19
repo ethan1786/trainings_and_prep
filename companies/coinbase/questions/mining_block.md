@@ -17,38 +17,37 @@ This problem has two parts: transactions without dependencies, then with parent-
 
 ### Level 1: Independent Transactions
 
-```python
-class Transaction:
-    def __init__(self, id: str, size: int, fee: int):
-        self.id = id
-        self.size = size
-        self.fee = fee
+```java
+class Transaction {
+    String id;
+    int size;
+    int fee;
+    Transaction(String id, int size, int fee) { ... }
+}
 
-def mine_block(transactions: list[Transaction], block_size: int) -> list[str]:
-    """
-    Select transactions to maximize total fee within block_size.
-    Scalable solution preferred over mathematically optimal.
-    Returns list of selected transaction IDs.
-    """
+List<String> mineBlock(List<Transaction> transactions, int blockSize);
+// Select transactions to maximize total fee within blockSize.
+// Scalable solution preferred over mathematically optimal.
+// Returns list of selected transaction IDs.
 ```
 
 ### Level 2: Transactions with Parent Dependencies
 
 A child transaction cannot be mined unless its parent is also in the same block. Each child has at most one parent; a parent may have multiple children.
 
-```python
-class Transaction:
-    def __init__(self, id: str, size: int, fee: int, parent_id: str | None = None):
-        self.id = id
-        self.size = size
-        self.fee = fee
-        self.parent_id = parent_id
+```java
+class Transaction {
+    String id;
+    int size;
+    int fee;
+    String parentId; // null if no parent
 
-def mine_block_with_deps(transactions: list[Transaction], block_size: int) -> list[str]:
-    """
-    Select transactions respecting parent dependencies to maximize fee.
-    To include a child, all ancestors must also be included.
-    """
+    Transaction(String id, int size, int fee, String parentId) { ... }
+}
+
+List<String> mineBlockWithDeps(List<Transaction> transactions, int blockSize);
+// Select transactions respecting parent dependencies to maximize fee.
+// To include a child, all ancestors must also be included.
 ```
 
 ---
@@ -61,16 +60,21 @@ def mine_block_with_deps(transactions: list[Transaction], block_size: int) -> li
 
 **Key Decisions:** The mathematically optimal solution is 0/1 Knapsack DP at O(N × block_size). At Bitcoin's ~4MB block size with thousands of transactions, DP is infeasible. Greedy with fee density is the industry standard (and what Bitcoin Core actually uses as a starting heuristic).
 
-```python
-def mine_block(transactions: list[Transaction], block_size: int) -> list[str]:
-    sorted_txs = sorted(transactions, key=lambda tx: tx.fee / tx.size, reverse=True)
-    selected = []
-    remaining = block_size
-    for tx in sorted_txs:
-        if tx.size <= remaining:
-            selected.append(tx.id)
-            remaining -= tx.size
-    return selected
+```java
+List<String> mineBlock(List<Transaction> transactions, int blockSize) {
+    List<Transaction> sorted = new ArrayList<>(transactions);
+    sorted.sort((a, b) -> Double.compare((double) b.fee / b.size, (double) a.fee / a.size));
+
+    List<String> selected = new ArrayList<>();
+    int remaining = blockSize;
+    for (Transaction tx : sorted) {
+        if (tx.size <= remaining) {
+            selected.add(tx.id);
+            remaining -= tx.size;
+        }
+    }
+    return selected;
+}
 ```
 
 **Example:**
@@ -93,51 +97,63 @@ Result: ["tx5", "tx2", "tx3"], fee=350
 
 **Core Idea:** To include a transaction, you must include its entire ancestor chain (up to the first already-included ancestor). Evaluate each candidate as a `(chain, ratio)` pair where ratio = sum(fees in chain) / sum(sizes in chain). Greedily pick the chain with the best ratio, then repeat (picking one chain changes the effective cost of descendant chains).
 
-**Data Structures:** `tx_map` for O(1) parent lookup, `included` set to track what's already in the block.
+**Data Structures:** `txMap` for O(1) parent lookup, `included` set to track what's already in the block.
 
 **Key Decisions:** The iterative approach is necessary because after including a chain, descendants become cheaper (their ancestors are already paid for), which changes their ratios. You must re-evaluate after each pick.
 
-```python
-def mine_block_with_deps(transactions: list[Transaction], block_size: int) -> list[str]:
-    tx_map = {tx.id: tx for tx in transactions}
-    included = set()
-    selected = []
-    remaining = block_size
+```java
+List<String> mineBlockWithDeps(List<Transaction> transactions, int blockSize) {
+    Map<String, Transaction> txMap = new HashMap<>();
+    for (Transaction tx : transactions) txMap.put(tx.id, tx);
 
-    def ancestor_chain(tx_id):
-        """Walk up to the first already-included ancestor (exclusive)."""
-        chain = []
-        cur = tx_id
-        while cur and cur not in included:
-            chain.append(cur)
-            cur = tx_map[cur].parent_id
-        return list(reversed(chain))  # root-first
+    Set<String> included = new HashSet<>();
+    List<String> selected = new ArrayList<>();
+    int remaining = blockSize;
 
-    while True:
-        best_ratio, best_chain = -1, None
-        for tx in transactions:
-            if tx.id in included:
-                continue
-            chain = ancestor_chain(tx.id)
-            if not chain:
-                continue
-            total_size = sum(tx_map[tid].size for tid in chain)
-            total_fee  = sum(tx_map[tid].fee  for tid in chain)
-            if total_size > remaining:
-                continue
-            ratio = total_fee / total_size
-            if ratio > best_ratio:
-                best_ratio, best_chain = ratio, chain
+    while (true) {
+        double bestRatio = -1;
+        List<String> bestChain = null;
 
-        if best_chain is None:
-            break
+        for (Transaction tx : transactions) {
+            if (included.contains(tx.id)) continue;
+            List<String> chain = ancestorChain(tx.id, txMap, included);
+            if (chain.isEmpty()) continue;
 
-        for tid in best_chain:
-            included.add(tid)
-            selected.append(tid)
-            remaining -= tx_map[tid].size
+            int totalSize = 0, totalFee = 0;
+            for (String tid : chain) {
+                totalSize += txMap.get(tid).size;
+                totalFee  += txMap.get(tid).fee;
+            }
+            if (totalSize > remaining) continue;
 
-    return selected
+            double ratio = (double) totalFee / totalSize;
+            if (ratio > bestRatio) {
+                bestRatio = ratio;
+                bestChain = chain;
+            }
+        }
+
+        if (bestChain == null) break;
+
+        for (String tid : bestChain) {
+            included.add(tid);
+            selected.add(tid);
+            remaining -= txMap.get(tid).size;
+        }
+    }
+    return selected;
+}
+
+private List<String> ancestorChain(String txId, Map<String, Transaction> txMap, Set<String> included) {
+    List<String> chain = new ArrayList<>();
+    String cur = txId;
+    while (cur != null && !included.contains(cur)) {
+        chain.add(cur);
+        cur = txMap.get(cur).parentId;
+    }
+    Collections.reverse(chain); // root-first
+    return chain;
+}
 ```
 
 **Step-through example:**
@@ -185,7 +201,7 @@ Result: ["tx6","tx1","tx2","tx3","tx4"]
 ### Common Interview Traps
 
 - **Forgetting to re-evaluate after picking a chain:** Ratios change when ancestors become free. A single-pass greedy sort doesn't work for Level 2.
-- **Not reversing the ancestor chain:** `ancestor_chain` walks child → root; you must insert root-first or the dependency order is violated.
+- **Not reversing the ancestor chain:** `ancestorChain` walks child → root; you must insert root-first or the dependency order is violated.
 - **Ancestor chain double-counting:** If tx1 and tx2 both appear as candidates, their shared ancestor (tx1) would be counted once when evaluating tx2's chain. The `included` check prevents this but candidates can still share ancestors — the algorithm handles this correctly because only one chain is selected per iteration.
 - **Division by zero:** A transaction with `size=0` would panic. Worth noting as an edge case even if the interviewer doesn't ask.
 
