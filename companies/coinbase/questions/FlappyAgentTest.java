@@ -10,10 +10,9 @@ public class FlappyAgentTest {
     static final double GRAVITY = 1.0;
     static final double JUMP_V = -8.0;
     static final double PIPE_SPEED = 1.0;
-    static final double MARGIN = 3.0;
     static final double Y_TOLERANCE = 5.0;
-    static final double V_MAX = 15.0;
-    static final int MAX_NODES = 500_000;    // safety cap to prevent timeout
+    static final double V_ALLOWANCE = 5.0;
+    static final int MAX_NODES = 500_000;
 
     static int nodeCount;
 
@@ -40,30 +39,24 @@ public class FlappyAgentTest {
 
         // === Mode 2: Pipe within DFS range → path-find to gap center ===
         if (framesToPipe <= DFS_RANGE) {
-            // Try tight tolerance first (land near gap center)
             nodeCount = 0;
             double[] best = {-1, Double.MAX_VALUE};
-            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter,
-                    pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
-                    0, false, best, Y_TOLERANCE);
-            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter,
-                    pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
-                    0, true, best, Y_TOLERANCE);
+            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter, screenHeight,
+                    false, best, Y_TOLERANCE);
+            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter, screenHeight,
+                    true, best, Y_TOLERANCE);
             if (best[0] >= 0) return best[0] == 1;
 
             // Widen tolerance: accept anywhere inside the gap
-            double gapTol = (gapBottom - gapTop) / 2.0 - MARGIN;
+            double gapTol = (gapBottom - gapTop) / 2.0;
             nodeCount = 0;
             best = new double[]{-1, Double.MAX_VALUE};
-            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter,
-                    pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
-                    0, false, best, gapTol);
-            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter,
-                    pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
-                    0, true, best, gapTol);
+            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter, screenHeight,
+                    false, best, gapTol);
+            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter, screenHeight,
+                    true, best, gapTol);
             if (best[0] >= 0) return best[0] == 1;
 
-            // DFS found nothing — fall through to oscillation toward gap
             return oscillate(birdY, birdV, gapCenter);
         }
 
@@ -76,37 +69,20 @@ public class FlappyAgentTest {
     }
 
     static void dfs(double y, double v, boolean jump, int framesLeft, int depth,
-                    double targetY,
-                    double pipeX, double pipeWidth, double gapTop, double gapBottom,
-                    double birdX, double screenH,
-                    int vSign, boolean firstActionWasJump, double[] bestResult,
+                    double targetY, double screenH,
+                    boolean firstActionWasJump, double[] bestResult,
                     double tolerance) {
         nodeCount++;
         if (nodeCount > MAX_NODES) return;
 
-        // Apply action
         if (jump) v = JUMP_V;
         v += GRAVITY;
         y += v;
 
-        // Prune: boundary death
-        if (y <= MARGIN || y >= screenH - MARGIN) return;
+        if (y <= 0 || y >= screenH) return;
 
-        // Prune: pipe collision at this frame
-        double pipeXNow = pipeX - (depth + 1) * PIPE_SPEED;
-        if (pipeXNow <= birdX && birdX <= pipeXNow + pipeWidth) {
-            if (y <= gapTop + MARGIN || y >= gapBottom - MARGIN) return;
-        }
-
-        // Prune: velocity too extreme
-        if (Math.abs(v) > V_MAX) return;
-
-        // Base case: reached target depth
         if (framesLeft <= 1) {
-            if (Math.abs(y - targetY) > tolerance) return;
-            if (vSign == 1 && v <= 0) return;
-            if (vSign == -1 && v >= 0) return;
-
+            if (Math.abs(y - targetY) > tolerance || Math.abs(v) > V_ALLOWANCE) return;
             double absV = Math.abs(v);
             if (absV < bestResult[1]) {
                 bestResult[0] = firstActionWasJump ? 1 : 0;
@@ -115,50 +91,12 @@ public class FlappyAgentTest {
             return;
         }
 
-        // Recurse: try both actions
-        dfs(y, v, false, framesLeft - 1, depth + 1, targetY,
-                pipeX, pipeWidth, gapTop, gapBottom, birdX, screenH,
-                vSign, firstActionWasJump, bestResult, tolerance);
-        dfs(y, v, true, framesLeft - 1, depth + 1, targetY,
-                pipeX, pipeWidth, gapTop, gapBottom, birdX, screenH,
-                vSign, firstActionWasJump, bestResult, tolerance);
+        dfs(y, v, false, framesLeft - 1, depth + 1, targetY, screenH,
+                firstActionWasJump, bestResult, tolerance);
+        dfs(y, v, true, framesLeft - 1, depth + 1, targetY, screenH,
+                firstActionWasJump, bestResult, tolerance);
     }
 
-    // When inside the pipe zone: simulate both actions for remaining pipe frames,
-    // pick the one that stays inside the gap the whole time
-    static boolean safeFallback(double birdY, double birdV, double screenH,
-                                double gapTop, double gapBottom, int frames) {
-        boolean noJumpSafe = simulateSafe(birdY, birdV, false, gapTop, gapBottom, screenH, frames);
-        boolean jumpSafe = simulateSafe(birdY, birdV, true, gapTop, gapBottom, screenH, frames);
-
-        if (noJumpSafe && !jumpSafe) return false;
-        if (!noJumpSafe && jumpSafe) return true;
-        // Both safe or both unsafe — pick the one closer to center
-        double gapCenter = (gapTop + gapBottom) / 2.0;
-        double noJumpY = birdY + birdV + GRAVITY;
-        double jumpY = birdY + JUMP_V + GRAVITY;
-        return Math.abs(jumpY - gapCenter) < Math.abs(noJumpY - gapCenter);
-    }
-
-    static boolean simulateSafe(double y, double v, boolean jump,
-                                double gapTop, double gapBottom, double screenH, int frames) {
-        if (jump) v = JUMP_V;
-        for (int i = 0; i < frames; i++) {
-            v += GRAVITY;
-            y += v;
-            if (y <= gapTop + MARGIN || y >= gapBottom - MARGIN) return false;
-            if (y <= 0 || y >= screenH) return false;
-        }
-        return true;
-    }
-
-    static boolean fallbackJump(double birdY, double birdV, double screenH, double gapCenter) {
-        double noJumpY = birdY + birdV + GRAVITY;
-        double jumpY = birdY + JUMP_V + GRAVITY;
-        if (noJumpY >= screenH - 10) return true;
-        if (jumpY <= 10) return false;
-        return birdY > gapCenter;
-    }
 
     // ==================== Test Infrastructure ====================
 

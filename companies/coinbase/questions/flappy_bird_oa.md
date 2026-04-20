@@ -41,14 +41,77 @@ on jump: v = JUMP_V  // velocity resets (negative = upward)
 
 ---
 
-## Clarify with Cosmo First (5 min)
+## Questions to Clarify (by stage)
 
-Before writing any code, ask:
-1. What's the coordinate system? (y=0 top or bottom?)
-2. Does jump replace velocity (`v = JUMP_V`) or add (`v += JUMP_V`)?
-3. Physics update order: `v += g` then `y += v`, or `y += v` then `v += g`?
-4. How fast do pipes move? (`PIPE_SPEED`)
-5. What are the actual GRAVITY and JUMP_V constants?
+You don't know what you don't know yet. Ask these AS you progress — not all upfront.
+
+### While reading the problem (Stage 0)
+- "What data does the state object contain? What fields are on the bird and pipe?"
+- "What's the coordinate system — is y=0 the top or bottom of the screen?"
+- "What does 'death' mean exactly — what are the collision conditions?"
+
+### After reading, before coding (still Stage 0)
+This is the most important question — it determines your entire approach:
+
+> "How does movement work? Does the bird have velocity and acceleration, or does it simply move up/down by a fixed amount each frame?"
+
+| Answer | Implication |
+|---|---|
+| Fixed amount (up N / down N) | **Simple grid.** State = just y. DFS is trivial. Solution is 15 lines. |
+| Velocity but no acceleration | State = (y, v) but v is binary. Still simple. |
+| Full physics (velocity + gravity) | State = (y, v) continuous. Need the full DFS below. |
+
+### While implementing Stage 1
+- "My bird seems to fly in the wrong direction — can you confirm if positive y means up or down?"
+- "When the bird jumps, does the velocity get replaced (`v = jumpForce`) or added (`v += jumpForce`)?"
+
+### While implementing Stage 2 (DFS)
+- "How fast do pipes move — is it 1 pixel per frame?"
+- "What happens at the screen edges — does the bird bounce or die?"
+- "Are position and velocity integers or doubles?"
+- "Is there only one pipe visible at a time, or can I see multiple pipes ahead?"
+
+### While tuning / debugging
+- "My bird gets close to the gap but misses by a few pixels — are there hitbox margins on the bird or pipe that I should account for?"
+- "The DFS seems slow — is there a frame time budget, or does each frame wait for my function to return?"
+
+---
+
+## If Simple Grid Physics
+
+If movement is just "jump = up by `STEP`, no jump = down by `STEP`":
+
+```java
+int STEP = 3;  // verify against OA
+
+boolean shouldJump(GameState state) {
+    int gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2;
+    int framesToPipe = (state.nextPipe.x - state.birdX) / PIPE_SPEED;
+
+    if (framesToPipe > 0 && framesToPipe <= 30) {
+        boolean noJumpOk = canReach(state.birdY + STEP, gapCenter, framesToPipe - 1, state.screenHeight);
+        boolean jumpOk = canReach(state.birdY - STEP, gapCenter, framesToPipe - 1, state.screenHeight);
+        if (jumpOk && !noJumpOk) return true;
+        if (noJumpOk && !jumpOk) return false;
+    }
+
+    int target = (framesToPipe > 30) ? state.screenHeight / 2 : gapCenter;
+    return state.birdY > target;
+}
+
+boolean canReach(int y, int targetY, int frames, int screenH) {
+    if (y <= 0 || y >= screenH) return false;
+    if (frames <= 0) return Math.abs(y - targetY) <= STEP;
+    return canReach(y + STEP, targetY, frames - 1, screenH)
+        || canReach(y - STEP, targetY, frames - 1, screenH);
+}
+```
+
+15 lines. Add memoization on `(y, frames)` if slow — only `screenHeight × frames` states. Then spend remaining time on edge cases and second pipe awareness.
+
+---
+
+## If Full Physics (rest of this doc)
 
 ---
 
@@ -99,8 +162,7 @@ class FlappyAgent {
     static final int PIPE_SPEED = 1;  // verify against OA
     static final int V_ALLOWANCE = 5;
     static final int Y_ALLOWANCE = 10;
-    static final int V_MAX = 15;
-    static final int DFS_RANGE = 25;
+    static final int DFS_RANGE = 25;  // ≈ screenHeight / 8
     static final int MAX_NODES = 500_000;
 
     int nodeCount;
@@ -119,10 +181,8 @@ class FlappyAgent {
         if (framesToPipe <= DFS_RANGE) {
             nodeCount = 0;
             Optional<Boolean> jumpResult = findPath(
-                    (int) state.birdY, (int) state.birdV, gapCenter, framesToPipe,
-                    (int) pipe.gapTop, (int) pipe.gapBottom,
-                    (int) pipe.x, (int) pipe.width, (int) state.birdX,
-                    (int) state.screenHeight);
+                    (int) state.birdY, (int) state.birdV,
+                    gapCenter, framesToPipe, (int) state.screenHeight);
             if (jumpResult.isPresent()) return jumpResult.get();
         }
 
@@ -130,13 +190,9 @@ class FlappyAgent {
         return state.birdY > gapCenter + 14;
     }
 
-    Optional<Boolean> findPath(int y, int v, int targetY, int frames,
-                               int gapTop, int gapBottom,
-                               int pipeX, int pipeW, int birdX, int screenH) {
-        int[] noJumpResult = dfs(y, v, false, frames, 0, targetY,
-                gapTop, gapBottom, pipeX, pipeW, birdX, screenH);
-        int[] jumpResult = dfs(y, v, true, frames, 0, targetY,
-                gapTop, gapBottom, pipeX, pipeW, birdX, screenH);
+    Optional<Boolean> findPath(int y, int v, int targetY, int frames, int screenH) {
+        int[] noJumpResult = dfs(y, v, false, frames, 0, targetY, screenH);
+        int[] jumpResult = dfs(y, v, true, frames, 0, targetY, screenH);
 
         // result: [found (0/1), absV at arrival]
         boolean noJumpFound = noJumpResult[0] == 1;
@@ -152,8 +208,7 @@ class FlappyAgent {
 
     // Returns [found (0/1), best |v| at arrival]
     int[] dfs(int y, int v, boolean jump, int framesLeft, int depth,
-              int targetY, int gapTop, int gapBottom,
-              int pipeX, int pipeW, int birdX, int screenH) {
+              int targetY, int screenH) {
         nodeCount++;
         if (nodeCount > MAX_NODES) return new int[]{0, Integer.MAX_VALUE};
 
@@ -162,17 +217,8 @@ class FlappyAgent {
         v += G;
         y += v;
 
-        // prune: boundary death
+        // only prune needed: ceiling/floor death
         if (y <= 0 || y >= screenH) return new int[]{0, Integer.MAX_VALUE};
-
-        // prune: pipe collision
-        int pipeXNow = pipeX - (depth + 1) * PIPE_SPEED;
-        if (pipeXNow <= birdX && birdX <= pipeXNow + pipeW) {
-            if (y <= gapTop || y >= gapBottom) return new int[]{0, Integer.MAX_VALUE};
-        }
-
-        // prune: velocity too extreme
-        if (Math.abs(v) > V_MAX) return new int[]{0, Integer.MAX_VALUE};
 
         // base case: reached target frame
         if (framesLeft <= 1) {
@@ -183,10 +229,8 @@ class FlappyAgent {
         }
 
         // recurse both actions
-        int[] noJump = dfs(y, v, false, framesLeft - 1, depth + 1, targetY,
-                gapTop, gapBottom, pipeX, pipeW, birdX, screenH);
-        int[] jumped = dfs(y, v, true, framesLeft - 1, depth + 1, targetY,
-                gapTop, gapBottom, pipeX, pipeW, birdX, screenH);
+        int[] noJump = dfs(y, v, false, framesLeft - 1, depth + 1, targetY, screenH);
+        int[] jumped = dfs(y, v, true, framesLeft - 1, depth + 1, targetY, screenH);
 
         // pick better result
         if (noJump[0] == 0) return jumped;
@@ -268,9 +312,9 @@ boolean shouldJump(GameState state) {
 | Bird always jumps / flies to ceiling | Physics constants wrong (GRAVITY or JUMP_V) | Verify: freefall 10 frames, compare positions |
 | Bird always falls / never jumps | Coordinate system inverted (y=0 bottom not top) | Flip the comparison direction |
 | DFS never finds a path | Y_ALLOWANCE too small or constants wrong | Increase Y_ALLOWANCE; verify physics |
-| DFS times out (agent freezes) | Search depth too large | Reduce DFS_RANGE; check MAX_NODES |
-| Bird passes first pipe, dies on second | DFS finds path but arrival velocity too high | DFS should optimize for min |v| (already does) |
-| Bird oscillates but clips pipe edge | Oscillation band wider than gap | Gap < 28px — reduce offset from 14 to smaller |
+| DFS times out (agent freezes) | Search depth too large | Reduce DFS_RANGE; lower MAX_NODES |
+| Bird passes first pipe, dies on second | DFS_RANGE too small — not enough frames to plan a low-velocity arrival | Increase DFS_RANGE |
+| Bird oscillates but clips pipe edge | Oscillation band (28px) wider than gap | Reduce offset from 14 to smaller value |
 
 ---
 
