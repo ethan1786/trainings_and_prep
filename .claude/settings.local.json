@@ -103,7 +103,9 @@
       "WebFetch(domain:news.ycombinator.com)",
       "WebFetch(domain:web.archive.org)",
       "Bash(javac FlappyAgentTest.java)",
-      "Bash(java FlappyAgentTest)"
+      "Bash(java FlappyAgentTest)",
+      "Bash(javac PhysicsCalc.java)",
+      "Bash(java PhysicsCalc)"
     ]
   }
 }
