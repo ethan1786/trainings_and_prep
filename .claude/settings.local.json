@@ -105,7 +105,11 @@
       "Bash(javac FlappyAgentTest.java)",
       "Bash(java FlappyAgentTest)",
       "Bash(javac PhysicsCalc.java)",
-      "Bash(java PhysicsCalc)"
+      "Bash(java PhysicsCalc)",
+      "Bash(javac OscTest.java)",
+      "Bash(java OscTest)",
+      "Bash(javac OscTest2.java)",
+      "Bash(java OscTest2)"
     ]
   }
 }

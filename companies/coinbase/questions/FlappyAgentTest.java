@@ -18,8 +18,7 @@ public class FlappyAgentTest {
     static int nodeCount;
 
     // Oscillation: offset=10, vThresh=5 gives band=[target-14, target+14], perfectly centered
-    static final double OSC_OFFSET = 10.0;
-    static final double OSC_V_THRESH = 5.0;
+    static final double OSC_OFFSET = 14.0;
     static final int DFS_RANGE = 25;  // can reach anywhere on screen in 25 frames
 
     static boolean shouldJump(double birdY, double birdV, double birdX,
@@ -29,23 +28,25 @@ public class FlappyAgentTest {
         double gapCenter = (gapTop + gapBottom) / 2.0;
         double screenCenter = screenHeight / 2.0;
 
-        int framesToPipeMid = Math.max(
-                (int) ((pipeX + pipeWidth / 2.0 - birdX) / PIPE_SPEED), 0);
+        // Target the leading edge — DFS delivers bird to gapCenter here,
+        // then oscillation keeps it centered through the pipe traversal
+        int framesToPipe = Math.max(
+                (int) ((pipeX - birdX) / PIPE_SPEED), 0);
 
         // === Mode 1: Inside pipe zone → oscillate around gap center ===
-        if (framesToPipeMid <= 0) {
+        if (framesToPipe <= 0) {
             return oscillate(birdY, birdV, gapCenter);
         }
 
         // === Mode 2: Pipe within DFS range → path-find to gap center ===
-        if (framesToPipeMid <= DFS_RANGE) {
+        if (framesToPipe <= DFS_RANGE) {
             // Try tight tolerance first (land near gap center)
             nodeCount = 0;
             double[] best = {-1, Double.MAX_VALUE};
-            dfs(birdY, birdV, false, framesToPipeMid, 0, gapCenter,
+            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter,
                     pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
                     0, false, best, Y_TOLERANCE);
-            dfs(birdY, birdV, true, framesToPipeMid, 0, gapCenter,
+            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter,
                     pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
                     0, true, best, Y_TOLERANCE);
             if (best[0] >= 0) return best[0] == 1;
@@ -54,10 +55,10 @@ public class FlappyAgentTest {
             double gapTol = (gapBottom - gapTop) / 2.0 - MARGIN;
             nodeCount = 0;
             best = new double[]{-1, Double.MAX_VALUE};
-            dfs(birdY, birdV, false, framesToPipeMid, 0, gapCenter,
+            dfs(birdY, birdV, false, framesToPipe, 0, gapCenter,
                     pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
                     0, false, best, gapTol);
-            dfs(birdY, birdV, true, framesToPipeMid, 0, gapCenter,
+            dfs(birdY, birdV, true, framesToPipe, 0, gapCenter,
                     pipeX, pipeWidth, gapTop, gapBottom, birdX, screenHeight,
                     0, true, best, gapTol);
             if (best[0] >= 0) return best[0] == 1;
@@ -71,7 +72,7 @@ public class FlappyAgentTest {
     }
 
     static boolean oscillate(double y, double v, double target) {
-        return y > target + OSC_OFFSET && v > OSC_V_THRESH;
+        return y > target + OSC_OFFSET;
     }
 
     static void dfs(double y, double v, boolean jump, int framesLeft, int depth,
