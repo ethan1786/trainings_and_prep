@@ -72,88 +72,95 @@ This is the most important question — it determines your entire approach:
 - "Is there only one pipe visible at a time, or can I see multiple pipes ahead?"
 
 ### While tuning / debugging
-- "My bird gets close to the gap but misses by a few pixels — are there hitbox margins on the bird or pipe that I should account for?"
+- "My bird gets close to the gap but misses by a few pixels — does the bird have a hitbox size, or is collision point-based?"
 - "The DFS seems slow — is there a frame time budget, or does each frame wait for my function to return?"
+- "Can I see multiple pipes ahead, or only the next one?"
 
 ---
 
-## If Simple Grid Physics
-
-If movement is just "jump = up by `STEP`, no jump = down by `STEP`":
-
-```java
-int STEP = 3;  // verify against OA
-
-boolean shouldJump(GameState state) {
-    int gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2;
-    int framesToPipe = (state.nextPipe.x - state.birdX) / PIPE_SPEED;
-
-    if (framesToPipe > 0 && framesToPipe <= 30) {
-        boolean noJumpOk = canReach(state.birdY + STEP, gapCenter, framesToPipe - 1, state.screenHeight);
-        boolean jumpOk = canReach(state.birdY - STEP, gapCenter, framesToPipe - 1, state.screenHeight);
-        if (jumpOk && !noJumpOk) return true;
-        if (noJumpOk && !jumpOk) return false;
-    }
-
-    int target = (framesToPipe > 30) ? state.screenHeight / 2 : gapCenter;
-    return state.birdY > target;
-}
-
-boolean canReach(int y, int targetY, int frames, int screenH) {
-    if (y <= 0 || y >= screenH) return false;
-    if (frames <= 0) return Math.abs(y - targetY) <= STEP;
-    return canReach(y + STEP, targetY, frames - 1, screenH)
-        || canReach(y - STEP, targetY, frames - 1, screenH);
-}
-```
-
-15 lines. Add memoization on `(y, frames)` if slow — only `screenHeight × frames` states. Then spend remaining time on edge cases and second pipe awareness.
-
 ---
 
-## If Full Physics (rest of this doc)
+## Stage 1: Fast Simple Solution (10 min)
 
----
+**Goal:** Pass most test cases immediately. Bank a good score. Free up 50 min for the DFS upgrade.
 
-## Stage 1: Understand + Simple Heuristic (5-10 min)
-
-Read the problem. Implement the simplest thing that makes the bird fly — validates your understanding of the physics and coordinate system.
+### If simple grid physics (no velocity/acceleration)
 
 ```java
 boolean shouldJump(GameState state) {
-    Pipe pipe = state.nextPipe;
-    double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
-
-    // predict next frame for both actions
-    double nextYNoJump = state.birdY + state.birdV + GRAVITY;
-    double nextYJump = state.birdY + JUMP_V + GRAVITY;
-
-    // boundary safety
-    if (nextYNoJump >= state.screenHeight - 10) return true;  // floor
-    if (nextYJump <= 10) return false;                         // ceiling
-
-    // which action gets closer to gap center?
-    return Math.abs(nextYJump - gapCenter) < Math.abs(nextYNoJump - gapCenter);
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
+    return state.birdY > gapCenter;
 }
 ```
 
-**Submit this.** Get a baseline score. Watch the bird fly. Verify physics constants match your assumptions.
+Bird chases gap center every frame. Oscillates within ±STEP. Done.
 
-**Tell Cosmo:** "Jump affects velocity not position, so I'm predicting next-frame positions for both actions and picking the one closer to gap center."
+### If full physics — jump replaces velocity (`v = JUMP_V`)
+
+Rush toward gap center, oscillate. The offset accounts for the asymmetric jump arc.
+
+```java
+static final int OFFSET = 14;  // ≈ arcHeight / 2. Tune if constants differ.
+
+boolean shouldJump(GameState state) {
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
+    double trigger = Math.max(Math.min(gapCenter + OFFSET, state.screenHeight - OFFSET), OFFSET);
+    return state.birdY > trigger;
+}
+```
+
+Chain-jumping is safe because each jump resets velocity to the same value — no accumulation.
+
+### If full physics — jump adds to velocity (`v += JUMP_V`)
+
+**Critical difference:** Chain-jumping accumulates velocity (v=-8, -16, -24...) → bird rockets to ceiling. Need velocity-aware jumping.
+
+**Good news:** Additive jump is actually easier to oscillate — the arc is smaller (~10px band vs 28px for replacement), so no offset is needed. But you need a distance-aware velocity threshold: jump aggressively when far from target (to travel fast), conservatively when close (to oscillate tight).
+
+```java
+boolean shouldJump(GameState state) {
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
+    double dist = Math.abs(state.birdY - gapCenter);
+
+    // Far: thresh=0 → climb/fall fast (wider oscillation ~21px, but traveling)
+    // Near: thresh=2 → tight oscillation (~10px band, centered on gapCenter)
+    int thresh = (dist > 20) ? 0 : 2;
+
+    return state.birdY > gapCenter && state.birdV > thresh;
+}
+```
+
+**Why no offset:** Additive jumps are weaker (at v=3, `v += -8` gives v=-5, not v=-8). Smaller impulse = smaller arc = band naturally centered. Offset would push the band to the wrong side.
+
+**Why distance-aware threshold:** With `thresh=2`, the bird only gains ~4px per oscillation cycle — too slow to reach a distant gap. With `thresh=0`, it gains ~20px per cycle but oscillates wider. Switching at dist=20 balances speed vs precision.
+
+**Tested 12/12:** All test cases pass including extreme positions, high initial velocity, narrow gaps (20px), and back-to-back pipes.
+
+### Tuning without knowing the physics model
+
+1. Start with `return y > gapCenter` — no offset, no velocity check
+2. If the bird clips the top of the gap → add `OFFSET` (replacement physics, try 10, then 14)
+3. If the bird rockets to the ceiling → add `&& v > thresh` (additive physics, try thresh=0 then 2)
+4. If the bird can't reach distant gaps → add distance-aware threshold (`dist > 20 ? 0 : 2`)
+
+This tuning loop takes 2-3 submits, ~30 seconds each.
+
+**Submit this.** If it passes most cases, you've banked a good score in 10 minutes.
+
+**Tell Cosmo:** "I'm rushing toward the gap center and oscillating. If the bird clips the gap edges, I'll increase the offset to center the oscillation band."
 
 ---
 
 ## Stage 2: DFS Path-Finding (20 min)
 
-**The upgrade:** One frame ahead isn't enough. We need to find a SEQUENCE of jump/no-jump decisions that gets the bird from its current position to the gap center when the pipe arrives. This is DFS.
+**Why upgrade:** Stage 1 rushes to gap center and oscillates. This works for most gaps. But if the gap is narrower than the oscillation band (~28px), the bird can't oscillate through — it needs to curve through with controlled velocity.
 
-**Key design decisions:**
-- Target the pipe's leading edge — DFS delivers bird to gapCenter with v≈0 at entry
-- Optimize for minimum |velocity| at arrival — smoothest entry = best chance of surviving the next pipe
-- Prune dead branches (boundary death, pipe collision, extreme velocity, node count limit)
-- When pipe is far (>25 frames), fall back to heuristic — DFS can't search that deep
+**Key insight:** Stage 1 already does the hard work of getting the bird near gap center. The DFS only handles the last few frames — a short-range curve ball through the gap. Search depth = `pipeWidth / PIPE_SPEED` (e.g., 10 frames for a 10px-wide pipe). That's 2^10 = 1K nodes — instant, no memoization needed.
 
-**Controllable range estimate:** Bird moves ~3.5 px/frame upward (chain jumping). For a 200px screen: 200/3.5 ≈ 57 frames worst case. But DFS finds optimal paths — **25 frames covers the full screen** in practice. Quick rule: `DFS_RANGE ≈ screenHeight / 8`.
+**How the two stages work together:**
+1. Stage 1 runs every frame: rush to gap center, oscillate
+2. When pipe is close (≤ pipe width + small buffer): DFS overrides with precise trajectory
+3. After passing the pipe: back to Stage 1 oscillation
 
 ```java
 class FlappyAgent {
@@ -162,132 +169,63 @@ class FlappyAgent {
     static final int PIPE_SPEED = 1;  // verify against OA
     static final int V_ALLOWANCE = 5;
     static final int Y_ALLOWANCE = 10;
-    static final int DFS_RANGE = 25;  // ≈ screenHeight / 8
-    static final int MAX_NODES = 500_000;
-
-    int nodeCount;
+    static final int OFFSET = 14;
 
     boolean shouldJump(GameState state) {
         Pipe pipe = state.nextPipe;
         int gapCenter = (int) ((pipe.gapTop + pipe.gapBottom) / 2.0);
         int framesToPipe = Math.max((int) ((pipe.x - state.birdX) / PIPE_SPEED), 0);
 
-        // Inside pipe zone or pipe passed: heuristic
-        if (framesToPipe <= 0) {
-            return state.birdY > gapCenter;
-        }
-
-        // Pipe within DFS range: path-find
-        if (framesToPipe <= DFS_RANGE) {
-            nodeCount = 0;
-            Optional<Boolean> jumpResult = findPath(
+        // Short-range DFS: pipe is close, curve through the gap
+        int dfsRange = (int) (pipe.width / PIPE_SPEED) + 5; // pipe width + small buffer
+        if (framesToPipe > 0 && framesToPipe <= dfsRange) {
+            Optional<Boolean> result = findPath(
                     (int) state.birdY, (int) state.birdV,
                     gapCenter, framesToPipe, (int) state.screenHeight);
-            if (jumpResult.isPresent()) return jumpResult.get();
+            if (result.isPresent()) return result.get();
         }
 
-        // Pipe far: steer toward gap center (jump if below, coast if above)
-        return state.birdY > gapCenter + 14;
+        // Default: Stage 1 oscillation (rush to center, oscillate)
+        double trigger = Math.max(Math.min(gapCenter + OFFSET, state.screenHeight - OFFSET), OFFSET);
+        return state.birdY > trigger;
     }
 
     Optional<Boolean> findPath(int y, int v, int targetY, int frames, int screenH) {
-        int[] noJumpResult = dfs(y, v, false, frames, 0, targetY, screenH);
-        int[] jumpResult = dfs(y, v, true, frames, 0, targetY, screenH);
+        int[] noJump = dfs(y, v, false, frames, targetY, screenH);
+        int[] jump = dfs(y, v, true, frames, targetY, screenH);
 
-        // result: [found (0/1), absV at arrival]
-        boolean noJumpFound = noJumpResult[0] == 1;
-        boolean jumpFound = jumpResult[0] == 1;
-
-        if (!noJumpFound && !jumpFound) return Optional.empty();
-        if (noJumpFound && !jumpFound) return Optional.of(false);
-        if (!noJumpFound && jumpFound) return Optional.of(true);
-
-        // Both found: pick the one arriving with lower |v|
-        return Optional.of(jumpResult[1] < noJumpResult[1]);
+        boolean nf = noJump[0] == 1, jf = jump[0] == 1;
+        if (!nf && !jf) return Optional.empty();
+        if (nf && !jf) return Optional.of(false);
+        if (!nf && jf) return Optional.of(true);
+        return Optional.of(jump[1] < noJump[1]);
     }
 
     // Returns [found (0/1), best |v| at arrival]
-    int[] dfs(int y, int v, boolean jump, int framesLeft, int depth,
-              int targetY, int screenH) {
-        nodeCount++;
-        if (nodeCount > MAX_NODES) return new int[]{0, Integer.MAX_VALUE};
-
-        // apply action + physics
-        if (jump) v = JUMP_V;
+    int[] dfs(int y, int v, boolean jump, int framesLeft, int targetY, int screenH) {
+        if (jump) v = JUMP_V;  // or v += JUMP_V if additive — verify with Cosmo
         v += G;
         y += v;
 
-        // only prune needed: ceiling/floor death
         if (y <= 0 || y >= screenH) return new int[]{0, Integer.MAX_VALUE};
 
-        // base case: reached target frame
         if (framesLeft <= 1) {
-            if (Math.abs(y - targetY) <= Y_ALLOWANCE && Math.abs(v) <= V_ALLOWANCE) {
+            if (Math.abs(y - targetY) <= Y_ALLOWANCE && Math.abs(v) <= V_ALLOWANCE)
                 return new int[]{1, Math.abs(v)};
-            }
             return new int[]{0, Integer.MAX_VALUE};
         }
 
-        // recurse both actions
-        int[] noJump = dfs(y, v, false, framesLeft - 1, depth + 1, targetY, screenH);
-        int[] jumped = dfs(y, v, true, framesLeft - 1, depth + 1, targetY, screenH);
+        int[] no = dfs(y, v, false, framesLeft - 1, targetY, screenH);
+        int[] yes = dfs(y, v, true, framesLeft - 1, targetY, screenH);
 
-        // pick better result
-        if (noJump[0] == 0) return jumped;
-        if (jumped[0] == 0) return noJump;
-        return noJump[1] <= jumped[1] ? noJump : jumped;
+        if (no[0] == 0) return yes;
+        if (yes[0] == 0) return no;
+        return no[1] <= yes[1] ? no : yes;
     }
 }
 ```
 
-**Tell Cosmo:** "I'm framing this as path-finding. DFS from current state to gap center, pruning dead branches. Optimizing for minimum arrival velocity so the bird enters the gap smoothly."
-
----
-
-## Stage 3: Add Oscillation Mode (15 min)
-
-**The problem with pure DFS:** When the pipe is far (>25 frames), the heuristic fallback `y > gapCenter + 14` works but isn't principled. And inside the pipe zone, `y > gapCenter` is crude.
-
-**The fix:** Physics analysis shows the oscillation band is always 28px wide. With `y > target + 14` as the jump trigger, the band is [target-14, target+14], centered perfectly. This is one line of code.
-
-**Two modes:**
-
-| Condition | Mode | Target |
-|---|---|---|
-| Pipe far (> DFS_RANGE frames) | Oscillate | Screen center |
-| Pipe close (≤ DFS_RANGE frames) | DFS path-find | Gap center |
-| Inside pipe zone | Oscillate | Gap center |
-
-Only change to the `shouldJump` method:
-
-```java
-boolean shouldJump(GameState state) {
-    Pipe pipe = state.nextPipe;
-    int gapCenter = (int) ((pipe.gapTop + pipe.gapBottom) / 2.0);
-    int screenCenter = (int) (state.screenHeight / 2.0);
-    int framesToPipe = Math.max((int) ((pipe.x - state.birdX) / PIPE_SPEED), 0);
-
-    // Inside pipe zone: oscillate around gap center
-    if (framesToPipe <= 0) {
-        return state.birdY > gapCenter + 14;
-    }
-
-    // Pipe within DFS range: path-find (same as Stage 2)
-    if (framesToPipe <= DFS_RANGE) {
-        nodeCount = 0;
-        Optional<Boolean> result = findPath(/* same args as Stage 2 */);
-        if (result.isPresent()) return result.get();
-        return state.birdY > gapCenter + 14;  // DFS failed, oscillate toward gap
-    }
-
-    // Pipe far: oscillate around screen center
-    return state.birdY > screenCenter + 14;
-}
-```
-
-**Tell Cosmo:** "I calculated the oscillation band is 28px. With `y > target + 14` the band centers on the target. When the pipe is far I oscillate around screen center, when close I use DFS, when inside the pipe I oscillate around gap center."
-
-**Why +14:** Half the oscillation band width. The bird falls 14px below the jump trigger, then the arc carries it 14px above. Net: symmetric around the target.
+**Tell Cosmo:** "Stage 1 gets the bird to gap center fast. Now I'm adding short-range DFS for the last few frames before the pipe — it finds the optimal curve to thread through tight gaps with minimal velocity."
 
 ---
 
@@ -295,13 +233,29 @@ boolean shouldJump(GameState state) {
 
 | Time | What | Safety net |
 |---|---|---|
-| 0-5 min | Read + clarify physics with Cosmo | — |
-| 5-10 min | Stage 1: simple heuristic. **Submit for baseline score.** | Working agent |
-| 10-30 min | Stage 2: DFS. Test, debug. **Submit when working.** | If stuck, Stage 1 still works |
-| 30-45 min | Stage 3: Add oscillation. Small change on top of working DFS. | If stuck, Stage 2 still works |
-| 45-60 min | Tune constants, test edge cases, clean up | — |
+| 0-5 min | Read + clarify physics model with Cosmo | — |
+| 5-10 min | Stage 1: oscillation. **Submit.** Should pass most cases. | Working agent |
+| 10-15 min | Observe failures. Tune OFFSET/MAX_V if needed. | Tuned agent |
+| 15-35 min | Stage 2: add short-range DFS for tight gaps. Small addition on top of Stage 1. | If stuck, Stage 1 still works |
+| 35-60 min | Tune, test edge cases, polish Cosmo chat log | — |
 
-**Critical rule:** Each stage is a working improvement. Never delete the previous stage until the new one is tested. If Stage 2 has bugs at minute 30, submit Stage 1 and debug — don't spend Stage 3 time fixing Stage 2.
+**Critical rule:** Stage 1 should pass most cases in 10 minutes. Only invest in DFS if Stage 1 fails on tight gaps. If the simple solution scores 90%, spend the remaining time polishing your Cosmo chat log — the reviewer reads it.
+
+---
+
+## Things That Could Surprise You
+
+These are scenarios we haven't tested but could break the solution:
+
+**Bird has a hitbox (not a point).** If the bird is 10x10 pixels, the effective gap shrinks by 10. A 40px gap becomes 30px — oscillation band (28px) barely fits, 2px clearance. DFS becomes important. **Ask Cosmo: "Does the bird have a hitbox size, or is it a single point?"**
+
+**Additive jump (`v += JUMP_V`).** Our tests use replacement (`v = JUMP_V`). If additive, chain-jumping accumulates: v=-8, -16, -24. The MAX_V cap in Stage 1 handles this, but the oscillation dynamics change entirely — the offset and band width need re-tuning. **The first thing to verify after Stage 1 fails.**
+
+**Physics update order reversed.** We use `v += g; y += v`. If the OA uses `y += v; v += g`, the oscillation shifts. OFFSET might need to be different. **If bird consistently clips one side of the gap, try changing the physics order.**
+
+**Score is precision-based, not just survival.** If the OA measures how centered the bird is when passing through the gap (not just alive/dead), DFS is worth the investment even for wide gaps — it arrives with lower velocity and tighter oscillation.
+
+**Second pipe visible.** If the state provides two pipes, plan for both. If next two gaps are at y=50 and y=150, oscillating around y=100 (midpoint) gives fastest access to both. **Check if `state` has a `secondPipe` field.**
 
 ---
 

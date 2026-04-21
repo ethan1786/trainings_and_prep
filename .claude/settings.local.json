@@ -109,7 +109,19 @@
       "Bash(javac OscTest.java)",
       "Bash(java OscTest)",
       "Bash(javac OscTest2.java)",
-      "Bash(java OscTest2)"
+      "Bash(java OscTest2)",
+      "Bash(javac FlappySimpleTest.java)",
+      "Bash(java FlappySimpleTest)",
+      "Bash(javac AdditiveTest.java)",
+      "Bash(java AdditiveTest)",
+      "Bash(javac AdditiveAgent.java)",
+      "Bash(java AdditiveAgent)",
+      "Bash(javac T02Debug.java)",
+      "Bash(java T02Debug)",
+      "Bash(javac AdditiveAgent2.java)",
+      "Bash(java AdditiveAgent2)",
+      "Bash(javac AdditiveAgent3.java)",
+      "Bash(java AdditiveAgent3)"
     ]
   }
 }

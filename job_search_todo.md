@@ -81,6 +81,16 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 
 ---
 
+### Cherry — Director Inbound, Chat Next Week
+Director of Eng (Tim Way, ex-Lyft) reached out directly. Staff Full-Stack role, fintech (BNPL for healthcare).
+$280K cash + equity ($500-600K total comp). Private company, remote.
+- [ ] 20-min chat with Tim next week (he'll propose time)
+- Primary value: competing offer for negotiation leverage with Coinbase/Netflix
+- Concerns: private equity risk, BNPL macro risk, React/TypeScript/Node stack, early morning Europe calls
+- Don't invest heavy prep — keep it lightweight
+
+---
+
 ## On Hold — Monitor Periodically
 
 ### Stripe
@@ -126,6 +136,7 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 | **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Applied — waiting** |
 | **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
 | **NVIDIA** | Senior (Staff-adjacent) | Cloud Software Engineer | Done ✅ | — | Yes (cold) | No referral | **Applied — waiting** |
+| **Cherry** | Staff | Full-Stack (fintech BNPL) | — | — | Inbound | Director of Eng | **Chat next week** |
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
