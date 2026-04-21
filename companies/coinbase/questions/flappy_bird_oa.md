@@ -384,74 +384,73 @@ class FlappyAgent {
 
 ## Stage 3: DFS Path-Finding (optional, if time permits)
 
-**Why upgrade from simulation:** The simulation assumes freefall — no future jumps after frame 0. For very tight gaps or when the bird needs precise velocity control, DFS finds the exact optimal jump sequence.
+**Why upgrade from simulation:** The simulation assumes freefall — no future jumps after frame 0. For very tight gaps, DFS explores all possible jump sequences and finds the actual optimal path. It's the same principle as the simulation (compare scores) but searches deeper.
+
+**The spectrum:**
+```
+Simulation = DFS with depth 1, evaluate by 25-frame freefall scoring
+DFS        = DFS with depth N, evaluate by single-frame scoring at leaf
+```
+Same algorithm, different tradeoff: simulation trades search depth for evaluation quality, DFS trades evaluation quality for search depth.
 
 **Key insight:** Stage 1 already gets the bird near gap center. The DFS only handles the last few frames — a short-range curve ball through the gap. Search depth = `pipeWidth / PIPE_SPEED` + small buffer. That's 2^15 max = 32K nodes — instant, no memoization needed.
 
+**Score-based DFS** (simpler than the binary found/not-found version — same scoring principle as simulation):
+
 ```java
 class FlappyAgent {
-    static final int G = 1;           // verify against OA
-    static final int JUMP_V = -8;     // verify against OA
-    static final int PIPE_SPEED = 1;  // verify against OA
-    static final int V_ALLOWANCE = 5;
-    static final int Y_ALLOWANCE = 10;
-    static final int OFFSET = 14;
+    static final int G = 1;
+    static final int JUMP_V = -8;
+    static final int PIPE_SPEED = 1;
+    static final int OFFSET = 14;  // or 18 for Order B physics
 
     boolean shouldJump(GameState state) {
         Pipe pipe = state.nextPipe;
         int gapCenter = (int) ((pipe.gapTop + pipe.gapBottom) / 2.0);
         int framesToPipe = Math.max((int) ((pipe.x - state.birdX) / PIPE_SPEED), 0);
 
-        // Short-range DFS: pipe is close, curve through the gap
-        int dfsRange = (int) (pipe.width / PIPE_SPEED) + 5; // pipe width + small buffer
+        // Short-range DFS: pipe is close, find optimal path through the gap
+        int dfsRange = (int) (pipe.width / PIPE_SPEED) + 5;
         if (framesToPipe > 0 && framesToPipe <= dfsRange) {
-            Optional<Boolean> result = findPath(
-                    (int) state.birdY, (int) state.birdV,
-                    gapCenter, framesToPipe, (int) state.screenHeight);
-            if (result.isPresent()) return result.get();
+            double noJumpScore = dfs((int) state.birdY, (int) state.birdV,
+                    false, framesToPipe, (int) state.screenHeight, gapCenter);
+            double jumpScore = dfs((int) state.birdY, (int) state.birdV,
+                    true, framesToPipe, (int) state.screenHeight, gapCenter);
+            return jumpScore > noJumpScore;
         }
 
-        // Default: Stage 1 oscillation (rush to center, oscillate)
-        double trigger = Math.max(Math.min(gapCenter + OFFSET, state.screenHeight - OFFSET), OFFSET);
-        return state.birdY > trigger;
+        // Default: Stage 1 oscillation
+        return state.birdY > gapCenter + OFFSET;
     }
 
-    Optional<Boolean> findPath(int y, int v, int targetY, int frames, int screenH) {
-        int[] noJump = dfs(y, v, false, frames, targetY, screenH);
-        int[] jump = dfs(y, v, true, frames, targetY, screenH);
+    double dfs(int y, int v, boolean jump, int framesLeft, int screenH, int gapCenter) {
+        if (jump) v = JUMP_V;  // or v += JUMP_V if additive
+        y += v; v += G;        // Order B — swap if Order A
 
-        boolean nf = noJump[0] == 1, jf = jump[0] == 1;
-        if (!nf && !jf) return Optional.empty();
-        if (nf && !jf) return Optional.of(false);
-        if (!nf && jf) return Optional.of(true);
-        return Optional.of(jump[1] < noJump[1]);
-    }
+        // death
+        if (y <= 0 || y >= screenH) return -10000 + framesLeft;
 
-    // Returns [found (0/1), best |v| at arrival]
-    int[] dfs(int y, int v, boolean jump, int framesLeft, int targetY, int screenH) {
-        if (jump) v = JUMP_V;  // or v += JUMP_V if additive — verify with Cosmo
-        v += G;
-        y += v;
-
-        if (y <= 0 || y >= screenH) return new int[]{0, Integer.MAX_VALUE};
-
+        // leaf: score by center proximity + velocity penalty
         if (framesLeft <= 1) {
-            if (Math.abs(y - targetY) <= Y_ALLOWANCE && Math.abs(v) <= V_ALLOWANCE)
-                return new int[]{1, Math.abs(v)};
-            return new int[]{0, Integer.MAX_VALUE};
+            return -Math.abs(y - gapCenter) - Math.abs(v) * 0.5;
         }
 
-        int[] no = dfs(y, v, false, framesLeft - 1, targetY, screenH);
-        int[] yes = dfs(y, v, true, framesLeft - 1, targetY, screenH);
-
-        if (no[0] == 0) return yes;
-        if (yes[0] == 0) return no;
-        return no[1] <= yes[1] ? no : yes;
+        // recurse: pick the better future
+        double noJump = dfs(y, v, false, framesLeft - 1, screenH, gapCenter);
+        double jumped = dfs(y, v, true, framesLeft - 1, screenH, gapCenter);
+        return Math.max(noJump, jumped);
     }
 }
 ```
 
-**Tell Cosmo:** "Stage 1 gets the bird to gap center fast. Now I'm adding short-range DFS for the last few frames before the pipe — it finds the optimal curve to thread through tight gaps with minimal velocity."
+**What's simpler vs the old binary DFS:**
+- Returns `double` score instead of `int[]` — no found/not-found tracking
+- No Y_ALLOWANCE, V_ALLOWANCE — score is continuous, no threshold tuning
+- No `Optional<Boolean>`, no `findPath` wrapper — just compare two scores directly
+- Same scoring principle as simulation: center proximity matters, velocity is a penalty
+- Death returns `-10000 + framesLeft` (same as simulation: survived longer = less bad)
+
+**Tell Cosmo:** "The DFS explores all jump/no-jump sequences for the last few frames before the pipe. Each leaf is scored by proximity to gap center and velocity. It picks the first action of the best-scoring path."
 
 ---
 
