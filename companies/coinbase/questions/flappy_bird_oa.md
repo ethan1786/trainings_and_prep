@@ -25,23 +25,41 @@
 
 ### Key Physics Numbers (G=1, JV=-8)
 
+The physics update ORDER changes everything:
+
+| Metric | Order A: `v+=g, y+=v` | Order B: `y+=v, v+=g` |
+|---|---|---|
+| Arc height (replacement) | 28px | 36px |
+| Oscillation band | 28px | 36px |
+| OFFSET needed | 14 | 18 |
+| Band fits 40px gap? | Yes (6px clearance/side) | **Barely (2px/side)** |
+
+**Order B (from a recent test-taker's blog) has a 36px band that barely fits a 40px gap.** This is why the blog used the simulation approach — simple oscillation clips the gap edges with Order B physics.
+
 | Metric | Replacement | Additive |
 |---|---|---|
-| Arc height from rest | 28px | 28px (but rarely starts from rest) |
-| Arc height at v=3 | 28px (same — v resets) | 15px (v=-5, weaker) |
-| Oscillation band | 28px | 10px |
-| OFFSET needed | 14 (= band/2) | 0 (band already centered) |
-| Velocity threshold | none | 2 (near target), 0 (far from target) |
-| Period | ~15 frames | ~8 frames |
-| Controllable range (25 frames) | ~400px | varies by v |
+| Oscillation band (Order A) | 28px | 10px |
+| Oscillation band (Order B) | 36px | ~12px |
+| OFFSET needed (Order A) | 14 | 0 |
+| OFFSET needed (Order B) | 18 | 0 |
+| Velocity threshold | none | 2 (near), 0 (far) |
 
 ### OFFSET Formula
 
 `OFFSET ≈ arcHeight / 2`
 
-For replacement: arc = sum of 1+2+...+|JV|-1 = |JV|×(|JV|-1)/2. With JV=-8: 8×7/2 = 28. OFFSET = 14.
+Arc height depends on physics order:
+- Order A (`v+=g, y+=v`): arc = |JV|×(|JV|-1)/2 = 8×7/2 = **28**. OFFSET = 14.
+- Order B (`y+=v, v+=g`): arc = |JV|×(|JV|+1)/2 = 8×9/2 = **36**. OFFSET = 18.
 
-Don't memorize — if you know G and JV, compute: the bird rises for |JV/G| frames, covering |JV|×(|JV|-1)/(2×G) px.
+Don't memorize — let the bird freefall or jump once and measure the arc. Adjust OFFSET from there.
+
+### When simple oscillation ISN'T enough
+
+If the oscillation band is close to the gap size (e.g., 36px band vs 40px gap = 2px margin), simple oscillation clips edges. Options:
+1. **Simulation approach** (proven by test-taker): simulate 25 frames for both jump/no-jump, score by survival + center proximity, pick better action. No inner policy needed if margins are tight enough that freefall already stays close.
+2. **Short-range DFS**: finds exact path through the gap with minimal velocity.
+3. **Tighter oscillation**: use `y > target + OFFSET && v >= vThresh` — the velocity threshold delays the jump, producing a smaller arc. But this may be too slow to reach distant gaps.
 
 ### Gotchas
 
@@ -63,21 +81,74 @@ Don't memorize — if you know G and JV, compute: the bird rises for |JV/G| fram
 Read problem → Clarify physics model with Cosmo
   │
   ├─ Grid (up/down fixed amount)
-  │   └─ return y > gapCenter              ← done in 2 min
+  │   └─ return y > gapCenter                     ← done in 2 min
   │
   ├─ Replacement (v = JV)
-  │   ├─ Stage 1: return y > gapCenter + 14   ← 10 min
-  │   └─ Stage 2: + short-range DFS            ← 30 min
+  │   ├─ Stage 1: return y > gapCenter + OFFSET   ← 10 min
+  │   │   ├─ Works (gap > band + 10px margin)? → done, tune OFFSET
+  │   │   └─ Clips edges (gap ≈ band)? → Stage 2
+  │   └─ Stage 2: + short-range DFS or simulation ← 30 min
   │
   ├─ Additive (v += JV)
   │   ├─ Stage 1: return y > gapCenter && v > (dist>20 ? 0 : 2)  ← 10 min
-  │   └─ Stage 2: + short-range DFS            ← 30 min
+  │   └─ Stage 2: + short-range DFS               ← 30 min
   │
   └─ Unknown → start with y > gapCenter, observe, tune
       ├─ Clips top of gap → add OFFSET (replacement)
       ├─ Rockets to ceiling → add v > thresh (additive)
+      ├─ Clips both edges (tight gap) → switch to simulation or DFS
       └─ Neither → grid physics, already done
 ```
+
+### Simulation Approach (fallback for tight margins)
+
+If simple oscillation clips gap edges (band ≈ gap size), use the simulation approach from the test-taker's blog. This compares 25-frame trajectories for jump vs no-jump and picks the higher-scoring one:
+
+```java
+boolean shouldJump(GameState state) {
+    // emergency: near floor
+    if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
+
+    double[] jumpScore = simulate(state, true);
+    double[] noopScore = simulate(state, false);
+
+    // survival priority: alive > dead
+    if (jumpScore[0] > 0 && noopScore[0] <= 0) return true;
+    if (noopScore[0] > 0 && jumpScore[0] <= 0) return false;
+
+    return jumpScore[1] > noopScore[1];
+}
+
+// returns [alive (1/0), score]
+double[] simulate(GameState state, boolean jumpNow) {
+    double y = state.birdY, v = state.birdV;
+    if (jumpNow) v = JUMP_V;
+
+    double score = 0;
+    int survived = 0;
+    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
+
+    for (int step = 0; step < 25; step++) {
+        y += v; v += GRAVITY;  // Order B physics (verify!)
+
+        if (y <= 0 || y >= state.screenHeight)
+            return new double[]{0, -1000 + survived};
+
+        double pipeX = state.nextPipe.x - step * PIPE_SPEED;
+        if (pipeX <= state.birdX && state.birdX <= pipeX + state.nextPipe.width) {
+            double clearance = Math.min(y - state.nextPipe.gapTop, state.nextPipe.gapBottom - y);
+            if (clearance <= 0) return new double[]{0, -1000 + survived};
+            score += 20 - Math.abs(y - gapCenter) + clearance * 0.3;
+        } else {
+            score += 5 - Math.abs(y - gapCenter) * 0.15;
+        }
+        survived++;
+    }
+    return new double[]{1, score};
+}
+```
+
+**When to switch from oscillation to simulation:** If Stage 1 passes most tests but clips edges on some, add the simulation as a refinement. The simulation handles tight margins that oscillation can't. It's ~30 lines on top of Stage 1.
 
 ---
 
@@ -224,16 +295,98 @@ This tuning loop takes 2-3 submits, ~30 seconds each.
 
 ---
 
-## Stage 2: DFS Path-Finding (20 min)
+## Stage 2: Simulation (20 min) — Proven on actual OA
 
-**Why upgrade:** Stage 1 rushes to gap center and oscillates. This works for most gaps. But if the gap is narrower than the oscillation band (~28px), the bird can't oscillate through — it needs to curve through with controlled velocity.
+**Why upgrade:** With Order B physics (`y+=v, v+=g`), the oscillation band is 36px. If the gap is 40px, that's only 2px clearance per side — simple oscillation clips edges. The simulation approach was used by a test-taker who passed the actual Coinbase OA a few weeks ago.
 
-**Key insight:** Stage 1 already does the hard work of getting the bird near gap center. The DFS only handles the last few frames — a short-range curve ball through the gap. Search depth = `pipeWidth / PIPE_SPEED` (e.g., 10 frames for a 10px-wide pipe). That's 2^10 = 1K nodes — instant, no memoization needed.
+**How it works:** Each frame, simulate 25 frames of freefall for both "jump now" and "don't jump now". Score each trajectory by survival + proximity to gap center. Pick the higher score. No inner policy, no DFS — just a for loop.
 
-**How the two stages work together:**
-1. Stage 1 runs every frame: rush to gap center, oscillate
-2. When pipe is close (≤ pipe width + small buffer): DFS overrides with precise trajectory
-3. After passing the pipe: back to Stage 1 oscillation
+**Why simulation beats DFS here:**
+- Less code (~30 lines vs ~40 lines), no recursion, fewer bugs under pressure
+- Handles unknown physics naturally — just run the physics forward, no formula needed
+- Proven to work on the actual OA
+- Scoring by clearance naturally avoids tight margins
+
+```java
+class FlappyAgent {
+    static final double GRAVITY = 1.0;
+    static final double JUMP_V = -8.0;
+    static final double PIPE_SPEED = 1.0;
+    static final int LOOKAHEAD = 25;
+
+    boolean shouldJump(GameState state) {
+        // emergency: near floor and falling
+        if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
+
+        // emergency: near pipe and too low
+        Pipe pipe = state.nextPipe;
+        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
+        double distX = pipe.x - state.birdX;
+        if (distX > 0 && distX <= 18 && state.birdY > gapCenter + 3 && state.birdV >= 0)
+            return true;
+
+        // simulate both actions, pick better score
+        double[] jumpRes = simulate(state, true);
+        double[] noopRes = simulate(state, false);
+
+        boolean jumpAlive = jumpRes[0] > 0, noopAlive = noopRes[0] > 0;
+        if (!noopAlive && jumpAlive) return true;
+        if (noopAlive && !jumpAlive) return false;
+        return jumpRes[1] > noopRes[1];
+    }
+
+    // returns [alive (1/0), score]
+    double[] simulate(GameState state, boolean jumpNow) {
+        double y = state.birdY, v = state.birdV;
+        Pipe pipe = state.nextPipe;
+        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
+
+        if (jumpNow) v = JUMP_V;  // or v += JUMP_V if additive
+
+        double score = 0;
+        double minClearance = Double.MAX_VALUE;
+        int survived = 0;
+
+        for (int step = 0; step < LOOKAHEAD; step++) {
+            // physics — VERIFY ORDER against OA
+            y += v; v += GRAVITY;  // Order B (from test-taker blog)
+            // v += GRAVITY; y += v;  // Order A (alternative — test both)
+
+            // boundary death
+            if (y <= 3 || y >= state.screenHeight - 3)
+                return new double[]{0, -1000 + survived};
+
+            // pipe zone check
+            double pipeX = pipe.x - step * PIPE_SPEED;
+            if (pipeX <= state.birdX && state.birdX <= pipeX + pipe.width) {
+                double clearance = Math.min(y - pipe.gapTop, pipe.gapBottom - y);
+                minClearance = Math.min(minClearance, clearance);
+                if (clearance <= 3)
+                    return new double[]{0, -1000 + survived};
+                score += 20.0 - Math.abs(y - gapCenter) + clearance * 0.3;
+            } else {
+                score += 5.0 - Math.abs(y - gapCenter) * 0.15;
+            }
+            survived++;
+        }
+
+        if (minClearance < Double.MAX_VALUE) score += minClearance * 0.5;
+        return new double[]{1, score};
+    }
+}
+```
+
+**Tell Cosmo:** "I'm simulating 25 frames for both jump and no-jump, scoring by survival and proximity to gap center. This handles tight margins better than pure oscillation."
+
+**Known limitation:** The simulation assumes pure freefall after the initial decision (no future jumps). This works when gaps have enough margin, but for very tight gaps the simulation may not distinguish well between jump and no-jump since both freefall trajectories miss. That's when DFS (Stage 3) helps.
+
+---
+
+## Stage 3: DFS Path-Finding (optional, if time permits)
+
+**Why upgrade from simulation:** The simulation assumes freefall — no future jumps after frame 0. For very tight gaps or when the bird needs precise velocity control, DFS finds the exact optimal jump sequence.
+
+**Key insight:** Stage 1 already gets the bird near gap center. The DFS only handles the last few frames — a short-range curve ball through the gap. Search depth = `pipeWidth / PIPE_SPEED` + small buffer. That's 2^15 max = 32K nodes — instant, no memoization needed.
 
 ```java
 class FlappyAgent {
@@ -308,11 +461,12 @@ class FlappyAgent {
 |---|---|---|
 | 0-5 min | Read + clarify physics model with Cosmo | — |
 | 5-10 min | Stage 1: oscillation. **Submit.** Should pass most cases. | Working agent |
-| 10-15 min | Observe failures. Tune OFFSET/MAX_V if needed. | Tuned agent |
-| 15-35 min | Stage 2: add short-range DFS for tight gaps. Small addition on top of Stage 1. | If stuck, Stage 1 still works |
-| 35-60 min | Tune, test edge cases, polish Cosmo chat log | — |
+| 10-15 min | Observe failures. Tune OFFSET if needed. | Tuned agent |
+| 15-35 min | Stage 2: simulation (if Stage 1 clips edges). **Proven on actual OA.** | If stuck, Stage 1 still works |
+| 35-50 min | Stage 3: DFS (if simulation can't handle very tight gaps). Optional. | If stuck, Stage 2 still works |
+| 50-60 min | Tune, test edge cases, polish Cosmo chat log | — |
 
-**Critical rule:** Stage 1 should pass most cases in 10 minutes. Only invest in DFS if Stage 1 fails on tight gaps. If the simple solution scores 90%, spend the remaining time polishing your Cosmo chat log — the reviewer reads it.
+**Critical rule:** Each stage is a working improvement. The simulation (Stage 2) is the highest-value upgrade — it's what the test-taker used to pass. DFS (Stage 3) is theoretical overkill unless gaps are extremely tight. If Stage 2 works, spend remaining time on Cosmo chat quality, not more engineering.
 
 ---
 

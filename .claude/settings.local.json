@@ -121,7 +121,11 @@
       "Bash(javac AdditiveAgent2.java)",
       "Bash(java AdditiveAgent2)",
       "Bash(javac AdditiveAgent3.java)",
-      "Bash(java AdditiveAgent3)"
+      "Bash(java AdditiveAgent3)",
+      "Bash(javac PhysicsOrder.java)",
+      "Bash(java PhysicsOrder)",
+      "Bash(javac OrderBTest.java)",
+      "Bash(java OrderBTest)"
     ]
   }
 }

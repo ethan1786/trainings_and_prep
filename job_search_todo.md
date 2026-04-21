@@ -64,17 +64,16 @@ These have been quiet for 1+ weeks. Time to act.
 | **Circle** | Staff SWE, messaged VP of Eng | 1+ week | VP of Eng | **Send light follow-up to VP by Apr 19** if no response |
 | **Airbnb** | 3 backend roles (cold, Apr 14) | 2 days | Know HM (Whitney Rogers) | Too early. Follow up ~Apr 28 if no response. Find recruiter on GraphQL Platform org. |
 
-**Netflix — waiting on Preetam, apply cold if no response**
-Sent message with 3 L5 target roles:
-- #1: **Experimentation Platform** (JR39712) — top pick, parity testing + feature flags
-  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer--L5----Experimentation-Platform_JR39712-1
-- #2: **Content & Business Products** (JR28754) — Content Finance Core team, Java + GraphQL platform
+**Netflix — Preetam silent, apply cold (do between Coinbase prep sessions)**
+Preetam hasn't responded. Experimentation Platform role (JR39712) appears closed.
+- [x] Send follow-up to Preetam — done Apr 16, no response
+- [ ] Check if Content & Business Products (JR28754) is still open → apply cold
   https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5_JR28754
-- #3: **Games Systems** (JR39604) — backend platform infra (auth, control plane, APIs)
+- [ ] Check if Games Systems (JR39604) is still open → apply cold
   https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5---Games-Systems_JR39604
-- [x] Send follow-up to Preetam — done Apr 16
-- [ ] If Preetam responds with referral → apply with it
-- [ ] **If no response by Apr 21 → apply cold to all 3**
+- [ ] Browse board for new L5 backend/platform roles to replace Experimentation Platform
+  Search: "Software Engineer 5", "L5", "platform", "infrastructure"
+- [ ] Apply cold to whatever's still open
 
 **Deprioritized — no more follow-ups:**
 Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap layoffs, Meta potential layoffs). Not worth chasing — if they respond, great.
@@ -120,7 +119,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Google** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
 | **Meta** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
 | **OpenAI** | 2+ weeks silent, no fit | Yes | Deprioritized — send Vishal thank-you | On hold |
-| **Netflix** | Messaged Preetam with 3 L5 roles | Not yet | Wait for Preetam, apply cold if no reply | **Apr 21** |
+| **Netflix** | Preetam silent, top pick closed | Not yet | Apply cold to remaining roles | **Now** |
 | **Circle** | 1+ week silent | Staff SWE | Follow up with VP | **Apr 19** |
 | **Stripe** | Original role filled | Workflow Engine (filled) | Monitor board | Ongoing |
 
@@ -141,7 +140,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
 | **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
 | **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
-| **Netflix** | L5 | Experimentation Platform, Content & Business Products, Games Systems | Done | — | Not yet (apply by Apr 21) | Preetam (referral) | Waiting on Preetam, cold apply if no reply |
+| **Netflix** | L5 | Content & Business Products, Games Systems + TBD | Done | — | Not yet | Preetam (no response) | **Apply cold now** |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
 | **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done | Done | Yes (x2) | Referral | **Rejected — failed online assessment** |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **Friend handling it** |
