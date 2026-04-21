@@ -7,6 +7,80 @@
 
 ---
 
+## Quick Reference
+
+### Core Strategy
+
+1. **Rush to gap center** as fast as possible (chain-jump up or chain-fall down)
+2. **Oscillate around center** to stay safe through the pipe and beyond
+3. **Add short-range DFS** if needed for tight gaps (last few frames only)
+
+### Oscillation by Physics Model
+
+| Physics | Jump trigger | Band width | Code |
+|---|---|---|---|
+| Grid (up N / down N) | `y > gapCenter` | 2 × STEP | `return y > gapCenter;` |
+| Replacement (`v = JV`) | `y > gapCenter + OFFSET` | ~28px (G=1, JV=-8) | `return y > gapCenter + 14;` |
+| Additive (`v += JV`) | `y > gapCenter && v > thresh` | ~10px (G=1, JV=-8) | `return y > gapCenter && v > thresh;` |
+
+### Key Physics Numbers (G=1, JV=-8)
+
+| Metric | Replacement | Additive |
+|---|---|---|
+| Arc height from rest | 28px | 28px (but rarely starts from rest) |
+| Arc height at v=3 | 28px (same — v resets) | 15px (v=-5, weaker) |
+| Oscillation band | 28px | 10px |
+| OFFSET needed | 14 (= band/2) | 0 (band already centered) |
+| Velocity threshold | none | 2 (near target), 0 (far from target) |
+| Period | ~15 frames | ~8 frames |
+| Controllable range (25 frames) | ~400px | varies by v |
+
+### OFFSET Formula
+
+`OFFSET ≈ arcHeight / 2`
+
+For replacement: arc = sum of 1+2+...+|JV|-1 = |JV|×(|JV|-1)/2. With JV=-8: 8×7/2 = 28. OFFSET = 14.
+
+Don't memorize — if you know G and JV, compute: the bird rises for |JV/G| frames, covering |JV|×(|JV|-1)/(2×G) px.
+
+### Gotchas
+
+| Surprise | Impact | How to detect | Fix |
+|---|---|---|---|
+| Additive jump (`v += JV`) | Chain-jump rockets to ceiling | Bird crashes ceiling in <10 frames | Add `&& v > thresh` |
+| y=0 is bottom (not top) | All comparisons inverted | Bird always goes wrong direction | Flip `>` to `<` |
+| Physics order `y += v` then `v += g` | Arc height shifts, OFFSET wrong | Bird clips one side of gap consistently | Change OFFSET ± 2-3 |
+| Bird has hitbox (not point) | Effective gap shrinks by hitbox height | Bird dies at gap edges despite being "centered" | Reduce OFFSET or widen Y_ALLOWANCE |
+| Jump adds AND resets partially | Hybrid — `v = max(v + JV, JV)` | Oscillation is wrong width | Test: jump at v=0 vs v=5, compare arcs |
+| Second pipe visible in state | Need to plan for two gaps | First pipe passes fine, second kills | Oscillate between two gap centers |
+| Score = precision, not survival | Simple solution passes but scores low | Score barely improves despite surviving | Add DFS for precise arrival |
+| Pipe speed varies | `framesToPipe` calculation wrong | Bird arrives early or late | Measure pipe.x across two frames |
+| Non-integer positions | DFS rounding errors | DFS finds no path even when close | Increase Y_ALLOWANCE |
+
+### Decision Tree During Assessment
+
+```
+Read problem → Clarify physics model with Cosmo
+  │
+  ├─ Grid (up/down fixed amount)
+  │   └─ return y > gapCenter              ← done in 2 min
+  │
+  ├─ Replacement (v = JV)
+  │   ├─ Stage 1: return y > gapCenter + 14   ← 10 min
+  │   └─ Stage 2: + short-range DFS            ← 30 min
+  │
+  ├─ Additive (v += JV)
+  │   ├─ Stage 1: return y > gapCenter && v > (dist>20 ? 0 : 2)  ← 10 min
+  │   └─ Stage 2: + short-range DFS            ← 30 min
+  │
+  └─ Unknown → start with y > gapCenter, observe, tune
+      ├─ Clips top of gap → add OFFSET (replacement)
+      ├─ Rockets to ceiling → add v > thresh (additive)
+      └─ Neither → grid physics, already done
+```
+
+---
+
 ## Problem Statement
 
 Implement `shouldJump(state) -> bool` for a Flappy Bird agent. Each frame, decide jump or not. Bird dies if it hits ceiling, floor, or pipe outside the gap.
@@ -104,8 +178,7 @@ static final int OFFSET = 14;  // ≈ arcHeight / 2. Tune if constants differ.
 
 boolean shouldJump(GameState state) {
     double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
-    double trigger = Math.max(Math.min(gapCenter + OFFSET, state.screenHeight - OFFSET), OFFSET);
-    return state.birdY > trigger;
+    return state.birdY > gapCenter + OFFSET;
 }
 ```
 
@@ -243,19 +316,73 @@ class FlappyAgent {
 
 ---
 
-## Things That Could Surprise You
+## Edge Cases & Surprises
 
-These are scenarios we haven't tested but could break the solution:
+### Physics model surprises
 
-**Bird has a hitbox (not a point).** If the bird is 10x10 pixels, the effective gap shrinks by 10. A 40px gap becomes 30px — oscillation band (28px) barely fits, 2px clearance. DFS becomes important. **Ask Cosmo: "Does the bird have a hitbox size, or is it a single point?"**
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| Additive jump (`v += JV`) | Chain-jump → v=-40 → ceiling crash | Bird crashes ceiling in <10 frames | Add `&& v > thresh` (see additive variant) |
+| Physics order: `y += v` then `v += g` | OFFSET is wrong, bird clips one gap side | Consistently misses on same side | Adjust OFFSET by ±2-3 |
+| Jump is partial (`v = max(v+JV, JV)`) | Hybrid model, oscillation band differs | Jump at v=0 vs v=5 gives different arcs | Test both, pick the wider OFFSET |
+| Gravity changes mid-game | Constants you tuned for are wrong | Bird suddenly starts failing | Read gravity from state each frame if available |
+| Jump has cooldown (can't jump every frame) | Chain-jumping impossible, oscillation widens | Bird falls further than expected between jumps | Increase OFFSET, plan for longer cycles |
+| Fractional/float physics | DFS integer rounding errors | DFS finds no path despite being close | Increase Y_ALLOWANCE; use double not int |
 
-**Additive jump (`v += JUMP_V`).** Our tests use replacement (`v = JUMP_V`). If additive, chain-jumping accumulates: v=-8, -16, -24. The MAX_V cap in Stage 1 handles this, but the oscillation dynamics change entirely — the offset and band width need re-tuning. **The first thing to verify after Stage 1 fails.**
+### Coordinate system surprises
 
-**Physics update order reversed.** We use `v += g; y += v`. If the OA uses `y += v; v += g`, the oscillation shifts. OFFSET might need to be different. **If bird consistently clips one side of the gap, try changing the physics order.**
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| y=0 is bottom (not top) | All `>` should be `<` and vice versa | Bird always goes wrong direction | Flip comparisons OR negate y internally |
+| x/y are swapped | Bird moves horizontally instead of vertically | Pipe never approaches | Swap x and y reads from state |
+| Position is center of bird (not top-left) | Collision math is off by half hitbox | Dies at edges despite being "inside" gap | Subtract hitbox/2 from gap boundaries |
+| Positions are doubles, pipe checks are strict `<` not `<=` | Off-by-one on exact gap boundaries | Dies at exactly gapTop or gapBottom | Use gapTop+1 and gapBottom-1 as safe zone |
 
-**Score is precision-based, not just survival.** If the OA measures how centered the bird is when passing through the gap (not just alive/dead), DFS is worth the investment even for wide gaps — it arrives with lower velocity and tighter oscillation.
+### Pipe surprises
 
-**Second pipe visible.** If the state provides two pipes, plan for both. If next two gaps are at y=50 and y=150, oscillating around y=100 (midpoint) gives fastest access to both. **Check if `state` has a `secondPipe` field.**
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| Bird has hitbox (10x10 px) | Effective gap = gap - hitboxHeight | Dies at gap edges "inside" the gap | Shrink gap by hitbox: `gapTop += hitH/2, gapBot -= hitH/2` |
+| Pipe has no width (instant check) | `pipeWidth` field is 0 or missing | DFS range calculation is wrong | Use pipeWidth=1 as default |
+| Multiple pipes on screen at once | Only planning for nextPipe, die on second | Pass first pipe, immediately hit second | Check state for second pipe; oscillate toward midpoint of both |
+| Pipes have variable gap sizes | One-size OFFSET doesn't fit all | Works on wide gaps, fails on narrow | Compute per-pipe: if gap < oscillation band, use DFS |
+| Pipe gap is asymmetric (top != bottom width) | gapCenter isn't the safe center | Clips one pipe side more than other | Use `(gapTop + gapBottom) / 2` — this already handles it |
+| New pipe appears at random Y after passing | Can't pre-plan for unknown gap | First pipe is fine, second is random | Oscillate around screen center between pipes |
+
+### Scoring surprises
+
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| Score = distance traveled (not just alive/dead) | Simple solution survives but scores low | Score barely improves between submits | DFS gives tighter trajectory, higher precision |
+| Score = time alive (frames survived) | Slower approach scores better | Faster isn't better | Don't rush; oscillate safely |
+| Score penalizes distance from center | Off-center oscillation costs points | Check scoring rubric if visible | DFS with min-velocity arrival |
+| Score has a maximum (pass/fail) | Over-engineering wastes time | Score hits ceiling with simple solution | Stop optimizing, polish Cosmo chat |
+| Multiple test cases with different physics | One set of constants doesn't work for all | Passes some tests, fails others | Read constants from state if possible; tune adaptively |
+
+### Environment / tool surprises
+
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| `shouldJump` is called BEFORE the frame updates | Your physics prediction is off by one frame | Bird is always 1 frame late | Adjust: predict from current state, not next state |
+| `shouldJump` is called AFTER physics, before collision | Position already updated when you decide | Jump has no effect on current frame position | This is normal — just affects next frame |
+| State object has different field names | Code doesn't compile | Immediate compile error | Read state class definition carefully; ask Cosmo |
+| State contains extra useful fields (score, frame#, second pipe) | Missing optimization opportunities | Read the full state object | Always `System.out.println(state)` first |
+| Function must return int (0/1) not boolean | Type mismatch | Compile error | `return (y > trigger) ? 1 : 0;` |
+| Time limit per frame (real-time constraint) | DFS too slow | Agent freezes or skips frames | Reduce DFS depth; add MAX_NODES cap |
+| No print/debug output visible | Can't debug by logging | Blind debugging | Use Cosmo: "my bird dies around frame 70, what could cause this?" |
+| Cosmo gives wrong advice | Code breaks after following suggestion | Things worked before Cosmo's suggestion | Always test after applying Cosmo's advice; revert if worse |
+
+### Game mechanic surprises
+
+| Surprise | What breaks | How to detect | Fix |
+|---|---|---|---|
+| Bird wraps around screen (no ceiling/floor death) | Boundary checks are unnecessary | Bird passes through top, appears at bottom | Remove boundary checks; adjust oscillation |
+| Gravity increases over time | Bird falls faster as game progresses | Works initially, fails later | Re-read gravity from state each frame |
+| Pipe speed increases | `framesToPipe` estimate drifts | Bird arrives early/late at gap | Calculate speed from pipe.x deltas; use latest speed |
+| Gap shrinks over time | Oscillation band that fit early doesn't fit later | Passes early pipes, fails later ones | Monitor gap size; switch to DFS when gap < band |
+| Bonus objects / coins in the gap | Higher score for hitting them | Score doesn't improve despite surviving | Add coin position to DFS target |
+| Wind / horizontal force | Bird drifts left or right | Bird x-position changes unexpectedly | Track birdX changes; adjust framesToPipe |
+| Jump has animation delay (takes effect next frame) | Jump timing is off by 1 | Bird jumps late consistently | Jump 1 frame earlier than calculated |
 
 ---
 
@@ -263,12 +390,15 @@ These are scenarios we haven't tested but could break the solution:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Bird always jumps / flies to ceiling | Physics constants wrong (GRAVITY or JUMP_V) | Verify: freefall 10 frames, compare positions |
-| Bird always falls / never jumps | Coordinate system inverted (y=0 bottom not top) | Flip the comparison direction |
-| DFS never finds a path | Y_ALLOWANCE too small or constants wrong | Increase Y_ALLOWANCE; verify physics |
-| DFS times out (agent freezes) | Search depth too large | Reduce DFS_RANGE; lower MAX_NODES |
-| Bird passes first pipe, dies on second | DFS_RANGE too small — not enough frames to plan a low-velocity arrival | Increase DFS_RANGE |
-| Bird oscillates but clips pipe edge | Oscillation band (28px) wider than gap | Reduce offset from 14 to smaller value |
+| Bird always jumps / flies to ceiling | Additive physics or wrong constants | Check: is it `v = JV` or `v += JV`? Verify G and JV values |
+| Bird always falls / never jumps | Coordinate system inverted (y=0 bottom) | Flip `>` to `<` in trigger |
+| Bird goes in right direction but clips pipe edges | OFFSET wrong for this physics model | Tune OFFSET: start at 0, increase by 5 |
+| Bird oscillates fine but dies on first pipe | Not reaching gapCenter in time | Bird starts too far from gap; increase travel speed (lower thresh) |
+| DFS never finds a path | Y_ALLOWANCE too small or physics constants wrong | Increase Y_ALLOWANCE to 15-20; verify G/JV |
+| DFS times out (agent freezes) | Search depth too large | Reduce DFS range; add MAX_NODES=500K cap |
+| Bird passes first pipe, dies immediately after | New pipe gap is very different from first | Oscillate around screen center between pipes, not around old gap |
+| Score doesn't improve despite surviving longer | Scoring is precision-based, not survival | Add DFS for precise gap-center arrival |
+| Code compiles but bird doesn't respond | Field names don't match state object | Print state object; verify field names with Cosmo |
 
 ---
 
@@ -277,4 +407,6 @@ These are scenarios we haven't tested but could break the solution:
 - **Physics-first approach:** Verify constants before writing complex logic. Wrong GRAVITY invalidates everything.
 - **Path-finding framing:** Presenting this as DFS (not just "jump when low") shows algorithmic depth.
 - **Two-mode design:** Show engineering maturity — oscillation for stability, DFS for precision, clean transition between modes.
+- **Adaptive tuning:** Show you can diagnose and fix problems systematically, not just guess. "The bird clips the top → probably need offset → let me calculate the arc height."
 - **Show reasoning to Cosmo:** The chat log is evaluated. Narrate your progression: "I started with a heuristic, realized I need path-finding, now I'm adding oscillation for long-range stability."
+- **Over-preparation signal:** Proactively mention edge cases before they happen: "I'm checking if the state has a hitbox field, because that would shrink the effective gap."
