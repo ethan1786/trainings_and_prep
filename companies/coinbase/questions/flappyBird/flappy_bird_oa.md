@@ -85,70 +85,24 @@ Read problem → Clarify physics model with Cosmo
   │
   ├─ Replacement (v = JV)
   │   ├─ Stage 1: return y > gapCenter + OFFSET   ← 10 min
-  │   │   ├─ Works (gap > band + 10px margin)? → done, tune OFFSET
-  │   │   └─ Clips edges (gap ≈ band)? → Stage 2
-  │   └─ Stage 2: + short-range DFS or simulation ← 30 min
+  │   │   ├─ Works? → tune OFFSET, move to Stage 2 if time
+  │   │   └─ Clips edges? → Stage 2 (simulation)
+  │   ├─ Stage 2: simulation (compare 25-frame freefall) ← 30 min
+  │   └─ Stage 3: DFS (if simulation still clips)  ← if time permits
   │
   ├─ Additive (v += JV)
   │   ├─ Stage 1: return y > gapCenter && v > (dist>20 ? 0 : 2)  ← 10 min
-  │   └─ Stage 2: + short-range DFS               ← 30 min
+  │   ├─ Stage 2: simulation                       ← 30 min
+  │   └─ Stage 3: DFS                              ← if time permits
   │
   └─ Unknown → start with y > gapCenter, observe, tune
       ├─ Clips top of gap → add OFFSET (replacement)
       ├─ Rockets to ceiling → add v > thresh (additive)
-      ├─ Clips both edges (tight gap) → switch to simulation or DFS
+      ├─ Clips both edges (tight gap) → Stage 2 simulation
       └─ Neither → grid physics, already done
 ```
 
-### Simulation Approach (fallback for tight margins)
-
-If simple oscillation clips gap edges (band ≈ gap size), use the simulation approach from the test-taker's blog. This compares 25-frame trajectories for jump vs no-jump and picks the higher-scoring one:
-
-```java
-boolean shouldJump(GameState state) {
-    // emergency: near floor
-    if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
-
-    double[] jumpScore = simulate(state, true);
-    double[] noopScore = simulate(state, false);
-
-    // survival priority: alive > dead
-    if (jumpScore[0] > 0 && noopScore[0] <= 0) return true;
-    if (noopScore[0] > 0 && jumpScore[0] <= 0) return false;
-
-    return jumpScore[1] > noopScore[1];
-}
-
-// returns [alive (1/0), score]
-double[] simulate(GameState state, boolean jumpNow) {
-    double y = state.birdY, v = state.birdV;
-    if (jumpNow) v = JUMP_V;
-
-    double score = 0;
-    int survived = 0;
-    double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
-
-    for (int step = 0; step < 25; step++) {
-        y += v; v += GRAVITY;  // Order B physics (verify!)
-
-        if (y <= 0 || y >= state.screenHeight)
-            return new double[]{0, -1000 + survived};
-
-        double pipeX = state.nextPipe.x - step * PIPE_SPEED;
-        if (pipeX <= state.birdX && state.birdX <= pipeX + state.nextPipe.width) {
-            double clearance = Math.min(y - state.nextPipe.gapTop, state.nextPipe.gapBottom - y);
-            if (clearance <= 0) return new double[]{0, -1000 + survived};
-            score += 20 - Math.abs(y - gapCenter) + clearance * 0.3;
-        } else {
-            score += 5 - Math.abs(y - gapCenter) * 0.15;
-        }
-        survived++;
-    }
-    return new double[]{1, score};
-}
-```
-
-**When to switch from oscillation to simulation:** If Stage 1 passes most tests but clips edges on some, add the simulation as a refinement. The simulation handles tight margins that oscillation can't. It's ~30 lines on top of Stage 1.
+**If oscillation clips gap edges:** Switch to Stage 2 (simulation) — see below. It handles tight margins where oscillation can't.
 
 ---
 
@@ -210,7 +164,7 @@ This is the most important question — it determines your entire approach:
 - "My bird seems to fly in the wrong direction — can you confirm if positive y means up or down?"
 - "When the bird jumps, does the velocity get replaced (`v = jumpForce`) or added (`v += jumpForce`)?"
 
-### While implementing Stage 2 (DFS)
+### While implementing Stage 2 (simulation) or Stage 3 (DFS)
 - "How fast do pipes move — is it 1 pixel per frame?"
 - "What happens at the screen edges — does the bird bounce or die?"
 - "Are position and velocity integers or doubles?"
@@ -299,13 +253,12 @@ This tuning loop takes 2-3 submits, ~30 seconds each.
 
 **Why upgrade:** With Order B physics (`y+=v, v+=g`), the oscillation band is 36px. If the gap is 40px, that's only 2px clearance per side — simple oscillation clips edges. The simulation approach was used by a test-taker who passed the actual Coinbase OA a few weeks ago.
 
-**How it works:** Each frame, simulate 25 frames of freefall for both "jump now" and "don't jump now". Score each trajectory by survival + proximity to gap center. Pick the higher score. No inner policy, no DFS — just a for loop.
+**How it works:** Each frame, simulate 25 frames of freefall for both "jump now" and "don't jump now". Score each trajectory. Pick the higher score. No inner policy, no DFS — just a for loop.
 
 **Why simulation beats DFS here:**
 - Less code (~30 lines vs ~40 lines), no recursion, fewer bugs under pressure
 - Handles unknown physics naturally — just run the physics forward, no formula needed
 - Proven to work on the actual OA
-- Scoring by clearance naturally avoids tight margins
 
 ```java
 class FlappyAgent {
@@ -318,25 +271,13 @@ class FlappyAgent {
         // emergency: near floor and falling
         if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
 
-        // emergency: near pipe and too low
-        Pipe pipe = state.nextPipe;
-        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
-        double distX = pipe.x - state.birdX;
-        if (distX > 0 && distX <= 18 && state.birdY > gapCenter + 3 && state.birdV >= 0)
-            return true;
-
         // simulate both actions, pick better score
-        double[] jumpRes = simulate(state, true);
-        double[] noopRes = simulate(state, false);
-
-        boolean jumpAlive = jumpRes[0] > 0, noopAlive = noopRes[0] > 0;
-        if (!noopAlive && jumpAlive) return true;
-        if (noopAlive && !jumpAlive) return false;
-        return jumpRes[1] > noopRes[1];
+        double jumpScore = simulate(state, true);
+        double noopScore = simulate(state, false);
+        return jumpScore > noopScore;
     }
 
-    // returns [alive (1/0), score]
-    double[] simulate(GameState state, boolean jumpNow) {
+    double simulate(GameState state, boolean jumpNow) {
         double y = state.birdY, v = state.birdV;
         Pipe pipe = state.nextPipe;
         double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
@@ -344,41 +285,80 @@ class FlappyAgent {
         if (jumpNow) v = JUMP_V;  // or v += JUMP_V if additive
 
         double score = 0;
-        double minClearance = Double.MAX_VALUE;
-        int survived = 0;
 
         for (int step = 0; step < LOOKAHEAD; step++) {
-            // physics — VERIFY ORDER against OA
-            y += v; v += GRAVITY;  // Order B (from test-taker blog)
-            // v += GRAVITY; y += v;  // Order A (alternative — test both)
+            y += v; v += GRAVITY;  // Order B (verify against OA)
 
-            // boundary death
-            if (y <= 3 || y >= state.screenHeight - 3)
-                return new double[]{0, -1000 + survived};
+            // death: heavy penalty, but surviving longer is less bad
+            if (y <= 0 || y >= state.screenHeight) return score - 1000;
 
-            // pipe zone check
+            // pipe zone: reward center proximity + clearance
             double pipeX = pipe.x - step * PIPE_SPEED;
             if (pipeX <= state.birdX && state.birdX <= pipeX + pipe.width) {
                 double clearance = Math.min(y - pipe.gapTop, pipe.gapBottom - y);
-                minClearance = Math.min(minClearance, clearance);
-                if (clearance <= 3)
-                    return new double[]{0, -1000 + survived};
+                if (clearance <= 0) return score - 1000;
                 score += 20.0 - Math.abs(y - gapCenter) + clearance * 0.3;
             } else {
+                // outside pipe: gentle center steering
                 score += 5.0 - Math.abs(y - gapCenter) * 0.15;
             }
-            survived++;
         }
-
-        if (minClearance < Double.MAX_VALUE) score += minClearance * 0.5;
-        return new double[]{1, score};
+        return score;
     }
 }
 ```
 
 **Tell Cosmo:** "I'm simulating 25 frames for both jump and no-jump, scoring by survival and proximity to gap center. This handles tight margins better than pure oscillation."
 
-**Known limitation:** The simulation assumes pure freefall after the initial decision (no future jumps). This works when gaps have enough margin, but for very tight gaps the simulation may not distinguish well between jump and no-jump since both freefall trajectories miss. That's when DFS (Stage 3) helps.
+**Known limitation:** The simulation assumes pure freefall after the initial decision (no future jumps). This works when gaps have enough margin, but for very tight gaps the simulation may not distinguish well. That's when DFS (Stage 3) helps.
+
+---
+
+## Scoring: Simulation vs DFS
+
+Both approaches score trajectories. The difference is WHAT they score and WHY.
+
+### Simulation scoring (per-frame accumulation over 25 frames)
+
+```
+Each frame:
+  In pipe zone:  +20 - |y - gapCenter| + clearance * 0.3
+  Outside pipe:  +5  - |y - gapCenter| * 0.15
+  Death:         score - 1000  (accumulated score so far minus heavy penalty)
+```
+
+**What it optimizes for:** Survival across many frames. The bird accumulates score every frame. Dying early loses all future points. Being centered in the pipe zone scores 4x more per frame than being centered outside — the simulation naturally prioritizes "be precise when it counts."
+
+**Why the weights are different per zone:** Outside the pipe, over-correcting to reach center causes wild velocity swings. The gentle 0.15 multiplier prevents that. Inside the pipe, precision is life-or-death — full distance penalty kicks in. The clearance bonus rewards extra safety margin.
+
+**Why `score - 1000` for death (not a separate alive flag):** If both trajectories die, the one that scored more before dying is better — it survived longer and was better positioned. No need for a separate alive/dead comparison; the -1000 penalty naturally makes alive >> dead.
+
+### DFS scoring (single evaluation at leaf node)
+
+```
+Leaf (reached target frame):
+  -|y - gapCenter| - |v| * 2.0
+
+Death (boundary hit):
+  -10000 + framesLeft  (survived longer = less bad)
+```
+
+**What it optimizes for:** Arrival state. The DFS explores all jump sequences and picks the one that arrives at the leaf with the best position + velocity. Unlike simulation, it doesn't care about intermediate frames — only the endpoint matters.
+
+**Why velocity matters here and not in simulation:** The simulation evaluates 25 frames of freefall — velocity naturally shows up as future position drift. The DFS only evaluates one frame (the leaf), so it must explicitly penalize high velocity. A bird arriving at gapCenter with v=8 looks perfect at the leaf but will be 8px off-center next frame.
+
+**Why `|v| * 2.0` (not 0.5):** With G=1 and JV=-8, velocity ranges ±8. Distance to center ranges 0-20. With `* 0.5`, velocity=8 contributes 4 to score — less than 5px off center. But v=8 means 8px drift next frame, which is a huge positional error. `* 2.0` makes velocity=8 contribute 16 — now the DFS strongly prefers v=0 arrivals, which is what we want for stable oscillation after passing the pipe.
+
+### Comparison
+
+| Aspect | Simulation | DFS |
+|---|---|---|
+| Evaluates | 25-frame trajectory | Single leaf state |
+| Death handling | `score - 1000` (natural) | `-10000 + framesLeft` |
+| Position scoring | Per-frame, zone-aware (20 vs 5) | Leaf only: `-\|y - center\|` |
+| Velocity scoring | Implicit (shows up as future drift) | Explicit: `-\|v\| * 2.0` |
+| What to tune | Zone weights (20, 5, 0.3, 0.15) | Velocity weight (2.0) |
+| Tune if bird... | ...overshoots entering pipe → reduce outside weight | ...oscillates wildly after pipe → increase v weight |
 
 ---
 
@@ -430,9 +410,9 @@ class FlappyAgent {
         // death
         if (y <= 0 || y >= screenH) return -10000 + framesLeft;
 
-        // leaf: score by center proximity + velocity penalty
+        // leaf: center proximity + velocity penalty (v matters more — it's next-frame drift)
         if (framesLeft <= 1) {
-            return -Math.abs(y - gapCenter) - Math.abs(v) * 0.5;
+            return -Math.abs(y - gapCenter) - Math.abs(v) * 2.0;
         }
 
         // recurse: pick the better future
