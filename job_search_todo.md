@@ -1,6 +1,6 @@
 # Job Search — Master Todo List
 
-> Last updated: April 16, 2026
+> Last updated: April 22, 2026
 
 ---
 
@@ -15,12 +15,13 @@
 
 ## Immediate — Take-Home Assessments
 
-### Coinbase — Take-Home Assessments (next week)
+### Coinbase — Assessments In Progress
 Recruiter screen done Apr 16. Role not pre-assigned — team matching after assessments.
-- [ ] **Apr 17 — Email recruiter about CodeSignal practice examples** (he mentioned he'd send them, hasn't yet)
-- [ ] Cognitive + Culture assessment (30 min)
-- [ ] Technical on CodeSignal (60 min) — AI copilot enabled, start simple then add details
-- [ ] Review prep doc Section 5a and Section 12 before CodeSignal
+- [ ] CCAT + SJT assessments (this week)
+- [ ] Coding assessment on CodeSignal (mid next week) — AI copilot enabled, start simple then add details
+- [ ] Go over all Coinbase coding questions (cloud_file_system, bank_system, in_memory_database, recipe_manager, task_management_system)
+- [ ] Practice a few rounds of CCAT
+- [ ] Go over system designs
 - After assessments: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
 
 **Email to recruiter (send Apr 17):**
@@ -30,9 +31,10 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
 
 ## This Week (Apr 16–19) — Remaining Actions
 
-### Pinterest — Applied ✅
+### Pinterest — Rejected ❌
 - [x] Sent note to Nick about Activation Team role — no response
 - [x] Applied directly to **Staff SWE, Activation Team** (Remote)
+- ❌ Rejected — filtered out at resume screening
 
 ### GitHub — Applied cold ✅
 - [x] Microsoft friend can't refer from Microsoft side, no internal path
@@ -109,10 +111,10 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Status | Roles Applied | Next Action | When |
 |---|---|---|---|---|
-| **Coinbase** | Recruiter screen ✅ | Staff Platform (x3) | Take-home assessments | **Next week** |
+| **Coinbase** | Assessments in progress | Staff Platform (x3) | CCAT + SJT now, coding mid next week | **This week + next** |
 | **Airbnb** | Applied (cold) | GraphQL, Hosting Svcs, Reservations | Wait, then follow up | **~Apr 28** |
 | **Figma** | Applied (cold) | DevEx, Distributed Sys, Prod Eng | Wait | **~Apr 28** |
-| **Pinterest** | Messaged Nick about Activation | Agent Foundations (old) | Wait for Nick | **Apr 20** |
+| **Pinterest** | Rejected ❌ | Staff SWE, Activation Team | — | — |
 | **Reddit** | InMailed 4 recruiters | Staff (x3) + Senior Staff (x2) | Follow up recruiters | **Apr 20** |
 | **Confluent** | 4 connection requests + 1 InMail | Staff, Flink CP | Follow up recruiters | **Apr 20** |
 | **GitHub** | Referral requested | Not yet applied | Wait for friend | **Apr 20** |
@@ -129,12 +131,12 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
 |---|---|---|---|---|---|---|---|
-| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Take-home assessments** |
+| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments in progress** |
 | **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting — follow up Apr 20 |
 | **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
-| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Applied — waiting** |
+| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Rejected — resume screen** |
 | **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
-| **NVIDIA** | Senior (Staff-adjacent) | Cloud Software Engineer | Done ✅ | — | Yes (cold) | No referral | **Applied — waiting** |
+| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes (cold) | No referral | **Applied — waiting** (prev role taken down, reapplied) |
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | — | — | Inbound | Director of Eng | **Chat next week** |
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
@@ -153,6 +155,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 |---|---|---|---|
 | **Coinbase** | Senior Staff, Core Automation | Rejected | Retried at Staff Platform ✅ |
 | **Airbnb** | Staff, GenAI | Rejected (cold) | Retried with backend roles |
+| **Pinterest** | Staff, Activation Team | Rejected (resume screen) | Nick unresponsive, cold app filtered |
 | **Datadog** | Staff (cold) | Rejected | Skip — NYC in-office, no connection |
 | **Snap, Palantir, Plaid** | — | Skipped | No remote roles |
 | **Discord, Vercel, Ramp/Juno** | — | Skipped | Stack mismatch (Python/TypeScript) |
