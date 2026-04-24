@@ -61,94 +61,106 @@ Logic: Antonym pairs. Meticulous is the opposite of careless. Generous is the op
 
 The CCAT tests whether you know words at a college-educated professional level. These words appear frequently in analogies, sentence completion, and odd-one-out questions.
 
+**Positive / Good Meaning:**
+
+| Word | Meaning | Common Pairing |
+|---|---|---|
+| **Ameliorate** | Make better, improve | Antonym: exacerbate |
+| **Amiable** | Friendly, pleasant | Synonym: affable |
+| **Astute** | Shrewd, perceptive | Synonym: sagacious |
+| **Benevolent** | Kind, generous | Antonym: malevolent |
+| **Candid** | Honest, straightforward | Antonym: evasive |
+| **Cogent** | Clear, logical, convincing | Synonym: compelling |
+| **Concise** | Brief, to the point | Antonym: verbose |
+| **Congenial** | Pleasant, agreeable | Synonym: amiable |
+| **Copious** | Abundant, plentiful | Antonym: scarce |
+| **Diligent** | Hardworking, careful | Antonym: negligent |
+| **Emulate** | Imitate, try to equal | Synonym: mimic |
+| **Exemplary** | Serving as a model, outstanding | Antonym: deplorable |
+| **Facilitate** | Make easier | Antonym: hinder |
+| **Feasible** | Possible, practical | Antonym: impractical |
+| **Frugal** | Economical, thrifty | Antonym: extravagant |
+| **Gregarious** | Sociable, outgoing | Antonym: reclusive |
+| **Incisive** | Sharp, penetrating (of analysis) | Synonym: astute |
+| **Innocuous** | Harmless | Antonym: harmful |
+| **Intrepid** | Fearless, bold | Antonym: timid |
+| **Lucid** | Clear, easy to understand | Antonym: confusing |
+| **Meticulous** | Extremely careful, precise | Antonym: careless |
+| **Mitigate** | Make less severe | Antonym: aggravate |
+| **Novel** | New, original (adj) | Antonym: conventional |
+| **Palpable** | Obvious, easily perceived | Antonym: imperceptible |
+| **Paramount** | Of supreme importance | Synonym: foremost |
+| **Pragmatic** | Practical, realistic | Antonym: idealistic |
+| **Prevalent** | Widespread, common | Antonym: rare |
+| **Prolific** | Producing abundantly | Antonym: unproductive |
+| **Prudent** | Wise, exercising good judgment | Antonym: reckless |
+| **Resilient** | Able to recover quickly | Antonym: fragile |
+| **Rigorous** | Thorough, strict | Antonym: lax |
+| **Scrutinize** | Examine closely | Antonym: overlook |
+| **Succinct** | Brief, concise | Antonym: rambling |
+| **Tangible** | Real, touchable | Antonym: abstract |
+| **Tenacious** | Persistent, holding firmly | Antonym: yielding |
+| **Ubiquitous** | Found everywhere | Antonym: rare |
+| **Unequivocal** | Clear, leaving no doubt | Antonym: ambiguous |
+| **Viable** | Capable of working | Antonym: impractical |
+| **Zealous** | Enthusiastic, passionate | Antonym: apathetic |
+
+**Negative / Bad Meaning:**
+
+| Word | Meaning | Common Pairing |
+|---|---|---|
+| **Apathy** | Lack of interest or concern | Antonym: enthusiasm |
+| **Capricious** | Unpredictable, changeable | Antonym: steadfast |
+| **Complacent** | Self-satisfied, unconcerned | Antonym: vigilant |
+| **Cryptic** | Mysterious, hard to understand | Antonym: transparent |
+| **Cursory** | Quick, superficial | Antonym: thorough |
+| **Dearth** | Scarcity, lack | Antonym: abundance |
+| **Debilitate** | Weaken | Antonym: strengthen |
+| **Deleterious** | Harmful | Synonym: detrimental |
+| **Erratic** | Unpredictable, inconsistent | Antonym: consistent |
+| **Exacerbate** | Make worse | Antonym: ameliorate |
+| **Futile** | Pointless, useless | Antonym: productive |
+| **Hackneyed** | Overused, cliched | Antonym: original |
+| **Haphazard** | Random, disorganized | Antonym: systematic |
+| **Impede** | Block, hinder | Antonym: facilitate |
+| **Lethargic** | Sluggish, lacking energy | Antonym: energetic |
+| **Mundane** | Ordinary, boring | Antonym: extraordinary |
+| **Negligent** | Failing to take proper care | Antonym: diligent |
+| **Oblivious** | Unaware | Antonym: aware |
+| **Obscure** | Unclear; little-known | Antonym: prominent |
+| **Obsolete** | Outdated, no longer used | Antonym: current |
+| **Perfunctory** | Done without care, going through motions | Antonym: thorough |
+| **Precarious** | Unstable, risky | Antonym: secure |
+| **Redundant** | Unnecessary, surplus | Antonym: essential |
+| **Stagnant** | Not moving, not growing | Antonym: dynamic |
+| **Superfluous** | More than needed, excess | Antonym: necessary |
+| **Trivial** | Of little importance | Antonym: significant |
+| **Verbose** | Using too many words | Antonym: concise |
+| **Volatile** | Liable to change rapidly, unstable | Antonym: stable |
+
+**Neutral / Descriptive (not inherently good or bad):**
+
 | Word | Meaning | Common Pairing |
 |---|---|---|
 | **Abate** | Reduce, lessen | Antonym: intensify |
 | **Aberration** | Deviation from normal | Synonym: anomaly |
 | **Ambiguous** | Unclear, open to interpretation | Antonym: explicit |
 | **Ambivalent** | Having mixed feelings | Antonym: decisive |
-| **Ameliorate** | Make better, improve | Antonym: exacerbate |
-| **Amiable** | Friendly, pleasant | Synonym: affable |
-| **Apathy** | Lack of interest or concern | Antonym: enthusiasm |
 | **Arduous** | Difficult, requiring great effort | Synonym: strenuous |
-| **Astute** | Shrewd, perceptive | Synonym: sagacious |
-| **Benevolent** | Kind, generous | Antonym: malevolent |
 | **Brevity** | Shortness, conciseness | Antonym: verbosity |
-| **Candid** | Honest, straightforward | Antonym: evasive |
-| **Capricious** | Unpredictable, changeable | Antonym: steadfast |
-| **Cogent** | Clear, logical, convincing | Synonym: compelling |
-| **Complacent** | Self-satisfied, unconcerned | Antonym: vigilant |
-| **Concise** | Brief, to the point | Antonym: verbose |
-| **Congenial** | Pleasant, agreeable | Synonym: amiable |
-| **Copious** | Abundant, plentiful | Antonym: scarce |
-| **Cryptic** | Mysterious, hard to understand | Antonym: transparent |
-| **Cursory** | Quick, superficial | Antonym: thorough |
-| **Dearth** | Scarcity, lack | Antonym: abundance |
-| **Debilitate** | Weaken | Antonym: strengthen |
-| **Deleterious** | Harmful | Synonym: detrimental |
-| **Diligent** | Hardworking, careful | Antonym: negligent |
 | **Disparate** | Fundamentally different | Antonym: similar |
 | **Dubious** | Doubtful, questionable | Antonym: certain |
 | **Elusive** | Hard to find or catch | Antonym: accessible |
-| **Emulate** | Imitate, try to equal | Synonym: mimic |
 | **Ephemeral** | Short-lived, temporary | Antonym: permanent |
 | **Equivocal** | Ambiguous, deliberately vague | Antonym: unambiguous |
-| **Erratic** | Unpredictable, inconsistent | Antonym: consistent |
-| **Exacerbate** | Make worse | Antonym: ameliorate |
-| **Exemplary** | Serving as a model, outstanding | Antonym: deplorable |
-| **Facilitate** | Make easier | Antonym: hinder |
-| **Feasible** | Possible, practical | Antonym: impractical |
-| **Frugal** | Economical, thrifty | Antonym: extravagant |
-| **Futile** | Pointless, useless | Antonym: productive |
-| **Gregarious** | Sociable, outgoing | Antonym: reclusive |
-| **Hackneyed** | Overused, cliched | Antonym: original |
-| **Haphazard** | Random, disorganized | Antonym: systematic |
-| **Impede** | Block, hinder | Antonym: facilitate |
 | **Implicit** | Implied, not stated directly | Antonym: explicit |
 | **Inadvertent** | Unintentional | Antonym: deliberate |
-| **Incisive** | Sharp, penetrating (of analysis) | Synonym: astute |
 | **Indifferent** | Having no interest or concern | Antonym: passionate |
 | **Inherent** | Built-in, fundamental | Synonym: intrinsic |
-| **Innocuous** | Harmless | Antonym: harmful |
-| **Intrepid** | Fearless, bold | Antonym: timid |
 | **Juxtapose** | Place side by side for comparison | — |
-| **Lethargic** | Sluggish, lacking energy | Antonym: energetic |
-| **Lucid** | Clear, easy to understand | Antonym: confusing |
-| **Meticulous** | Extremely careful, precise | Antonym: careless |
-| **Mitigate** | Make less severe | Antonym: aggravate |
-| **Mundane** | Ordinary, boring | Antonym: extraordinary |
-| **Negligent** | Failing to take proper care | Antonym: diligent |
 | **Nonchalant** | Casually calm, unbothered | Antonym: anxious |
-| **Novel** | New, original (adj) | Antonym: conventional |
-| **Oblivious** | Unaware | Antonym: aware |
-| **Obscure** | Unclear; little-known | Antonym: prominent |
-| **Obsolete** | Outdated, no longer used | Antonym: current |
-| **Palpable** | Obvious, easily perceived | Antonym: imperceptible |
-| **Paramount** | Of supreme importance | Synonym: foremost |
-| **Perfunctory** | Done without care, going through motions | Antonym: thorough |
 | **Pervasive** | Widespread, everywhere | Antonym: limited |
-| **Pragmatic** | Practical, realistic | Antonym: idealistic |
-| **Precarious** | Unstable, risky | Antonym: secure |
-| **Prevalent** | Widespread, common | Antonym: rare |
-| **Prolific** | Producing abundantly | Antonym: unproductive |
-| **Prudent** | Wise, exercising good judgment | Antonym: reckless |
-| **Redundant** | Unnecessary, surplus | Antonym: essential |
-| **Resilient** | Able to recover quickly | Antonym: fragile |
-| **Rigorous** | Thorough, strict | Antonym: lax |
-| **Scrutinize** | Examine closely | Antonym: overlook |
 | **Sporadic** | Occurring irregularly | Antonym: constant |
-| **Stagnant** | Not moving, not growing | Antonym: dynamic |
-| **Succinct** | Brief, concise | Antonym: rambling |
-| **Superfluous** | More than needed, excess | Antonym: necessary |
-| **Tangible** | Real, touchable | Antonym: abstract |
-| **Tenacious** | Persistent, holding firmly | Antonym: yielding |
-| **Trivial** | Of little importance | Antonym: significant |
-| **Ubiquitous** | Found everywhere | Antonym: rare |
-| **Unequivocal** | Clear, leaving no doubt | Antonym: ambiguous |
-| **Verbose** | Using too many words | Antonym: concise |
-| **Viable** | Capable of working | Antonym: impractical |
-| **Volatile** | Liable to change rapidly, unstable | Antonym: stable |
-| **Zealous** | Enthusiastic, passionate | Antonym: apathetic |
 
 **High-frequency antonym pairs** (these appear in analogies constantly):
 
