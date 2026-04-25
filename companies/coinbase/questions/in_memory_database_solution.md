@@ -1,3 +1,27 @@
+## Summary
+
+Nested key-field-value store with TTL, prefix scan, and multi-backup/restore. 4 levels: basic CRUD + CAS → scan/scanWithPrefix → TTL (lazy expiration) → backup/restore with TreeMap for point-in-time lookup.
+
+## Design
+
+**Data model:** Single nested map with `ExpiryValue` wrapping value + optional TTL. Simpler than reference solution's parallel data/expiry maps.
+
+**Maps / structures:**
+- `db`: key → (field → ExpiryValue{value, ttl})
+- `allbackups`: TreeMap<timestamp → deep copy of db> for O(log B) `floorEntry` lookup
+
+**Key pattern:** Lazy expiration — writes never clean up, reads filter out expired entries. `backup` excludes expired fields; `restore` copies blindly and lets reads handle stale TTLs.
+
+**Gotchas under pressure:**
+- `set()` clears existing TTL (creates ExpiryValue without ttl); `setWithTtl()` sets it — don't mix up
+- `compareAndSet` (Level 1) must preserve existing TTL when updating value — don't create new ExpiryValue without carrying ttl forward
+- Deep copy in BOTH backup and restore — ExpiryValue objects are mutable, shallow copy causes aliasing where mutations to live db corrupt backups
+- `restore` with no matching backup (`floorEntry` returns null) — guard against NPE
+- Expired at boundary: `ttl <= timestamp` means expired (inclusive), confirm with interviewer
+
+---
+
+```java
 class InMemoryDB {
     private Map<String, Map<String, ExpiryValue>> db = new HashMap<>();
     private TreeMap<Integer, Map<String, Map<String, ExpiryValue>>> allbackups = new TreeMap<>();

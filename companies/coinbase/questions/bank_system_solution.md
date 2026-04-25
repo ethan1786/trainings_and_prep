@@ -1,3 +1,28 @@
+## Summary
+
+Banking system with accounts, transfers, scheduled payments, and balance history. 4 levels: account CRUD/transfers → spending analytics → scheduled payments (min-heap + lazy cancel) → merge accounts + point-in-time balance queries.
+
+## Design
+
+**Data model:** `BankAccount` class with append-only `Transaction` history (timestamp → balance snapshots). `mergedInto` pointer for transparent payment redirection after merge.
+
+**Maps / structures:**
+- `accounts`: accountId → BankAccount
+- `spenders`: accountId → total outgoing (for `topSpenders`)
+- `existingPaymentIds` / `cancelPaymentIds`: composite key (accountId:paymentId) for O(1) cancel validation
+- `pendingPayment`: PriorityQueue ordered by (dueTime, paymentId)
+
+**Key pattern:** Every public method calls `checkAndExecutePayment(timestamp)` first — due payments fire BEFORE the method's own logic. This is the core invariant.
+
+**Gotchas under pressure:**
+- `cancelPayment` must also fire due payments first — a payment due NOW cannot be cancelled
+- `mergedInto` pointer: payments for deleted accounts silently redirect to surviving account
+- `getBalance`: linear scan works under time pressure, mention binary search upgrade if asked
+- Composite paymentId (accountId + ":" + paymentId) gives O(1) ownership check vs reference's O(P) heap scan
+- `cancelAllByUser`-style iteration: don't modify a collection while iterating it
+
+---
+
 **Design decisions vs reference solution:**
 - `BankAccount` class with linked `Transaction` history instead of parallel maps — encapsulates per-account state cleanly
 - `mergedInto` pointer on `BankAccount` — merged accounts silently redirect scheduled payments to the surviving account without an O(P) reassignment scan during merge

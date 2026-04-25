@@ -1,3 +1,26 @@
+## Summary
+
+Multi-user file system with quotas, backup/restore. 4 levels: basic CRUD → prefix search → users/quotas/merge → backup/restore.
+
+## Design
+
+**Data model:** Dual-map architecture. Per-user `storage` map (filename → size) plus global `storageByUser` (filename → userId) for cross-user name uniqueness checks.
+
+**Maps:**
+- `users`: userId → User (storage map, capacity, backup)
+- `storageByUser`: filename → userId (global name registry)
+
+**Key pattern:** Every mutation must update BOTH maps. This is the #1 bug source — `deleteFile` and `mergeUser` both need `storageByUser` cleanup.
+
+**Gotchas under pressure:**
+- Capacity: clarify with interviewer — is it total bytes or file count?
+- `mergeUser` must also `users.remove(userId2)`, not just set a flag
+- `restore`: clarify whether current files not in backup should be deleted or kept
+- After each new level, scan ALL existing methods for missing state updates
+
+---
+
+```java
 class CloudFileSystem {
     private Map<String, String> storageByUser = new HashMap<>();
     private Map<String, User> users = new HashMap<>();

@@ -1,3 +1,28 @@
+## Summary
+
+Recipe CRUD with case-insensitive name uniqueness, search/sort, user auth, and version history with rollback. 4 levels: basic CRUD → search/sort with mixed ID types → user system → versioned edits + rollback.
+
+## Design
+
+**Data model:** `VersionedRecipe` list per recipeId (append-only history). Separate `activeRecipeNames` map tracks ONLY the current name for uniqueness — old version names don't participate.
+
+**Maps:**
+- `recipes`: recipeId → List<VersionedRecipe> (history, latest = getLast())
+- `activeRecipeNames`: name.toLowerCase() → recipeId (current name registry)
+- `users`: userId → username
+
+**Key pattern:** Name uniqueness is case-insensitive — ALL name map keys are lowercased. Every name comparison uses `equalsIgnoreCase`, every map lookup uses `name.toLowerCase()`.
+
+**Gotchas under pressure:**
+- Same-name update: "reject if name taken BY A DIFFERENT recipe" — not just "name exists." Read condition aloud before writing: `nameExists && !belongsToThisRecipe`
+- This check appears in `updateRecipe`, `editRecipe`, AND `rollbackRecipe` — same logic, easy to get wrong on copy-paste
+- `updateRecipe` (Level 1) clears history and resets to version 1; `editRecipe` (Level 3+) appends new version — different semantics
+- `addUser` rejects existing users (`containsKey` → false), opposite of the `!containsKey` pattern used in edit/rollback for missing users — don't copy-paste the condition
+- Sort: ingredient count ASC, then recipeId ASC with numeric IDs sorted numerically
+
+---
+
+```java
 class RecipeManager {
     private Map<String, List<VersionedRecipe>> recipes = new HashMap<>(); // recipeId to latest version
     private Map<String, String> activeRecipeNames = new HashMap<>();
