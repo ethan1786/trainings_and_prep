@@ -253,184 +253,147 @@ This tuning loop takes 2-3 submits, ~30 seconds each.
 
 **Why upgrade:** With Order B physics (`y+=v, v+=g`), the oscillation band is 36px. If the gap is 40px, that's only 2px clearance per side — simple oscillation clips edges. The simulation approach was used by a test-taker who passed the actual Coinbase OA a few weeks ago.
 
-**How it works:** Each frame, simulate 25 frames of freefall for both "jump now" and "don't jump now". Score each trajectory. Pick the higher score. No inner policy, no DFS — just a for loop.
+**How it works:** Each frame, simulate freefall for both "jump now" and "don't jump now". Score each trajectory by per-frame accumulation. Pick the higher score. No recursion, no branching — just a for loop.
 
-**Why simulation beats DFS here:**
-- Less code (~30 lines vs ~40 lines), no recursion, fewer bugs under pressure
+**Why simulation first (not DFS):**
+- Less code (~30 lines), no recursion, fewer bugs under pressure
 - Handles unknown physics naturally — just run the physics forward, no formula needed
 - Proven to work on the actual OA
+- **Sets up the scoring foundation for Stage 3** — DFS reuses the same `eval` function, just adds branching
+
+### Scoring design (shared by Stage 2 and Stage 3)
+
+The same per-frame scoring drives both simulation and DFS. No death penalty needed — dying just stops accumulating score. Paths that survive longer naturally score higher.
+
+```
+Each frame:
+  In pipe zone:   +20 - |y - gapCenter| * 0.5     (precision matters here)
+  Outside pipe:   +5  - |y - gapCenter| * 0.15     (gentle center steering)
+  Death:          return score (stop accumulating — no penalty needed)
+
+At leaf (final frame):
+  score - |v| * 2.0   (penalize exit velocity — low v = stable for next pipe)
+```
+
+**Why no death penalty:** A path that dies at frame 8 accumulates ~8 frames of score. A path that survives 15 frames accumulates ~15 frames. The survivor always wins without needing `-1000`. This also means if BOTH paths die, the one that lived longer is naturally preferred.
+
+**Why the pipe zone scores 4x more:** Outside the pipe, over-correcting causes velocity swings. The gentle 0.15 weight prevents that. Inside the pipe, precision is survival — full penalty kicks in.
+
+**Why velocity penalty at the leaf:** The bird needs to exit the pipe zone in a stable state. `v=8` means 8px drift next frame — that's a death sentence if the next pipe is close. `|v| * 2.0` strongly prefers `v≈0` exits.
+
+### Code
 
 ```java
 class FlappyAgent {
-    static final double GRAVITY = 1.0;
+    static final double G = 1.0;
     static final double JUMP_V = -8.0;
     static final double PIPE_SPEED = 1.0;
     static final int LOOKAHEAD = 25;
 
     boolean shouldJump(GameState state) {
-        // emergency: near floor and falling
-        if (state.birdY >= state.screenHeight - 8 && state.birdV > 0) return true;
-
-        // simulate both actions, pick better score
-        double jumpScore = simulate(state, true);
-        double noopScore = simulate(state, false);
-        return jumpScore > noopScore;
-    }
-
-    double simulate(GameState state, boolean jumpNow) {
-        double y = state.birdY, v = state.birdV;
         Pipe pipe = state.nextPipe;
         double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
 
-        if (jumpNow) v = JUMP_V;  // or v += JUMP_V if additive
+        double jumpScore = eval(state.birdY, state.birdV, true,
+                                state, pipe, gapCenter, LOOKAHEAD, 0, false);
+        double noopScore = eval(state.birdY, state.birdV, false,
+                                state, pipe, gapCenter, LOOKAHEAD, 0, false);
+        return jumpScore > noopScore;
+    }
 
-        double score = 0;
+    // Shared eval function — useDfs=false for simulation (Stage 2), true for DFS (Stage 3)
+    double eval(double y, double v, boolean jump,
+                GameState state, Pipe pipe, double gapCenter,
+                int framesLeft, double score, boolean useDfs) {
+        // apply action
+        if (jump) v = JUMP_V;  // or v += JUMP_V if additive
 
-        for (int step = 0; step < LOOKAHEAD; step++) {
-            y += v; v += GRAVITY;  // Order B (verify against OA)
+        // physics
+        y += v; v += G;  // Order B (verify against OA — swap if Order A)
 
-            // death: heavy penalty, but surviving longer is less bad
-            if (y <= 0 || y >= state.screenHeight) return score - 1000;
+        // death: just return accumulated score, no penalty
+        if (y <= 0 || y >= state.screenHeight) return score;
 
-            // pipe zone: reward center proximity + clearance
-            double pipeX = pipe.x - step * PIPE_SPEED;
-            if (pipeX <= state.birdX && state.birdX <= pipeX + pipe.width) {
-                double clearance = Math.min(y - pipe.gapTop, pipe.gapBottom - y);
-                if (clearance <= 0) return score - 1000;
-                score += 20.0 - Math.abs(y - gapCenter) + clearance * 0.3;
-            } else {
-                // outside pipe: gentle center steering
-                score += 5.0 - Math.abs(y - gapCenter) * 0.15;
-            }
+        // pipe collision check
+        int framesUsed = LOOKAHEAD - framesLeft + 1;
+        double pipeLeft = pipe.x - framesUsed * PIPE_SPEED;
+        boolean inPipe = state.birdX >= pipeLeft && state.birdX <= pipeLeft + pipe.width;
+
+        if (inPipe) {
+            if (y <= pipe.gapTop || y >= pipe.gapBottom) return score;  // pipe wall death
+            score += 20.0 - Math.abs(y - gapCenter) * 0.5;
+        } else {
+            score += 5.0 - Math.abs(y - gapCenter) * 0.15;
         }
-        return score;
+
+        // leaf: add velocity penalty
+        if (framesLeft <= 1) return score - Math.abs(v) * 2.0;
+
+        if (useDfs) {
+            // Stage 3: branch at every frame
+            double noJ = eval(y, v, false, state, pipe, gapCenter, framesLeft - 1, score, true);
+            double doJ = eval(y, v, true, state, pipe, gapCenter, framesLeft - 1, score, true);
+            return Math.max(noJ, doJ);
+        } else {
+            // Stage 2: freefall — no future jumps
+            return eval(y, v, false, state, pipe, gapCenter, framesLeft - 1, score, false);
+        }
     }
 }
 ```
 
 **Tell Cosmo:** "I'm simulating 25 frames for both jump and no-jump, scoring by survival and proximity to gap center. This handles tight margins better than pure oscillation."
 
-**Known limitation:** The simulation assumes pure freefall after the initial decision (no future jumps). This works when gaps have enough margin, but for very tight gaps the simulation may not distinguish well. That's when DFS (Stage 3) helps.
+**Known limitation:** The simulation assumes pure freefall after the initial decision (no future jumps). This works when gaps have enough margin, but for very tight gaps the simulation may not distinguish well. That's when DFS (Stage 3) helps — and it's a one-line change.
 
 ---
 
-## Scoring: Simulation vs DFS
+## Stage 3: DFS Path-Finding (upgrade from Stage 2)
 
-Both approaches score trajectories. The difference is WHAT they score and WHY.
+**Why upgrade:** Simulation only decides frame 0 (jump or not), then freefalls. For very tight gaps, the bird needs to make jump decisions at every frame through the pipe. DFS explores all possible jump sequences using the same scoring.
 
-### Simulation scoring (per-frame accumulation over 25 frames)
-
-```
-Each frame:
-  In pipe zone:  +20 - |y - gapCenter| + clearance * 0.3
-  Outside pipe:  +5  - |y - gapCenter| * 0.15
-  Death:         score - 1000  (accumulated score so far minus heavy penalty)
-```
-
-**What it optimizes for:** Survival across many frames. The bird accumulates score every frame. Dying early loses all future points. Being centered in the pipe zone scores 4x more per frame than being centered outside — the simulation naturally prioritizes "be precise when it counts."
-
-**Why the weights are different per zone:** Outside the pipe, over-correcting to reach center causes wild velocity swings. The gentle 0.15 multiplier prevents that. Inside the pipe, precision is life-or-death — full distance penalty kicks in. The clearance bonus rewards extra safety margin.
-
-**Why `score - 1000` for death (not a separate alive flag):** If both trajectories die, the one that scored more before dying is better — it survived longer and was better positioned. No need for a separate alive/dead comparison; the -1000 penalty naturally makes alive >> dead.
-
-### DFS scoring (single evaluation at leaf node)
+**What changes from Stage 2:** One boolean flag. The `eval` function already has the DFS branch — just pass `useDfs=true` when the pipe is close.
 
 ```
-Leaf (reached target frame):
-  -|y - gapCenter| - |v| * 2.0
-
-Death (boundary hit):
-  -10000 + framesLeft  (survived longer = less bad)
+Simulation (Stage 2) = eval with useDfs=false  → freefall after frame 0
+DFS        (Stage 3) = eval with useDfs=true   → branch at every frame
 ```
 
-**What it optimizes for:** Arrival state. The DFS explores all jump sequences and picks the one that arrives at the leaf with the best position + velocity. Unlike simulation, it doesn't care about intermediate frames — only the endpoint matters.
+### Code changes (add to Stage 2)
 
-**Why velocity matters here and not in simulation:** The simulation evaluates 25 frames of freefall — velocity naturally shows up as future position drift. The DFS only evaluates one frame (the leaf), so it must explicitly penalize high velocity. A bird arriving at gapCenter with v=8 looks perfect at the leaf but will be 8px off-center next frame.
-
-**Why `|v| * 2.0` (not 0.5):** With G=1 and JV=-8, velocity ranges ±8. Distance to center ranges 0-20. With `* 0.5`, velocity=8 contributes 4 to score — less than 5px off center. But v=8 means 8px drift next frame, which is a huge positional error. `* 2.0` makes velocity=8 contribute 16 — now the DFS strongly prefers v=0 arrivals, which is what we want for stable oscillation after passing the pipe.
-
-### Comparison
-
-| Aspect | Simulation | DFS |
-|---|---|---|
-| Evaluates | 25-frame trajectory | Single leaf state |
-| Death handling | `score - 1000` (natural) | `-10000 + framesLeft` |
-| Position scoring | Per-frame, zone-aware (20 vs 5) | Leaf only: `-\|y - center\|` |
-| Velocity scoring | Implicit (shows up as future drift) | Explicit: `-\|v\| * 2.0` |
-| What to tune | Zone weights (20, 5, 0.3, 0.15) | Velocity weight (2.0) |
-| Tune if bird... | ...overshoots entering pipe → reduce outside weight | ...oscillates wildly after pipe → increase v weight |
-
----
-
-## Stage 3: DFS Path-Finding (optional, if time permits)
-
-**Why upgrade from simulation:** The simulation assumes freefall — no future jumps after frame 0. For very tight gaps, DFS explores all possible jump sequences and finds the actual optimal path. It's the same principle as the simulation (compare scores) but searches deeper.
-
-**The spectrum:**
-```
-Simulation = DFS with depth 1, evaluate by 25-frame freefall scoring
-DFS        = DFS with depth N, evaluate by single-frame scoring at leaf
-```
-Same algorithm, different tradeoff: simulation trades search depth for evaluation quality, DFS trades evaluation quality for search depth.
-
-**Key insight:** Stage 1 already gets the bird near gap center. The DFS only handles the last few frames — a short-range curve ball through the gap. Search depth = `pipeWidth / PIPE_SPEED` + small buffer. That's 2^15 max = 32K nodes — instant, no memoization needed.
-
-**Score-based DFS** (simpler than the binary found/not-found version — same scoring principle as simulation):
+Only `shouldJump` changes. The `eval` function is already written:
 
 ```java
-class FlappyAgent {
-    static final int G = 1;
-    static final int JUMP_V = -8;
-    static final int PIPE_SPEED = 1;
-    static final int OFFSET = 14;  // or 18 for Order B physics
-
     boolean shouldJump(GameState state) {
         Pipe pipe = state.nextPipe;
-        int gapCenter = (int) ((pipe.gapTop + pipe.gapBottom) / 2.0);
-        int framesToPipe = Math.max((int) ((pipe.x - state.birdX) / PIPE_SPEED), 0);
+        double gapCenter = (pipe.gapTop + pipe.gapBottom) / 2.0;
 
-        // Short-range DFS: pipe is close, find optimal path through the gap
-        int dfsRange = (int) (pipe.width / PIPE_SPEED) + 5;
-        if (framesToPipe > 0 && framesToPipe <= dfsRange) {
-            double noJumpScore = dfs((int) state.birdY, (int) state.birdV,
-                    false, framesToPipe, (int) state.screenHeight, gapCenter);
-            double jumpScore = dfs((int) state.birdY, (int) state.birdV,
-                    true, framesToPipe, (int) state.screenHeight, gapCenter);
-            return jumpScore > noJumpScore;
-        }
+        // How far to the right edge of the pipe
+        int framesToExit = (int) ((pipe.x + pipe.width - state.birdX) / PIPE_SPEED);
 
-        // Default: Stage 1 oscillation
-        return state.birdY > gapCenter + OFFSET;
+        // Near pipe: DFS (branch every frame through the pipe)
+        boolean useDfs = framesToExit > 0 && framesToExit <= LOOKAHEAD;
+        int depth = useDfs ? framesToExit : LOOKAHEAD;
+
+        double jumpScore = eval(state.birdY, state.birdV, true,
+                                state, pipe, gapCenter, depth, 0, useDfs);
+        double noopScore = eval(state.birdY, state.birdV, false,
+                                state, pipe, gapCenter, depth, 0, useDfs);
+        return jumpScore > noopScore;
     }
-
-    double dfs(int y, int v, boolean jump, int framesLeft, int screenH, int gapCenter) {
-        if (jump) v = JUMP_V;  // or v += JUMP_V if additive
-        y += v; v += G;        // Order B — swap if Order A
-
-        // death
-        if (y <= 0 || y >= screenH) return -10000 + framesLeft;
-
-        // leaf: center proximity + velocity penalty (v matters more — it's next-frame drift)
-        if (framesLeft <= 1) {
-            return -Math.abs(y - gapCenter) - Math.abs(v) * 2.0;
-        }
-
-        // recurse: pick the better future
-        double noJump = dfs(y, v, false, framesLeft - 1, screenH, gapCenter);
-        double jumped = dfs(y, v, true, framesLeft - 1, screenH, gapCenter);
-        return Math.max(noJump, jumped);
-    }
-}
 ```
 
-**What's simpler vs the old binary DFS:**
-- Returns `double` score instead of `int[]` — no found/not-found tracking
-- No Y_ALLOWANCE, V_ALLOWANCE — score is continuous, no threshold tuning
-- No `Optional<Boolean>`, no `findPath` wrapper — just compare two scores directly
-- Same scoring principle as simulation: center proximity matters, velocity is a penalty
-- Death returns `-10000 + framesLeft` (same as simulation: survived longer = less bad)
+**DFS target = right edge of pipe.** The DFS searches all jump sequences across the full pipe width. A path must survive the entire pipe to accumulate the maximum per-frame bonus. Among paths that all survive, exit quality (center proximity + low velocity) differentiates.
 
-**Tell Cosmo:** "The DFS explores all jump/no-jump sequences for the last few frames before the pipe. Each leaf is scored by proximity to gap center and velocity. It picks the first action of the best-scoring path."
+**Search cost:** Depth = `pipeWidth / PIPE_SPEED` ≈ 15 frames → 2^15 = 32K nodes. Instant.
+
+**Why this works cleanly:**
+- Same `eval` function, same scoring, same physics — no rewrite
+- Simulation handles long-range (far from pipe), DFS handles short-range (through the pipe)
+- Stage 1 oscillation still gets the bird near the gap; DFS just threads the needle
+- If DFS breaks or is too slow, remove the `useDfs` flag → back to Stage 2
+
+**Tell Cosmo:** "I upgraded to DFS for the pipe traversal — same scoring function, but now branching at every frame to find the optimal jump sequence through the gap. The simulation still handles long-range positioning."
 
 ---
 
@@ -441,11 +404,11 @@ class FlappyAgent {
 | 0-5 min | Read + clarify physics model with Cosmo | — |
 | 5-10 min | Stage 1: oscillation. **Submit.** Should pass most cases. | Working agent |
 | 10-15 min | Observe failures. Tune OFFSET if needed. | Tuned agent |
-| 15-35 min | Stage 2: simulation (if Stage 1 clips edges). **Proven on actual OA.** | If stuck, Stage 1 still works |
-| 35-50 min | Stage 3: DFS (if simulation can't handle very tight gaps). Optional. | If stuck, Stage 2 still works |
-| 50-60 min | Tune, test edge cases, polish Cosmo chat log | — |
+| 15-35 min | Stage 2: simulation with `eval` function. **Submit.** Proven on actual OA. | If stuck, Stage 1 still works |
+| 35-45 min | Stage 3: flip `useDfs=true` when near pipe. **Submit.** One-line upgrade. | If stuck, Stage 2 still works |
+| 45-60 min | Tune weights, test edge cases, polish Cosmo chat log | — |
 
-**Critical rule:** Each stage is a working improvement. The simulation (Stage 2) is the highest-value upgrade — it's what the test-taker used to pass. DFS (Stage 3) is theoretical overkill unless gaps are extremely tight. If Stage 2 works, spend remaining time on Cosmo chat quality, not more engineering.
+**Critical rule:** Each stage is a working improvement. Stage 2 → 3 is a one-line change (`useDfs=true`) because they share the same `eval` function. If Stage 2 passes, Stage 3 is low-risk and worth attempting. If Stage 3 breaks, revert the flag → back to Stage 2 instantly.
 
 ---
 
