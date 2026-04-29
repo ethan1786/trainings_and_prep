@@ -20,6 +20,16 @@ class Pipe {
 //   4. What are gravity and jump velocity values?
 
 class solution {
+    {
+        // this check is very important
+        // emergency: near floor and falling — jump regardless
+        if (state.birdY >= state.screenHeight - 10 && state.birdV > 0)
+  return true;
+
+        // emergency: near ceiling and rising — don't jump regardless
+        if (state.birdY <= 10 && state.birdV < 0) return false;
+    }
+
     // a. simple physics, no accelaration
     boolean shouldJump(GameState state) {
         double gapCenter = (state.nextPipe.gapTop + state.nextPipe.gapBottom) / 2.0;
