@@ -1,6 +1,6 @@
 # Job Search — Master Todo List
 
-> Last updated: April 22, 2026
+> Last updated: April 29, 2026
 
 ---
 
@@ -15,17 +15,15 @@
 
 ## Immediate — Take-Home Assessments
 
-### Coinbase — Assessments In Progress
+### Coinbase — Assessments Submitted, Waiting for Results
 Recruiter screen done Apr 16. Role not pre-assigned — team matching after assessments.
-- [ ] CCAT + SJT assessments (this week)
-- [ ] Coding assessment on CodeSignal (mid next week) — AI copilot enabled, start simple then add details
-- [ ] Go over all Coinbase coding questions (cloud_file_system, bank_system, in_memory_database, recipe_manager, task_management_system)
-- [ ] Practice a few rounds of CCAT
-- [ ] Go over system designs
-- After assessments: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
-
-**Email to recruiter (send Apr 17):**
-> Hi [Name] — thanks again for the great conversation on Wednesday! I'm looking forward to the assessments. You mentioned you'd send over some CodeSignal practice examples — just wanted to follow up on that so I can start preparing. Thanks!
+- [x] CCAT + SJT assessments
+- [x] Coding assessment on CodeSignal — coin budget variant, scored 16/20
+- [x] Go over all Coinbase coding questions
+- [x] Practice CCAT rounds
+- [ ] **Waiting for results — expect Friday May 2 or Monday May 5**
+- If passed: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
+- **Lesson learned:** Start simple, submit, then fix edge cases. Don't overengineer upfront.
 
 ---
 
@@ -82,11 +80,11 @@ Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap 
 
 ---
 
-### Cherry — Director Inbound, Chat Next Week
+### Cherry — Director Inbound, Chat Tomorrow (Apr 30)
 Director of Eng (Tim Way, ex-Lyft) reached out directly. Staff Full-Stack role, fintech (BNPL for healthcare).
 $280K cash + equity ($500-600K total comp). Private company, remote.
-- [ ] 20-min chat with Tim next week (he'll propose time)
-- Primary value: competing offer for negotiation leverage with Coinbase/Netflix
+- [ ] **20-min chat with Tim — Apr 30**
+- Primary value: competing offer for negotiation leverage with Coinbase/NVIDIA
 - Concerns: private equity risk, BNPL macro risk, React/TypeScript/Node stack, early morning Europe calls
 - Don't invest heavy prep — keep it lightweight
 
@@ -111,7 +109,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Status | Roles Applied | Next Action | When |
 |---|---|---|---|---|
-| **Coinbase** | Assessments in progress | Staff Platform (x3) | CCAT + SJT now, coding mid next week | **This week + next** |
+| **Coinbase** | Assessments submitted ✅ | Staff Platform (x3) | Waiting for results | **May 2 or May 5** |
 | **Airbnb** | Applied (cold) | GraphQL, Hosting Svcs, Reservations | Wait, then follow up | **~Apr 28** |
 | **Figma** | Applied (cold) | DevEx, Distributed Sys, Prod Eng | Wait | **~Apr 28** |
 | **Pinterest** | Rejected ❌ | Staff SWE, Activation Team | — | — |
@@ -131,12 +129,12 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
 |---|---|---|---|---|---|---|---|
-| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments in progress** |
+| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments submitted — waiting** |
 | **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting — follow up Apr 20 |
 | **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
 | **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Rejected — resume screen** |
 | **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
-| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes (cold) | No referral | **Applied — waiting** (prev role taken down, reapplied) |
+| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes | Sourcer responded ✅ | **Answered screening questions — waiting for HM review** |
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | — | — | Inbound | Director of Eng | **Chat next week** |
 | **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
 | **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
