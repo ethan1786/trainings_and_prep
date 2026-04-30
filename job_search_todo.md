@@ -1,6 +1,6 @@
 # Job Search — Master Todo List
 
-> Last updated: April 29, 2026
+> Last updated: April 30, 2026
 
 ---
 
@@ -27,101 +27,78 @@ Recruiter screen done Apr 16. Role not pre-assigned — team matching after asse
 
 ---
 
-## This Week (Apr 16–19) — Remaining Actions
+## Completed / Closed Actions
 
-### Pinterest — Rejected ❌
-- [x] Sent note to Nick about Activation Team role — no response
-- [x] Applied directly to **Staff SWE, Activation Team** (Remote)
-- ❌ Rejected — filtered out at resume screening
-
-### GitHub — Applied cold ✅
-- [x] Microsoft friend can't refer from Microsoft side, no internal path
-- [x] Applied directly to **Principal SWE, Core Platform Infrastructure** (req #5101)
-
-### Google — Rejected ❌
-- [x] Got referral, applied to 2 roles, completed online assessment
-- ❌ Rejected — failed Google Hiring Assessment (30-min cognitive/behavioral screen)
-- Cooldown period likely 6-12 months before reapplying
-
-### Meta — Waiting on Connection
+### Meta — On Hold (Mass Layoffs)
 - [x] Reached out to Meta connection
-- [ ] If connection agrees, apply for E6 (Staff) backend infra roles
-- [ ] If no reply by end of week, find other connections or apply cold
+- Hiring likely frozen during mass layoffs. Revisit after layoffs stabilize.
+
+### Netflix — Applied Cold ✅
+- [x] Applied cold to remaining L5 roles
+- [x] Send thank-you to Preetam for referral attempt
 
 ---
 
-## Silent / Stale — Follow Up Needed
+## Likely Dead — No More Follow-ups
 
-These have been quiet for 1+ weeks. Time to act.
+| Company | Status | Notes |
+|---|---|---|
+| **Reddit** | Dead | 5 roles, 4 recruiters InMailed, no response |
+| **Confluent** | Dead | 4 connection requests + 1 InMail, no response |
+| **GitHub** | Dead | Cold app, no referral, no response |
+| **Figma** | Dead | 3 cold apps, no response |
+| **Circle** | Slow — wait | Known to be slow on cold apps, give it more time |
+| **OpenAI** | Dead | No remote platform fit. Send Vishal thank-you. |
 
-| Company | Applied | Days Silent | Contact | Action |
-|---|---|---|---|---|
-| **Reddit** | 5 roles, InMailed 4 recruiters | ~3 days | Recruiters | Follow up with 2 Ads team recruiters by **Apr 20** |
-| **Confluent** | Flink Control Plane, 4 connection requests + 1 InMail | ~3 days | Recruiters | Follow up when connections accepted, or find new recruiters by **Apr 20** |
-| **OpenAI** | Yes, connected with Vishal + recruiter Josh | 2+ weeks? | Josh | **Follow up with Josh now** — if no response, this is likely dead |
-| **Netflix** | Yes, Preetam referred + pinged HM | 2+ weeks? | Preetam | **Message Preetam to confirm status** — is the referral still active? What role/level? |
-| **Figma** | 3 backend roles (cold, Apr 14) | 2 days | AI directors (old outreach) | Too early to follow up. If AI directors reply, pivot conversation to backend teams |
-| **Circle** | Staff SWE, messaged VP of Eng | 1+ week | VP of Eng | **Send light follow-up to VP by Apr 19** if no response |
-| **Airbnb** | 3 backend roles (cold, Apr 14) | 2 days | Know HM (Whitney Rogers) | Too early. Follow up ~Apr 28 if no response. Find recruiter on GraphQL Platform org. |
-
-**Netflix — Preetam silent, apply cold (do between Coinbase prep sessions)**
-Preetam hasn't responded. Experimentation Platform role (JR39712) appears closed.
-- [x] Send follow-up to Preetam — done Apr 16, no response
-- [ ] Check if Content & Business Products (JR28754) is still open → apply cold
-  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5_JR28754
-- [ ] Check if Games Systems (JR39604) is still open → apply cold
-  https://netflix.wd1.myworkdayjobs.com/en-US/Netflix/job/USA---Remote/Software-Engineer-5---Games-Systems_JR39604
-- [ ] Browse board for new L5 backend/platform roles to replace Experimentation Platform
-  Search: "Software Engineer 5", "L5", "platform", "infrastructure"
-- [ ] Apply cold to whatever's still open
-
-**Deprioritized — no more follow-ups:**
-Reddit, Confluent, Circle cold outreach went unanswered. Market worsening (Snap layoffs, Meta potential layoffs). Not worth chasing — if they respond, great.
+**Action items:**
+- [ ] Send thank-you to Vishal (OpenAI) and Preetam (Netflix) for referral attempts
 
 ---
 
-### Cherry — Director Inbound, Chat Tomorrow (Apr 30)
+### Cherry — HM Call Scheduled
 Director of Eng (Tim Way, ex-Lyft) reached out directly. Staff Full-Stack role, fintech (BNPL for healthcare).
 $280K cash + equity ($500-600K total comp). Private company, remote.
-- [ ] **20-min chat with Tim — Apr 30**
+- [x] HR chat with Cat — Apr 30 ✅
+- [x] Sent resume to Cat (HR) and Tim (HM)
+- [ ] **HM call with Tim — May 11**
+- Full interview process: HM → Coding → System Design → Application Design → Final (CTO)
+- Prep docs created in `companies/cherry/`
 - Primary value: competing offer for negotiation leverage with Coinbase/NVIDIA
 - Concerns: private equity risk, BNPL macro risk, React/TypeScript/Node stack, early morning Europe calls
-- Don't invest heavy prep — keep it lightweight
 
 ---
 
-## On Hold — Monitor Periodically
+## On Hold — Monitor Career Pages Regularly
 
-### Stripe
-- [x] Original role (Workflow Engine) appears filled — removed from job board
-- Stream Compute role is a stretch (needs deep Flink/streaming infra experience you don't have)
-- **Strategy:** Monitor Stripe job board for new backend platform roles. When a good one appears, message YiYi (connection) with a specific ask.
+### Actively monitoring:
+- **Stripe** — waiting for new backend platform roles. Message YiYi when one appears.
+- **Spotify** — lifeatspotify.com/jobs — Staff backend, remote
+- **LinkedIn** — careers.linkedin.com — Staff infra, remote
+- **Twilio / Segment** — platform infrastructure, remote
+- **Elastic** — distributed systems, remote-first
+- **HashiCorp** — infrastructure tooling, remote (you use Terraform daily)
+- **Cloudflare** — systems engineering, remote
 
-### OpenAI
-- Vishal referred you, but recruiter Josh never accepted LinkedIn invite. Application likely stale.
-- No remote backend platform roles that fit your profile — their stack is Python/Go, roles are AI-infra or security focused
-- **Strategy:** Send thank-you to Vishal, check board occasionally, but don't invest active effort.
-- [ ] Send thank-you/check-in message to Vishal (see message template in follow-ups section)
+### Lower priority:
+- **Apple** — careers.apple.com (less likely remote)
+- **Microsoft** — careers.microsoft.com
+- **Salesforce** — careers.salesforce.com
+- **ByteDance/TikTok** — careers.tiktok.com
 
 ---
 
-## Waiting — Status Tracker
+## Active Pipeline — Status Tracker
 
-| Company | Status | Roles Applied | Next Action | When |
-|---|---|---|---|---|
-| **Coinbase** | Assessments submitted ✅ | Staff Platform (x3) | Waiting for results | **May 2 or May 5** |
-| **Airbnb** | Applied (cold) | GraphQL, Hosting Svcs, Reservations | Wait, then follow up | **~Apr 28** |
-| **Figma** | Applied (cold) | DevEx, Distributed Sys, Prod Eng | Wait | **~Apr 28** |
-| **Pinterest** | Rejected ❌ | Staff SWE, Activation Team | — | — |
-| **Reddit** | InMailed 4 recruiters | Staff (x3) + Senior Staff (x2) | Follow up recruiters | **Apr 20** |
-| **Confluent** | 4 connection requests + 1 InMail | Staff, Flink CP | Follow up recruiters | **Apr 20** |
-| **GitHub** | Referral requested | Not yet applied | Wait for friend | **Apr 20** |
-| **Google** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
-| **Meta** | Referral requested | Not yet applied | Wait for connection | **Apr 20** |
-| **OpenAI** | 2+ weeks silent, no fit | Yes | Deprioritized — send Vishal thank-you | On hold |
-| **Netflix** | Preetam silent, top pick closed | Not yet | Apply cold to remaining roles | **Now** |
-| **Circle** | 1+ week silent | Staff SWE | Follow up with VP | **Apr 19** |
-| **Stripe** | Original role filled | Workflow Engine (filled) | Monitor board | Ongoing |
+| Company | Status | Next Action | When |
+|---|---|---|---|
+| **Coinbase** | Assessments submitted ✅ | Waiting for results | **May 2 or May 5** |
+| **NVIDIA** | Screening questions answered | Waiting for HM review | **This week** |
+| **Cherry** | HR done, resume sent | HM call with Tim | **May 11** |
+| **Twilio** | Applying tonight | Principal Eng, Phone Numbers Platform (P5) | **Apply by May 1** |
+| **Circle** | Cold app, slow process | Wait | — |
+| **Meta** | On hold (mass layoffs) | Revisit after layoffs stabilize | **TBD** |
+| **Netflix** | Applied cold | Waiting | — |
+| **Airbnb** | Rejected ❌ | — | — |
 
 ---
 
@@ -130,20 +107,22 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
 |---|---|---|---|---|---|---|---|
 | **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments submitted — waiting** |
-| **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | 4 recruiters InMailed | Waiting — follow up Apr 20 |
-| **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | 4 recruiters + InMail | Waiting — follow up Apr 20 |
-| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | Nick (no response) | **Rejected — resume screen** |
-| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | No referral | **Applied — waiting** |
-| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes | Sourcer responded ✅ | **Answered screening questions — waiting for HM review** |
-| **Cherry** | Staff | Full-Stack (fintech BNPL) | — | — | Inbound | Director of Eng | **Chat next week** |
-| **Stripe** | Staff | (Workflow Engine filled) | Done | — | Yes (filled) | YiYi | On hold — monitor board |
-| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | Know HM (Whitney Rogers) | Waiting |
-| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | AI directors (old) | Waiting |
-| **OpenAI** | — | — | Done | — | Yes | Vishal | **On hold** — no remote platform fit |
-| **Netflix** | L5 | Content & Business Products, Games Systems + TBD | Done | — | Not yet | Preetam (no response) | **Apply cold now** |
-| **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Follow up Apr 19 |
-| **Google** | L6 (Staff) | Search Experiments + Observability/OTel | Done | Done | Yes (x2) | Referral | **Rejected — failed online assessment** |
-| **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **Friend handling it** |
+| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments submitted — waiting** |
+| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes | Sourcer responded ✅ | **Screening questions answered — waiting HM** |
+| **Cherry** | Staff | Full-Stack (fintech BNPL) | Done ✅ | Done ✅ | Inbound | Director of Eng + HR | **HM call May 11** |
+| **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Applying tonight | Cold | **Deadline May 1** |
+| **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting (slow process) |
+| **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **On hold — mass layoffs** |
+| **Netflix** | L5 | Backend/Platform | Done | — | Yes (cold) | Preetam (no response) | Applied cold — waiting |
+| **Stripe** | Staff | (monitoring board) | Done | — | — | YiYi | On hold — monitoring |
+| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | — | **Rejected** |
+| **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | — | Dead — no response |
+| **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | — | Dead — no response |
+| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | — | Dead — no response |
+| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | — | Dead — no response |
+| **OpenAI** | — | — | Done | — | Yes | Vishal | Dead — send thank-you |
+| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | — | Rejected — resume screen |
+| **Google** | L6 (Staff) | Search Experiments + Observability | Done | Done | Yes (x2) | Referral | Rejected — failed OA |
 
 ---
 
@@ -154,28 +133,22 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Coinbase** | Senior Staff, Core Automation | Rejected | Retried at Staff Platform ✅ |
 | **Airbnb** | Staff, GenAI | Rejected (cold) | Retried with backend roles |
 | **Pinterest** | Staff, Activation Team | Rejected (resume screen) | Nick unresponsive, cold app filtered |
+| **Airbnb** | Staff (retry), backend roles | Rejected (cold) | All 3 backend roles rejected |
+| **Reddit** | Staff + Sr Staff, Ads/Growth | Dead | 5 roles, 4 recruiters, no response |
+| **Confluent** | Staff, Flink CP | Dead | 4 connections + InMail, no response |
+| **GitHub** | Principal, Core Platform | Dead | Cold app, no response |
+| **Figma** | Staff, DevEx/Distributed/ProdEng | Dead | 3 cold apps, no response |
+| **OpenAI** | — | Dead | No remote platform fit |
 | **Datadog** | Staff (cold) | Rejected | Skip — NYC in-office, no connection |
 | **Snap, Palantir, Plaid** | — | Skipped | No remote roles |
 | **Discord, Vercel, Ramp/Juno** | — | Skipped | Stack mismatch (Python/TypeScript) |
 
 ---
 
-## Ongoing — Technical Prep
+## This Week — Action Items
 
-- [ ] LC: 2–3 problems/day, timed (focus on graph, DP, design patterns)
-- [ ] System design: practice 1 topic per day (45 min)
-- [ ] Behavioral: practice STAR stories aloud (Stories 1, 3, 5, 9, 11, 12)
-- [ ] Coinbase-specific: review CodeSignal format, blockchain basics, parity testing story
-- [ ] Save K8s operator pattern / Flink overview for right before Confluent on-site
-
----
-
-## Manual Career Page Check (30 min — not yet done)
-
-- [ ] Apple — careers.apple.com
-- [ ] Microsoft — careers.microsoft.com
-- [ ] LinkedIn — careers.linkedin.com
-- [ ] Salesforce — careers.salesforce.com
-- [ ] Spotify — lifeatspotify.com/jobs
-- [ ] ByteDance/TikTok — careers.tiktok.com
-- Look for: Staff/Senior backend, platform, infrastructure roles. Remote or Boston.
+- [ ] Send thank-you messages to Vishal (OpenAI) and Preetam (Netflix)
+- [ ] Skim Cherry HM prep doc before May 11 call
+- [ ] Browse career pages for new roles (see "On Hold" section): Stripe, Spotify, Twilio, Elastic, HashiCorp, Cloudflare
+- [ ] LC: 2-3 problems/day to stay sharp (focus on HashMap/CRUD patterns from Coinbase prep)
+- [ ] If Coinbase passes → prep for virtual on-site (behavioral, coding, system design, reverse system design)
