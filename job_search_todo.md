@@ -22,19 +22,6 @@ Recruiter screen done Apr 16. OA passed (16/20 coding + CCAT/SJT).
 - [ ] **HR call Monday to schedule virtual on-site**
 - Virtual on-site (4 rounds): behavioral 45min, coding 60min, system design 60min, reverse system design 60min
 - Prep docs in `companies/coinbase/`
-- **Lesson learned:** Start simple, submit, then fix edge cases. Don't overengineer upfront.
-
----
-
-## Completed / Closed Actions
-
-### Meta — On Hold (Mass Layoffs)
-- [x] Reached out to Meta connection
-- Hiring likely frozen during mass layoffs. Revisit after layoffs stabilize.
-
-### Netflix — Applied Cold ✅
-- [x] Applied cold to remaining L5 roles
-- [x] Send thank-you to Preetam for referral attempt
 
 ---
 
@@ -91,10 +78,6 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Twilio** | Applied ✅ | Waiting | — |
 | **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
 | **HashiCorp/IBM** | Applied ✅ | Staff SWE, HashiCorp Secure (Vault/Boundary) | — |
-| **Circle** | Cold app, slow process | Wait | — |
-| **Meta** | On hold (mass layoffs) | Revisit after layoffs stabilize | **TBD** |
-| **Netflix** | Applied cold | Waiting | — |
-| **Airbnb** | Rejected ❌ | — | — |
 
 ---
 
@@ -140,5 +123,5 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 - [ ] **Monday: HR call with Coinbase to schedule on-site**
 - [ ] Prep for Coinbase virtual on-site (behavioral, coding, system design, reverse system design)
 - [ ] Skim Cherry HM prep doc before May 11 call
-- [ ] Browse career pages: Stripe, Spotify (Cloudflare/LinkedIn removed — no remote eng openings)
+- [ ] Browse career pages: Stripe, Spotify
 - [ ] LC: 2-3 problems/day (focus on HashMap/CRUD patterns + LC practice list in Coinbase prep doc)

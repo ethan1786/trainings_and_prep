@@ -132,7 +132,8 @@
       "WebFetch(domain:www.elastic.co)",
       "WebFetch(domain:www.hashicorp.com)",
       "WebFetch(domain:www.ibm.com)",
-      "WebFetch(domain:jobs.elastic.co)"
+      "WebFetch(domain:jobs.elastic.co)",
+      "Bash(pandoc *)"
     ]
   }
 }
