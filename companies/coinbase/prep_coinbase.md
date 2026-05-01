@@ -126,103 +126,17 @@ Completed. Key takeaways:
 - Role is not pre-assigned — recruiter is hiring for the whole Platform team with multiple roles to fill
 - Team matching happens after take-home assessments
 - Comp is set for Staff level, Boston area, not negotiable
-- Next step: 2 take-home assessments
 
-### Round 2: Take-Home Assessments (NEXT)
+### Round 2: Take-Home Assessments ✅ PASSED
 
-Two separate assessments to complete:
+- CCAT + SJT completed
+- CodeSignal OA: coin budget variant (not flappy bird), scored 16/20
+- **Lesson learned:** Start simple, submit, then fix edge cases. Don't overengineer upfront. Lost time building a simulation approach that was scrapped — the simple heuristic passed 80% of cases.
 
-**Assessment A: Cognitive + Culture (30 min total)**
-- Non-technical — personality/culture fit and cognitive reasoning
-- Don't overthink this — answer honestly and consistently
-- Coinbase values: intensity, accountability, speed, AI-first mindset
+### HR Call Monday — logistics/scheduling only
+Not a real interview — HR will explain next steps and schedule the HM call + on-site.
 
-**Assessment A Details: CCAT + Situational Judgment**
-
-The 30-minute non-technical assessment has two parts:
-
-**Part 1: CCAT (Criteria Cognitive Aptitude Test)**
-
-50 questions in 15 minutes. You are NOT expected to finish — average score is ~24/50, target 30+.
-
-Three question types:
-- **Verbal:** analogies, vocabulary, sentence completion
-- **Math/logic:** word problems, number series, basic algebra
-- **Spatial:** pattern matching, shape rotation, next-in-sequence
-
-Strategy:
-- ~18 seconds per question — if you don't see it in 10s, skip and come back
-- No penalty for blanks — skip aggressively
-- Do your strongest category first to bank easy points
-- Check the clock at question 15 and 30
-- Don't overthink spatial questions — trust first instinct
-
-Practice:
-- CriteriaCorp official free practice test (one attempt)
-- YouTube: search "CCAT practice test" for full walkthroughs
-- Any generic aptitude test prep (number series, verbal analogies) transfers directly
-
-**Part 2: Situational Judgment Test (SJT) — Google Hiring Assessment style**
-
-Workplace scenarios where you rank or select the best/worst response from 4-5 options.
-
-What they score: collaboration, direct communication, ownership, bias toward action.
-
-Rules of thumb:
-| When in doubt... | Prefer | Over |
-|---|---|---|
-| Fix vs escalate | Fix + inform the person | Escalate to manager immediately |
-| Solo vs collaborate | Loop others in | Hero it alone |
-| Confront vs avoid | Address it directly and respectfully | Wait and see / hope it resolves |
-| Process vs action | Take action first, create process after | Schedule a meeting to discuss |
-| Perfect vs shipped | Ship with known tradeoffs stated | Block on perfection |
-
-Coinbase values to filter through:
-- **Act like an owner** — take responsibility, don't defer to someone else
-- **Clear communication** — direct > indirect, explicit > assumed
-- **Positive energy** — assume good intent from teammates
-- **Efficient execution** — fix it, don't just talk about fixing it
-
-The key insight: there's no trick. They want people who communicate directly, take ownership, and don't create drama. If your answer feels like what a mature Staff engineer would actually do on a normal workday, it's probably right.
-
-Practice: search "Google Hiring Assessment practice" or "SJT practice test software engineer" — the format is nearly identical.
-
-**Assessment B: Technical on CodeSignal (60 min)**
-- Gamified physics-based simulation — NOT standard LeetCode
-- AI chat assistant (Cosmo) is embedded — conversational, not autocomplete
-- Recruiter's advice: **start simple, then add more details**
-- Proctored — no external resources allowed
-
-**Strategy:**
-- Get a working solution first, then iterate to add edge cases, optimizations, and cleaner code
-- Use the AI copilot to scaffold boilerplate, but make sure you understand and can explain what it generates
-- Don't spend too long on perfection in early questions — budget time for all questions
-- See Section 12 for assessment details (gamified simulation format, Cosmo AI assistant strategy)
-
-**How to use Cosmo effectively:**
-- **Coinbase sees your full Cosmo chat log** — every question you ask is part of your evaluation. Treat it like pair-programming while your manager reads the conversation.
-- Cosmo has context on the problem prompt and your current code (per email)
-- Cosmo will NOT generate full solutions — it deliberately gives partial/pseudocode answers
-- Cosmo cannot run or test code
-- Good: "I'm thinking of using BFS here because the graph is unweighted — does that make sense?"
-- Good: "My character overshoots at high velocity — what are common pitfalls with deceleration logic?"
-- Good: "What edge cases should I consider for negative values here?"
-- Good: Syntax/API lookups: "What's Java's Math method for clamping a value to a range?"
-- Bad: "Solve this for me" or "Write the complete solution" — flagged and Cosmo will likely refuse
-- Bad: Pasting the full problem and asking for an answer
-- Show your reasoning in the chat — the conversation log demonstrates your thought process to reviewers
-
-**When you get access to the environment (recruiter will send examples):**
-- Check: Is it a chat interface or inline autocomplete?
-- Check: Can you type natural language prompts, or does it only suggest code as you type?
-- Check: Is there a "run tests" button and what do test cases look like?
-- Check: Time visibility — remaining time per question or just total?
-- Spend the first 2 minutes of the actual assessment understanding the tool — don't discover its limitations on question 3
-- Pick Java as your language
-
-**After assessments:** Recruiter matches you to a specific team/role based on results, then you talk to the actual hiring manager.
-
-### Round 3: Hiring Manager Call
+### Round 3: Hiring Manager Call (TBD — will be scheduled Monday)
 
 This happens after assessment results, with the HM for your matched team. This is where you assess the team, the work, and the manager.
 
@@ -583,6 +497,40 @@ Each level tests a different skill: correctness → concurrency → distributed 
 - After solving, discuss time/space complexity and edge cases
 - Staff expectation: you should finish with time to discuss optimizations and alternative approaches
 
+### Additional LC Practice — Matching Coinbase Patterns
+
+Your Coinbase forum questions are all multi-level HashMap CRUD with incremental complexity. These LC problems train the same muscles:
+
+**Exact pattern match (multi-level HashMap CRUD):**
+
+| LC # | Problem | Why it matches |
+|---|---|---|
+| 588 | Design In-Memory File System | Almost identical to cloud_file_system |
+| 1166 | Design File System | Simpler variant — good warmup |
+| 1146 | Snapshot Array | Backup/restore with versioning — like in_memory_database |
+| 981 | Time Based Key-Value Store | Timestamped lookups, binary search — like bank_system getBalance |
+| 146 | LRU Cache | HashMap + DLL, dual structure consistency |
+| 460 | LFU Cache | HashMap + frequency tracking, more complex state |
+| 355 | Design Twitter | Multi-entity relationships, timeline merging |
+| 1244 | Design A Leaderboard | HashMap + sorting, like topSpenders |
+
+**State machine / lifecycle:**
+
+| LC # | Problem | Why it matches |
+|---|---|---|
+| 353 | Design Snake Game | State machine with position tracking |
+| 362 | Design Hit Counter | TTL/expiry, sliding window — like your TTL patterns |
+| 1472 | Design Browser History | State management with back/forward |
+| 2043 | Simple Bank System | Already in your prep — follow-up progression to distributed is key |
+
+**Multi-map consistency (your #1 bug pattern):**
+
+| LC # | Problem | Why it matches |
+|---|---|---|
+| 432 | All O(1) Data Structure | HashMap + doubly-linked list, must keep both in sync |
+| 895 | Maximum Frequency Stack | Two maps that must stay consistent |
+| 380 | Insert Delete GetRandom O(1) | HashMap + array, dual structure |
+
 ---
 
 ## 13. System Design Prep — Coinbase
@@ -601,6 +549,20 @@ Each level tests a different skill: correctness → concurrency → distributed 
 | **Internal Platform / Operational Tooling** | Multi-tenant platform serving eng + compliance + risk, dashboards, alerting | Your cross-team platform work |
 | **Real-Time Price Feed** | Aggregating prices across exchanges, WebSocket streaming, staleness detection | Real-time systems, caching |
 | **Rate Limiter / API Gateway** | Distributed, multi-tier, sliding window, per-user/per-API limits | Standard system design topic |
+
+### Additional System Design Practice
+
+**High priority — practice these end-to-end (45 min each):**
+
+1. **Payment/Settlement System** — #1 most likely. Design fiat → crypto flow with idempotency, reconciliation, multi-day settlement, state machine (INITIATED → DEBITED → CREDITED → COMPLETED). Practice: what happens when the credit step fails midway?
+2. **Distributed Rate Limiter** — sliding window, per-user/per-API, Redis-backed. You've built this (Nginx/Lua at Toast, Kong at Applause). Practice the distributed version across multiple API gateway nodes.
+3. **Event-Driven Pipeline** — Kafka-based financial event processing. Ordering guarantees, exactly-once semantics, dead letter queues, consumer group rebalancing. Maps to your SQS/SNS/Kafka experience.
+4. **Notification System** — real-time alerts for transactions/price movements. WebSocket + pub/sub + push notifications + email. Fan-out patterns, delivery guarantees.
+
+**Medium priority — know the high-level approach:**
+
+5. **Distributed Key-Value Store** — consistent hashing, replication strategies, conflict resolution (last-write-wins vs vector clocks). Fundamental distributed systems knowledge.
+6. **Blockchain Transaction Indexer** — ingesting on-chain data, handling chain reorgs, eventual consistency between on-chain and internal state.
 
 ### How to Approach (Staff Level)
 
@@ -705,6 +667,38 @@ Based on the Platform Backend roles, likely systems include:
 - **Circuit breaking / fault isolation** — "What happens when a downstream dependency is slow? We solved this by..."
 - **SLO-based monitoring** — "Are your alerts based on SLOs or raw thresholds? SLO-based alerting catches degradation earlier because..."
 
+### Reverse System Design — Detailed Framework
+
+**The meta-signal:** They're testing whether you can walk into an unfamiliar system and quickly identify what matters. Don't redesign everything — pick 2-3 high-impact observations and go deep. Quality over quantity.
+
+**How to structure your improvement suggestions:**
+
+For each issue you identify, follow this pattern:
+1. **State the issue:** "I notice there's no reconciliation between X and Y"
+2. **Explain the risk:** "This means silent data drift could go undetected for hours"
+3. **Propose a solution:** "I'd add a periodic job that compares X with Y and alerts on divergence"
+4. **Reference your experience:** "At CarGurus we built exactly this — a parity testing framework at 50% production traffic"
+5. **Acknowledge tradeoffs:** "The cost is an additional read load on both stores, but for financial correctness that's worth it"
+
+**Common patterns to look for in any system they show you:**
+
+| Pattern | Red flag | Your suggestion |
+|---|---|---|
+| No idempotency on writes | Retries cause duplicates | Add idempotency keys on all mutation endpoints |
+| Single data store, no reconciliation | Silent corruption goes undetected | Add a reconciliation job comparing sources of truth |
+| Sync calls in a pipeline | One slow dependency blocks everything | Convert to async with queues, add circuit breaker |
+| No dead letter queue | Failed messages disappear | Add DLQ with alerting and replay capability |
+| Alerts on raw thresholds | Misses gradual degradation | Switch to SLO-based alerting with error budgets |
+| No distributed tracing | Can't trace a request end-to-end | Add trace context propagation, instrument key hops |
+| Tight coupling between services | Changes in one break another | Define clear API contracts, add versioning |
+| No deployment safety | Bad deploys hit all users | Add canary/blue-green with automatic rollback |
+
+**What NOT to do:**
+- Don't critique everything — acknowledge what's well-designed
+- Don't propose a full rewrite — suggest incremental improvements
+- Don't stay surface-level — go deep on 2-3 issues rather than listing 10
+- Don't be arrogant — "Have you considered..." not "You should have..."
+
 ---
 
 ## 13b. Behavioral Interview Prep — Coinbase
@@ -768,15 +762,27 @@ Based on the Platform Backend roles, likely systems include:
 
 ## 14. Pre-Interview Checklist
 
-- [ ] Re-read this doc
+### Before HM Call
+- [ ] Re-read Sections 3-8 of this doc (roles, fit, questions, "Why Coinbase?")
+- [ ] Know which team you're matched to (recruiter will tell you Monday)
+- [ ] Prepare role-specific questions from Section 7
+- [ ] Have "Why Coinbase?" answer ready (30 sec — Section 8)
+- [ ] Know the leveling story: "Staff Platform is a better match than Senior Staff — I want to be hands-on building infrastructure"
+
+### Before Virtual On-Site
+- [ ] Re-read Sections 5a (round-by-round), 6 (STAR stories), 13 (system design), 13a (reverse system design), 13b (behavioral)
 - [ ] Re-read resume_coinbase.html
 - [ ] Practice Stories 1, 3, 9 aloud (2 min each — lead with metrics, platform impact)
-- [ ] Review system_design_playbook.md: Payment System, Rate Limiter, Distributed Message Queue
-- [ ] Review technical_playbook.md: distributed systems, event-driven patterns, caching, fault tolerance
+- [ ] Review coding prep: LC 2043 bank system follow-up progression (Section 12) + HashMap patterns from OA prep
+- [ ] Review system design: Payment System, Rate Limiter, Distributed Message Queue
+- [ ] Review reverse system design approach (Section 13a) — probe questions for reliability, correctness, observability
 - [ ] Brush up on blockchain/crypto basics (Section 9) — finality, reconciliation, hot/cold wallets
-- [ ] Have "Why Coinbase?" answer ready (30 sec version — Section 8)
-- [ ] Prepare role-specific questions: know which role you're interviewing for and tailor questions (Section 7)
-- [ ] Research Coinbase engineering blog posts on platform infrastructure, reliability, and financial correctness
-- [ ] Review your parity testing framework story in detail — it's your strongest signal for Overseer's invariant enforcement
-- [ ] Prepare for CodeSignal assessment — LC medium, "pseudo project" format (Section 12)
-- [ ] Know the leveling story: "Staff Platform is a better match than Senior Staff — I want to be hands-on building infrastructure"
+- [ ] Review parity testing framework story in detail — strongest signal for Overseer/correctness roles
+- [ ] Research Coinbase engineering blog posts on platform infrastructure
+- [ ] Practice Excalidraw or whatever whiteboard tool they use
+
+### Key Prep From OA Practice (reuse for on-site coding)
+- All 5 hard coding questions reviewed — patterns: HashMap CRUD, dual-map consistency, TTL/expiry, state machines, backup/restore
+- Common bug pattern: new level breaks old methods (scan all methods when adding state)
+- Common bug pattern: copy-paste boolean conditions (read method name + condition as a sentence)
+- Start simple, get it working, then iterate

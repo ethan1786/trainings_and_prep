@@ -15,14 +15,13 @@
 
 ## Immediate — Take-Home Assessments
 
-### Coinbase — Assessments Submitted, Waiting for Results
-Recruiter screen done Apr 16. Role not pre-assigned — team matching after assessments.
+### Coinbase — OA Passed ✅, Virtual On-Site Next
+Recruiter screen done Apr 16. OA passed (16/20 coding + CCAT/SJT).
 - [x] CCAT + SJT assessments
 - [x] Coding assessment on CodeSignal — coin budget variant, scored 16/20
-- [x] Go over all Coinbase coding questions
-- [x] Practice CCAT rounds
-- [ ] **Waiting for results — expect Friday May 2 or Monday May 5**
-- If passed: HM call → virtual on-site (4 rounds: behavioral 45min, coding 60min, system design 60min, reverse system design 60min)
+- [ ] **HR call Monday to schedule virtual on-site**
+- Virtual on-site (4 rounds): behavioral 45min, coding 60min, system design 60min, reverse system design 60min
+- Prep docs in `companies/coinbase/`
 - **Lesson learned:** Start simple, submit, then fix edge cases. Don't overengineer upfront.
 
 ---
@@ -72,12 +71,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 ### Actively monitoring:
 - **Stripe** — waiting for new backend platform roles. Message YiYi when one appears.
-- **Spotify** — lifeatspotify.com/jobs — Staff backend, remote
-- **LinkedIn** — careers.linkedin.com — Staff infra, remote
-- **Twilio / Segment** — platform infrastructure, remote
-- **Elastic** — distributed systems, remote-first
-- **HashiCorp** — infrastructure tooling, remote (you use Terraform daily)
-- **Cloudflare** — systems engineering, remote
+- **Spotify** — lifeatspotify.com/jobs — checked Apr 30, only Senior level ($160-234K), too low. Monitor for Staff.
 
 ### Lower priority:
 - **Apple** — careers.apple.com (less likely remote)
@@ -91,10 +85,12 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Status | Next Action | When |
 |---|---|---|---|
-| **Coinbase** | Assessments submitted ✅ | Waiting for results | **May 2 or May 5** |
+| **Coinbase** | OA passed ✅ | HR call Monday → schedule on-site | **Monday** |
 | **NVIDIA** | Screening questions answered | Waiting for HM review | **This week** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **May 11** |
-| **Twilio** | Applying tonight | Principal Eng, Phone Numbers Platform (P5) | **Apply by May 1** |
+| **Twilio** | Applied ✅ | Waiting | — |
+| **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
+| **HashiCorp/IBM** | Applied ✅ | Staff SWE, HashiCorp Secure (Vault/Boundary) | — |
 | **Circle** | Cold app, slow process | Wait | — |
 | **Meta** | On hold (mass layoffs) | Revisit after layoffs stabilize | **TBD** |
 | **Netflix** | Applied cold | Waiting | — |
@@ -106,23 +102,16 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
 |---|---|---|---|---|---|---|---|
-| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments submitted — waiting** |
-| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **Assessments submitted — waiting** |
+| **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **OA passed — scheduling on-site** |
 | **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes | Sourcer responded ✅ | **Screening questions answered — waiting HM** |
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | Done ✅ | Done ✅ | Inbound | Director of Eng + HR | **HM call May 11** |
-| **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Applying tonight | Cold | **Deadline May 1** |
+| **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Yes | Cold | Applied — waiting |
+| **Elastic** | Principal | Principal Java Eng II, Security - Elasticsearch | Done ✅ | — | Yes | Cold | Applied — waiting |
+| **HashiCorp/IBM** | Staff | Staff SWE, HashiCorp Secure (Vault/Boundary) | Done ✅ | — | Yes | Cold | Applied — waiting |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting (slow process) |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **On hold — mass layoffs** |
-| **Netflix** | L5 | Backend/Platform | Done | — | Yes (cold) | Preetam (no response) | Applied cold — waiting |
+| **Netflix** | L5 | Backend/Platform | Done | — | Yes (cold) | — | Applied cold — waiting |
 | **Stripe** | Staff | (monitoring board) | Done | — | — | YiYi | On hold — monitoring |
-| **Airbnb** | Staff (retry) | GraphQL, Hosting Svcs, Reservations | Done ✅ | — | Yes (x3) | — | **Rejected** |
-| **Reddit** | Staff + Sr Staff | Ads Engineering/Growth | Done | Done | Yes (x5) | — | Dead — no response |
-| **Confluent** | Staff | Flink Control Plane | Done | Done | Yes | — | Dead — no response |
-| **GitHub** | Principal (stretch) | Core Platform Infra | Done | Done | Yes (cold) | — | Dead — no response |
-| **Figma** | Staff (untitled) | DevEx, Distributed Sys, Prod Eng | Done ✅ | — | Yes (x3) | — | Dead — no response |
-| **OpenAI** | — | — | Done | — | Yes | Vishal | Dead — send thank-you |
-| **Pinterest** | Staff | Activation Team | Done ✅ | Done | Yes | — | Rejected — resume screen |
-| **Google** | L6 (Staff) | Search Experiments + Observability | Done | Done | Yes (x2) | Referral | Rejected — failed OA |
 
 ---
 
@@ -148,7 +137,8 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 ## This Week — Action Items
 
 - [ ] Send thank-you messages to Vishal (OpenAI) and Preetam (Netflix)
+- [ ] **Monday: HR call with Coinbase to schedule on-site**
+- [ ] Prep for Coinbase virtual on-site (behavioral, coding, system design, reverse system design)
 - [ ] Skim Cherry HM prep doc before May 11 call
-- [ ] Browse career pages for new roles (see "On Hold" section): Stripe, Spotify, Twilio, Elastic, HashiCorp, Cloudflare
-- [ ] LC: 2-3 problems/day to stay sharp (focus on HashMap/CRUD patterns from Coinbase prep)
-- [ ] If Coinbase passes → prep for virtual on-site (behavioral, coding, system design, reverse system design)
+- [ ] Browse career pages: Stripe, Spotify (Cloudflare/LinkedIn removed — no remote eng openings)
+- [ ] LC: 2-3 problems/day (focus on HashMap/CRUD patterns + LC practice list in Coinbase prep doc)

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yifei Sun — Resume — HashiCorp Secure</title>
+<style>
+  :root {
+    --accent: #1a365d;
+    --accent-light: #2c5282;
+    --accent-muted: #a0b4cc;
+    --accent-bg: #edf2f7;
+    --highlight: #2b6cb0;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --text-light: #718096;
+    --border: #cbd5e0;
+    --page-bg: #ffffff;
+  }
+  @page { size: letter; margin: 0.45in 0.55in; }
+  @media print {
+    body { margin: 0; padding: 0; }
+    a { color: var(--accent-light) !important; text-decoration: none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Segoe UI', sans-serif;
+    font-size: 9pt;
+    line-height: 1.42;
+    color: var(--text);
+    background: var(--page-bg);
+    max-width: 7.5in;
+    margin: 0 auto;
+    padding: 0.45in 0;
+  }
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .header-left h1 {
+    font-size: 24pt;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .header-left .tagline {
+    font-size: 9pt;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .header-right {
+    text-align: right;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .header-right a {
+    color: var(--accent-light);
+    text-decoration: none;
+  }
+  .section-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #ffffff;
+    background: #0f2440;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 3px 8px;
+    margin-top: 10px;
+    margin-bottom: 7px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .summary {
+    font-size: 9pt;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 0;
+  }
+  .tech-sub {
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+  .tech-sub-label {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .highlights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 20px;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .highlights li {
+    list-style: none;
+    padding-left: 10px;
+    position: relative;
+  }
+  .highlights li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .job {
+    margin-bottom: 10px;
+  }
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: var(--accent-bg);
+    padding: 3px 8px;
+    margin-bottom: 4px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .job-header .company {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .job-header .role {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: var(--text);
+    margin-left: 8px;
+  }
+  .job-header .dates {
+    font-size: 8pt;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+  .project {
+    margin-bottom: 5px;
+    padding-left: 8px;
+  }
+  .project-name {
+    font-weight: 700;
+    font-size: 8.5pt;
+    color: var(--highlight);
+  }
+  .project ul {
+    margin: 1px 0 0 12px;
+    padding: 0;
+  }
+  .project li {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 1px;
+  }
+  .project p {
+    font-size: 8.5pt;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  .metrics {
+    display: inline-flex;
+    gap: 16px;
+    margin: 2px 0 2px 12px;
+    font-size: 8.5pt;
+  }
+  .metrics .m {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .metrics .m span {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .edu-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1px;
+    padding-left: 8px;
+  }
+  .edu-row .school {
+    font-weight: 600;
+    font-size: 8.5pt;
+  }
+  .edu-row .year {
+    font-size: 8pt;
+    color: var(--text-light);
+  }
+  .compact { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Yifei Sun</h1>
+    <div class="tagline">Staff Software Engineer &middot; IAM, Identity Federation &amp; Secure Distributed Systems &middot; 13 Years</div>
+  </div>
+  <div class="header-right">
+    (617) 922-4823<br>
+    sun1fei@gmail.com<br>
+    <a href="https://www.linkedin.com/in/yifei-sun-a789861b">linkedin.com/in/yifei-sun-a789861b</a>
+  </div>
+</div>
+
+<div class="section-title">Summary</div>
+<p class="summary">
+  Staff-level engineer with 13 years building identity infrastructure, secure distributed systems, and
+  cloud-native platforms at scale. Architected and shipped production IAM platforms — designed Keycloak-based
+  SSO with OAuth 2.0 and SAML identity federation, built custom token validation and RBAC enforcement plugins
+  at the API gateway layer (Kong, Nginx), and deployed secure service mesh (Linkerd + mTLS on Kubernetes)
+  for service-to-service trust. Led multi-quarter technical strategy for a high-traffic API platform serving
+  millions of daily requests (p99 250ms&rarr;50ms, 99.9% availability), driving architecture standards and
+  engineering excellence across 10+ teams via RFCs and design docs. Combines deep hands-on security
+  engineering with cross-organizational technical leadership in document-driven, distributed team environments.
+  Daily user of HashiCorp Terraform for infrastructure automation.
+</p>
+
+<div class="section-title">Leadership Highlights</div>
+<ul class="highlights">
+  <li>Built production IAM platform: Keycloak SSO (OAuth 2.0, SAML), identity federation across 3 platforms, RBAC enforcement at API gateway</li>
+  <li>Led multi-quarter API platform redesign: p99 5&times; reduction, 99.9% availability, cross-team strategy spanning 10+ teams and 3 departments</li>
+  <li>Deployed secure service mesh (Linkerd + Kong on K8s) with mTLS, custom auth plugins (Python), rate limiting, and traffic management</li>
+  <li>Drove technical strategy and architecture standards via RFCs, design docs, and ADRs — document-based async collaboration across distributed teams</li>
+</ul>
+<div class="tech-sub">
+  <span class="tech-sub-label">Technologies:</span>
+  <strong>IAM &amp; Security:</strong> OAuth 2.0, SAML, Keycloak, JWT/token validation, RBAC/ABAC, SCIM-compatible provisioning, Kong, Nginx &middot;
+  <strong>Languages:</strong> Java (13 years), Python, Node.js/TypeScript, Golang (familiar) &middot;
+  <strong>Infrastructure:</strong> Terraform, Ansible, AWS (ECS, EKS, SQS, SNS, S3, RDS, DynamoDB) &middot;
+  Kubernetes, Docker, Linkerd (service mesh), Kafka, Redis, PostgreSQL, Cassandra &middot;
+  REST API, gRPC, GraphQL &middot; Event-Driven, CQRS &middot; Datadog, Grafana, Distributed Tracing &middot; CI/CD
+</div>
+
+<div class="section-title">Experience</div>
+
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">CarGurus</span><span class="role">— Principal Software Engineer / Technical Lead</span></div>
+    <span class="dates">Oct 2019 – Present</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Multi-Quarter API Platform Strategy — Secure Microservices at Scale</span>
+    <ul>
+      <li>Defined and drove the multi-quarter technical strategy for redesigning CarGurus' highest-traffic API (~8,000 rpm, millions of daily impressions), leading 3 principal/senior engineers and aligning 10+ teams across 3 departments — from vision through execution.</li>
+      <li>Architected orchestration service consolidating 12 downstream integrations into 5 well-defined services with per-service authentication, authorization boundaries, circuit breaking, fault isolation, and idempotent retry.</li>
+      <li>Built automated correctness verification infrastructure comparing new vs. legacy responses at 50% production traffic, enabling safe, data-driven rollout decisions with zero integrity regressions.</li>
+    </ul>
+    <div class="metrics">
+      <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
+      <div class="m">Availability: 98% &rarr; 99.9%</div>
+      <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
+    </div>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Cross-Org Architecture Standards &amp; Engineering Excellence</span>
+    <ul>
+      <li>Established reusable patterns for API security, observability, caching, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and architecture decision records in a document-driven async culture.</li>
+      <li>Led 10+ engineering training sessions. Mentored senior engineers on secure system design, cross-team strategy, and path to Principal-level scope — force-multiplying organizational capability.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Event-Driven Platform &amp; GraphQL Federation</span>
+    <ul>
+      <li>Led backend platform design using event-driven architecture (SQS/SNS, Kafka) with Terraform-managed AWS infrastructure and IAM-based access controls per service boundary.</li>
+      <li>Designed Netflix DGS subgraph for federated GraphQL gateway with per-consumer authorization, exposing data to frontend, backend, and AI consumers through a unified, access-controlled graph.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">Applause</span><span class="role">— Senior Software Engineer / Technical Lead</span></div>
+    <span class="dates">Oct 2017 – Oct 2019</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">IAM Platform — Identity Federation, Token Auth &amp; Secure Gateway</span>
+    <ul>
+      <li>Architected and deployed a production IAM platform: migrated legacy auth to Keycloak-based SSO with OAuth 2.0 and SAML identity federation, unifying authentication and authorization across internal systems, an enterprise partner platform, and a large external community with role-based access control.</li>
+      <li>Built custom token validation and RBAC enforcement plugins for Kong API gateway in Python — per-request JWT validation against Keycloak, token refresh handling, session management, and fine-grained permission checks at the gateway layer before requests reach backend services.</li>
+      <li>Deployed service mesh (Linkerd on Kubernetes) with mTLS for secure service-to-service communication and zero-trust networking. Performed Glassfish-to-modern-runtime migration with JVM performance tuning.</li>
+      <li>Coordinated migration of multiple Java and Node.js services behind the new auth gateway with minimal downtime, aligning 4 teams to ensure consistent identity and access management posture across the entire platform.</li>
+    </ul>
+  </div>
+  <div class="project compact">
+    <span class="project-name">Event Sourcing &amp; Microservices Architecture</span>
+    <ul>
+      <li>Drove design and prototyping of microservice architecture based on event sourcing and CQRS; defined foundational security isolation and data access patterns for services, events, and read/write models adopted by new domains.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="job">
+  <div class="job-header">
+    <div><span class="company">Toast Inc.</span><span class="role">— Senior Software Engineer</span></div>
+    <span class="dates">Sep 2014 – Oct 2017</span>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Core Platform Services &amp; API Gateway Security</span>
+    <ul>
+      <li>Among the earliest engineers during hypergrowth; built core platform services end-to-end (Order Service, Labor Service, REST APIs) with authentication, authorization, and input validation at every service boundary.</li>
+      <li>Built a custom API gateway in Nginx with Lua scripting for rate limiting, request authentication, traffic routing, and abuse prevention — the first security enforcement layer for all external API traffic.</li>
+      <li>Set up the initial AWS environment using Ansible — provisioned infrastructure, deployment pipelines, IAM policies, and monitoring before a dedicated DevOps or security team existed.</li>
+    </ul>
+  </div>
+  <div class="project compact">
+    <span class="project-name">Secure Third-Party Integrations</span>
+    <ul>
+      <li>Led API integrations with key partners (workforce management) with authenticated bidirectional sync, schema validation, and access control. Partnered cross-functionally with PMs, sales, and support.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="job compact">
+  <div class="job-header">
+    <div><span class="company">The MathWorks Inc.</span><span class="role">— Software Engineer II</span></div>
+    <span class="dates">Jul 2013 – Aug 2014</span>
+  </div>
+  <div class="project">
+    <p>Developed internal engineering tools (Java backend) for MATLAB/Simulink workflows. Improved backend automation systems for build/test reliability and developer productivity.</p>
+  </div>
+</div>
+
+<div class="section-title">Education</div>
+<div class="edu-row">
+  <span class="school">M.S. in Electrical and Computer Engineering — Northeastern University, Boston</span>
+  <span class="year">2010 – 2013</span>
+</div>
+<div class="edu-row">
+  <span class="school">B.S. in Information Science — Beijing University of Aeronautics and Astronautics</span>
+  <span class="year">2006 – 2010</span>
+</div>
+
+</body>
+</html>

@@ -128,7 +128,11 @@
       "Bash(java OrderBTest)",
       "Bash(mv realtime_market_data.md systemDesign/)",
       "Bash(mv crypto_order_system.md drone_delivery.md food_delivery_system.md interleave_iterator.md log_file_parser.md mining_block.md nft_feature_generation.md query_pagination.md senior/)",
-      "WebFetch(domain:www.lifeatspotify.com)"
+      "WebFetch(domain:www.lifeatspotify.com)",
+      "WebFetch(domain:www.elastic.co)",
+      "WebFetch(domain:www.hashicorp.com)",
+      "WebFetch(domain:www.ibm.com)",
+      "WebFetch(domain:jobs.elastic.co)"
     ]
   }
 }
