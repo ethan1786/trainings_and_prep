@@ -1,9 +1,16 @@
 # Coinbase Explore: Realtime Market Data
 
-**Category:** System Design
+**Category:** System Design — **#1 Most Frequent SD Topic (5 occurrences in 2026 Q2 data)**
 **Difficulty:** Hard
 **Time Estimate:** 45-60 min
 **Key Topics:** Stream processing, WebSocket fanout, hot cache, exchange feed resilience, window aggregation
+
+### Interview Intel (2026 Q2 Blog)
+- Appeared in 5 out of 10 system design interviews — by far the most common
+- Framed as "Coinbase Explore" — real-time price stream with subscriptions
+- Candidates must **self-clarify** real-time vs subscription vs brokerage boundaries — interviewer won't hand it to you
+- Bar is high for this round — lead with the hard problem (fanout) not the easy one (ingestion)
+- Other SD topics seen: crypto exchange order flow (failure handling, 1 occurrence), stock trading platform (1), blob storage (1)
 
 ---
 

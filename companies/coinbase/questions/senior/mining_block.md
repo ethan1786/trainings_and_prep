@@ -1,9 +1,17 @@
 # Mining Block
 
-**Category:** Coding
+**Category:** Coding — **VO #2 Most Frequent (7 occurrences in 2026 Q2 data)**
 **Difficulty:** Medium
 **Time Estimate:** 45 min
 **Key Topics:** Greedy, Knapsack, Dependency Graph, Tree Traversal, Fee Density
+
+### Interview Intel (2026 Q2 Blog)
+- **Second highest frequency VO coding question** — appeared in 7 out of 47 coding interviews
+- **CRITICAL: Do NOT use DP or heap.** Multiple reports of interviewers explicitly rejecting these approaches
+- Expected approach: fee/size ratio greedy sort — this is the "production optimal" solution
+- Parent-child DFS is the Level 2 follow-up
+- Warning: some interviewers don't understand greedy and will push you toward DP — stay calm, explain your reasoning, don't cave
+- This is a common trap question — candidates who reach for DP/heap get penalized even if the solution works
 
 ---
 

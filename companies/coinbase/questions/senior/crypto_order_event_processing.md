@@ -1,9 +1,15 @@
 # Crypto Order Event Processing
 
-**Category:** Coding
+**Category:** Coding — **VO #4 Frequent (3 occurrences in 2026 Q2 data)**
 **Difficulty:** Medium
 **Time Estimate:** 45 min
 **Key Topics:** State Machine, Event Processing, Kafka, HashMap, Idempotency
+
+### Interview Intel (2026 Q2 Blog)
+- Appeared 3 times in VO coding rounds
+- Focus areas: consumeMessages, getOrderStatus, state machine (NEW→IN_PROGRESS→COMPLETED, CANCEL)
+- Idempotency key handling is explicitly tested — mention it unprompted
+- This overlaps with crypto_order_system.md (pause/resume/cancel variant, 2 occurrences) — similar state machine patterns
 
 ---
 

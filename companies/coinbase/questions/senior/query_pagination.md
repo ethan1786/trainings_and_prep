@@ -1,9 +1,16 @@
 # Query Pagination
 
-**Category:** Coding
+**Category:** Coding — **VO #1 Most Frequent (10 occurrences in 2026 Q2 data)**
 **Difficulty:** Medium
 **Time Estimate:** 45-60 min
 **Key Topics:** Builder Pattern, Method Chaining, Offset vs. Keyset Pagination, API Design
+
+### Interview Intel (2026 Q2 Blog)
+- **Highest frequency VO coding question** — appeared in 10 out of 47 coding interviews
+- Interviewer deliberately **will not give function signatures** — expects you to design input/output OOD yourself
+- Forward + backward pagination is a common follow-up — `prevCursor` is not optional
+- Offset vs cursor distinction is tested explicitly — name it unprompted
+- Looks simple but the OOD design aspect is where candidates get caught
 
 ---
 

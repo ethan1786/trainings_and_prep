@@ -101,7 +101,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Coinbase** | OA passed ✅ | HR call (Kael) → schedule VO for week of 5/18 | **Mon May 4, 2:30 PM** |
 | **HashiCorp/IBM** | Recruiter reached out ✅ | HR/recruiter call | **Mon May 4, 11 AM** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **Sun May 11** |
-| **NVIDIA** | Screening questions answered | Waiting for HM review | TBD |
+| **NVIDIA** | Passed HR filter, with HM | Follow up with Eleza: Fleet Mgmt update + Physical AI Tooling (JR2014111, remote, Principal) | **Tue May 6** |
 | **Twilio** | Applied ✅ | Waiting | — |
 | **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
 

@@ -1,9 +1,14 @@
 # Food Delivery System
 
-**Category:** Coding
+**Category:** Coding — **VO #3 Frequent (4 occurrences in 2026 Q2 data)**
 **Difficulty:** Medium
 **Time Estimate:** 45-60 min
 **Key Topics:** HashMap, Min-Heap, Euclidean Distance, Top-K, Time-Range Queries
+
+### Interview Intel (2026 Q2 Blog)
+- Appeared 4 times in VO coding rounds
+- Key patterns tested: hash dict lookups + binary search for average price + 0-1 knapsack variant
+- The blog mentions a knapsack follow-up ("given a budget, best meal combination") — be ready to name it as 0-1 knapsack
 
 ---
 

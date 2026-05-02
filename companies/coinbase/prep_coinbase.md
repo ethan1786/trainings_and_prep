@@ -161,7 +161,9 @@ This happens after assessment results, with the HM for your matched team. This i
 - Ask about team tenure and turnover — "How long have most people been on this team?"
 - If you get bad vibes about pace/burnout, take it seriously — Glassdoor complaints exist for a reason
 
-### Round 4: Virtual On-Site (4 rounds)
+### Round 4: Virtual On-Site
+
+> **NOTE (2026 Q2 blog intel):** The format may be **2 Coding + 1 SD + 1 HM/BQ** instead of 1 Coding + 1 SD + 1 Reverse SD + 1 BQ. **Clarify with Kael on Monday** which format applies to your loop.
 
 | # | Round | Duration | Focus |
 |---|---|---|---|
@@ -175,11 +177,21 @@ This happens after assessment results, with the HM for your matched team. This i
 - Lead with metrics and data in every answer
 - Show platform thinking, cross-team leadership
 - See Section 6 for story ranking and selection strategy
+- **Blog intel:** HM round specifically probes AI/LLM project experience — have Stories 5 (MCP) and 17 (GenAI) ready
+- **Blog intel:** HM style can be provocative ("if your projects are this good, why haven't you been promoted?") — stay calm, answer factually
+- **Blog intel:** Interviewer quality varies — some may be disengaged or push suboptimal approaches. Don't let it rattle you.
 
 **Round 4.2 — Coding (60 min):**
 - Likely LC medium, similar to CodeSignal assessment but live with an interviewer
 - Write clean, compilable code — talk through your approach
 - See Section 12 for problem list
+- **Blog intel — VO coding pulls from a DIFFERENT pool than OA.** Top 4 VO coding topics:
+  1. **Pagination** (10 occurrences) — interviewer won't give function signatures, you design OOD
+  2. **Block Mining** (7 occurrences) — **DO NOT use DP/heap, use fee/size greedy sort**
+  3. **Food Delivery** (4 occurrences) — hash dict + binary search + knapsack follow-up
+  4. **Crypto Order/Kafka** (3 occurrences) — state machine + idempotency
+- **Blog intel:** Some interviewers push you toward suboptimal approaches (e.g., DP for Block Mining). State your reasoning clearly, don't cave.
+- **Blog intel:** If format is 2 coding rounds, expect 2 different problems from this pool
 
 **Round 4.3 — System Design (60 min):**
 - Expect financial/crypto domain: payment system, exchange, blockchain indexer
@@ -187,6 +199,9 @@ This happens after assessment results, with the HM for your matched team. This i
 - Lead with correctness and fault tolerance (financial systems can't be eventually correct)
 - Quantify scale: "At Coinbase's volume, if we process X transactions/second..."
 - See Section 13 for topic list
+- **Blog intel: Coinbase Explore (real-time price stream) is the #1 SD topic** — 5 out of 10 occurrences
+- Must self-clarify real-time / subscription / brokerage boundaries — interviewer won't spell them out
+- Lead with the hard problem (fanout to 2M clients) not the easy one (ingestion)
 
 **Round 4.4 — Reverse System Design (60 min):**
 - They walk you through one of their actual systems
@@ -218,8 +233,8 @@ This happens after assessment results, with the HM for your matched team. This i
 | **Must tell** | 9 | Digital Commerce — 0→1 Under Pressure | Greenfield execution, event-driven architecture, revenue-critical system |
 | **Strong** | 4 | Architectural Standards / RFC Process | Platform standards adopted org-wide — shows you set the bar for engineering quality |
 | **Strong** | 14 | Applause — Event Sourcing / CQRS | Kafka, event-driven architecture, distributed systems depth — relevant to all 3 roles |
-| **Strong** | 5 | MCP Server — 0→1 Under Ambiguity | AI proficiency signal (all roles require it), greenfield execution, technical judgment |
-| **Good** | 17 | GenAI Platform — Evaluation & Automation | AI daily workflow signal, multi-provider orchestration |
+| **Must tell** | 5 | MCP Server — 0→1 Under Ambiguity | AI proficiency signal (all roles require it), greenfield execution — **blog says HM specifically probes AI/LLM projects** |
+| **Must tell** | 17 | GenAI Platform — Evaluation & Automation | AI daily workflow signal — **no AI/LLM story = penalty per blog intel** |
 | **Good** | 7 | GraphQL Federation | Platform serving infrastructure, multiple consumer types |
 | **Good** | 11 | Mentoring Engineers | Growing team capability, raising the bar |
 | **Good** | 12 | Driving Consensus via RFCs | Written communication, cross-team alignment |
@@ -760,7 +775,41 @@ For each issue you identify, follow this pattern:
 
 ---
 
-## 14. Pre-Interview Checklist
+## 14. Interview Intel Summary (2026 Q2 Blog)
+
+> Source: Chinese-language Coinbase interview trend analysis, 2026 Q2. Based on ~85 data points.
+
+### Key Takeaways
+- **VO format may be 2 Coding + 1 SD + 1 HM/BQ** — not the 1+1+1+1 from recruiter. Clarify with Kael.
+- **VO coding is a different pool from OA.** OA = HashMap CRUD, VO = Pagination, Block Mining, Food Delivery, Crypto Order/Kafka.
+- **Block Mining is a trap question.** Interviewers push DP/heap but expect greedy (fee/size ratio). Don't cave.
+- **Pagination requires OOD.** Interviewer won't give function signatures — you design input/output yourself.
+- **System Design = Coinbase Explore (real-time price stream)** in 50% of cases. You must self-clarify boundaries.
+- **HM/BQ round heavily probes AI/LLM projects.** No AI story = penalized. Stories 5 (MCP) and 17 (GenAI) are critical.
+- **HM can be provocative.** "Why haven't you been promoted?" / PUA-style questions reported. Stay calm, answer factually.
+- **Interviewer quality varies.** Some disengage, some push suboptimal solutions. Don't let it rattle you — state your reasoning.
+- **Toxic culture is a frequent complaint.** Ghosting post-interview, 6-8 month freezes after team match fails, disrespectful interviewers — go in eyes open.
+- **Process is long.** AI Recruiter → CCAT/SJT → OA → HR/team match → VO. You're past the hardest filter (OA).
+
+### VO Coding Frequency (top 4 — covers ~50% of all coding interviews)
+| # | Topic | Occurrences | Key Trap |
+|---|---|---|---|
+| 1 | Pagination | 10 | No function signature given — design OOD yourself |
+| 2 | Block Mining | 7 | Do NOT use DP/heap — greedy fee/size ratio only |
+| 3 | Food Delivery | 4 | Knapsack follow-up possible |
+| 4 | Crypto Order/Kafka | 3 | Idempotency key is explicitly tested |
+
+### VO System Design Frequency
+| # | Topic | Occurrences |
+|---|---|---|
+| 1 | Coinbase Explore (real-time price) | 5 |
+| 2 | Crypto Exchange Order Flow | 1 |
+| 3 | Stock Trading Platform | 1 |
+| 4 | Blob Storage | 1 |
+
+---
+
+## 15. Pre-Interview Checklist
 
 ### Before HM Call
 - [ ] Re-read Sections 3-8 of this doc (roles, fit, questions, "Why Coinbase?")

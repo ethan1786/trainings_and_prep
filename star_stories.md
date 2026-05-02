@@ -10,102 +10,88 @@
 
 | # | Story | Anchor Project | LP Tags | Best For |
 |---|-------|---------------|---------|----------|
-| 1 | API Modernization — Leading the Cross-Org Migration | API Modernization | Ownership, Delivers Results, Think Big | Stripe, Airbnb, Datadog, Circle |
-| 2 | API Modernization — 5× Latency Reduction | API Modernization | Insists on Highest Standards, Dive Deep | Airbnb, Datadog, Figma |
-| 3 | API Modernization — Parity Testing Framework | API Modernization | Invent and Simplify, Dive Deep | Stripe, Datadog, Figma |
-| 4 | API Modernization — Architectural Standards Adoption | API Modernization | Think Big, Earn Trust | Stripe, Circle, Netflix |
-| 5 | MCP Server — 0→1 Under Ambiguity | MCP Server | Bias for Action, Invent and Simplify, Customer Obsession | Stripe, Netflix, Circle |
-| 6 | MCP Server — Stakeholder Management | MCP Server | Earn Trust, Customer Obsession, Delivers Results | All |
-| 7 | DGS Subgraph — GraphQL Federation Migration | DGS Subgraph | Ownership, Learn and be Curious | Netflix, Figma, Stripe |
-| 8 | DGS Subgraph — JVM Warmup & Performance | DGS Subgraph | Dive Deep, Insists on Highest Standards | Airbnb, Datadog, Netflix |
-| 9 | Digital Shopping — 0→1 Product Under Pressure | Digital Shopping | Bias for Action, Delivers Results, Customer Obsession | Coinbase, Stripe |
-| 10 | Digital Shopping — Safe Experiment Retirement | Digital Shopping | Ownership, Are Right A Lot | Coinbase, Stripe, Circle |
-| 11 | Cross-Org Leadership — Mentoring to Staff Level | Leadership | Hire & Develop The Best, Earn Trust | All |
-| 12 | Cross-Org Leadership — Driving Consensus via RFCs | Leadership | Disagree and Commit, Earn Trust | Circle, Stripe, Netflix |
-| 13 | Applause — Auth Modernization with Minimal Downtime | Applause Auth | Delivers Results, Ownership, Dive Deep | Coinbase, Figma |
-| 14 | Applause — Event Sourcing / CQRS Initiative | Applause CQRS | Invent and Simplify, Think Big | Stripe, Figma, Coinbase |
-| 15 | Toast — Early Engineer in Hypergrowth | Toast | Ownership, Bias for Action, Learn and be Curious | All |
-| 16 | Toast — Building DevOps & QA from Scratch | Toast | Invent and Simplify, Ownership | Datadog, Figma, Circle |
-| 17 | GenAI Engine — Hybrid Rules + LLM Architecture | GenAI (Independent) | Invent and Simplify, Think Big, Learn and be Curious | Netflix, Stripe, Coinbase |
-| 18 | GenAI Engine — Prompt Lab & Experimentation | GenAI (Independent) | Learn and be Curious, Insists on Highest Standards | Datadog, Airbnb |
-| 19 | Disagree and Commit — Pushing Back on Architecture | Cross-cutting | Have Backbone, Disagree and Commit | All |
-| 20 | Failure & Learning — A Decision That Didn't Work Out | Cross-cutting | Are Right A Lot, Learn and be Curious | All |
+| 1 | API Modernization — Full Story (Leadership + Technical + Influence) | API Modernization | Ownership, Delivers Results, Think Big, Insists on Highest Standards, Dive Deep, Earn Trust | All |
+| 2 | API Modernization — Parity Testing Framework | API Modernization | Invent and Simplify, Dive Deep | Stripe, Datadog, Figma |
+| 3 | MCP Server — 0→1 Under Ambiguity | MCP Server | Bias for Action, Invent and Simplify, Customer Obsession | Stripe, Netflix, Circle |
+| 4 | MCP Server — Stakeholder Management | MCP Server | Earn Trust, Customer Obsession, Delivers Results | All |
+| 5 | DGS Subgraph — GraphQL Federation Migration | DGS Subgraph | Ownership, Learn and be Curious | Netflix, Figma, Stripe |
+| 6 | DGS Subgraph — JVM Warmup & Performance | DGS Subgraph | Dive Deep, Insists on Highest Standards | Airbnb, Datadog, Netflix |
+| 7 | Digital Shopping — 0→1 Product Under Pressure | Digital Shopping | Bias for Action, Delivers Results, Customer Obsession | Coinbase, Stripe |
+| 8 | Digital Shopping — Safe Experiment Retirement | Digital Shopping | Ownership, Are Right A Lot | Coinbase, Stripe, Circle |
+| 9 | Cross-Org Leadership — Mentoring to Staff Level | Leadership | Hire & Develop The Best, Earn Trust | All |
+| 10 | Cross-Org Leadership — Driving Consensus via RFCs | Leadership | Disagree and Commit, Earn Trust | Circle, Stripe, Netflix |
+| 11 | Applause — Auth Modernization with Minimal Downtime | Applause Auth | Delivers Results, Ownership, Dive Deep | Coinbase, Figma |
+| 12 | Applause — Event Sourcing / CQRS Initiative | Applause CQRS | Invent and Simplify, Think Big | Stripe, Figma, Coinbase |
+| 13 | Toast — Early Engineer in Hypergrowth | Toast | Ownership, Bias for Action, Learn and be Curious | All |
+| 14 | Toast — Building DevOps & QA from Scratch | Toast | Invent and Simplify, Ownership | Datadog, Figma, Circle |
+| 15 | GenAI Engine — Hybrid Rules + LLM Architecture | GenAI (Independent) | Invent and Simplify, Think Big, Learn and be Curious | Netflix, Stripe, Coinbase |
+| 16 | GenAI Engine — Prompt Lab & Experimentation | GenAI (Independent) | Learn and be Curious, Insists on Highest Standards | Datadog, Airbnb |
+| 17 | Disagree and Commit — Pushing Back on Architecture | Cross-cutting | Have Backbone, Disagree and Commit | All |
+| 18 | Failure & Learning — A Decision That Didn't Work Out | Cross-cutting | Are Right A Lot, Learn and be Curious | All |
 
 ---
 
-## Story 1: API Modernization — Leading the Cross-Org Migration
+## Story 1: API Modernization — Full Story
 
-**Anchor:** High-Traffic Legacy API Modernization · **LPs:** Ownership, Delivers Results, Think Big
-**Best for:** Stripe, Airbnb, Datadog, Circle
+**Anchor:** High-Traffic Legacy API Modernization · **LPs:** Ownership, Delivers Results, Think Big, Insists on Highest Standards, Dive Deep, Earn Trust
+**Best for:** All companies — this is your flagship story
+
+### Angle Guide
+
+This is one story with multiple layers. Emphasize the angle that fits the question — expand or skip layers as needed.
+
+| Question Type | Lead With | Expand On | Skip |
+|---|---|---|---|
+| "Tell me about a project you led" / cross-org leadership | Leadership layer | Technical if they ask follow-ups | Influence |
+| "How did you improve performance/reliability" / technical depth | Technical layer | Leadership for scope context | Influence |
+| "How do you drive org-wide change" / standards & influence | Influence layer | Leadership for credibility | Technical details |
+| "Most significant project" / delivers results | Leadership + Results | Technical + Influence as follow-ups | Nothing — tell the full arc |
+| "Insists on highest standards" / pushing the bar | Technical layer ("I wasn't satisfied, pushed for 5x") | SLO framework | Influence |
 
 ### STAR Spoken-Style
 
-**Situation:** CarGurus' most-visited page — the vehicle listing page — was powered by a monolithic API handling about 8,000 requests per minute with millions of daily impressions. The codebase had years of accumulated domain logic spread across roughly 12 downstream integrations. It was slow, fragile, and very hard to deploy safely. P99 latency was around 250 ms, availability was about 99%, and deploys took about an hour because of the blast radius.
+**Situation:** CarGurus' most-visited page — the vehicle listing page — was powered by a monolithic API handling about 8,000 requests per minute with millions of daily impressions. The codebase had years of accumulated domain logic spread across roughly 12 downstream integrations. It was slow, fragile, and very hard to deploy safely. P99 latency was around 250 ms, availability was about 98%, and deploys took about an hour because of the blast radius.
 
 **Task:** I was asked to lead the modernization of this API. It wasn't just a rewrite — it touched almost every team's data. I needed to coordinate with about 10 teams across 3 departments, lead a small group of 3 principal and senior engineers, and deliver something that could safely take over production traffic without regressions.
 
-**Action:** I started by producing the initial architecture proposal in about two weeks. The key insight was introducing an orchestration service and a GraphQL boundary that consolidated those 12 downstream integrations into 5 well-defined services. This reduced fan-out and simplified failure modes dramatically. I ran architecture reviews across all affected teams to build consensus, then we shipped the first production milestone in 6 months. We ran the new implementation in A/B testing handling 50% of traffic side-by-side with the legacy stack.
+**Action:**
 
-**Result:** We completed the modernization ahead of schedule. P99 went from 250 ms to about 50 ms — a 5× improvement. Availability improved from 98% to 99.9%. Deploy time dropped from an hour to about 3 minutes — 20× faster. The patterns we established became the architectural standard for new services across the org.
+*Leadership layer:* I started by producing the initial architecture proposal in about two weeks. The key insight was introducing an orchestration service that consolidated those 12 downstream integrations into 5 well-defined services. I ran architecture reviews across all affected teams to build consensus, then we shipped the first production milestone in 6 months. We ran the new implementation in A/B testing handling 50% of traffic side-by-side with the legacy stack.
+
+*Technical layer:* I re-planned the entire call graph. The legacy system made sequential calls where there were no data dependencies, so I restructured the orchestration to fan out independent downstream calls in async threads — parallel wherever possible, sequential only where one call's output feeds another. I defined fine-grained per-service network configs: individual timeouts, connection pools, and retry policies tuned to each dependency's profile. I added circuit breakers so a slow or failing downstream would be isolated instead of blocking the entire request. For non-critical data sources, I designed graceful degradation — return a partial response rather than a 500. On the caching side, I added in-memory caches for both long-lived static data and short-TTL dynamic data. In-memory was a deliberate choice over Redis: at 8,000 rpm with deeply nested response objects, the network hop and serialization cost would have eaten into the latency gains. I also introduced per-hop SLO latency budgets monitored in Datadog so any single service regression was immediately visible.
+
+*Influence layer:* I documented the patterns we established — service decomposition, orchestration, caching strategy, parity testing — as formal RFCs and design docs. I pre-socialized them with tech leads across teams, incorporated feedback, and presented at architecture reviews and all-hands. I also paired with engineers from other teams when they started new services, helping them apply the patterns. The standards became org-wide, not just our team's way of doing things.
+
+**Result:** We completed the modernization ahead of schedule. P99 went from 250 ms to about 50 ms — a 5× improvement. Availability improved from 98% to 99.9%. Deploy time dropped from an hour to about 3 minutes — 20× faster. The architectural patterns we established were adopted across multiple teams and departments. Several team leads told me the standards saved them weeks of design work. The SLO framework became the model for how other teams think about latency budgets.
 
 ### Bullet Recap
 
-- **S:** Monolithic API powering highest-traffic page, 8k rpm, 250ms p99, ~99% availability, 1hr deploys
+- **S:** Monolithic API powering highest-traffic page, 8k rpm, 250ms p99, ~98% availability, 1hr deploys
 - **T:** Lead full modernization; coordinate 10 teams / 3 depts; deliver without regressions
-- **A:** Produced architecture in 2 weeks; orchestration service + GraphQL boundary; 12→5 service consolidation; A/B tested at 50% traffic; built parity testing framework
-- **R:** p99 250ms→50ms (5×), availability 98%→99.9%, deploy 1hr→3min (20×), completed ahead of schedule, patterns adopted org-wide
+- **A (leadership):** Architecture proposal in 2 weeks; orchestration service; 12→5 service consolidation; A/B tested at 50% traffic; led 3 principal/senior engineers
+- **A (technical):** Sequential→parallel async fan-out; per-service timeouts, connection pools, retry policies; circuit breakers; graceful degradation; in-memory cache (not Redis — avoid network hop + serialization cost at 8k rpm); per-hop SLO latency budgets in Datadog
+- **A (influence):** Wrote RFCs and design docs; pre-socialized with tech leads; presented at architecture reviews and all-hands; paired with other teams on new services
+- **R:** p99 250ms→50ms (5×), availability 98%→99.9%, deploy 1hr→3min (20×), completed ahead of schedule, patterns adopted org-wide, SLO framework became org model
 
 ### Long-Form Narrative
 
-The vehicle listing page is CarGurus' bread and butter — millions of consumers visit it daily, and the API behind it handled roughly 8,000 requests per minute. Over the years, the implementation had become a monolith with tendrils reaching into a dozen downstream services, each with its own quirks and hidden domain logic. Latency was hovering around 250 ms at the 99th percentile, and availability was around 98% — which sounds fine until you consider the volume. Deploys were nerve-wracking hour-long affairs because a bug in any part of the stack could cascade.
+The vehicle listing page is CarGurus' bread and butter — millions of consumers visit it daily, and the API behind it handled roughly 8,000 requests per minute. Over the years, the implementation had become a monolith with tendrils reaching into a dozen downstream services, each with its own quirks and hidden domain logic. Latency was hovering around 250 ms at the 99th percentile, and availability was around 98%. Deploys were nerve-wracking hour-long affairs because a bug in any part of the stack could cascade.
 
-I was tapped to lead the modernization. My first move was to map the entire dependency graph and identify the real boundaries. Within about two weeks, I had an architecture proposal centered on a new orchestration service that would sit behind a GraphQL boundary, consolidating 12 downstream integrations into 5 clearly defined services with explicit contracts. I presented this to all affected teams — roughly 10 teams across engineering, data, and product — and iterated on the design based on their feedback.
+I was tapped to lead the modernization. My first move was to map the entire dependency graph and identify the real boundaries. Within about two weeks, I had an architecture proposal centered on a new orchestration service that consolidated 12 downstream integrations into 5 clearly defined services with explicit contracts. I presented this to all affected teams — roughly 10 teams across engineering, data, and product — and iterated on the design based on their feedback. I led a core team of 3 principal and senior engineers.
 
-I led a core team of 3 principal and senior engineers. We shipped the first production milestone in 6 months and set up an A/B test where the new implementation handled 50% of live traffic. I also built a parity-testing framework that validated the full response payload and data integrity against the legacy stack, which gave us high confidence during rollout.
+On the technical side, I found the old system was making sequential calls to downstream services even when there were no data dependencies between them, with no fine-grained network controls — every call used the same default timeout, with no circuit breaking or isolation. I restructured the call graph to fan out independent downstream calls in async threads — parallel wherever the data dependencies allowed, sequential only where one call's output fed another's input. I defined per-service network configurations: individual timeouts tuned to each dependency's latency profile, dedicated connection pools, and retry policies appropriate to each service's failure characteristics. I added circuit breakers so that a slow or failing dependency would be isolated — one bad downstream wouldn't block the entire request. For non-critical data sources, I designed graceful degradation: return a partial response rather than a 500.
 
-The results spoke for themselves: p99 latency dropped to about 50 ms, availability climbed to 99.9%, and deploy time went from an hour to about 3 minutes. We completed the project ahead of the original timeline. Perhaps more importantly, the architectural patterns we established — the orchestration layer, the service boundaries, the testing approach — became the standard for new microservices across the organization.
+For caching, I chose in-memory caches rather than Redis — a deliberate decision. At 8,000 rpm with deeply nested response objects, the network hop to Redis and the serialization/deserialization cost would have eaten significantly into the latency gains. I used long-TTL in-memory cache for static data (like dealer metadata) and short-TTL in-memory cache for dynamic data that changed more frequently but was still read-heavy. I also introduced a latency budget framework — each downstream service got an SLO for its contribution to the total request, monitored in Datadog dashboards.
 
----
+We shipped the first production milestone in 6 months and set up an A/B test where the new implementation handled 50% of live traffic. I also built a parity-testing framework (see Story 2) that validated correctness during rollout.
 
-## Story 2: API Modernization — 5× Latency Reduction
+After the project, I invested in codifying the patterns. I wrote formal RFCs and design docs covering service decomposition, API contracts, caching strategy, and the parity testing approach. I met individually with tech leads from each major team before publishing, incorporated their feedback, and presented at architecture reviews and all-hands. I also paired with engineers from other teams when they started building new services, helping them apply the patterns to their specific domains.
 
-**Anchor:** High-Traffic Legacy API Modernization · **LPs:** Insists on Highest Standards, Dive Deep
-**Best for:** Airbnb, Datadog, Figma
-
-### STAR Spoken-Style
-
-**Situation:** During the API modernization at CarGurus, we had consolidated the architecture, but I wasn't satisfied with the performance profile. The legacy system had a p99 of around 250 ms, and while the new architecture was cleaner, I wanted to push much further.
-
-**Task:** My goal was to achieve a step-function improvement in latency, not just incremental — I wanted the new stack to be demonstrably faster in a way that moved key business metrics.
-
-**Action:** I re-planned the entire call graph across data sources. The legacy system made sequential calls where there were no data dependencies, so I restructured the orchestration to fan out independent downstream calls in async threads — parallel wherever possible, sequential only where one call's output feeds another. I defined fine-grained network configs per downstream service: per-service timeouts, connection pool sizes, and retry policies tuned to each dependency's profile. I added circuit breakers so a slow or failing downstream would be isolated instead of blocking the entire request. For error handling, I designed graceful degradation — if a non-critical data source was down, we'd return a partial response rather than a 500. On the caching side, I added in-memory caches (not Redis) for both long-lived static data and short-TTL dynamic data. In-memory was a deliberate choice: at 8,000 rpm with deeply nested response objects, the network hop and serialization cost of Redis would have eaten into the latency gains. I also worked with teams to set SLOs on each downstream service so we had a latency budget per hop.
-
-**Result:** The new stack achieved a p99 of about 50 ms — a 5× improvement. This wasn't just a vanity metric; the reduced latency directly improved user engagement metrics on the listing page. The SLO framework we introduced became the model for how other teams think about latency budgets.
-
-### Bullet Recap
-
-- **S:** Legacy API p99 ~250ms; new architecture cleaner but performance not yet optimized
-- **T:** Achieve step-function latency improvement, not incremental
-- **A:** Re-planned call graph: sequential→parallel async fan-out for independent calls; fine-grained per-service timeouts, connection pools, retry policies; circuit breakers for fault isolation; graceful degradation for non-critical sources; in-memory cache (not Redis — avoid network hop + serialization cost at 8k rpm with nested objects) for both static and short-TTL dynamic data; per-hop SLO latency budgets
-- **R:** p99 250ms→50ms (5×); improved user engagement; SLO framework adopted across teams
-
-### Long-Form Narrative
-
-After we'd designed the new service architecture, I turned my attention to performance. The legacy system ran at about 250 ms p99, and while the new topology was much cleaner, I wasn't going to settle for "a bit faster." I set an internal goal of getting under 100 ms p99 and saw the potential to go further.
-
-I mapped the full call graph and found the old system was making sequential calls to downstream services even when there were no data dependencies between them. It was also missing fine-grained network controls — every downstream call used the same default timeout, with no circuit breaking or isolation.
-
-In the new orchestration service, I restructured the call graph to fan out independent downstream calls in async threads — parallel wherever the data dependencies allowed, sequential only where one call's output fed another's input. I defined per-service network configurations: individual timeouts tuned to each dependency's latency profile, dedicated connection pools, and retry policies appropriate to each service's failure characteristics. I added circuit breakers so that a slow or failing dependency would be isolated — one bad downstream wouldn't block the entire request. For non-critical data sources, I designed graceful degradation: return a partial response rather than a 500.
-
-For caching, I chose in-memory caches rather than Redis — a deliberate decision. At 8,000 rpm with deeply nested response objects, the network hop to Redis and the serialization/deserialization cost would have eaten significantly into the latency gains. I used long-TTL in-memory cache for static data (like dealer metadata) and short-TTL in-memory cache for dynamic data that changed more frequently but was still read-heavy.
-
-I also introduced a latency budget framework — each downstream service got an SLO for its contribution to the total request, and we monitored it in Datadog dashboards. This made it immediately visible when any single service regressed.
-
-The end result was about 50 ms p99 — a 5× improvement. Beyond the raw numbers, this translated to measurable improvements in user engagement on the listing page. The SLO budgeting approach became a model that other teams adopted.
+The results: p99 latency dropped to about 50 ms (5×), availability climbed to 99.9%, and deploy time went from an hour to about 3 minutes (20×). We completed the project ahead of schedule. The architectural patterns were adopted across multiple teams and departments — several team leads told me the standards saved them weeks of design work. The SLO budgeting approach became a model other teams adopted. The user engagement metrics on the listing page improved measurably with the reduced latency.
 
 ---
 
-## Story 3: API Modernization — Parity Testing Framework
+## Story 2: API Modernization — Parity Testing Framework
 
 **Anchor:** High-Traffic Legacy API Modernization · **LPs:** Invent and Simplify, Dive Deep
 **Best for:** Stripe, Datadog, Figma
@@ -139,41 +125,7 @@ The parity framework caught dozens of subtle issues before they ever reached a r
 
 ---
 
-## Story 4: API Modernization — Architectural Standards Adoption
-
-**Anchor:** High-Traffic Legacy API Modernization · **LPs:** Think Big, Earn Trust
-**Best for:** Stripe, Circle, Netflix
-
-### STAR Spoken-Style
-
-**Situation:** During the API modernization at CarGurus, I realized the patterns we were establishing — service boundaries, orchestration layers, GraphQL contracts, testing strategies — were solving problems that every team in the org was going to face.
-
-**Task:** I wanted to make sure these patterns didn't just live in our codebase. I wanted them to become the organizational standard so that future services would be built consistently and we wouldn't have to keep solving the same problems.
-
-**Action:** I documented the patterns in formal design docs and RFCs, covering service decomposition guidelines, API contract standards, caching strategy, and the parity-testing approach. I presented these at architecture reviews and engineering all-hands. Importantly, I didn't just dictate — I incorporated feedback from other teams' tech leads, which built buy-in. I also paired with engineers from other teams when they started new services, helping them apply the patterns to their specific contexts.
-
-**Result:** The patterns were adopted across multiple teams and departments. New microservices consistently followed the same architecture template, which reduced onboarding time for engineers moving between teams and made our system more predictable. Several team leads told me these standards saved them weeks of design work on their own projects.
-
-### Bullet Recap
-
-- **S:** API modernization patterns solving problems applicable across the whole org
-- **T:** Codify patterns into organizational standards; drive adoption beyond own team
-- **A:** Wrote RFCs and design docs; presented at architecture reviews and all-hands; incorporated cross-team feedback; paired with other teams on new service launches
-- **R:** Patterns adopted org-wide; reduced onboarding friction; saved other teams weeks of design work; consistent architecture across new services
-
-### Long-Form Narrative
-
-One of the things I'm most proud of from the API modernization is what happened after the project itself. During the work, we established clear patterns: how to decompose a monolith into bounded services, how to set up orchestration layers, how to define GraphQL contracts between services, how to use caching effectively, and how to validate correctness during migration.
-
-I recognized these weren't just useful for our project — they were general solutions. So I invested time in writing them up as formal design docs and RFCs. I covered service decomposition principles, contract-first API design, a tiered caching playbook, and a migration testing playbook based on our parity framework.
-
-I presented these at architecture review boards and at engineering all-hands sessions. The key to adoption wasn't just writing good docs — it was incorporating feedback. I invited other team leads to critique the proposals, and I adjusted based on their input. This turned the standards from "the listing team's way of doing things" into "our org's way of doing things."
-
-I also went beyond documentation and actively paired with engineers from other teams when they started building new services. Helping them apply the patterns to their specific domains cemented the adoption. Multiple team leads later told me these standards saved them weeks of upfront design work on their own projects.
-
----
-
-## Story 5: MCP Server — 0→1 Under Ambiguity
+## Story 3: MCP Server — 0→1 Under Ambiguity
 
 **Anchor:** ChatGPT Apps SDK MCP Server · **LPs:** Bias for Action, Invent and Simplify, Customer Obsession
 **Best for:** Stripe, Netflix, Circle
@@ -209,7 +161,7 @@ The POC generated significant excitement and directly informed the company's bro
 
 ---
 
-## Story 6: MCP Server — Stakeholder Management
+## Story 4: MCP Server — Stakeholder Management
 
 **Anchor:** ChatGPT Apps SDK MCP Server · **LPs:** Earn Trust, Customer Obsession, Delivers Results
 **Best for:** All companies
@@ -245,7 +197,7 @@ The project was later cited internally as an example of how to run a cross-funct
 
 ---
 
-## Story 7: DGS Subgraph — GraphQL Federation Migration
+## Story 5: DGS Subgraph — GraphQL Federation Migration
 
 **Anchor:** Netflix DGS Subgraph · **LPs:** Ownership, Learn and be Curious
 **Best for:** Netflix, Figma, Stripe
@@ -281,7 +233,7 @@ I wrote load tests to validate throughput and latency under realistic traffic pa
 
 ---
 
-## Story 8: DGS Subgraph — JVM Warmup & Performance
+## Story 6: DGS Subgraph — JVM Warmup & Performance
 
 **Anchor:** Netflix DGS Subgraph · **LPs:** Dive Deep, Insists on Highest Standards
 **Best for:** Airbnb, Datadog, Netflix
@@ -317,7 +269,7 @@ This pattern was adopted by other teams bringing JVM services into the federated
 
 ---
 
-## Story 9: Digital Shopping — 0→1 Product Under Pressure
+## Story 7: Digital Shopping — 0→1 Product Under Pressure
 
 **Anchor:** Digital Shopping & Online Leads Products · **LPs:** Bias for Action, Delivers Results, Customer Obsession
 **Best for:** Coinbase, Stripe
@@ -351,7 +303,7 @@ We launched within the target timeline. The product captured a meaningful volume
 
 ---
 
-## Story 10: Digital Shopping — Safe Experiment Retirement
+## Story 8: Digital Shopping — Safe Experiment Retirement
 
 **Anchor:** Digital Shopping & Online Leads Products · **LPs:** Ownership, Are Right A Lot
 **Best for:** Coinbase, Stripe, Circle
@@ -385,7 +337,7 @@ We retired multiple experiments without a single customer-facing incident. Other
 
 ---
 
-## Story 11: Cross-Org Leadership — Mentoring to Staff Level
+## Story 9: Cross-Org Leadership — Mentoring to Staff Level
 
 **Anchor:** Cross-Org Platform & API Leadership · **LPs:** Hire & Develop The Best, Earn Trust
 **Best for:** All companies
@@ -419,7 +371,7 @@ Over time, multiple engineers I mentored expanded their scope. One went from exe
 
 ---
 
-## Story 12: Cross-Org Leadership — Driving Consensus via RFCs
+## Story 10: Cross-Org Leadership — Driving Consensus via RFCs
 
 **Anchor:** Cross-Org Platform & API Leadership · **LPs:** Disagree and Commit, Earn Trust
 **Best for:** Circle, Stripe, Netflix
@@ -455,7 +407,7 @@ The standards were adopted and are still in use. More importantly, the process b
 
 ---
 
-## Story 13: Applause — Auth Modernization with Minimal Downtime
+## Story 11: Applause — Auth Modernization with Minimal Downtime
 
 **Anchor:** Authentication & Identity Modernization · **LPs:** Delivers Results, Ownership, Dive Deep
 **Best for:** Coinbase, Figma
@@ -491,7 +443,7 @@ The result was a unified SSO across all products with social and mobile login su
 
 ---
 
-## Story 14: Applause — Event Sourcing / CQRS Initiative
+## Story 12: Applause — Event Sourcing / CQRS Initiative
 
 **Anchor:** Event Sourcing & CQRS Initiative · **LPs:** Invent and Simplify, Think Big
 **Best for:** Stripe, Figma, Coinbase
@@ -527,7 +479,7 @@ The patterns were adopted by multiple new service domains. Teams had much more a
 
 ---
 
-## Story 15: Toast — Early Engineer in Hypergrowth
+## Story 13: Toast — Early Engineer in Hypergrowth
 
 **Anchor:** Toast Hypergrowth · **LPs:** Ownership, Bias for Action, Learn and be Curious
 **Best for:** All companies
@@ -563,7 +515,7 @@ The services I built processed thousands of orders daily as Toast grew. The depl
 
 ---
 
-## Story 16: Toast — Building DevOps & QA from Scratch
+## Story 14: Toast — Building DevOps & QA from Scratch
 
 **Anchor:** Toast Hypergrowth · **LPs:** Invent and Simplify, Ownership
 **Best for:** Datadog, Figma, Circle
@@ -599,7 +551,7 @@ When Toast hired dedicated DevOps and QA engineers, they didn't start from zero.
 
 ---
 
-## Story 17: GenAI Engine — Hybrid Rules + LLM Architecture
+## Story 15: GenAI Engine — Hybrid Rules + LLM Architecture
 
 **Anchor:** GenAI Decision Engine (Independent) · **LPs:** Invent and Simplify, Think Big, Learn and be Curious
 **Best for:** Netflix, Stripe, Coinbase
@@ -633,7 +585,7 @@ Every decision comes with an explainability trace: which path was taken, which r
 
 ---
 
-## Story 18: GenAI Engine — Prompt Lab & Experimentation
+## Story 16: GenAI Engine — Prompt Lab & Experimentation
 
 **Anchor:** GenAI Decision Engine (Independent) · **LPs:** Learn and be Curious, Insists on Highest Standards
 **Best for:** Datadog, Airbnb
@@ -671,7 +623,7 @@ The platform revealed insights I wouldn't have found manually. Bayesian optimiza
 
 ---
 
-## Story 19: Disagree and Commit — Pushing Back on Architecture
+## Story 17: Disagree and Commit — Pushing Back on Architecture
 
 **Anchor:** Cross-cutting · **LPs:** Have Backbone, Disagree and Commit
 **Best for:** All companies
@@ -709,7 +661,7 @@ On a different decision later in the project — a disagreement about testing st
 
 ---
 
-## Story 20: Failure & Learning — A Decision That Didn't Work Out
+## Story 18: Failure & Learning — A Decision That Didn't Work Out
 
 **Anchor:** Cross-cutting · **LPs:** Are Right A Lot, Learn and be Curious
 **Best for:** All companies
@@ -751,29 +703,28 @@ I wrote a retrospective documenting what I assumed, what I missed, and what the 
 
 | Leadership Principle | Stories |
 |---|---|
-| **Customer Obsession** | 5, 6, 9 |
-| **Ownership** | 1, 7, 9, 10, 13, 15, 16 |
-| **Invent and Simplify** | 3, 5, 14, 16, 17 |
-| **Are Right A Lot** | 10, 20 |
-| **Learn and be Curious** | 7, 15, 17, 18, 20 |
-| **Hire & Develop The Best** | 11 |
-| **Insists on Highest Standards** | 2, 8, 18 |
-| **Think Big** | 1, 4, 14, 17 |
-| **Bias for Action** | 5, 9, 15 |
-| **Dive Deep** | 2, 3, 8, 13 |
-| **Earn Trust** | 4, 6, 11, 12 |
-| **Delivers Results** | 1, 6, 9, 13 |
-| **Have Backbone; Disagree and Commit** | 12, 19 |
+| **Customer Obsession** | 3, 4, 7 |
+| **Ownership** | 1, 5, 7, 8, 11, 13, 14 |
+| **Invent and Simplify** | 2, 3, 12, 14, 15 |
+| **Are Right A Lot** | 8, 18 |
+| **Learn and be Curious** | 5, 13, 15, 16, 18 |
+| **Hire & Develop The Best** | 9 |
+| **Insists on Highest Standards** | 1, 6, 16 |
+| **Think Big** | 1, 12, 15 |
+| **Bias for Action** | 3, 7, 13 |
+| **Dive Deep** | 1, 2, 6, 11 |
+| **Earn Trust** | 1, 4, 9, 10 |
+| **Delivers Results** | 1, 4, 7, 11 |
+| **Have Backbone; Disagree and Commit** | 10, 17 |
 
 ## Company Quick-Reference Matrix
 
 | Company | Best Stories |
 |---|---|
-| **Stripe** | 1, 3, 4, 5, 7, 9, 10, 12, 14, 17 |
-| **Netflix** | 4, 5, 7, 8, 12, 17 |
-| **Datadog** | 1, 2, 3, 8, 16, 18 |
-| **Coinbase** | 9, 10, 13, 14, 17 |
-| **Airbnb** | 1, 2, 5, 8, 18 |
-| **Figma** | 2, 3, 7, 13, 14, 16 |
-| **Circle** | 1, 4, 5, 10, 12, 16 |
-| **All** | 6, 11, 15, 19, 20 |
+| **Coinbase** | 1, 2, 3, 7, 8, 11, 12, 15 |
+| **HashiCorp/IBM** | 1, 2, 11, 12, 13, 14 |
+| **NVIDIA** | 1, 2, 5, 6, 15, 16 |
+| **Cherry** | 1, 7, 11, 13, 14 |
+| **Stripe** | 1, 2, 3, 5, 7, 8, 10, 12, 15 |
+| **Netflix** | 1, 5, 6, 10, 15 |
+| **All** | 4, 9, 13, 17, 18 |
