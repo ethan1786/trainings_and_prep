@@ -46,24 +46,24 @@
 
 **Action:** I started by producing the initial architecture proposal in about two weeks. The key insight was introducing an orchestration service and a GraphQL boundary that consolidated those 12 downstream integrations into 5 well-defined services. This reduced fan-out and simplified failure modes dramatically. I ran architecture reviews across all affected teams to build consensus, then we shipped the first production milestone in 6 months. We ran the new implementation in A/B testing handling 50% of traffic side-by-side with the legacy stack.
 
-**Result:** We completed the modernization ahead of schedule. P99 went from 250 ms to about 50 ms — a 5× improvement. Availability improved from 99% to 99.999%. Deploy time dropped from an hour to about 3 minutes — 20× faster. The patterns we established became the architectural standard for new services across the org.
+**Result:** We completed the modernization ahead of schedule. P99 went from 250 ms to about 50 ms — a 5× improvement. Availability improved from 98% to 99.9%. Deploy time dropped from an hour to about 3 minutes — 20× faster. The patterns we established became the architectural standard for new services across the org.
 
 ### Bullet Recap
 
 - **S:** Monolithic API powering highest-traffic page, 8k rpm, 250ms p99, ~99% availability, 1hr deploys
 - **T:** Lead full modernization; coordinate 10 teams / 3 depts; deliver without regressions
 - **A:** Produced architecture in 2 weeks; orchestration service + GraphQL boundary; 12→5 service consolidation; A/B tested at 50% traffic; built parity testing framework
-- **R:** p99 250ms→50ms (5×), availability 99%→99.999%, deploy 1hr→3min (20×), completed ahead of schedule, patterns adopted org-wide
+- **R:** p99 250ms→50ms (5×), availability 98%→99.9%, deploy 1hr→3min (20×), completed ahead of schedule, patterns adopted org-wide
 
 ### Long-Form Narrative
 
-The vehicle listing page is CarGurus' bread and butter — millions of consumers visit it daily, and the API behind it handled roughly 8,000 requests per minute. Over the years, the implementation had become a monolith with tendrils reaching into a dozen downstream services, each with its own quirks and hidden domain logic. Latency was hovering around 250 ms at the 99th percentile, and availability was around 99% — which sounds fine until you consider the volume. Deploys were nerve-wracking hour-long affairs because a bug in any part of the stack could cascade.
+The vehicle listing page is CarGurus' bread and butter — millions of consumers visit it daily, and the API behind it handled roughly 8,000 requests per minute. Over the years, the implementation had become a monolith with tendrils reaching into a dozen downstream services, each with its own quirks and hidden domain logic. Latency was hovering around 250 ms at the 99th percentile, and availability was around 98% — which sounds fine until you consider the volume. Deploys were nerve-wracking hour-long affairs because a bug in any part of the stack could cascade.
 
 I was tapped to lead the modernization. My first move was to map the entire dependency graph and identify the real boundaries. Within about two weeks, I had an architecture proposal centered on a new orchestration service that would sit behind a GraphQL boundary, consolidating 12 downstream integrations into 5 clearly defined services with explicit contracts. I presented this to all affected teams — roughly 10 teams across engineering, data, and product — and iterated on the design based on their feedback.
 
 I led a core team of 3 principal and senior engineers. We shipped the first production milestone in 6 months and set up an A/B test where the new implementation handled 50% of live traffic. I also built a parity-testing framework that validated the full response payload and data integrity against the legacy stack, which gave us high confidence during rollout.
 
-The results spoke for themselves: p99 latency dropped to about 50 ms, availability climbed to 99.999%, and deploy time went from an hour to about 3 minutes. We completed the project ahead of the original timeline. Perhaps more importantly, the architectural patterns we established — the orchestration layer, the service boundaries, the testing approach — became the standard for new microservices across the organization.
+The results spoke for themselves: p99 latency dropped to about 50 ms, availability climbed to 99.9%, and deploy time went from an hour to about 3 minutes. We completed the project ahead of the original timeline. Perhaps more importantly, the architectural patterns we established — the orchestration layer, the service boundaries, the testing approach — became the standard for new microservices across the organization.
 
 ---
 
@@ -78,7 +78,7 @@ The results spoke for themselves: p99 latency dropped to about 50 ms, availabili
 
 **Task:** My goal was to achieve a step-function improvement in latency, not just incremental — I wanted the new stack to be demonstrably faster in a way that moved key business metrics.
 
-**Action:** I dove deep into profiling — tracing every downstream call, analyzing serialization overhead, caching behavior, and connection pooling. I found that the old system was making redundant fan-out calls and wasn't efficiently batching data fetches. In the new orchestration layer, I designed the call graph to minimize sequential hops, batch where possible, and aggressively cache stable data. I also worked with teams to set SLOs on each downstream service so we had a latency budget per hop.
+**Action:** I re-planned the entire call graph across data sources. The legacy system made sequential calls where there were no data dependencies, so I restructured the orchestration to fan out independent downstream calls in async threads — parallel wherever possible, sequential only where one call's output feeds another. I defined fine-grained network configs per downstream service: per-service timeouts, connection pool sizes, and retry policies tuned to each dependency's profile. I added circuit breakers so a slow or failing downstream would be isolated instead of blocking the entire request. For error handling, I designed graceful degradation — if a non-critical data source was down, we'd return a partial response rather than a 500. On the caching side, I added in-memory caches (not Redis) for both long-lived static data and short-TTL dynamic data. In-memory was a deliberate choice: at 8,000 rpm with deeply nested response objects, the network hop and serialization cost of Redis would have eaten into the latency gains. I also worked with teams to set SLOs on each downstream service so we had a latency budget per hop.
 
 **Result:** The new stack achieved a p99 of about 50 ms — a 5× improvement. This wasn't just a vanity metric; the reduced latency directly improved user engagement metrics on the listing page. The SLO framework we introduced became the model for how other teams think about latency budgets.
 
@@ -86,14 +86,18 @@ The results spoke for themselves: p99 latency dropped to about 50 ms, availabili
 
 - **S:** Legacy API p99 ~250ms; new architecture cleaner but performance not yet optimized
 - **T:** Achieve step-function latency improvement, not incremental
-- **A:** Deep profiling of call graph; eliminated redundant fan-out; batched data fetches; aggressive caching of stable data; introduced per-hop SLO latency budgets
+- **A:** Re-planned call graph: sequential→parallel async fan-out for independent calls; fine-grained per-service timeouts, connection pools, retry policies; circuit breakers for fault isolation; graceful degradation for non-critical sources; in-memory cache (not Redis — avoid network hop + serialization cost at 8k rpm with nested objects) for both static and short-TTL dynamic data; per-hop SLO latency budgets
 - **R:** p99 250ms→50ms (5×); improved user engagement; SLO framework adopted across teams
 
 ### Long-Form Narrative
 
 After we'd designed the new service architecture, I turned my attention to performance. The legacy system ran at about 250 ms p99, and while the new topology was much cleaner, I wasn't going to settle for "a bit faster." I set an internal goal of getting under 100 ms p99 and saw the potential to go further.
 
-I spent time profiling every layer. The old system made redundant calls to the same downstream services from different code paths, had no batching, and had poor cache utilization because cache keys were too granular. In the new orchestration service, I redesigned the call graph to minimize sequential hops — if two downstream calls don't depend on each other, they run in parallel. I introduced batched data fetching where the graph allowed it, and implemented a two-tier caching strategy: a fast in-memory cache for data that changes rarely (like dealer metadata) and a shorter-TTL distributed cache for semi-dynamic data.
+I mapped the full call graph and found the old system was making sequential calls to downstream services even when there were no data dependencies between them. It was also missing fine-grained network controls — every downstream call used the same default timeout, with no circuit breaking or isolation.
+
+In the new orchestration service, I restructured the call graph to fan out independent downstream calls in async threads — parallel wherever the data dependencies allowed, sequential only where one call's output fed another's input. I defined per-service network configurations: individual timeouts tuned to each dependency's latency profile, dedicated connection pools, and retry policies appropriate to each service's failure characteristics. I added circuit breakers so that a slow or failing dependency would be isolated — one bad downstream wouldn't block the entire request. For non-critical data sources, I designed graceful degradation: return a partial response rather than a 500.
+
+For caching, I chose in-memory caches rather than Redis — a deliberate decision. At 8,000 rpm with deeply nested response objects, the network hop to Redis and the serialization/deserialization cost would have eaten significantly into the latency gains. I used long-TTL in-memory cache for static data (like dealer metadata) and short-TTL in-memory cache for dynamic data that changed more frequently but was still read-heavy.
 
 I also introduced a latency budget framework — each downstream service got an SLO for its contribution to the total request, and we monitored it in Datadog dashboards. This made it immediately visible when any single service regressed.
 
