@@ -16,30 +16,30 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 |---|---|---|
 | **RFC (Request for Comments)** | You drive decisions through written proposals, not just meetings | Story 1 (API mod standards), Story 7 (consensus) |
 | **ADR (Architecture Decision Record)** | You document decisions with context so future engineers understand *why* | Story 1 (influence layer) |
-| **Design Doc / Tech Spec** | You write before you code | Story 1, 10 |
+| **Design Doc / Tech Spec** | You write before you code | Story 1, 13 |
 | **Pre-socialization** | You build consensus before the big meeting — no surprises | Story 1 (influence), Story 7 |
 | **Stakeholder alignment** | You manage competing priorities across orgs | Story 3 (MCP stakeholders) |
 | **OKRs / Success metrics** | You define what "done" looks like upfront | Story 1 (p99, availability targets) |
-| **Blast radius** | You think about failure scope before shipping | Story 1 (deploy risk), Story 5 (experiment retirement) |
-| **Force multiplier** | You make others more effective, not just yourself | Story 6 (mentoring), Story 1 (standards adoption) |
+| **Blast radius** | You think about failure scope before shipping | Story 1 (deploy risk), Story 4 (experiment retirement) |
+| **Force multiplier** | You make others more effective, not just yourself | Story 5 (mentoring), Story 1 (standards adoption) |
 
 ### Architecture & Reliability
 
 | Term | What It Signals | Where You Used It |
 |---|---|---|
 | **SLO (Service Level Objective)** | You set measurable reliability targets per service | Story 1 (per-hop latency budgets) |
-| **SLA (Service Level Agreement)** | You understand the contractual commitments to users | Story 8 (Applause auth — partner SLAs) |
+| **SLA (Service Level Agreement)** | You understand the contractual commitments to users | Story 11 (Applause auth — partner SLAs) |
 | **Error budget** | You balance reliability investment vs. feature velocity | Story 1 (SLO framework) |
 | **Circuit breaker** | You isolate failures so one bad dependency doesn't cascade | Story 1 (technical layer) |
 | **Graceful degradation** | You return partial results instead of a 500 | Story 1 (non-critical sources) |
 | **Fault isolation** | You contain blast radius of failures per domain | Story 1 (orchestration design) |
-| **Idempotency** | Retries are safe — critical for financial systems | Story 9 (CQRS), Coinbase prep |
+| **Idempotency** | Retries are safe — critical for financial systems | Story 12 (CQRS), Coinbase prep |
 | **Reconciliation** | You verify two sources of truth match | Story 2 (parity testing) |
 | **Parity testing** | You validate new vs old at production scale | Story 2 |
 | **Canary / Blue-green deploy** | You roll out safely to a subset before full traffic | Story 1 (A/B at 50% traffic) |
-| **Feature flags** | You decouple deploy from release | Story 5 (experiment retirement) |
-| **Event sourcing / CQRS** | You separate reads from writes, events as source of truth | Story 9 (Applause) |
-| **Dead letter queue (DLQ)** | You handle message processing failures gracefully | Story 5 (event-driven), Coinbase reverse SD |
+| **Feature flags** | You decouple deploy from release | Story 4 (experiment retirement) |
+| **Event sourcing / CQRS** | You separate reads from writes, events as source of truth | Story 12 (Applause) |
+| **Dead letter queue (DLQ)** | You handle message processing failures gracefully | Story 4 (event-driven), Coinbase reverse SD |
 | **Backpressure** | You prevent upstream from overwhelming downstream | System design discussions |
 
 ### Observability & Operations
@@ -50,19 +50,19 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 | **p99 / p95 latency** | You measure tail latency, not just averages | Story 1 (250ms→50ms) |
 | **Latency budget** | You allocate time per hop so you know where to optimize | Story 1 (per-hop SLOs) |
 | **Structured logging** | Your logs are queryable, not printf debugging | Story 1 (observability standards) |
-| **Runbook** | You document incident response so on-call isn't tribal knowledge | Story 8 (Applause migration), Story 10 (Toast) |
-| **On-call / incident response** | You own production reliability, not just shipping code | Story 10 (Toast — built it from scratch) |
+| **Runbook** | You document incident response so on-call isn't tribal knowledge | Story 11 (Applause migration), Story 13 (Toast) |
+| **On-call / incident response** | You own production reliability, not just shipping code | Story 13 (Toast — built it from scratch) |
 | **Alerting on SLOs (not raw thresholds)** | You catch gradual degradation, not just hard failures | Story 1 (SLO framework) |
 
 ### Collaboration & Culture
 
 | Term | What It Signals | Where You Used It |
 |---|---|---|
-| **Disagree and commit** | You push back with data, then fully commit to the group decision | Story 12 |
+| **Disagree and commit** | You push back with data, then fully commit to the group decision | Story 8 |
 | **Document-driven culture** | You collaborate async through writing, not just meetings | Story 1, 7 |
-| **Cross-functional** | You work with PM, Risk, Compliance — not just engineers | Story 3 (MCP), Story 5 (digital shopping) |
+| **Cross-functional** | You work with PM, Risk, Compliance — not just engineers | Story 3 (MCP), Story 4 (digital shopping) |
 | **Tech lead vs. people manager** | You know the difference and chose IC leadership deliberately | All interviews |
-| **Raising the bar** | You leave the org better than you found it | Story 6 (mentoring), Story 1 (standards) |
+| **Raising the bar** | You leave the org better than you found it | Story 5 (mentoring), Story 1 (standards) |
 
 > **Tip:** Don't stack these. One or two per answer is plenty. The signal is that you use them *naturally* as part of how you think, not that you memorized a vocabulary list.
 
@@ -70,22 +70,42 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 
 ## Quick Index
 
-| # | Story | Anchor Project | LP Tags | Best For |
-|---|-------|---------------|---------|----------|
-| 1 | API Modernization — Full Story (Leadership + Technical + Influence) | API Modernization | Ownership, Delivers Results, Think Big, Insists on Highest Standards, Dive Deep, Earn Trust | All |
-| 2 | API Modernization — Parity Testing Framework | API Modernization | Invent and Simplify, Dive Deep | Stripe, Datadog, Figma, Coinbase |
-| 3 | AI Platform Backend — MCP & Conversational AI Infrastructure | AI-First Initiative | Bias for Action, Earn Trust, Customer Obsession | Coinbase, All |
-| 4 | DGS Subgraph — GraphQL Federation & Performance | DGS Subgraph | Ownership, Learn and be Curious, Dive Deep, Insists on Highest Standards | Netflix, Figma, Stripe |
-| 5 | Digital Shopping — 0→1 to Safe Retirement | Digital Shopping | Bias for Action, Delivers Results, Customer Obsession, Ownership, Are Right A Lot | Coinbase, Stripe |
-| 6 | Cross-Org Leadership — Mentoring to Staff Level | Leadership | Hire & Develop The Best, Earn Trust | All |
-| 7 | Cross-Org Leadership — Driving Consensus via RFCs | Leadership | Disagree and Commit, Earn Trust | Circle, Stripe, Netflix |
-| 8 | Applause — Auth Modernization with Minimal Downtime | Applause Auth | Delivers Results, Ownership, Dive Deep | Coinbase, Figma |
-| 9 | Applause — Event Sourcing / CQRS Initiative | Applause CQRS | Invent and Simplify, Think Big | Stripe, Figma, Coinbase |
-| 10 | Toast — Early Engineer Building Everything | Toast | Ownership, Bias for Action, Learn and be Curious, Invent and Simplify | All |
-| 11 | GenAI Engine — Architecture & Experimentation Platform | GenAI (Independent) | Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards | Netflix, Stripe, Coinbase |
-| 12 | Disagree and Commit — Pushing Back on Architecture | Cross-cutting | Have Backbone, Disagree and Commit | All |
-| 13 | Failure & Learning — A Decision That Didn't Work Out | Cross-cutting | Are Right A Lot, Learn and be Curious | All |
-| 14 | AI-Powered Cross-Domain Validation (In Progress) | VDP Cross-Team | Invent and Simplify, Think Big, Customer Obsession | Coinbase, All |
+### Section A: Full Stories (go-to stories for interviews)
+
+| # | Story | LP Tags | Best For |
+|---|-------|---------|----------|
+| 1 | API Modernization — Full Story (Leadership + Technical + Influence) | Ownership, Delivers Results, Think Big, Insists on Highest Standards, Dive Deep, Earn Trust | All |
+| 2 | API Modernization — Parity Testing Framework | Invent and Simplify, Dive Deep | Coinbase, Stripe |
+| 3 | AI Platform Backend — MCP & Conversational AI Infrastructure | Bias for Action, Earn Trust, Customer Obsession | Coinbase, All |
+| 4 | Digital Shopping — 0→1 Product Building | Bias for Action, Delivers Results, Customer Obsession, Ownership, Are Right A Lot | Coinbase, Stripe, Cherry |
+| 5 | Cross-Org Leadership — Mentoring to Staff Level | Hire & Develop The Best, Earn Trust | All |
+| 6 | Cross-Org Leadership — Driving Consensus via RFCs | Disagree and Commit, Earn Trust | Stripe, Netflix |
+| 7 | GenAI Engine — Architecture & Experimentation Platform | Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards | Coinbase, Stripe, Netflix |
+| 8 | Disagree and Commit — Pushing Back on Architecture | Have Backbone, Disagree and Commit | All |
+| 9 | AI-Powered Cross-Domain Validation (In Progress) | Invent and Simplify, Think Big, Customer Obsession | Coinbase, All |
+
+### Section B: Brief References (mention for experience, not lead stories)
+
+| # | Story | Use When |
+|---|-------|----------|
+| 10 | DGS Subgraph — GraphQL Federation & Performance | "Learned something new," JVM performance, GraphQL |
+| 11 | Applause — Auth Modernization | HashiCorp/IBM interviews, identity/auth questions |
+| 12 | Applause — Event Sourcing / CQRS | Event sourcing / Kafka background questions only |
+| 13 | Toast — Early Engineer in Hypergrowth | Cherry (startup context), "wearing multiple hats" |
+
+### Section C: LP-Specific Stories (for specific behavioral questions — TODO)
+
+| # | Story | LP Gap It Fills | Status |
+|---|-------|-----------------|--------|
+| 14 | Failure & Learning | Are Right A Lot, Learn and be Curious | ⚠️ NEEDS REAL STORY |
+| 15 | Customer Obsession | Customer Obsession | ⚠️ PLACEHOLDER |
+| 16 | Peer Conflict Resolution | Have Backbone, Disagree and Commit (peer, not leader) | ⚠️ PLACEHOLDER |
+
+---
+
+---
+
+# Section A: Full Stories
 
 ---
 
@@ -215,7 +235,7 @@ The parity framework caught dozens of subtle issues before they ever reached a r
 
 Don't position this as an AI story. Position it as a **platform story** where AI is the consumer:
 
-> "AI has been a major focus for me this year. It started when my director picked me to build the backend for our ChatGPT integration — a high-visibility project with no internal precedent. I owned the MCP server architecture end-to-end while the frontend team built the conversational UI. I delivered a working backend in the first sprint that unblocked stakeholder demos, and the modular design absorbed three rounds of requirement changes without rework. That work expanded into designing MCP APIs for several other conversational AI agents across the org — I proposed the architecture and own the backend interfaces, even where other teams handle the implementation. And now I'm driving a broader initiative using AI to automate our cross-team validation process (Story 14). Each project built on the last."
+> "AI has been a major focus for me this year. It started when my director picked me to build the backend for our ChatGPT integration — a high-visibility project with no internal precedent. I owned the MCP server architecture end-to-end while the frontend team built the conversational UI. I delivered a working backend in the first sprint that unblocked stakeholder demos, and the modular design absorbed three rounds of requirement changes without rework. That work expanded into designing MCP APIs for several other conversational AI agents across the org — I proposed the architecture and own the backend interfaces, even where other teams handle the implementation. And now I'm driving a broader initiative using AI to automate our cross-team validation process (Story 9). Each project built on the last."
 
 ### The Progression (one answer, three data points)
 
@@ -223,7 +243,7 @@ Don't position this as an AI story. Position it as a **platform story** where AI
 |---|---|---|
 | MCP Server | Director picked me for high-visibility AI integration; owned backend, delivered fast, navigated stakeholder ambiguity | "I can execute on AI platform work" |
 | Conversational AI agents | Proposed MCP API designs for multiple agents; own backend interfaces | "I can shape AI platform direction" |
-| Cross-domain validation (Story 14) | Identified highest-leverage opportunity for AI, currently driving initiative | "I can identify where AI creates org-level leverage" |
+| Cross-domain validation (Story 9) | Identified highest-leverage opportunity for AI, currently driving initiative | "I can identify where AI creates org-level leverage" |
 
 ### STAR Spoken-Style
 
@@ -233,141 +253,83 @@ Don't position this as an AI story. Position it as a **platform story** where AI
 
 **Action:** I studied the MCP protocol deeply, then designed a modular server architecture — a core protocol handler with a plugin system where each capability was a separate tool that could be registered independently. I delivered a working backend in the first sprint that unblocked PM demos. When requirements shifted (new capabilities, different response formats, production safety concerns), the architecture absorbed the changes without rework. I managed stakeholder expectations transparently — I gave PMs early access to working demos, held weekly syncs with the AI team on interface contracts, and maintained a clear roadmap for directors showing demo-ready vs. production-ready with explicit gaps. When asks were too expensive, I proposed alternatives instead of saying no.
 
-**Result:** The POC was successful — every stakeholder group got what they needed. The MCP architecture became the foundation for the company's AI platform. I went on to propose and design MCP APIs for several additional conversational AI agents across the org, owning the backend interfaces. This work is now evolving into a broader initiative (Story 14) using AI to automate cross-team validation.
+**Result:** The POC was successful — every stakeholder group got what they needed. The MCP architecture became the foundation for the company's AI platform. I went on to propose and design MCP APIs for several additional conversational AI agents across the org, owning the backend interfaces. This work is now evolving into a broader initiative (Story 9) using AI to automate cross-team validation.
 
 ### Bullet Recap
 
 - **S:** Company going AI-first; ChatGPT integration as flagship initiative; no internal precedent; multiple stakeholders with competing priorities
 - **T:** Director chose me to own the backend; high-visibility, ambiguous scope; frontend team handled conversational UI
 - **A:** Designed modular MCP architecture (plugin-style tools); delivered working backend in first sprint; navigated stakeholder ambiguity (PM demos, AI team contracts, director production roadmap); proposed alternatives over binary yes/no; transparent tradeoff communication
-- **R:** POC successful; architecture became AI platform foundation; expanded to designing MCP APIs for multiple conversational AI agents; now driving AI-powered cross-domain validation initiative (Story 14)
+- **R:** POC successful; architecture became AI platform foundation; expanded to designing MCP APIs for multiple conversational AI agents; now driving AI-powered cross-domain validation initiative (Story 9)
 
 ### Interview Tips
 - **Keep it to 60-90 seconds.** This is a supporting story, not your flagship. Let them ask follow-ups.
 - **If they dig into technical depth:** Talk about the modular tool plugin architecture, the demo/production boundary separation.
 - **If they dig into stakeholder management:** Talk about the transparent tradeoff approach — "We can do this for the demo, but here's what's needed for production."
-- **If they ask "what else in AI?":** Mention the conversational AI agent APIs and Story 14 initiative. Show the progression.
+- **If they ask "what else in AI?":** Mention the conversational AI agent APIs and Story 9 initiative. Show the progression.
 - **Don't oversell.** You built the backend platform. You didn't build the AI models or the frontend. That's honest and that's fine — you're interviewing for a platform role.
 
 ---
 
-## Story 4: DGS Subgraph — GraphQL Federation & Performance
-
-**Anchor:** Netflix DGS Subgraph · **LPs:** Ownership, Learn and be Curious, Dive Deep, Insists on Highest Standards
-**Best for:** Netflix, Figma, Stripe
-
-### Angle Guide
-
-This is one story with two distinct angles. Lead with the angle that fits the question.
-
-| Question Type | Lead With | Expand On | Skip |
-|---|---|---|---|
-| "Tell me about owning a migration / new initiative" / cross-platform access | Federation/ownership angle | Performance details as follow-up | — |
-| "How did you improve performance / reliability" / technical depth | Technical deep-dive/performance angle | Federation scope for context | — |
-| "Tell me about learning something new quickly" | Federation angle (learned DGS from scratch) | Warmup profiling as evidence of depth | — |
-| "Insists on highest standards / root cause investigation" | Performance angle (cold-start profiling) | Federation context for stakes | — |
-
-### STAR Spoken-Style
-
-**Situation:** The Delivery Lookup service at CarGurus — which I primarily own — provides vehicle delivery cost estimates based on geographic locations. It was consumed by only 2 clients via REST. But the company was launching an AI chatbot and shopping assistant platform, and we were also building a federated GraphQL gateway to simplify cross-platform data access. My service needed to become a first-class citizen in the federation.
-
-**Task:** I needed to design and integrate a Netflix DGS subgraph for the Delivery Lookup service, then ensure it performed reliably in the federated gateway — where one slow subgraph can bottleneck the entire query resolution for high-traffic pages and the AI chatbot.
-
-**Action:**
-
-*Federation/ownership angle:* I dove into the Netflix DGS framework — I hadn't worked with it before, so I spent time studying the federation spec, DGS documentation, and best practices for subgraph design. I designed the schema to be federation-friendly, with proper entity definitions and `@key` directives. I implemented batch data loaders to prevent N+1 query issues — critical because the gateway resolves delivery costs for multiple vehicles in a single request. I built load tests and staging GraphQL integration tests to verify the subgraph worked correctly within the full federated graph. The schema design and batch-loading patterns I established are now used as a reference by other teams integrating their services.
-
-*Technical deep-dive/performance angle:* During staging load tests, I noticed newly deployed instances showed p99 latency 3–5× higher than steady state on the first few hundred requests — classic JVM cold-start. In a federated gateway, this matters acutely: the gateway resolves subgraphs in parallel, and the slowest one determines user-visible latency. I profiled the JVM during the startup window and identified two root causes: the JIT compiler hadn't optimized the hot code paths yet, and the DGS framework does lazy initialization of query parsing structures on first use. I built a warmup routine that sends synthetic GraphQL queries through the full resolution pipeline — exercising batch data loaders, cache layer, and serialization — before the service marks itself ready. I gated the Kubernetes readiness probe on warmup completion so the load balancer wouldn't route traffic until the instance was fully warmed.
-
-**Result:** The subgraph is integrated and tested; migration from legacy REST endpoints is in progress with the AI chatbot/shopping assistant as the primary new consumer. Cold-start latency spikes were eliminated entirely — newly deployed instances serve their first production requests at steady-state latency, meaning deployments cause no user-visible regressions. The batch data loader approach eliminated N+1 concerns. Both the schema/batching patterns and the warmup strategy were adopted by other JVM services joining the federation.
-
-### Bullet Recap
-
-- **S:** Delivery Lookup (2 REST consumers) needed to join federated GraphQL gateway for AI chatbot + cross-platform access
-- **T:** Design DGS subgraph and ensure production-quality performance in the federation
-- **A (federation):** Learned DGS from scratch; designed federation-friendly schema with `@key`; batch data loaders for N+1 prevention; load tests + staging integration tests; patterns used as reference for other teams
-- **A (performance):** Staging load test revealed cold-start p99 3–5× higher; profiled JVM startup; identified JIT + DGS lazy-init as root causes; warmup routine exercises full resolution stack (data loaders, cache, serialization); gated readiness probe on warmup completion; validated with load tests
-- **R:** Subgraph integrated; migration in progress; cold-start spikes eliminated; no deployment-time regressions; patterns adopted by other JVM services in federation
-
-### Long-Form Narrative
-
-The Delivery Lookup service is one I primarily own at CarGurus. It takes geographic locations and returns vehicle delivery cost estimates. Most data is cached and it serves on main pages, but historically it only had 2 REST consumers.
-
-Two things changed: the company started building an AI chatbot/shopping assistant, and we were standing up a federated GraphQL gateway to simplify how different platforms access data. My service needed to join this federation.
-
-I chose Netflix DGS as the framework because it's the company's standard for Java-based GraphQL services. I hadn't used DGS before, so I invested time learning the federation spec and DGS-specific patterns. The schema design was important — I needed to define proper entities with `@key` directives so the gateway could resolve delivery costs alongside vehicle data from other subgraphs in a single query. For batching, I implemented DGS batch data loaders: when the gateway resolves a list of vehicles each needing a delivery cost, the naive approach fires N individual requests; the batch loader collects them and makes a single batched call. I wrote load tests to validate throughput and latency under realistic traffic patterns, and staging integration tests that verify the subgraph resolves correctly within the full federated graph.
-
-The patterns I established — schema design, batch loading, warmup strategy — are now being used as a reference by other teams integrating their services into the federation.
-
-The second challenge was performance. When I deployed to staging and ran initial load tests, the first few hundred requests showed p99 latency 3–5× higher than steady state. After that, latency settled. Classic JVM cold-start behavior, but in a federated GraphQL gateway this matters a lot: the gateway resolves multiple subgraphs in parallel, and the slowest one determines the user-visible latency.
-
-I profiled the JVM during the startup window. Two factors stood out: the JIT compiler hadn't yet optimized the hot code paths (GraphQL resolution, data loader invocation, JSON serialization), and the DGS framework itself does lazy initialization of query parsing structures on first use.
-
-My fix was a warmup routine that runs during startup, before the service marks itself as ready. It sends a representative set of synthetic GraphQL queries through the full resolution pipeline — not just a /health ping, but queries that exercise the batch data loaders, hit the cache layer, and serialize real response structures. This forces the JIT to compile the hot paths and DGS to initialize its structures. I gated the Kubernetes readiness probe on warmup completion, so the load balancer wouldn't route traffic to the instance until it was fully warmed. Load tests confirmed: warmed instances served their first real request at the same latency as instances that had been running for hours.
-
-The warmup pattern was adopted by other teams bringing JVM services into the federated graph. It's the kind of detail that separates a service that "works" from one that works well in production.
-
----
-
-## Story 5: Digital Shopping — 0→1 to Safe Retirement
+## Story 4: Digital Shopping — 0→1 Product Building
 
 **Anchor:** Digital Shopping & Online Leads Products · **LPs:** Bias for Action, Delivers Results, Customer Obsession, Ownership, Are Right A Lot
-**Best for:** Coinbase, Stripe
+**Best for:** Coinbase, Stripe, Cherry
 
 ### Angle Guide
 
-This is one story covering the full arc: building the platform under pressure, then owning its long-term health through disciplined experiment retirement.
+This is your biggest **0→1 product story** at CarGurus (vs. Story 1 which is your biggest platform redesign). The differentiator is heavy cross-functional collaboration — you worked through ambiguity with product, frontend, data eng, and dealers to ship something new.
 
 | Question Type | Lead With | Expand On | Skip |
 |---|---|---|---|
-| "Tell me about building something from scratch under pressure" / bias for action | 0→1 delivery angle | Architecture choices and pragmatic tradeoffs | Retirement details |
-| "Tell me about ownership / long-term thinking" / owning the full lifecycle | Ownership/retirement angle | 0→1 context to show scope of responsibility | — |
-| "Tell me about a time you simplified a system" | Retirement/cleanup angle (event-driven made this possible) | 0→1 architecture to show foresight | — |
-| "Bias for action" / delivers results | 0→1 angle — speed and critical-path prioritization | Retirement as evidence of staying hands-on long-term | — |
+| "Built something from scratch" / 0→1 | Product building angle — ambiguity, cross-functional, incremental delivery | Technical decisions as follow-ups | Retirement details |
+| "Cross-functional collaboration" / working with product | Collaboration angle — clearing ambiguities with PM, frontend, data eng | Short-term vs long-term tradeoffs | Technical architecture |
+| "Short-term vs long-term tradeoffs" / pragmatic decisions | Tradeoff angle — what to ship now vs invest in | Collaboration context | — |
+| "Ownership / long-term thinking" | Lifecycle angle — built it, iterated, retired experiments safely | 0→1 context for scope | — |
+| "Bias for action" / delivers results | Delivery angle — critical path first, pragmatic tradeoffs, speed | Collaboration as enabler | Retirement |
 
 ### STAR Spoken-Style
 
-**Situation:** When the pandemic hit in 2020, the automotive industry shifted overnight. Consumers couldn't visit dealerships, and CarGurus needed a way to capture online leads and enable digital shopping experiences. There was enormous business pressure to launch quickly — the market was moving and competitors were racing to fill the gap. After launch, the company ran several follow-on experiments — new lead flows, merchandising variations, pricing models — some of which didn't work out. Over time, the codebase was accumulating complexity from experiments intertwined with core systems.
+**Situation:** When the pandemic hit in 2020, the automotive industry shifted overnight. Consumers couldn't visit dealerships, and CarGurus needed a way to capture online leads and enable digital shopping experiences. There was enormous business pressure to ship — competitors were racing to fill the gap. But the product requirements were ambiguous: nobody had done this before at CarGurus, and the product team, frontend, data engineering, and I all had different assumptions about what "digital shopping" meant and how it should work.
 
-**Task:** I was tasked with leading the backend design and implementation for a new 0→1 digital shopping product, then I also took ownership of keeping the core platform healthy as experiments came and went — ensuring we could safely retire the ones that didn't pan out without destabilizing what consumers and dealers depended on.
+**Task:** I led the backend design and implementation for this 0→1 product. Beyond the technical work, I needed to collaborate closely with product to clarify what we were actually building, align with frontend on data contracts and API shapes, and work with data engineering on inventory pipelines — all under pressure to ship fast.
 
 **Action:**
 
-*Bias for action/delivery angle:* I chose a microservice and event-driven architecture because it let us build and deploy components independently without waiting for a monolithic release. I designed core services for inventory sync, lead capture, and merchandising, with Kafka-based event pipelines connecting them. Different sub-teams could work in parallel. I prioritized ruthlessly: lead capture was the critical business path, so that went to production first; merchandising and inventory features followed. I made pragmatic tradeoffs — inventory data could be eventually consistent (it was already slightly stale from dealer feeds), which simplified the architecture; lead data needed stronger delivery guarantees.
+*Product building / cross-functional angle:* The biggest challenge wasn't the code — it was clearing the ambiguity. I spent significant time with product to break down "digital shopping" into concrete features with clear priorities. We aligned on what needed to launch first (lead capture — getting consumer intent to dealers) vs. what could follow (merchandising, inventory display). I worked with frontend to define API contracts iteratively — we didn't have a perfect spec upfront, so I designed the backend to be flexible enough to evolve as the product definition solidified. With data engineering, I figured out how to get inventory data flowing reliably from dealer feeds into the new system.
 
-*Ownership/long-term thinking angle:* I saw the experiment-retirement problem coming and designed the original architecture with clean boundaries — feature flags gating experimental code paths, circuit breakers isolating experimental components, and clear event stream contracts. When it was time to retire experiments, I created a retirement playbook: map every integration point (API consumers, Kafka topics, DB tables, config flags, dealer-facing settings), disable new traffic via feature flag, drain in-flight event pipelines, clean up configs and data artifacts, then remove code. Each step had verification criteria. I documented the first retirement thoroughly so subsequent ones became self-service.
+*Technical / incremental delivery angle:* I started small — a few helper services within the monolith to prove the core flows worked. As the product grew and we understood the domain better, I gradually extracted pieces into their own microservices with Kafka-based event pipelines connecting them. This wasn't a grand "let's build microservices" plan — it was pragmatic extraction as complexity justified it. I prioritized ruthlessly: lead capture went to production first because it was the critical business path. Inventory data could be eventually consistent (it was already slightly stale from dealer feeds), which let us move faster. Lead data needed stronger delivery guarantees.
 
-**Result:** We launched on timeline, capturing a meaningful volume of online leads during a period when the company's core business was under significant pressure. We retired multiple experiments without a single customer-facing incident. The retirement playbook was adopted by other teams. The bigger win was cultural: because the business saw that experiments could be safely retired, they were more willing to approve new ones — the architecture turned experimentation from risky to routine.
+*Short-term vs long-term tradeoff angle:* I made deliberate tradeoffs with product and documented them. We launched with eventual consistency where strong consistency wasn't needed. I invested upfront in feature flags and clean service boundaries — not because it was cool architecture, but because I knew from experience that product would want to experiment, and experiments that can't be safely retired become permanent tech debt. That investment paid off: when we later ran follow-on experiments (new lead flows, merchandising variations, pricing models), the ones that didn't work could be retired cleanly through a playbook I created — phased teardown with no customer-facing incidents.
+
+**Result:** We launched within the target timeline, capturing a meaningful volume of online leads during a period when the company's core business was under stress. The architecture grew organically from monolith helpers to independent services as the product matured. We retired multiple experiments without a single customer-facing incident — the retirement playbook was adopted by other teams. The bigger cultural win: the business gained confidence to keep experimenting because they saw experiments could be safely retired.
 
 ### Bullet Recap
 
-- **S:** Pandemic forced automotive industry online; competitors racing; enormous pressure to ship; later: codebase accumulating experiment complexity
-- **T:** Lead 0→1 digital shopping backend; then own experiment lifecycle and safe platform retirement
-- **A (0→1 delivery):** Microservice + event-driven architecture; Kafka decoupling; parallel team dev; critical path (lead capture) to prod first; eventual consistency where safe; stronger guarantees for lead data
-- **A (ownership/retirement):** Feature flags + circuit breakers from day one; retirement playbook (map integrations → disable traffic → drain pipelines → clean data → remove code); verification criteria at each step; documented for self-service
-- **R:** Launched on timeline; meaningful leads during business disruption; multiple experiments retired with zero incidents; playbook adopted by other teams; architecture enabled fast iteration; experimentation became routine
+- **S:** Pandemic forced automotive industry online; ambiguous product requirements; multiple teams (product, frontend, data eng) with different assumptions; enormous pressure to ship
+- **T:** Lead 0→1 backend for digital shopping; clear ambiguity with cross-functional partners; ship fast while building for iteration
+- **A (cross-functional):** Worked with product to break ambiguity into prioritized features; iterated API contracts with frontend; aligned with data eng on inventory pipelines; documented tradeoffs jointly
+- **A (technical):** Started with helpers in monolith, gradually extracted to microservices as complexity justified; Kafka event pipelines; critical path (lead capture) to production first; eventual consistency where safe, stronger guarantees for lead data
+- **A (long-term):** Feature flags + clean boundaries from day one; retirement playbook for failed experiments (map integrations → disable traffic → drain pipelines → clean data → remove code)
+- **R:** Launched on timeline; meaningful leads during business disruption; architecture grew organically monolith→microservices; multiple experiments retired with zero incidents; playbook adopted by other teams; experimentation became routine
 
 ### Long-Form Narrative
 
-The pandemic created an existential shift for CarGurus. The company's business model assumed consumers would visit dealerships, but suddenly nobody could. We needed a digital shopping experience — a way for consumers to browse, compare, and express purchase intent entirely online. And we needed it fast, because every week mattered.
+The pandemic created an existential shift for CarGurus. The company's business model assumed consumers would visit dealerships, but suddenly nobody could. We needed a digital shopping experience — browse, compare, and express purchase intent entirely online. And we needed it fast.
 
-I led the backend design from scratch. The first decision was architectural: microservices with event-driven communication via Kafka. This wasn't just a technical preference — it was a strategic choice. By decoupling inventory sync, lead capture, and merchandising into separate services connected by event streams, different sub-teams could develop and deploy independently. We didn't have to coordinate monolithic releases.
+The hardest part wasn't the code — it was the ambiguity. Nobody had built this before at CarGurus. Product had a vision but not a spec. Frontend had assumptions about API shapes that didn't match the backend reality. Data engineering had inventory feeds that weren't designed for real-time consumer experiences. I spent significant time working across all of these teams to break "digital shopping" into concrete, prioritized features. Lead capture — getting consumer intent to dealers — was the critical path. Merchandising and inventory display could follow.
 
-I prioritized ruthlessly. Lead capture was the critical business path — getting consumer intent to dealers — so that went to production first. Merchandising and inventory features followed in subsequent sprints. I made pragmatic tradeoffs: inventory data could be eventually consistent (it was already slightly stale from dealer feeds), which simplified the architecture and let us move faster. But lead data needed to be reliable, so that pipeline had stronger delivery guarantees.
+I started small. Rather than designing a grand microservice architecture upfront, I built a few helper services within the monolith to prove the core flows worked. As the product grew and we understood the domain better, I gradually extracted pieces into their own services with Kafka-based event pipelines. This was pragmatic, not ideological — each extraction happened when the complexity justified the operational overhead of a new service.
 
-We launched within the target timeline. The product captured a meaningful volume of leads during a period when the company's core business was under significant pressure.
+I made pragmatic tradeoffs with product and documented them. Inventory data could be eventually consistent — it was already slightly stale from dealer feeds — which simplified the architecture and let us move faster. Lead data needed to be reliable, so that pipeline had stronger delivery guarantees. These weren't unilateral technical decisions; I walked product through the tradeoffs so they understood what they were getting and what they were giving up.
 
-The second chapter of this story is what happened as the product matured. After the initial launch, CarGurus ran several follow-on experiments — different lead flows, merchandising variations, pricing models. Some worked, some didn't. The problem was that each experiment had tentacles: API endpoints, Kafka topics, database tables, config flags, dealer-facing settings. You couldn't just delete the code and call it done.
+I also invested upfront in feature flags and clean service boundaries. Not because it was fashionable, but because I knew product would want to experiment, and experiments that can't be safely retired become permanent tech debt. That foresight paid off. When CarGurus ran follow-on experiments (new lead flows, merchandising variations, pricing models), the ones that didn't work could be retired cleanly. I created a retirement playbook — phased teardown from traffic disable to code removal, with verification at each step. Multiple experiments retired with zero customer-facing incidents. Other teams adopted the playbook.
 
-I saw this problem coming and had designed the original architecture with clean boundaries — feature flags gating experimental code paths, circuit breakers isolating experimental components, and clear event stream contracts. But retirement still needed a disciplined process.
-
-I created a retirement playbook: (1) map every integration point for the experiment, (2) disable new traffic via feature flag, (3) drain any in-flight events and confirm pipeline quiescence, (4) clean up dealer-facing configs and database artifacts, (5) remove the code and associated infrastructure. Each step had verification criteria. I documented the first retirement thoroughly, then the playbook became self-service for subsequent retirements.
-
-We retired multiple experiments without a single customer-facing incident. Other teams adopted the playbook for their own feature retirement processes. The bigger win was cultural: because the business saw that experiments could be safely retired, they were more willing to approve new ones. The clean architecture and disciplined process turned experimentation from risky to routine.
+The bigger cultural win: because the business saw that experiments could be safely retired, they were more willing to approve new ones. The architecture and the process turned experimentation from risky to routine.
 
 ---
 
-## Story 6: Cross-Org Leadership — Mentoring to Staff Level
+## Story 5: Cross-Org Leadership — Mentoring to Staff Level
 
 **Anchor:** Cross-Org Platform & API Leadership · **LPs:** Hire & Develop The Best, Earn Trust
 **Best for:** All companies
@@ -401,7 +363,7 @@ Over time, multiple engineers I mentored expanded their scope. One went from exe
 
 ---
 
-## Story 7: Cross-Org Leadership — Driving Consensus via RFCs
+## Story 6: Cross-Org Leadership — Driving Consensus via RFCs
 
 **Anchor:** Cross-Org Platform & API Leadership · **LPs:** Disagree and Commit, Earn Trust
 **Best for:** Circle, Stripe, Netflix
@@ -437,114 +399,7 @@ The standards were adopted and are still in use. More importantly, the process b
 
 ---
 
-## Story 8: Applause — Auth Modernization with Minimal Downtime
-
-**Anchor:** Authentication & Identity Modernization · **LPs:** Delivers Results, Ownership, Dive Deep
-**Best for:** Coinbase, Figma
-
-### STAR Spoken-Style
-
-**Situation:** At Applause, the authentication system was home-grown — a custom auth layer that had been bolted onto different products over the years. Internal tools, an enterprise partner platform, and a large external community all had separate login experiences with different auth mechanisms. Social login and mobile login weren't supported. The system was fragile and a security risk.
-
-**Task:** I was tasked with leading the migration to a modern Keycloak-based SSO platform that would unify authentication across all products. The critical constraint was minimal downtime — the external community had thousands of active users, and the partner platform had contractual SLAs.
-
-**Action:** I designed a phased migration. First, I stood up Keycloak and configured it to support the various identity providers we needed: internal LDAP, social login (Google, Facebook), and mobile auth. Then I implemented a dual-auth bridge — the existing auth system and Keycloak ran in parallel, with sessions accepted from both. This let us migrate products one at a time without a flag day. I migrated the internal tools first (lowest risk), then the partner platform (medium risk, but we could coordinate with partners), then the external community (highest risk, most users). For each migration, I wrote runbooks and rollback procedures. I worked closely with the Angular, Node.js, and Java monolith teams to update their auth integrations.
-
-**Result:** The migration was completed with minimal downtime — no SLA violations, no mass session invalidations, no customer-facing auth outages. All products were unified under a single SSO with social and mobile login support. The dual-auth bridge approach was key — it gave us a safe, incremental migration path instead of a risky big-bang cutover.
-
-### Bullet Recap
-
-- **S:** Home-grown auth across multiple products; separate login experiences; no social/mobile login; fragile and security risk
-- **T:** Migrate to Keycloak SSO across internal tools, partner platform, external community; minimal downtime; contractual SLAs
-- **A:** Phased migration: Keycloak + multi-provider setup; dual-auth bridge for parallel operation; migrated low→medium→high risk sequentially; runbooks + rollback procedures; coordinated with Angular/Node.js/Java teams
-- **R:** Completed with minimal downtime; zero SLA violations; unified SSO with social/mobile login; dual-auth bridge enabled safe incremental migration
-
-### Long-Form Narrative
-
-Authentication migrations are among the riskiest infrastructure changes you can make. At Applause, the situation was particularly complex because the home-grown auth system was deeply embedded in multiple products — internal tools, an enterprise partner platform, and a large external community. Each had its own login flow, its own session management, its own user store.
-
-My approach was to avoid the big-bang cutover entirely. I designed a dual-auth bridge: Keycloak and the legacy auth system ran in parallel, and the session validation layer accepted tokens from both. This meant I could migrate products one at a time. A user who was migrated to Keycloak would get the new login experience. A user who hadn't been migrated yet would continue using the legacy flow. Both could coexist.
-
-I migrated in order of risk: internal tools first (if something broke, only employees were affected), then the partner platform (we could coordinate downtime windows with partners), then the external community (the highest user count and least tolerance for disruption). For each phase, I wrote detailed runbooks and rollback procedures — if anything went wrong during a migration window, we could revert to the legacy auth in minutes.
-
-The coordination across teams was substantial. The various products were built on different stacks — Angular frontends, Node.js APIs, Java monoliths — and each needed its auth integration updated. I worked with each team to ensure the transition was smooth and tested.
-
-The result was a unified SSO across all products with social and mobile login support, completed with minimal downtime and zero SLA violations. The dual-auth bridge pattern was the enabler — it turned a scary flag-day migration into a series of small, controllable steps.
-
----
-
-## Story 9: Applause — Event Sourcing / CQRS (Brief Reference)
-
-**Anchor:** Event Sourcing & CQRS Initiative · **LPs:** Invent and Simplify, Think Big
-**Status:** Trimmed — use as brief background, not a full story. Pivot to CarGurus event-driven work (Story 5) for recent examples.
-
-> **One-liner if it comes up:** "At Applause, I introduced event sourcing and CQRS to decouple services that were sharing databases directly. I built the POC, defined the patterns, and ran workshops to help engineers adopt the paradigm. That experience informed how I designed the event-driven architecture at CarGurus — Kafka pipelines, decoupled services, independent deployability."
-
-**When to mention:** Only if they ask specifically about event sourcing, CQRS, or Kafka background. Don't lead with this — it's 7 years old and at Senior scope.
-
----
-
-## Story 10: Toast — Early Engineer Building Everything
-
-**Anchor:** Toast Hypergrowth · **LPs:** Ownership, Bias for Action, Learn and be Curious, Invent and Simplify
-**Best for:** All companies
-
-### Angle Guide
-
-This is one story covering the full early-stage experience: building core services AND the infrastructure and safety nets that made them reliable.
-
-| Question Type | Lead With | Expand On | Skip |
-|---|---|---|---|
-| "Tell me about an early-stage / 0→1 experience" / startup builder | Core services angle | Infrastructure work as evidence of breadth | — |
-| "Tell me about building infrastructure / DevOps / QA" | Infrastructure/safety nets angle | Core services for domain context | — |
-| "Tell me about ownership / going beyond your role" | Infrastructure/safety nets angle (self-directed, not assigned) | Core services to establish credibility | — |
-| "What's the most you've ever worn multiple hats?" | Both angles together — use full arc | — | — |
-
-### STAR Spoken-Style
-
-**Situation:** I joined Toast when it was truly early — the company was growing from its first customers to hundreds of restaurant clients within a few years. The engineering team was small. There was no established architecture, no dedicated DevOps team, and no QA team. Deployments were manual, risky, and infrequent — someone would SSH into servers, pull code, restart services, and hope for the best. Testing was ad-hoc manual spot-checking. Every engineer wore multiple hats.
-
-**Task:** I needed to build core backend services that would become the foundation of the restaurant management platform, while also identifying and closing the infrastructure and quality gaps that would eventually cause a production outage if left unaddressed — even though nobody assigned me that second part.
-
-**Action:**
-
-*Core services/startup builder angle:* I designed and implemented the foundational services — the Order Service (the heart of a restaurant platform: every transaction flows through it), the Labor Service (scheduling, time tracking), and shared APIs that other features built on top of. These had to be reliable from day one because restaurants depended on them in real time: a bug in the Order Service means a restaurant can't process payments; a bug in Labor means employees don't get paid correctly. My technology choices were deliberately pragmatic — for services that didn't yet need to be microservices, I kept them monolithic. Premature decomposition would have been a tax on a small team. I focused on clean interfaces so that when the time came to split services, the boundaries were already clear.
-
-*Infrastructure/safety nets angle:* I saw the deployment and testing gap as the highest-leverage problem I could solve. I built an AWS-based CI/CD pipeline: automated builds triggered by git commits, a staging environment mirroring production, automated test suites against staging, and a streamlined deployment process replacing the SSH-and-pray approach. For testing, I focused on critical business paths — order processing, payment capture, labor calculations — rather than chasing coverage for its own sake. I also created soft infrastructure: deployment checklists, rollback procedures, a simple runbook for common failure modes. These turned tribal knowledge into repeatable process.
-
-**Result:** The services I built processed thousands of orders daily as Toast grew. The deployment pipelines were used for over a year until a dedicated DevOps team was hired. The testing framework caught several critical bugs that would have impacted restaurants in production. When Toast eventually hired dedicated DevOps and QA engineers, they inherited a working foundation rather than starting from zero. The lesson I carry forward: in hypergrowth, the best architecture is the simplest one that works today and doesn't prevent you from evolving tomorrow — and the engineer who builds the safety nets is as valuable as the engineer who builds the features.
-
-### Bullet Recap
-
-- **S:** Very early-stage Toast; first customers to hundreds; no DevOps, no QA; manual deploys; ad-hoc testing; small team, everyone wore multiple hats
-- **T:** Build foundational backend services + identify and close infrastructure/quality gaps (second part self-directed)
-- **A (core services):** Designed Order Service, Labor Service, shared APIs; pragmatic monolith-first where appropriate; clean interfaces for future decomposition; reliability-first given real-time restaurant dependency
-- **A (infrastructure/safety nets):** Built AWS CI/CD pipeline (automated build → staging → deploy); integration testing framework for critical paths (order, payment, labor); deployment checklists + rollback procedures + runbooks
-- **R:** Services became platform backbone; thousands of orders/day; pipelines used until dedicated DevOps team hired; testing caught critical pre-production bugs; dedicated teams inherited working foundation
-
-### Long-Form Narrative
-
-Toast was a formative experience. I joined when the company was truly early — a handful of engineers, a handful of restaurant customers, and a massive vision for what the platform could become. There was no established architecture, no DevOps team, no QA team. If something needed to be built, you built it.
-
-I focused first on the core domain: the Order Service (the heart of a restaurant platform — every transaction flows through it), the Labor Service (scheduling, time tracking), and shared APIs that other features would depend on. These had to work reliably from day one. A bug in the Order Service means a restaurant can't process payments. A bug in Labor means employees don't get paid correctly. The stakes were real even at small scale.
-
-My technology choices were deliberately pragmatic. For services that didn't yet need to be microservices, I kept them monolithic. Premature decomposition would have been a tax on a small team moving fast. I focused on clean interfaces so that when the time came to split services (and it did), the boundaries were already clear.
-
-The second chapter was infrastructure. Deploying code at early Toast was a manual, anxiety-inducing process — someone would SSH into servers, pull the latest code, restart services, and hope for the best. Testing was whatever the developer remembered to check manually. For a platform that restaurants depended on for every transaction, this was a ticking time bomb.
-
-Nobody asked me to fix this — I just saw it as the highest-leverage problem I could solve. I built a CI/CD pipeline on AWS: automated builds triggered by git commits, a staging environment that mirrored production, automated test suites that ran against staging, and a streamlined deployment process that replaced the SSH-and-pray approach.
-
-The testing framework focused on critical business paths. I didn't try to achieve 100% coverage — that would have been premature for a fast-moving startup. Instead, I identified the paths where a bug would cause real business harm (order processing, payment capture, labor calculations) and built integration tests for those. The tests ran on every build, so developers got fast feedback.
-
-I also created soft infrastructure: deployment checklists, rollback procedures, a simple runbook for common failure modes. These were documents, not code, but they were just as important — they turned tribal knowledge into repeatable process.
-
-The services I built processed thousands of orders daily as Toast grew. The deployment pipelines I created were used for over a year until a dedicated DevOps team was hired. The testing framework caught several critical bugs before they reached restaurants. When Toast hired dedicated DevOps and QA engineers, they didn't start from zero — they inherited working pipelines, a test framework, and documented procedures, then improved everything significantly.
-
-The experience reinforced two beliefs I still hold: in hypergrowth, the best architecture is the simplest one that works today and doesn't prevent you from evolving tomorrow; and the engineer who builds the safety nets is as valuable as the engineer who builds the features.
-
----
-
-## Story 11: GenAI Engine — Architecture & Experimentation Platform
+## Story 7: GenAI Engine — Architecture & Experimentation Platform
 
 **Anchor:** GenAI Decision Engine (Independent) · **LPs:** Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards
 **Best for:** Netflix, Stripe, Coinbase
@@ -559,10 +414,17 @@ This is one story covering two phases: designing the hybrid architecture, then b
 | "How do you measure and improve a system?" / data-driven | Measurement/optimization angle | Architecture for context on what's being optimized | — |
 | "Tell me about an AI/LLM project" | Architecture angle (hybrid design is the interesting part) | Prompt Lab to show you went beyond building to optimizing | — |
 | "Insists on highest standards / you weren't satisfied" | Prompt Lab angle (moved from intuition to data-driven) | Architecture to show the scope of what you were optimizing | — |
+| "Learn and be curious" / self-directed growth | Initiative framing (see below) | Architecture + Prompt Lab as evidence of depth | — |
+
+### Initiative Framing (for "why did you build this?" / "learn and be curious" questions)
+
+> "AI was becoming central to our industry, and I didn't have the opportunity to build AI systems at work at the time. Instead of waiting, I built one myself — a full GenAI decision engine as an independent project. I wanted to understand not just how to call an LLM API, but how to architect a production-grade system around it: routing, cost optimization, explainability, and systematic evaluation. That self-directed investment is what gave me the foundation to later lead the MCP server work and propose the AI cross-domain validation initiative at CarGurus."
+
+**Key signal:** You didn't wait for permission. You invested in yourself, and that investment directly led to real work impact (Story 3 → Story 9).
 
 ### STAR Spoken-Style
 
-**Situation:** I was building an independent project — a GenAI decision engine. I hit two fundamental challenges. First, a design tension: pure LLM-based decisions were too slow and expensive for real-time use cases, but pure rule-based systems couldn't handle the nuance that made GenAI valuable. Second, an optimization problem: once the system was built, it had dozens of tunable parameters — prompts, model selection, routing thresholds, policy weights — and I was optimizing by intuition and spot-checking manually. That doesn't scale and doesn't give you confidence you're not regressing on other cases.
+**Situation:** AI was becoming central to our industry, but I didn't have the opportunity to build AI systems at work. Rather than wait, I built a GenAI decision engine as an independent project to develop real depth in the space. I hit two fundamental challenges. First, a design tension: pure LLM-based decisions were too slow and expensive for real-time use cases, but pure rule-based systems couldn't handle the nuance that made GenAI valuable. Second, an optimization problem: once the system was built, it had dozens of tunable parameters — prompts, model selection, routing thresholds, policy weights — and I was optimizing by intuition and spot-checking manually. That doesn't scale and doesn't give you confidence you're not regressing on other cases.
 
 **Task:** I needed to design a hybrid inference architecture that was both real-time capable and LLM-quality for complex cases, and then build a systematic experimentation platform to optimize it — moving from "it seems better" to "here's the data showing it's better."
 
@@ -606,7 +468,7 @@ The platform revealed insights I wouldn't have found manually. Bayesian optimiza
 
 ---
 
-## Story 12: Disagree and Commit — Pushing Back on Architecture
+## Story 8: Disagree and Commit — Pushing Back on Architecture
 
 **Anchor:** Cross-cutting · **LPs:** Have Backbone, Disagree and Commit
 **Best for:** All companies
@@ -644,45 +506,7 @@ On a different decision later in the project — a disagreement about testing st
 
 ---
 
-## Story 13: Failure & Learning — A Decision That Didn't Work Out
-
-**Anchor:** Cross-cutting · **LPs:** Are Right A Lot, Learn and be Curious
-**Best for:** All companies
-
-### STAR Spoken-Style
-
-**Situation:** Early in the digital shopping project at CarGurus, I made an architectural decision to use a particular caching strategy — aggressive in-memory caching with long TTLs — to optimize the product listing API. My reasoning was sound in isolation: the data was mostly static, and caching would dramatically reduce database load.
-
-**Task:** The challenge became apparent when the product team started running frequent inventory and pricing experiments. The long cache TTLs meant experiment changes weren't reflected to users for minutes, sometimes longer. PMs were frustrated because their A/B tests showed confusing data — different users were seeing different versions depending on when their cache expired.
-
-**Action:** Once I understood the problem, I had to admit that my original decision was wrong for the context. I was optimizing for the static case but hadn't adequately considered the experimentation use case that was becoming central to the product strategy. I redesigned the caching layer with a shorter TTL for experiment-sensitive data and implemented cache invalidation tied to experiment configuration changes. I also added versioned cache keys so that when an experiment changed, the old cached data was automatically bypassed. I documented the decision retrospectively: what I assumed, what I missed, and what the better approach was — and shared it with the team so others could learn from it.
-
-**Result:** The revised caching strategy resolved the experimentation issues. PMs got consistent A/B test data, and the performance impact was minimal because I was surgical about which data got shorter TTLs. The bigger result was the learning: I now always ask "what's the mutation pattern?" before designing a caching strategy, not just "what's the read pattern?" The retrospective document I shared was referenced by other engineers facing similar caching decisions.
-
-### Bullet Recap
-
-- **S:** Chose aggressive long-TTL caching for product listing API; seemed sound for mostly-static data
-- **T:** Problem emerged when product team ran frequent experiments; stale cache caused confusing A/B test data
-- **A:** Acknowledged the decision was wrong for the context; redesigned with shorter TTLs for experiment-sensitive data; cache invalidation tied to experiment config changes; versioned cache keys; wrote and shared retrospective
-- **R:** Experimentation issues resolved; minimal performance impact; learned to always consider mutation patterns in caching design; retrospective referenced by other engineers
-
-### Long-Form Narrative
-
-This is a story about a decision I got wrong and what I learned from it. During the digital shopping project, I designed the caching layer for the product listing API. The data was predominantly static — vehicle inventory that updated in batch feeds, pricing that changed infrequently. I chose aggressive in-memory caching with long TTLs (15-30 minutes). The performance gains were significant: database load dropped, response times improved, and the service handled higher throughput.
-
-The problem surfaced weeks later when the product team began running inventory and pricing experiments more frequently. They'd change experiment configurations expecting users to see the new treatment immediately, but the long cache TTLs meant some users continued seeing stale data for minutes. Their A/B test metrics were noisy and confusing — differences between test and control groups were partially artifacts of cache staleness, not actual treatment effects.
-
-When I dug into the complaints, I realized the root cause was my design decision. I'd optimized for the dominant access pattern (static reads) without adequately considering the emerging mutation pattern (frequent experiment changes). In hindsight, I should have asked the product team about their planned experimentation cadence before designing the cache.
-
-I owned the mistake and redesigned the caching layer. The fix was surgical: data that was sensitive to experiment configuration got shorter TTLs and cache invalidation tied to experiment change events. I also introduced versioned cache keys — when an experiment configuration changed, the version incremented, and the old cache entries were automatically bypassed without needing explicit invalidation.
-
-The performance impact was minimal because most data was still long-TTL cached — only experiment-sensitive fields used the shorter TTLs. The PMs got consistent A/B data, and the system was designed to handle frequent experiment changes gracefully.
-
-I wrote a retrospective documenting what I assumed, what I missed, and what the better approach was. I shared it with the engineering team not to self-flagellate, but because I thought the lesson was generalizable: when designing caching, ask about mutation patterns, not just read patterns. Other engineers referenced that document when making their own caching decisions.
-
----
-
-## Story 14: AI-Powered Cross-Domain Validation (In Progress)
+## Story 9: AI-Powered Cross-Domain Validation (In Progress)
 
 **Anchor:** VDP Cross-Team Validation · **LPs:** Invent and Simplify, Think Big, Customer Obsession, Bias for Action
 **Best for:** Coinbase (AI-first signal), all companies (cross-org, initiative-driven)
@@ -720,7 +544,7 @@ I wrote a retrospective documenting what I assumed, what I missed, and what the 
 ```
 Story 2 (Parity Testing)     → compared old vs new responses at 50% traffic
 Story 3 (MCP Server)         → built tool-calling server for AI integration
-Story 14 (THIS)              → combines both: AI agent validates cross-domain
+Story 9 (THIS)               → combines both: AI agent validates cross-domain
                                consistency using MCP tools + parity patterns
 ```
 
@@ -731,32 +555,149 @@ Story 14 (THIS)              → combines both: AI agent validates cross-domain
 
 ---
 
+# Section B: Brief References
+
+---
+
+## Story 10: DGS Subgraph — GraphQL Federation & Performance (Brief Reference)
+
+**Anchor:** Netflix DGS Subgraph · **LPs:** Ownership, Learn and be Curious, Dive Deep
+**Status:** Trimmed — use as supporting detail, not a standalone story. Pivot to Story 1 (API Modernization) for cross-org platform work, or Story 9 (AI Cross-Domain Validation) for technical curiosity.
+
+> **One-liner if it comes up:** "I own the Delivery Lookup service at CarGurus. When we stood up a federated GraphQL gateway for our AI chatbot platform, I learned the Netflix DGS framework from scratch, designed a federation-friendly schema with batch data loaders to prevent N+1 issues, and solved a JVM cold-start problem by building a warmup routine that exercises the full resolution stack before the service accepts traffic. The patterns were adopted by other teams joining the federation."
+
+> **If they dig into JVM performance:** "Newly deployed instances showed p99 3-5x higher than steady state. I profiled the JVM and found two root causes: JIT hadn't compiled the hot paths yet, and DGS does lazy initialization of query parsing on first use. I built a warmup routine that sends synthetic GraphQL queries through the full pipeline — data loaders, cache, serialization — before the readiness probe passes. Cold-start spikes eliminated entirely."
+
+**When to mention:** "Learned something new quickly," "dive deep / root cause analysis," or "how do you ensure performance in production." Not a lead story — use as a follow-up example or supporting detail.
+
+---
+
+## Story 11: Applause — Auth Modernization (Brief Reference)
+
+**Anchor:** Authentication & Identity Modernization · **LPs:** Delivers Results, Ownership, Dive Deep
+**Status:** Trimmed — use for HashiCorp/IBM (IAM domain) or any identity/auth questions. Not a lead story for other companies.
+
+> **30-second version:** "At Applause, I led the migration from a home-grown auth system to Keycloak-based SSO — unified authentication across internal tools, an enterprise partner platform, and a large external community with OAuth 2.0, SAML, and social login. The key was a dual-auth bridge: legacy and Keycloak ran in parallel so I could migrate products one at a time, ordered by risk — internal first, partners second, external community last. Zero SLA violations, zero customer-facing auth outages."
+
+> **If they dig into technical approach:** "I built custom token validation and RBAC plugins for the Kong API gateway in Python — per-request JWT validation against Keycloak, token refresh handling, and fine-grained permission checks at the gateway layer. Also deployed service mesh (Linkerd on K8s) with mTLS for service-to-service trust. Coordinated the migration across Angular, Node.js, and Java teams."
+
+> **If they ask about the dual-auth bridge pattern:** "Both auth systems accepted sessions simultaneously. A migrated user got Keycloak; a non-migrated user stayed on legacy. No flag day. Each phase had runbooks and rollback procedures — if anything broke, we could revert in minutes."
+
+**When to use:** HashiCorp/IBM interviews (Vault/Boundary = auth infrastructure), "tell me about a risky migration," "identity/security experience." For other companies, mention briefly as background: "I've built auth infrastructure before — Keycloak SSO, API gateway security, service mesh — so I understand what it takes."
+
+---
+
+## Story 12: Applause — Event Sourcing / CQRS (Brief Reference)
+
+**Anchor:** Event Sourcing & CQRS Initiative · **LPs:** Invent and Simplify, Think Big
+**Status:** Trimmed — use as brief background, not a full story. Pivot to CarGurus event-driven work (Story 4) for recent examples.
+
+> **One-liner if it comes up:** "At Applause, I introduced event sourcing and CQRS to decouple services that were sharing databases directly. I built the POC, defined the patterns, and ran workshops to help engineers adopt the paradigm. That experience informed how I designed the event-driven architecture at CarGurus — Kafka pipelines, decoupled services, independent deployability."
+
+**When to mention:** Only if they ask specifically about event sourcing, CQRS, or Kafka background. Don't lead with this — it's 7 years old and at Senior scope.
+
+---
+
+## Story 13: Toast — Early Engineer in Hypergrowth (Brief Reference)
+
+**Anchor:** Toast Hypergrowth · **LPs:** Ownership, Bias for Action, Learn and be Curious
+**Status:** Trimmed — use for "early-stage experience," "wearing multiple hats," or Cherry interviews (startup context). Not a lead story.
+
+> **30-second version:** "I joined Toast when it was very early — small engineering team, no DevOps, no QA. I built the core backend services (Order Service, Labor Service) that became the platform backbone, then saw that the deployment and testing gaps were a ticking time bomb and built the CI/CD pipeline and integration testing framework myself — nobody assigned me that. Pragmatic monolith-first approach, clean interfaces for future decomposition. When Toast hired dedicated DevOps and QA, they inherited a working foundation."
+
+> **If they ask about ownership / going beyond your role:** "The deployment infrastructure wasn't my job — but I saw it as the highest-leverage problem I could solve. Restaurants depended on our system for every transaction. I built the safety nets because nobody else was going to."
+
+> **Key takeaway to quote:** "In hypergrowth, the best architecture is the simplest one that works today and doesn't prevent you from evolving tomorrow."
+
+**When to use:** Cherry HM call (startup builder angle), "tell me about early-stage experience," "wearing multiple hats." For Coinbase/HashiCorp, mention briefly as background: "I was an early engineer at Toast — built core services and infrastructure from scratch during hypergrowth."
+
+---
+
+# Section C: LP-Specific Stories
+
+---
+
+## Story 14: Failure & Learning — TODO: NEEDS REAL STORY
+
+**Anchor:** Cross-cutting · **LPs:** Are Right A Lot, Learn and be Curious
+**Best for:** All companies
+**Status:** ⚠️ PLACEHOLDER — previous content was fabricated. Need a real failure story before interviews. Think about: a technical decision that seemed right but wasn't, underestimated complexity, didn't push back hard enough, or moved too fast.
+
+### STAR Spoken-Style
+
+**Situation:** Early in the digital shopping project at CarGurus, I made an architectural decision to use a particular caching strategy — aggressive in-memory caching with long TTLs — to optimize the product listing API. My reasoning was sound in isolation: the data was mostly static, and caching would dramatically reduce database load.
+
+**Task:** The challenge became apparent when the product team started running frequent inventory and pricing experiments. The long cache TTLs meant experiment changes weren't reflected to users for minutes, sometimes longer. PMs were frustrated because their A/B tests showed confusing data — different users were seeing different versions depending on when their cache expired.
+
+**Action:** Once I understood the problem, I had to admit that my original decision was wrong for the context. I was optimizing for the static case but hadn't adequately considered the experimentation use case that was becoming central to the product strategy. I redesigned the caching layer with a shorter TTL for experiment-sensitive data and implemented cache invalidation tied to experiment configuration changes. I also added versioned cache keys so that when an experiment changed, the old cached data was automatically bypassed. I documented the decision retrospectively: what I assumed, what I missed, and what the better approach was — and shared it with the team so others could learn from it.
+
+**Result:** The revised caching strategy resolved the experimentation issues. PMs got consistent A/B test data, and the performance impact was minimal because I was surgical about which data got shorter TTLs. The bigger result was the learning: I now always ask "what's the mutation pattern?" before designing a caching strategy, not just "what's the read pattern?" The retrospective document I shared was referenced by other engineers facing similar caching decisions.
+
+### Bullet Recap
+
+- **S:** Chose aggressive long-TTL caching for product listing API; seemed sound for mostly-static data
+- **T:** Problem emerged when product team ran frequent experiments; stale cache caused confusing A/B test data
+- **A:** Acknowledged the decision was wrong for the context; redesigned with shorter TTLs for experiment-sensitive data; cache invalidation tied to experiment config changes; versioned cache keys; wrote and shared retrospective
+- **R:** Experimentation issues resolved; minimal performance impact; learned to always consider mutation patterns in caching design; retrospective referenced by other engineers
+
+### Long-Form Narrative
+
+This is a story about a decision I got wrong and what I learned from it. During the digital shopping project, I designed the caching layer for the product listing API. The data was predominantly static — vehicle inventory that updated in batch feeds, pricing that changed infrequently. I chose aggressive in-memory caching with long TTLs (15-30 minutes). The performance gains were significant: database load dropped, response times improved, and the service handled higher throughput.
+
+The problem surfaced weeks later when the product team began running inventory and pricing experiments more frequently. They'd change experiment configurations expecting users to see the new treatment immediately, but the long cache TTLs meant some users continued seeing stale data for minutes. Their A/B test metrics were noisy and confusing — differences between test and control groups were partially artifacts of cache staleness, not actual treatment effects.
+
+When I dug into the complaints, I realized the root cause was my design decision. I'd optimized for the dominant access pattern (static reads) without adequately considering the emerging mutation pattern (frequent experiment changes). In hindsight, I should have asked the product team about their planned experimentation cadence before designing the cache.
+
+I owned the mistake and redesigned the caching layer. The fix was surgical: data that was sensitive to experiment configuration got shorter TTLs and cache invalidation tied to experiment change events. I also introduced versioned cache keys — when an experiment configuration changed, the version incremented, and the old cache entries were automatically bypassed without needing explicit invalidation.
+
+The performance impact was minimal because most data was still long-TTL cached — only experiment-sensitive fields used the shorter TTLs. The PMs got consistent A/B data, and the system was designed to handle frequent experiment changes gracefully.
+
+I wrote a retrospective documenting what I assumed, what I missed, and what the better approach was. I shared it with the engineering team not to self-flagellate, but because I thought the lesson was generalizable: when designing caching, ask about mutation patterns, not just read patterns. Other engineers referenced that document when making their own caching decisions.
+
+---
+
+## Story 15: Customer Obsession — TODO: PLACEHOLDER
+
+**Anchor:** Cross-cutting · **LPs:** Customer Obsession
+**Best for:** All companies
+**Status:** ⚠️ PLACEHOLDER — Need a story about making a decision that prioritized the end user/customer over engineering convenience. Think about: responding to dealer/user feedback, changing a technical approach because of customer impact, advocating for user experience in a technical decision.
+
+---
+
+## Story 16: Peer Conflict Resolution — TODO: PLACEHOLDER
+
+**Anchor:** Cross-cutting · **LPs:** Have Backbone, Disagree and Commit
+**Best for:** All companies
+**Status:** ⚠️ PLACEHOLDER — Need a story about disagreeing with a peer (not a senior leader — Story 8 covers that). Think about: disagreeing with another principal engineer on an approach, resolving a technical disagreement between two teams, a time you and a peer had different opinions and how you resolved it.
+
+---
+
 ## LP Quick-Reference Matrix
 
-| Leadership Principle | Stories |
+| LP | Stories |
 |---|---|
-| **Customer Obsession** | 3, 5, 14 |
-| **Ownership** | 1, 4, 5, 8, 10 |
-| **Invent and Simplify** | 2, 9, 10, 11, 14 |
-| **Are Right A Lot** | 5, 13 |
-| **Learn and be Curious** | 4, 10, 11, 13 |
-| **Hire & Develop The Best** | 6 |
-| **Insists on Highest Standards** | 1, 4, 11 |
-| **Think Big** | 1, 9, 11, 14 |
-| **Bias for Action** | 3, 5, 10 |
-| **Dive Deep** | 1, 2, 4, 8 |
-| **Earn Trust** | 1, 3, 6, 7 |
-| **Delivers Results** | 1, 3, 5, 8 |
-| **Have Backbone; Disagree and Commit** | 7, 12 |
+| **Customer Obsession** | 3, 4, 15 (TODO) |
+| **Ownership** | 1, 4, 5, 11, 13 |
+| **Invent and Simplify** | 2, 7, 9, 12 |
+| **Are Right A Lot** | 4, 14 (TODO) |
+| **Learn and be Curious** | 7, 10, 13 |
+| **Hire & Develop The Best** | 5 |
+| **Insists on Highest Standards** | 1, 7 |
+| **Think Big** | 1, 7, 9 |
+| **Bias for Action** | 3, 4, 13 |
+| **Dive Deep** | 1, 2, 10, 11 |
+| **Earn Trust** | 1, 3, 5, 6 |
+| **Delivers Results** | 1, 3, 4, 11 |
+| **Have Backbone; Disagree and Commit** | 6, 8, 16 (TODO) |
 
 ## Company Quick-Reference Matrix
 
 | Company | Best Stories |
 |---|---|
-| **Coinbase** | 1, 2, 3, 5, 8, 9, 11, 14 |
-| **HashiCorp/IBM** | 1, 2, 8, 9, 10 |
-| **NVIDIA** | 1, 2, 4, 11 |
-| **Cherry** | 1, 5, 8, 10 |
-| **Stripe** | 1, 2, 4, 5, 7, 9, 11 |
-| **Netflix** | 1, 4, 7, 11 |
-| **All** | 3, 6, 10, 12, 13 |
+| **Coinbase** | 1, 2, 3, 4, 7, 9, 11 |
+| **HashiCorp/IBM** | 1, 2, 11, 12, 13 |
+| **NVIDIA** | 1, 2, 7, 10 |
+| **Cherry** | 1, 4, 11, 13 |
+| **Stripe** | 1, 2, 4, 6, 7, 10 |
+| **Netflix** | 1, 6, 7, 10 |
+| **All** | 3, 5, 8, 13, 14, 15, 16 |
