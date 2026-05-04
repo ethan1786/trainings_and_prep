@@ -6,6 +6,60 @@
 
 ---
 
+## Direct Questions — 30-Second Answers
+
+These aren't STAR questions — they're direct, and you need a prepared crisp answer. Don't ramble.
+
+### About You
+
+**"Tell me your strengths."**
+> "I'm strong at seeing across team boundaries. After working across many product features, I naturally spot systemic problems that no single team owns — and I have the follow-through to turn that into a cross-org initiative. The API modernization at CarGurus started that way: I identified the bottleneck, pitched the solution, led 10 teams through it, and set the architectural standard for the org."
+
+**"Tell me your weaknesses."**
+> "I tend to dive deep into the technical solution before fully validating the product context. I had a case where I designed an aggressive caching strategy that was technically sound but didn't account for how frequently the product team was running experiments — it caused stale data in A/B tests. Since then, I always ask 'what's the mutation pattern?' before designing caching or any data strategy. I catch myself and ask the product question first now."
+
+**"Tell me about yourself." / "Walk me through your background."**
+> "I'm a Staff/Principal backend engineer with 13 years of experience. Three chapters: I was an early engineer at Toast during hypergrowth — built core services, infrastructure, the whole stack from scratch. Then at Applause I led the auth modernization — Keycloak SSO, API gateway security, service mesh. For the last 6 years at CarGurus I've been the technical lead for the highest-traffic platform — redesigned the API serving millions of daily requests, 5x latency improvement, drove architecture standards across 10+ teams. Most recently I've been focused on AI platform infrastructure — MCP servers, agent backends, and using AI to automate cross-team collaboration."
+
+**"Why are you leaving your current role?"**
+> "I've been at CarGurus for 6 years and I've had a great run — led the biggest platform initiatives, set architecture standards, mentored engineers. But I've outgrown the problems. I want to build at higher stakes and larger scale, and [company name]'s challenges are exactly the kind of work I'm looking for."
+
+**"Why this company?"**
+- **Coinbase:** "Financial platform infrastructure at massive scale. Correctness, reliability, and observability are non-negotiable — that's exactly where my experience maps. Plus you're going AI-first, and I've been building AI platform backends."
+- **HashiCorp/IBM:** "I use Terraform daily, and my auth background — Keycloak, Kong, service mesh — maps directly to Vault and Boundary. IBM's backing gives the team stability to invest long-term."
+- **Cherry:** "Early-stage, full-stack ownership, building real infrastructure from scratch — I did this at Toast and it's where I thrive."
+- **NVIDIA:** "The platform work — distributed systems, data pipelines, APIs across engineering orgs — is my core strength. My academic background in control systems and sensor processing is a bonus fit."
+
+### Career & Growth
+
+**"Why haven't you been promoted?" / "Why are you still at the same level?"**
+> "My title is Principal at CarGurus, which maps to Staff at most FAANG-scale companies. I've been operating at that level for years — driving cross-org initiatives, setting architecture standards, leading 10+ teams through a major platform redesign. I'm looking for a company where the scope matches what I'm already doing."
+
+**"Have you ever been a people manager? Would you want to?"**
+> "There were opportunities to grow into the management track. I considered it seriously, but I felt my strength was in technical leadership — and my manager agreed. That said, I do a lot of the work that overlaps with management: mentoring engineers toward promotion, running cross-team alignment, giving hard feedback, driving consensus through RFCs. I'm not allergic to the people side — I actively seek it."
+
+**"Where do you see yourself in 5 years?"**
+> "Leading technical direction for a critical platform at scale — the person teams come to when there's a hard architectural problem that crosses org boundaries. Whether that's as a Staff+ IC or a technical director depends on where I can have the most impact."
+
+**"What does your first 90 days look like?"**
+> "First 30 days: learn the system. Read the code, understand the architecture, build relationships with the teams I'll be working with. Ship something small to build credibility. Days 30-60: identify the highest-leverage improvement I can drive — usually a reliability or correctness gap that's been accepted as normal. Days 60-90: propose the fix through a design doc or RFC, get buy-in, start executing. I don't come in with a pre-built agenda — I come in with a process for finding the right agenda."
+
+### Situational
+
+**"How do you handle disagreements with your manager?"**
+> "I present my perspective with data, not just opinion. If we still disagree, I ask what would change their mind — that usually reveals we're optimizing for different things. Once the decision is made, I commit fully. I had a case where a senior leader proposed a technology I disagreed with — I prepared a 5-dimension comparison, presented it respectfully, and the group went with my recommendation. But on a separate decision where the group went the other direction, I committed completely."
+
+**"How do you prioritize when everything is urgent?"**
+> "I ask: what's the blast radius if this doesn't get done? Correctness issues (money could be wrong) beat reliability issues (system could go down) beat performance issues (system is slow) beat feature work. For the API modernization, I prioritized the parity testing framework before the performance work — getting the answers right mattered more than getting them fast."
+
+**"How do you handle ambiguity?"**
+> "I start building. Not the final solution, but something concrete that forces clarity. On the MCP server project, requirements were shifting weekly. I built a modular architecture in the first sprint that gave PMs something to demo and gave me feedback on what actually mattered. Ambiguity resolves faster when people can react to something real than when they're debating abstractions."
+
+**"Tell me about a time you had to say no."**
+> "I don't say no — I say 'here's what that costs.' On the MCP project, a PM wanted a new capability that would require significant rework. Instead of refusing, I said: 'We can do this in two days for the demo, but it won't be production-safe. Here's the alternative that gets you 80% of the value and stays on the production path.' They chose the alternative. Transparent tradeoffs, not binary yes/no."
+
+---
+
 ## Staff+ Vocabulary — Drop These Naturally
 
 These are the terms FAANG interviewers listen for. Don't force them — weave them into your stories where they naturally fit.

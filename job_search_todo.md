@@ -21,7 +21,7 @@
 | Date | Event |
 |---|---|
 | **Mon May 4** | HashiCorp/IBM recruiter call (11 AM), Coinbase HR call with Kael (2:30 PM) |
-| **Sun May 11** | Cherry HM call with Tim |
+| **Mon May 11** | Cherry HM call with Tim |
 | **~May 14-15** | Cherry coding round (if HM goes well — low-stakes warmup before Coinbase) |
 | **~May 21-22** | **Coinbase Virtual On-Site (Wed/Thu preferred)** |
 | **May 23-25** | Memorial weekend — travel to in-laws, no interviews |
@@ -37,7 +37,7 @@
 - [ ] Skim Cherry HM prep doc before May 11
 
 ### Week of May 11 — Cherry HM + Coding/System Design Shift
-- [ ] **Sun May 11: Cherry HM call with Tim**
+- [ ] **Mon May 11: Cherry HM call with Tim**
 - [ ] If HM goes well, schedule Cherry coding for May 14-15
 - [ ] LC grind: multi-map consistency (432, 380, 895), state machines, Coinbase OA patterns
 - [ ] System design practice: Payment/Settlement System (45 min timed)
@@ -99,8 +99,8 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | Company | Status | Next Action | When |
 |---|---|---|---|
 | **Coinbase** | OA passed ✅ | HR call (Kael) → schedule VO for week of 5/18 | **Mon May 4, 2:30 PM** |
-| **HashiCorp/IBM** | Recruiter reached out ✅ | HR/recruiter call | **Mon May 4, 11 AM** |
-| **Cherry** | HR done, resume sent | HM call with Tim | **Sun May 11** |
+| **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
+| **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
 | **NVIDIA** | Passed HR filter, with HM | Follow up with Eleza: Fleet Mgmt update + Physical AI Tooling (JR2014111, remote, Principal) | **Tue May 6** |
 | **Twilio** | Applied ✅ | Waiting | — |
 | **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
@@ -116,7 +116,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | Done ✅ | Done ✅ | Inbound | Director of Eng + HR | **HM call May 11** |
 | **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Yes | Cold | Applied — waiting |
 | **Elastic** | Principal | Principal Java Eng II, Security - Elasticsearch | Done ✅ | — | Yes | Cold | Applied — waiting |
-| **HashiCorp/IBM** | Staff | Staff SWE, HashiCorp Secure (Vault/Boundary) | Done ✅ | — | Yes | Recruiter ✅ | **HR call Mon May 4** |
+| **HashiCorp/IBM** | Staff | Staff SWE, HashiCorp Secure (Vault/Boundary) | Done ✅ | — | Yes | Recruiter ✅ | **HR done — HM call next** |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting (slow process) |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **On hold — mass layoffs** |
 | **Netflix** | L5 | Backend/Platform | Done | — | Yes (cold) | — | Applied cold — waiting |
