@@ -101,7 +101,19 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Coinbase** | OA passed ✅ | HR call (Kael) → schedule VO for week of 5/18 | **Mon May 4, 2:30 PM** |
 | **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
-| **NVIDIA** | Passed HR filter, with HM | Follow up with Eleza: Fleet Mgmt update + Physical AI Tooling (JR2014111, remote, Principal) | **Tue May 6** |
+| **NVIDIA** | Passed HR filter, with HM | Send follow-up email to Eleza (see draft below) | **Tue May 5 midday** |
+
+**NVIDIA follow-up email draft (send Tue May 5 midday):**
+> Hi Eleza,
+>
+> Hope you're doing well! Just wanted to check in on the Lead SWE - Fleet Management role — any update from the hiring manager?
+>
+> I also came across the Principal SWE - Physical AI Tooling role (JR2014111, remote) and think it could be a strong fit. The core of the role — distributed backend systems, high-performance data pipelines, platform APIs across engineering orgs — maps closely to what I've been doing for the past 13 years. I also have an academic background in control systems (undergrad) and sensor processing / neural networks (MS thesis research), which aligns with the AV/robotics domain.
+>
+> Happy to share more context on either role. Thanks again!
+>
+> Best,
+> Yifei
 | **Twilio** | Applied ✅ | Waiting | — |
 | **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
 
