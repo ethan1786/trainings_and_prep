@@ -98,22 +98,12 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Status | Next Action | When |
 |---|---|---|---|
-| **Coinbase** | OA passed ✅ | HR call (Kael) → schedule VO for week of 5/18 | **Mon May 4, 2:30 PM** |
+| **Coinbase** | VO scheduling, 14% layoff announced | Check if Kael replies by Fri 5/9 — if silent, send neutral follow-up | **Fri May 9** |
 | **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
-| **NVIDIA** | Passed HR filter, with HM | Send follow-up email to Eleza (see draft below) | **Tue May 5 midday** |
-
-**NVIDIA follow-up email draft (send Tue May 5 midday):**
-> Hi Eleza,
->
-> Hope you're doing well! Just wanted to check in on the Lead SWE - Fleet Management role — any update from the hiring manager?
->
-> I also came across the Principal SWE - Physical AI Tooling role (JR2014111, remote) and think it could be a strong fit. The core of the role — distributed backend systems, high-performance data pipelines, platform APIs across engineering orgs — maps closely to what I've been doing for the past 13 years. I also have an academic background in control systems (undergrad) and sensor processing / neural networks (MS thesis research), which aligns with the AV/robotics domain.
->
-> Happy to share more context on either role. Thanks again!
->
-> Best,
-> Yifei
+| **NVIDIA** | 2 roles forwarded to HM | Eleza forwarded resume + questionnaire to hiring teams; waiting | — |
+| **DoorDash** | Applied ✅ | Staff SWE, Security Engineering (cold) | Applied May 5 |
+| **OpenAI** | Applied ✅ | Principal SWE, Infrastructure Security (cold) | Applied May 5 |
 | **Twilio** | Applied ✅ | Waiting | — |
 | **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
 
@@ -124,7 +114,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | Company | Target Level | Role Focus | Resume | Prep Doc | Applied | Referral/Contact | Status |
 |---|---|---|---|---|---|---|---|
 | **Coinbase** | Staff | Platform Backend (x3) | Done ✅ | Done ✅ | Yes | Recruiter ✅ | **OA passed — scheduling on-site** |
-| **NVIDIA** | Senior (Staff-adjacent) | Lead SWE, Fleet Mgmt - DGX Cloud | Done ✅ | — | Yes | Sourcer responded ✅ | **Screening questions answered — waiting HM** |
+| **NVIDIA** | Senior + Principal | Lead SWE Fleet Mgmt + Principal Physical AI Tooling | Done ✅ | — | Yes (x2) | Sourcer responded ✅ | **Both roles forwarded to hiring teams** |
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | Done ✅ | Done ✅ | Inbound | Director of Eng + HR | **HM call May 11** |
 | **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Yes | Cold | Applied — waiting |
 | **Elastic** | Principal | Principal Java Eng II, Security - Elasticsearch | Done ✅ | — | Yes | Cold | Applied — waiting |
@@ -148,7 +138,9 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Confluent** | Staff, Flink CP | Dead | 4 connections + InMail, no response |
 | **GitHub** | Principal, Core Platform | Dead | Cold app, no response |
 | **Figma** | Staff, DevEx/Distributed/ProdEng | Dead | 3 cold apps, no response |
-| **OpenAI** | — | Dead | No remote platform fit |
+| **OpenAI** | Principal | Principal SWE, Infrastructure Security (remote) | Done ✅ | — | Yes | Cold (Vishal as backup) | **Applied May 5** |
+| **DoorDash** | Staff | Staff SWE, Security Engineering (remote) | Done ✅ | — | Yes | Cold | **Applied May 5** |
+| **OpenAI** | — (prev) | Dead (prev) | Retried with InfraSec Principal (remote) ✅ |
 | **Datadog** | Staff (cold) | Rejected | Skip — NYC in-office, no connection |
 | **Snap, Palantir, Plaid** | — | Skipped | No remote roles |
 | **Discord, Vercel, Ramp/Juno** | — | Skipped | Stack mismatch (Python/TypeScript) |

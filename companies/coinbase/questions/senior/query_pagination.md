@@ -187,3 +187,107 @@ fetchPage(cursor=6) -> data=[25],       nextCursor=-1, prevCursor=3
 - **Connect to SQL:** "Each `set*` method maps to a WHERE clause. `setTimeRange` maps to `time BETWEEN :start AND :end`. In production, I'd generate a parameterized SQL query from the filters rather than scanning a list."
 - **Connect to Coinbase domain:** This is literally the Coinbase transaction history API. Users query their BTC/ETH/USD trades filtered by date range, currency pair, and amount. Pagination is essential — a user with 5 years of daily trades has thousands of rows.
 - **Observability:** "In production I'd emit a metric on the filter combination being used — if 90% of queries are `userId + timeRange`, that drives index design and caching strategy."
+
+---
+
+## Production Architecture (Discussion Points)
+
+### Offset vs Keyset vs Snapshot — When to Use Each
+
+| Approach | Mechanism | Best For | Tradeoff |
+|---|---|---|---|
+| Offset | `SKIP n LIMIT m` | Interview implementation | Unstable under writes, O(offset) per page |
+| Keyset (true cursor) | `WHERE id > :lastId LIMIT m` | Real-time feed, infinite scroll | Stable, O(log N) with index, can't jump to arbitrary page |
+| Snapshot | Cache filtered results, slice | Reporting, exports, admin dashboards | Stable, but stale + memory cost, requires server state |
+
+Keyset requires a monotonically increasing ID (or composite `(timestamp, id)`). This is the correct production answer for Coinbase transaction history — users scroll forward, never jump to "page 47."
+
+Snapshot is correct for reporting — user expects a frozen view while paging through results (e.g., "export my Q1 trades to CSV"). Server holds state keyed by query hash + timestamp.
+
+### Read/Write Separation (CQRS Pattern)
+
+```
+Write path:
+  User places trade → API → Transactional DB (Postgres) → Kafka event published
+
+Read path:
+  Kafka consumer → Dedicated query/reporting services → Optimized read model
+  User queries → Orchestration layer → Routes to correct read service
+```
+
+- Write side: strong consistency in Postgres (trade execution, balance updates)
+- Read side: dedicated reporting services consume Kafka events, maintain their own optimized views
+- Orchestration layer routes queries based on type: user-scoped history → hot cache; cross-user aggregation → reporting service
+- Small lag (seconds) on read side is acceptable for transaction history — users don't need sub-second freshness on page 5
+
+### Caching & Serialization
+
+- **In-process cache** preferred over Redis for hot data — avoids network hop + JSON serialization cost
+- Store as native objects (not JSON) — zero serde on cache hit
+- If Redis is needed (shared state across instances): use sorted sets keyed by `userId`, scored by timestamp — range queries happen in Redis, not after deserializing the whole list
+- For large datasets: protobuf or flat binary over JSON — smaller wire size, faster parse
+- Sharding: partition by `userId` — one user's history fits on a single node, no scatter-gather for the most common query
+
+### When Elasticsearch Is (and Isn't) Needed
+
+**Postgres with composite indexes is sufficient when:**
+- Query patterns are known and stable (userId + time, userId + currency + time)
+- Filters are exact match or range on structured fields
+- 2-3 composite indexes cover 90% of queries
+
+**Elasticsearch earns its complexity when:**
+- Ad-hoc filter combinations across 10+ fields you can't predict
+- Full-text search (transaction memos, notes)
+- Complex aggregations ("total volume by currency by day by region")
+- Compliance/admin: "find all transactions over $10K mentioning 'refund' across all users"
+
+**Tradeoff:** ES adds eventual consistency lag, high ops burden (cluster management, split-brain), and expensive writes (inverted index rebuild). Don't reach for it unless the query patterns genuinely demand it.
+
+### Hot/Warm/Cold Data Tiering
+
+| Tier | Age | Store | Latency | Purpose |
+|---|---|---|---|---|
+| Hot | < 7 days | In-memory cache | Sub-ms | Real-time view, active trading |
+| Warm | 7–90 days | PostgreSQL + read replicas | ~10 ms | Paginated history, keyset cursor |
+| Cold | 90+ days | S3 Parquet (partitioned by user + month) | 200-500 ms | Archive, compliance, exports |
+
+**Transition mechanism:**
+- TTL-based eviction from hot cache after 7 days
+- Cron/Kafka consumer moves rows Postgres → S3 Parquet after 90 days
+- Cold data request: lazy-load from S3, hydrate into temporary result, higher latency acceptable
+- UI shows "Loading older transactions..." for cold tier
+
+### Back-of-Envelope Sizing (Coinbase-scale)
+
+```
+Assumptions:
+  Active users:           10M
+  Avg trades/user/day:    2 (passive majority, power traders skew high)
+  Row size:               ~200 bytes (id, userId, timestamp, currency, amount, fee, status)
+
+Daily volume:   10M × 2 = 20M transactions/day
+Monthly:        600M transactions
+Yearly:         7.2B transactions
+
+Hot tier (in-memory, < 7 days):
+  Rows:     20M/day × 7 = 140M rows
+  Size:     140M × 200B = 28 GB raw
+  With overhead (indexes, object headers): ~50-60 GB
+  → Sharded by userId across 4-8 nodes: 7-15 GB per node ✓
+
+Warm tier (Postgres, 7-90 days):
+  Rows:     20M/day × 83 ≈ 1.7B rows
+  Size:     1.7B × 200B = 340 GB on disk
+  With indexes: ~500-600 GB
+  → Fits on large RDS (io2, 1TB), read replicas for query load
+
+Cold tier (S3 Parquet, 90d+):
+  Year 1:   7.2B × 200B = 1.4 TB raw
+  Compressed (Parquet ~5x): ~280 GB/year on S3
+  → Pennies in storage cost
+  → Query via Athena if compliance needs ad-hoc access
+```
+
+### Interview Sound Bite (15 seconds)
+
+> "I'd tier the data: 7-day hot cache in memory for the real-time view, 90-day warm in Postgres with read replicas for paginated history using keyset cursors, and cold archive in S3 Parquet partitioned by user and month. A user viewing page 1 hits cache; scrolling past 90 days triggers an async fetch from cold storage. The math works out to ~50 GB hot, ~500 GB warm, and under 300 GB/year compressed cold."
