@@ -1,8 +1,64 @@
 # Coinbase — Staff Software Engineer, Backend - Platform
 
-> **Full prep doc.** Read before recruiter screen, hiring manager call, and on-site.
-> Applied to 3 Platform Backend roles: FinHub Tooling, Overseer, Payment Rails.
-> Last updated: April 2026
+> **VO prep doc.** Applied to 3 Platform Backend roles: FinHub Tooling, Overseer, Payment Rails.
+> Last updated: May 4, 2026
+
+---
+
+## Virtual On-Site — Round-by-Round Guide (confirmed from Kael, May 4)
+
+| # | Round | Format | Key Advice from Recruiter |
+|---|---|---|---|
+| 1 | **Coding** | CodeSignal platform | Think out loud, clarify algorithm + edge cases before coding, write test cases, split into files if time |
+| 2 | **System Design** | CodeSignal whiteboard | Clarify requirements, **lead and drive the conversation** — don't let interviewer prompt you |
+| 3 | **Domain Interview** | Whiteboard — present YOUR prior work | Come prepared to showcase a system you designed; expect "how would you build this differently with AI tools?" |
+| 4 | **Behavioral** | Conversational | Staff+ level stories, metrics, cross-org impact |
+
+**Overall strategy:** Only 1 coding round. The other 3 rounds are ambiguous/conversational — your job is to **lead confidently and demonstrate Staff+ judgment**. Don't be passive or wait for prompts.
+
+---
+
+**Round 1 — Coding (CodeSignal):**
+- Platform: CodeSignal — familiarize yourself with the tool before the interview
+- **Think out loud** from the start — clarify your algorithm before writing code
+- Identify and discuss edge cases before implementing
+- Write test cases if time allows
+- Split code into multiple files if complexity warrants it (shows code organization)
+- **Blog intel — VO coding pulls from a DIFFERENT pool than OA.** Top 4 VO coding topics:
+  1. **Pagination** (10 occurrences) — interviewer won't give function signatures, you design OOD
+  2. **Block Mining** (7 occurrences) — **DO NOT use DP/heap, use fee/size greedy sort**
+  3. **Food Delivery** (4 occurrences) — hash dict + binary search + knapsack follow-up
+  4. **Crypto Order/Kafka** (3 occurrences) — state machine + idempotency
+- **Blog intel:** Some interviewers push you toward suboptimal approaches (e.g., DP for Block Mining). State your reasoning clearly, don't cave.
+
+**Round 2 — System Design (CodeSignal whiteboard):**
+- **YOU lead.** Don't wait for the interviewer to ask "have you thought about scale?" — address it proactively
+- Clarify requirements upfront (functional, non-functional, scale, SLAs)
+- Drive the conversation through: requirements → high-level design → deep dive → operational concerns
+- Financial/crypto domain likely: payment system, exchange, real-time price, blockchain indexer
+- Lead with correctness and fault tolerance (financial systems can't be eventually correct)
+- **Blog intel: Coinbase Explore (real-time price stream) is the #1 SD topic** — 5 out of 10 occurrences
+- Must self-clarify real-time / subscription / brokerage boundaries — interviewer won't spell them out
+- Lead with the hard problem (fanout to 2M clients) not the easy one (ingestion)
+
+**Round 3 — Domain Interview (showcase YOUR work):**
+- **This is your chance to shine.** You come prepared with a system YOU designed and present it.
+- Presenting: **Digital Shopping system** — see `domain_interview_prep.md` for full prep
+- Walk through: problem → architecture → key technical decisions → results → what you'd do differently
+- **Expect the AI question:** "How would you build this differently with AI tools?"
+  - AI for inventory data quality (detect stale/wrong listings)
+  - AI for lead scoring (which leads are high-intent?)
+  - AI for testing (auto-generated integration tests across services)
+  - AI for monitoring (anomaly detection on lead volume, inventory freshness)
+- **Staff+ signal:** Show you made tradeoffs, influenced multiple teams, set standards — not just "I wrote the code"
+
+**Round 4 — Behavioral (Staff+ level):**
+- Formal STAR interview — have Stories 1, 3, 4, 5, 8 polished
+- Lead with metrics and data in every answer
+- Show platform thinking, cross-team leadership, ownership
+- **Blog intel:** HM round specifically probes AI/LLM project experience — have Story 3 (AI Platform) ready
+- **Blog intel:** HM style can be provocative ("if your projects are this good, why haven't you been promoted?") — stay calm, answer factually
+- **Blog intel:** Interviewer quality varies — don't let it rattle you
 
 ---
 
@@ -21,23 +77,13 @@
 - Regulatory wins — international expansion, crypto-favorable US policy shifts
 - Partnerships with major financial institutions (BlackRock iShares Bitcoin Trust uses Coinbase for custody)
 
----
-
-## 2. Engineering Culture & Values
-
+**Engineering culture:**
 - **Mission-driven and intense:** "Our work culture is intense and isn't for everyone." They explicitly filter for intensity and ambition.
 - **AI-first transformation:** Not just using AI as a tool — reimagining all processes for a fully AI-driven world. This is a company-wide bet.
 - **Remote-first with required offsites:** Distributed engineering org, but mandatory in-person gatherings multiple times per year.
 - **Speed and accountability:** High agency, high velocity. Ship fast, own outcomes.
 - **Languages:** Go (primary), Ruby (legacy), Kotlin/Java. Heavy Kafka and PostgreSQL. Growing Rust usage.
 - **Security and compliance are first-class:** Financial regulations (SOX, AML/KYC) shape engineering decisions.
-
-**What this means for your interview:**
-- Show you build reliable platform infrastructure — correctness, observability, and fault tolerance in a financial context.
-- Demonstrate AI proficiency naturally — all Platform roles require "proficiency with generative AI tools in daily workflows."
-- Show genuine interest in crypto/blockchain (you don't need to be a maximalist, but apathy is a red flag).
-- Frame everything around impact and outcomes, not just technical elegance.
-- Show you can work across organizational boundaries — these platform roles serve Engineering, Risk, Compliance, and Operations.
 
 ---
 
@@ -72,8 +118,6 @@
 - All are Remote USA, Staff level
 
 **Best fit ranking:** Overseer > FinHub Tooling > Payment Rails
-
-**For the recruiter call:** The recruiter may want to match you to one role. Express interest in all 3 but if pressed, lean toward Overseer (your parity testing = correctness verification, Kafka experience) or FinHub Tooling (platform serving multiple teams). Payment Rails is fine as a backup but you lack direct payments domain experience.
 
 ---
 
@@ -118,142 +162,9 @@
 - Distributed message queue / event-driven architecture
 - Real-time monitoring and alerting system
 
-## 5a. Round-by-Round Guide
-
-### Round 1: Recruiter Screen ✅ DONE (Apr 16)
-
-Completed. Key takeaways:
-- Role is not pre-assigned — recruiter is hiring for the whole Platform team with multiple roles to fill
-- Team matching happens after take-home assessments
-- Comp is set for Staff level, Boston area, not negotiable
-
-### Round 2: Take-Home Assessments ✅ PASSED
-
-- CCAT + SJT completed
-- CodeSignal OA: coin budget variant (not flappy bird), scored 16/20
-- **Lesson learned:** Start simple, submit, then fix edge cases. Don't overengineer upfront. Lost time building a simulation approach that was scrapped — the simple heuristic passed 80% of cases.
-
-### HR Call Monday — logistics/scheduling only
-Not a real interview — HR will explain next steps and schedule the HM call + on-site.
-
-### Round 3: Hiring Manager Call (TBD — will be scheduled Monday)
-
-This happens after assessment results, with the HM for your matched team. This is where you assess the team, the work, and the manager.
-
-**What they'll ask:**
-- Deep dive on your background — expect follow-ups on specific projects
-- Why this role / this team specifically? (you'll know which team by now)
-- How do you approach building platform infrastructure?
-- Technical judgment questions — trade-off discussions, architectural decisions
-- What does your first 90 days look like?
-
-**What you should ask:**
-- What's the biggest reliability or correctness challenge your team is facing right now?
-- How does this team interact with Risk, Compliance, and Operations stakeholders? What does that collaboration look like day-to-day?
-- What does the current observability and monitoring setup look like for fund movements? Where are the gaps?
-- How much autonomy does this role have in defining the technical direction vs. executing a defined roadmap?
-- How do you measure success for this role in the first 6-12 months?
-- What's the on-call model — how does the team handle incidents in a 24/7 crypto market? What's the rotation like?
-- What does the day-to-day pace look like on this team? How does the "intense culture" Coinbase talks about play out here?
-
-**Tips:**
-- This is where you can probe work-life balance more directly — "What does on-call look like? How often do people work weekends?"
-- Ask about team tenure and turnover — "How long have most people been on this team?"
-- If you get bad vibes about pace/burnout, take it seriously — Glassdoor complaints exist for a reason
-
-### Round 4: Virtual On-Site
-
-> **NOTE (2026 Q2 blog intel):** The format may be **2 Coding + 1 SD + 1 HM/BQ** instead of 1 Coding + 1 SD + 1 Reverse SD + 1 BQ. **Clarify with Kael on Monday** which format applies to your loop.
-
-| # | Round | Duration | Focus |
-|---|---|---|---|
-| 1 | **Behavioral** | 45 min | With hiring manager — STAR stories, leadership, culture fit |
-| 2 | **Coding** | 60 min | Live coding — algorithm + data structures |
-| 3 | **System Design** | 60 min | Design a large-scale system |
-| 4 | **Reverse System Design** | 60 min | They present their system, you ask questions and identify improvements |
-
-**Round 4.1 — Behavioral (45 min with HM):**
-- This is the formal STAR interview — have Stories 1, 3, 9, 4 polished
-- Lead with metrics and data in every answer
-- Show platform thinking, cross-team leadership
-- See Section 6 for story ranking and selection strategy
-- **Blog intel:** HM round specifically probes AI/LLM project experience — have Stories 5 (MCP) and 17 (GenAI) ready
-- **Blog intel:** HM style can be provocative ("if your projects are this good, why haven't you been promoted?") — stay calm, answer factually
-- **Blog intel:** Interviewer quality varies — some may be disengaged or push suboptimal approaches. Don't let it rattle you.
-
-**Round 4.2 — Coding (60 min):**
-- Likely LC medium, similar to CodeSignal assessment but live with an interviewer
-- Write clean, compilable code — talk through your approach
-- See Section 12 for problem list
-- **Blog intel — VO coding pulls from a DIFFERENT pool than OA.** Top 4 VO coding topics:
-  1. **Pagination** (10 occurrences) — interviewer won't give function signatures, you design OOD
-  2. **Block Mining** (7 occurrences) — **DO NOT use DP/heap, use fee/size greedy sort**
-  3. **Food Delivery** (4 occurrences) — hash dict + binary search + knapsack follow-up
-  4. **Crypto Order/Kafka** (3 occurrences) — state machine + idempotency
-- **Blog intel:** Some interviewers push you toward suboptimal approaches (e.g., DP for Block Mining). State your reasoning clearly, don't cave.
-- **Blog intel:** If format is 2 coding rounds, expect 2 different problems from this pool
-
-**Round 4.3 — System Design (60 min):**
-- Expect financial/crypto domain: payment system, exchange, blockchain indexer
-- Drive the conversation — propose trade-offs with conviction
-- Lead with correctness and fault tolerance (financial systems can't be eventually correct)
-- Quantify scale: "At Coinbase's volume, if we process X transactions/second..."
-- See Section 13 for topic list
-- **Blog intel: Coinbase Explore (real-time price stream) is the #1 SD topic** — 5 out of 10 occurrences
-- Must self-clarify real-time / subscription / brokerage boundaries — interviewer won't spell them out
-- Lead with the hard problem (fanout to 2M clients) not the easy one (ingestion)
-
-**Round 4.4 — Reverse System Design (60 min):**
-- They walk you through one of their actual systems
-- Your job: ask smart questions, identify bottlenecks, suggest improvements
-- This tests your **architectural judgment and curiosity**, not your ability to design from scratch
-- Prep tips:
-  - Practice asking probing questions: "What happens when X fails?" "How do you handle Y at scale?" "What's the bottleneck today?"
-  - Think about observability, fault tolerance, scalability, and correctness — your usual lens
-  - Don't be afraid to say "I'd want to understand X before suggesting changes"
-  - Draw on your own experience — "At CarGurus, we had a similar challenge and we solved it by..."
-  - This is where your parity testing / correctness verification experience shines — ask about how they verify correctness
-
-### Round 5: Offer
-
-- Comp is set for Staff level, Boston area — not negotiable per recruiter
-- This is the right time to ask about personal scheduling flexibility: "I have young kids — if I need to step out for a couple hours during the day and make up the time in the evening, is that how the team works?"
-- Ask about equity vesting schedule, refreshers, and performance review cadence
-- Remote offsites: how many per year, where, how long?
-- Ask about promotion velocity — what does Senior Staff scope look like from this role?
-
----
-
-## 6. STAR Stories to Prepare (Ranked by Relevance)
-
-| Priority | # | Story | Why It Fits |
-|---|---|---|---|
-| **Must tell** | 1 | API Modernization — Orchestration Platform | Platform serving millions of requests, cross-team impact, p99 5x improvement — core Platform Backend signal |
-| **Must tell** | 3 | Parity Testing Framework | Correctness verification at production scale — directly maps to Overseer's invariant enforcement |
-| **Must tell** | 9 | Digital Commerce — 0→1 Under Pressure | Greenfield execution, event-driven architecture, revenue-critical system |
-| **Strong** | 4 | Architectural Standards / RFC Process | Platform standards adopted org-wide — shows you set the bar for engineering quality |
-| **Strong** | 14 | Applause — Event Sourcing / CQRS | Kafka, event-driven architecture, distributed systems depth — relevant to all 3 roles |
-| **Must tell** | 5 | MCP Server — 0→1 Under Ambiguity | AI proficiency signal (all roles require it), greenfield execution — **blog says HM specifically probes AI/LLM projects** |
-| **Must tell** | 17 | GenAI Platform — Evaluation & Automation | AI daily workflow signal — **no AI/LLM story = penalty per blog intel** |
-| **Good** | 7 | GraphQL Federation | Platform serving infrastructure, multiple consumer types |
-| **Good** | 11 | Mentoring Engineers | Growing team capability, raising the bar |
-| **Good** | 12 | Driving Consensus via RFCs | Written communication, cross-team alignment |
-| **Wildcard** | 19 | Disagree and Commit | High-conviction leadership |
-| **Wildcard** | 20 | Failure & Learning | Self-awareness, growth mindset |
-
-**Story selection strategy per round:**
-- **Behavioral (platform/reliability):** Stories 1, 3, 14
-- **Behavioral (0→1 / greenfield):** Stories 9, 5
-- **Behavioral (leadership/cross-functional):** Stories 1, 4, 12, 19
-- **Behavioral (AI proficiency):** Stories 5, 17
-- **Behavioral (mentoring):** Stories 11, 4
-- **System design follow-up:** Stories 1, 14, 3
-
 ---
 
 ## 7. Questions to Ask Interviewers
-
-All questions are organized by round in Section 5a. Additional questions for technical interviewers:
 
 ### Technical / Team Match
 - What's the current tech stack? (Confirming Go, Kafka, PostgreSQL, etc.)
@@ -262,6 +173,11 @@ All questions are organized by round in Section 5a. Additional questions for tec
 - How do you balance shipping speed with the correctness guarantees required in financial systems?
 - What does the deployment pipeline look like — how often do you ship, and what safety checks are in place?
 - How does the AI-first mandate play out in practice for platform teams — what does "proficiency with generative AI tools in daily workflows" actually mean here?
+- What's the biggest reliability or correctness challenge your team is facing right now?
+- How does this team interact with Risk, Compliance, and Operations stakeholders? What does that collaboration look like day-to-day?
+- What does the current observability and monitoring setup look like for fund movements? Where are the gaps?
+- How much autonomy does this role have in defining the technical direction vs. executing a defined roadmap?
+- What's the on-call model — how does the team handle incidents in a 24/7 crypto market? What's the rotation like?
 
 ---
 
@@ -310,65 +226,9 @@ You don't need to be a blockchain expert, but show baseline literacy:
 
 ---
 
-## 11. Red Flags to Watch For
-
-- If the team is understaffed and you'd be doing on-call for 24/7 crypto markets with no rotation — ask about on-call burden explicitly
-- If Go is a hard requirement with zero ramp-up time — your Java/Python background transfers, but confirm there's a learning curve budget
-- If "platform" really means "feature team that also maintains infrastructure" — true platform roles should have platform-first priorities, not product feature deadlines
-- If the role has been open for a very long time — could signal unclear scope, difficult HM, or budget issues
-- If compensation is anchored to the low end of the $218K–$256.5K band — you were previously considered for Senior Staff, don't let the re-application anchor you lower
-- If there's no clear path to Senior Staff from this role — ask about promotion velocity and what Senior Staff scope looks like on this team
-
----
-
 ## 12. Technical Coding Prep — Coinbase
 
-### CodeSignal Take-Home Assessment (60 min)
-
-**Format: AI-Assisted Gamified Simulation** (NOT standard LeetCode)
-- Single-file coding environment with an AI chat assistant called **Cosmo**
-- You write code to control a character through a physics-based simulation
-- Strategy/optimization problem — not pattern-matching to known LC problems
-- Languages: Java, Python 3, JavaScript, TypeScript, C++
-- Proctored — no external resources, no second monitor, no phone, scratch paper OK
-- Recruiter's tip: "start simple, then add more details"
-
-**What Cosmo (AI assistant) can do:**
-- Chat panel in the IDE — not autocomplete, it's conversational
-- Has context on the problem prompt and your current code
-- Use it to: clarify the problem, brainstorm approaches, debug errors, check edge cases
-- Has a reset button to clear context
-- "You are encouraged (and may need) to use Cosmo to complete the assessment"
-
-**What they're evaluating:**
-- Problem decomposition and algorithmic reasoning
-- Effective collaboration with AI tools
-- Balancing solution correctness with execution efficiency
-- Optimizing strategies under real-world constraints
-
-**Strategy:**
-1. **Read the full problem carefully** — understand the simulation physics, constraints, and scoring
-2. **Get a working solution first** — a basic strategy that completes the simulation, even if not optimal
-3. **Iterate with Cosmo** — ask it to help identify weaknesses: "my character fails when X, what should I change?"
-4. **Optimize incrementally** — improve one aspect at a time (speed, accuracy, edge cases)
-5. **Think about trade-offs explicitly** — they're testing whether you can reason about correctness vs performance, not just code
-
-**How to use Cosmo effectively:**
-- Good: "The character overshoots at high velocity — how should I adjust the deceleration logic?"
-- Good: "What edge cases does my current strategy miss?"
-- Good: "Explain this physics formula so I can implement the movement correctly"
-- Bad: "Write the entire solution for me"
-- Review everything Cosmo suggests — it can be wrong, and blindly accepting bad suggestions is worse than not using it
-
-**Prep: Practice environment available** — use it to learn the IDE and Cosmo interface before the timed assessment. Real questions will be different but the tool interaction will be the same.
-
-**Time management (60 min, no pause):**
-- First 5–10 min: read problem, understand simulation rules and scoring
-- Next 15 min: implement basic working strategy
-- Next 25 min: iterate and optimize with Cosmo's help
-- Last 10 min: test edge cases, clean up, final improvements
-
-**LC problems still relevant for on-site coding round (not this assessment):**
+**LC problems relevant for VO coding round:**
 
 | # | Problem | Difficulty | Pattern | Notes |
 |---|---------|-----------|---------|-------|
@@ -616,86 +476,7 @@ Your Coinbase forum questions are all multi-level HashMap CRUD with incremental 
 
 ---
 
-## 13a. Reverse System Design Prep — Coinbase
-
-This is the unique round (60 min). They walk you through one of their actual systems and you ask questions, identify issues, and suggest improvements.
-
-### What It Tests
-- **Architectural judgment** — can you spot design trade-offs and potential issues?
-- **Curiosity and depth** — do you ask the right follow-up questions?
-- **Communication** — can you articulate concerns clearly and propose alternatives?
-- **Experience** — can you draw parallels to systems you've built?
-
-### How to Approach
-
-**First 10 minutes — Listen and Understand:**
-- Let them present the system — take notes
-- Ask clarifying questions: "What's the traffic pattern?" "What's the SLA?" "How many teams depend on this?"
-- Don't jump to critique too early — understand before you judge
-
-**Next 30 minutes — Probe and Identify:**
-Ask questions in these categories:
-
-**Reliability & Failure Modes:**
-- "What happens when [component X] goes down?"
-- "Is there a single point of failure here?"
-- "How do you handle partial failures in this pipeline?"
-- "What's the blast radius of a bad deployment?"
-
-**Correctness & Data Integrity:**
-- "How do you verify that the data flowing through is correct?"
-- "Is there reconciliation between these two data stores?"
-- "What happens if a message is processed twice?"
-- "How do you detect silent data corruption?"
-
-**Scalability & Performance:**
-- "What's the bottleneck today?"
-- "What happens at 10x current load?"
-- "Are there hot keys or hot partitions?"
-- "How do you handle thundering herd / cache stampede?"
-
-**Observability & Operations:**
-- "How do you know if this is healthy? What metrics do you watch?"
-- "What does an incident look like? How long to detect, how long to mitigate?"
-- "How do you deploy changes safely? Canary? Blue-green?"
-
-**Developer Experience:**
-- "How easy is it for a new team to onboard onto this platform?"
-- "What are the most common complaints from internal consumers?"
-
-**Last 20 minutes — Suggest Improvements:**
-- Don't just list problems — propose solutions with trade-offs
-- Reference your experience: "At CarGurus, we had a similar challenge and solved it by..."
-- Be specific: "I'd add a reconciliation job that compares X with Y on a 5-minute interval"
-- Acknowledge what's good: "This part is well-designed because..."
-
-### What They Might Show You
-Based on the Platform Backend roles, likely systems include:
-- **Fund movement pipeline** — how money flows from user deposit to internal ledger to blockchain
-- **Operational tooling dashboard** — how internal teams (risk, compliance) monitor transactions
-- **Reconciliation system** — how they verify internal state matches external (blockchain) state
-- **Event-driven processing pipeline** — Kafka-based system for processing financial events
-
-### Your Strongest Cards to Play
-- **Parity testing framework** — "I built exactly this kind of correctness verification. Here's what I'd look for..."
-- **Distributed tracing** — "How do you trace a single transaction end-to-end? At CarGurus we used..."
-- **Circuit breaking / fault isolation** — "What happens when a downstream dependency is slow? We solved this by..."
-- **SLO-based monitoring** — "Are your alerts based on SLOs or raw thresholds? SLO-based alerting catches degradation earlier because..."
-
-### Reverse System Design — Detailed Framework
-
-**The meta-signal:** They're testing whether you can walk into an unfamiliar system and quickly identify what matters. Don't redesign everything — pick 2-3 high-impact observations and go deep. Quality over quantity.
-
-**How to structure your improvement suggestions:**
-
-For each issue you identify, follow this pattern:
-1. **State the issue:** "I notice there's no reconciliation between X and Y"
-2. **Explain the risk:** "This means silent data drift could go undetected for hours"
-3. **Propose a solution:** "I'd add a periodic job that compares X with Y and alerts on divergence"
-4. **Reference your experience:** "At CarGurus we built exactly this — a parity testing framework at 50% production traffic"
-5. **Acknowledge tradeoffs:** "The cost is an additional read load on both stores, but for financial correctness that's worth it"
-
-**Common patterns to look for in any system they show you:**
+## 13a. Common Patterns / Red Flags (System Design Reference)
 
 | Pattern | Red flag | Your suggestion |
 |---|---|---|
@@ -708,26 +489,22 @@ For each issue you identify, follow this pattern:
 | Tight coupling between services | Changes in one break another | Define clear API contracts, add versioning |
 | No deployment safety | Bad deploys hit all users | Add canary/blue-green with automatic rollback |
 
-**What NOT to do:**
-- Don't critique everything — acknowledge what's well-designed
-- Don't propose a full rewrite — suggest incremental improvements
-- Don't stay surface-level — go deep on 2-3 issues rather than listing 10
-- Don't be arrogant — "Have you considered..." not "You should have..."
-
 ---
 
 ## 13b. Behavioral Interview Prep — Coinbase
 
 45 minutes with the hiring manager. This is a formal STAR interview — structured, scored, and important.
 
+Story numbering references star_stories.md (1=API Mod, 2=Parity, 3=AI Platform, 4=Digital Shopping, 5=Mentoring, 6=RFCs, 7=GenAI, 8=Disagree&Commit, 9=AI Cross-Domain).
+
 ### Coinbase Values to Signal
 
 | Value | What They Look For | Your Story |
 |---|---|---|
-| **Clear communication** | Can you explain complex trade-offs clearly? Do you drive alignment? | Story 1 (API Modernization — 10+ teams), Story 12 (RFCs) |
-| **Efficient execution** | Do you ship? Do you prioritize ruthlessly? | Story 9 (Digital Shopping — 0→1 under pressure) |
+| **Clear communication** | Can you explain complex trade-offs clearly? Do you drive alignment? | Story 1 (API Modernization — 10+ teams), Story 6 (RFCs) |
+| **Efficient execution** | Do you ship? Do you prioritize ruthlessly? | Story 4 (Digital Shopping — 0→1 under pressure) |
 | **Act like an owner** | Do you go beyond your job description? Do you take responsibility? | Story 1 (drove cross-org initiative nobody asked for) |
-| **High bar for quality** | Do you build reliable systems? Do you leave things better? | Story 3 (Parity Testing — correctness at scale) |
+| **High bar for quality** | Do you build reliable systems? Do you leave things better? | Story 2 (Parity Testing — correctness at scale) |
 | **Positive energy** | Are you someone people want to work with? | All stories — lead with collaboration, not heroism |
 
 ### Common Behavioral Questions at Coinbase
@@ -738,27 +515,25 @@ For each issue you identify, follow this pattern:
 - "Tell me about a time you improved reliability or performance significantly."
   → Story 1 (p99 5x improvement, 98% → 99.9% availability)
 - "Describe a technical decision you made that had org-wide impact."
-  → Story 4 (Architectural Standards / RFC Process)
+  → Story 6 (Architectural Standards / RFC Process)
 
 **Greenfield / 0→1:**
 - "Tell me about a time you built something from scratch."
-  → Story 9 (Digital Shopping) or Story 5 (MCP Server)
+  → Story 4 (Digital Shopping) or Story 3 (AI Platform)
 - "How do you approach building in an ambiguous environment?"
-  → Story 5 (MCP Server — sole backend engineer, no precedent)
+  → Story 3 (AI Platform — sole backend engineer, no precedent)
 
 **Data-Driven / Correctness:**
 - "Tell me about a time you used data to make a technical decision."
-  → Story 3 (Parity Testing — automated validation at 50% traffic)
+  → Story 2 (Parity Testing — automated validation at 50% traffic)
 - "How do you ensure correctness in a system?"
-  → Story 3 (Parity Testing) + mention reconciliation, idempotency principles
+  → Story 2 (Parity Testing) + mention reconciliation, idempotency principles
 
 **Leadership / Conflict:**
 - "Tell me about a time you disagreed with a colleague or stakeholder."
-  → Story 19 (Disagree and Commit)
+  → Story 8 (Disagree and Commit)
 - "Tell me about a time you mentored someone."
-  → Story 11 (Mentoring to Principal Level)
-- "Tell me about a time a project failed or didn't go as planned."
-  → Story 20 (Failure & Learning)
+  → Story 5 (Mentoring to Principal Level)
 
 **Coinbase-Specific:**
 - "Why Coinbase?" → Section 8
@@ -785,7 +560,7 @@ For each issue you identify, follow this pattern:
 - **Block Mining is a trap question.** Interviewers push DP/heap but expect greedy (fee/size ratio). Don't cave.
 - **Pagination requires OOD.** Interviewer won't give function signatures — you design input/output yourself.
 - **System Design = Coinbase Explore (real-time price stream)** in 50% of cases. You must self-clarify boundaries.
-- **HM/BQ round heavily probes AI/LLM projects.** No AI story = penalized. Stories 5 (MCP) and 17 (GenAI) are critical.
+- **HM/BQ round heavily probes AI/LLM projects.** No AI story = penalized. Stories 3 (AI Platform) and 7 (GenAI) are critical.
 - **HM can be provocative.** "Why haven't you been promoted?" / PUA-style questions reported. Stay calm, answer factually.
 - **Interviewer quality varies.** Some disengage, some push suboptimal solutions. Don't let it rattle you — state your reasoning.
 - **Toxic culture is a frequent complaint.** Ghosting post-interview, 6-8 month freezes after team match fails, disrespectful interviewers — go in eyes open.
@@ -811,27 +586,25 @@ For each issue you identify, follow this pattern:
 
 ## 15. Pre-Interview Checklist
 
-### Before HM Call
-- [ ] Re-read Sections 3-8 of this doc (roles, fit, questions, "Why Coinbase?")
-- [ ] Know which team you're matched to (recruiter will tell you Monday)
-- [ ] Prepare role-specific questions from Section 7
-- [ ] Have "Why Coinbase?" answer ready (30 sec — Section 8)
-- [ ] Know the leveling story: "Staff Platform is a better match than Senior Staff — I want to be hands-on building infrastructure"
-
-### Before Virtual On-Site
-- [ ] Re-read Sections 5a (round-by-round), 6 (STAR stories), 13 (system design), 13a (reverse system design), 13b (behavioral)
+### Before Virtual On-Site (May 4)
+- [ ] Re-read Sections 3–5 of this doc (roles, fit, VO round guide)
 - [ ] Re-read resume_coinbase.html
-- [ ] Practice Stories 1, 3, 9 aloud (2 min each — lead with metrics, platform impact)
-- [ ] Review coding prep: LC 2043 bank system follow-up progression (Section 12) + HashMap patterns from OA prep
-- [ ] Review system design: Payment System, Rate Limiter, Distributed Message Queue
-- [ ] Review reverse system design approach (Section 13a) — probe questions for reliability, correctness, observability
+- [ ] Re-read star_stories.md — Stories 1, 2, 3, 4, 7, 8 polished (lead with metrics)
+- [ ] Re-read the domain interview prep doc for Story 1 (API Modernization) — practice the walkthrough and the AI question answer
+- [ ] Practice Stories 1, 2, 4 aloud (2 min each — lead with metrics, platform impact)
+- [ ] Review coding prep: LC 2043 bank system follow-up progression (Section 12) + HashMap patterns
+- [ ] Review VO coding topics: Pagination (OOD design), Block Mining (greedy fee/size), Food Delivery, Crypto Order state machine
+- [ ] Review system design: Payment System, Rate Limiter, Distributed Message Queue (Section 13)
+- [ ] Review common patterns/red flags table (Section 13a) — idempotency, DLQ, SLO alerting, distributed tracing
 - [ ] Brush up on blockchain/crypto basics (Section 9) — finality, reconciliation, hot/cold wallets
-- [ ] Review parity testing framework story in detail — strongest signal for Overseer/correctness roles
-- [ ] Research Coinbase engineering blog posts on platform infrastructure
-- [ ] Practice Excalidraw or whatever whiteboard tool they use
+- [ ] Practice Excalidraw or whatever whiteboard tool they use (CodeSignal whiteboard for SD round)
+- [ ] Familiarize yourself with CodeSignal IDE (coding round uses it — multi-file support available)
 
-### Key Prep From OA Practice (reuse for on-site coding)
-- All 5 hard coding questions reviewed — patterns: HashMap CRUD, dual-map consistency, TTL/expiry, state machines, backup/restore
-- Common bug pattern: new level breaks old methods (scan all methods when adding state)
-- Common bug pattern: copy-paste boolean conditions (read method name + condition as a sentence)
-- Start simple, get it working, then iterate
+### Key Reminders for VO Day
+- Only 1 coding round — the other 3 are conversational. Lead confidently, don't wait for prompts.
+- Coding: think out loud before writing anything. Clarify algorithm + edge cases first.
+- System Design: YOU drive. Proactively address scale, correctness, fault tolerance.
+- Domain Interview: come with Story 1 prepared end-to-end. Expect the AI question.
+- Behavioral: every answer needs metrics. 2 min max per story. Pause after STAR for follow-ups.
+- Common bug patterns to avoid: new level breaks old methods (blast radius check), copy-paste boolean conditions
+- Start simple, submit, then iterate — don't overengineer upfront
