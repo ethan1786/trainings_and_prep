@@ -20,39 +20,47 @@
 
 | Date | Event |
 |---|---|
-| **Mon May 4** | HashiCorp/IBM recruiter call (11 AM), Coinbase HR call with Kael (2:30 PM) |
+| ~~Mon May 4~~ | ~~HashiCorp/IBM recruiter call~~ ✅, ~~Coinbase HR call (Kael)~~ ✅ |
+| **Fri May 9** | Coinbase: check if Kael replies with VO dates — if silent, send neutral follow-up |
+| **Sat-Sun May 10-11** | BQ practice + Cherry HM prep |
 | **Mon May 11** | Cherry HM call with Tim |
-| **~May 14-15** | Cherry coding round (if HM goes well — low-stakes warmup before Coinbase) |
-| **~May 21-22** | **Coinbase Virtual On-Site (Wed/Thu preferred)** |
+| **Wed May 13** | HashiCorp/IBM HM video interview (2:00 PM ET) |
+| **~May 14-15** | Cherry coding round (if HM goes well — warmup before Coinbase) |
+| **~May 21-22** | **Coinbase Virtual On-Site (Wed/Thu preferred)** — waiting for Kael to confirm |
 | **May 23-25** | Memorial weekend — travel to in-laws, no interviews |
 | **~May 27-28** | HashiCorp coding round (if scheduled by then) |
 
-### Week of May 4 — Behavioral Focus + Calls
+### Week of May 4-9 — Coding + System Design (CURRENT WEEK)
 - [x] Send thank-you messages to Vishal (OpenAI), Preetam (Netflix), and Nick (Pinterest)
-- [ ] **Mon 11 AM: HashiCorp/IBM recruiter call**
-- [ ] **Mon 2:30 PM: Coinbase HR call (Kael) — request VO week of 5/18, aim Wed/Thu**
-- [ ] Fix STAR stories (accuracy pass — in progress)
-- [ ] Practice stories aloud: 1, 3, 9, 19, 20 — 2 min each
-- [ ] LC warmup: 2/day from Coinbase pattern list
-- [ ] Skim Cherry HM prep doc before May 11
+- [x] HashiCorp/IBM recruiter call ✅
+- [x] Coinbase HR call (Kael) ✅ — VO targeting week of 5/18
+- [x] Coinbase VO coding questions — all 6 solved (Pagination, Mining Block, Food Delivery, Crypto Order, Interleave, Log Parser)
+- [x] Domain interview prep — scripts, diagram, and structure complete
+- [x] Applied: DoorDash (Staff SWE Security), OpenAI (Principal InfraSec)
+- [x] Applied: NVIDIA Principal Physical AI Tooling (via Eleza)
+- [x] Messaged YiYi re: Stripe Staff Engineer, Identity
+- [ ] **System design: Coinbase Explore / Real-Time Price Feed** — 45 min timed practice
+- [ ] **Miro practice** — create account, draw domain interview diagram (15 min)
+- [ ] **Fri May 9:** Check if Kael replied with VO dates
 
-### Week of May 11 — Cherry HM + Coding/System Design Shift
+### Week of May 10-13 — BQ + HM Calls
+- [ ] **Sat-Sun:** Practice STAR stories aloud (Stories 1, 3, 4, 5, 8 — 2 min each)
+- [ ] **Sat-Sun:** Review Direct Questions + Staff+ Strengths sections
+- [ ] **Sun:** Skim Cherry HM prep doc
 - [ ] **Mon May 11: Cherry HM call with Tim**
-- [ ] If HM goes well, schedule Cherry coding for May 14-15
-- [ ] LC grind: multi-map consistency (432, 380, 895), state machines, Coinbase OA patterns
-- [ ] System design practice: Payment/Settlement System (45 min timed)
-- [ ] System design practice: Distributed Rate Limiter (45 min timed)
-- [ ] Review reverse system design framework + practice case
+- [ ] **Wed May 13: HashiCorp/IBM HM video interview (2:00 PM ET)**
+- [ ] If Cherry HM goes well, schedule coding for May 14-15
+- [ ] If no reply from YiYi by Thu May 8, cold apply Stripe Identity
 
 ### Week of May 18 — Coinbase VO Week
-- [ ] Mon-Tue: light review, re-read prep doc, practice stories one more time
-- [ ] **Wed/Thu: Coinbase Virtual On-Site**
+- [ ] Mon-Tue: light review, re-read prep doc, practice domain interview on Miro, practice stories one more time
+- [ ] **Wed/Thu: Coinbase Virtual On-Site** (pending confirmation from Kael)
 - [ ] Fri: decompress
 
 ### Week of May 25 — Post-Memorial
 - [ ] Cherry coding round (if not done earlier)
 - [ ] HashiCorp coding round (if scheduled)
-- [ ] Browse career pages: Stripe, Spotify
+- [ ] NVIDIA call (date TBD)
 
 ---
 

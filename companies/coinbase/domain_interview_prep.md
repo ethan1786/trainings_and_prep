@@ -110,23 +110,154 @@
 
 ---
 
-## Presentation Flow (10 min walkthrough)
+## Presentation Plan (1-hour Domain Interview)
 
-1. **Context** (1 min): Pandemic, automotive went online, 0→1 product, business pressure
-2. **High-level architecture** (2 min): Draw the main components, show data flows
-3. **Key decision: monolith→microservices extraction** (2 min): Started simple, extracted as complexity justified. Show the evolution.
-4. **Key decision: consistency tradeoffs** (2 min): Eventual for inventory (already stale from feeds), strong for leads (money). Explain WHY.
-5. **Key decision: feature flags + experiment isolation** (2 min): How you designed for iteration from day one
-6. **Results** (1 min): Launched on timeline, meaningful leads, architecture enabled safe experimentation
+**Format:** ~18 min presentation + ~40 min Q&A from interviewer
+
+---
+
+### Part 1: System Overview (0:00–8:00)
+
+#### Context & Judgment Arc (0:00–3:00)
+
+**Script:**
+
+> "I'm going to walk you through a digital shopping platform I built from scratch. The context: pandemic hit, consumers couldn't visit dealerships, and we needed to enable online transactions — browsing, expressing purchase intent, and eventually putting down deposits. There was enormous business pressure, but no spec — nobody at the company had done this before.
+>
+> My first job wasn't writing code. It was translating ambiguity into priorities. I worked with product to break 'digital shopping' into concrete features. Lead capture was the critical business path — that's money flowing to dealers — so it went first with strong consistency guarantees. Inventory display could be eventually consistent because the data was already slightly stale from dealer feeds. Merchandising and pricing experiments were explicitly deferred — not because they weren't important, but because we didn't have enough signal on what would work.
+>
+> The key judgment: ship the minimum that proves the business model works, with enough architectural room to grow without rewriting."
+
+**[Draw on Miro: Stage 1 — monolith with modules]**
+
+#### Architecture Evolution (3:00–8:00)
+
+**Script:**
+
+> "I started simple. A few helper modules inside the monolith — lead capture, inventory display, dealer config. Single DB, single deploy, zero operational overhead. The team was small, we co-located, and it let us iterate daily.
+>
+> [Draw Stage 2] As the product grew and we understood the domain better, I extracted services one at a time. Lead capture came out first — it needed an independent SLA because that's revenue. It got its own DB with strong write consistency. Inventory sync moved to event-driven because it tolerates eventual consistency — the data is already stale from dealer feeds. I added feature flags at this point because I knew product would want to experiment.
+>
+> [Draw Stage 3] The mature state: independent services connected via event bus. Lead Service, Inventory Service, Merchandising Service — each with its own data store, independent deployment, clean boundaries. Notification and analytics services subscribe to events. Experiments can be safely retired without touching core services.
+>
+> Each extraction was triggered by real pain — deploy coupling, SLA requirements, or team ownership boundaries — not by theory."
+
+**[Three-panel evolution diagram on Miro]**
+
+---
+
+### Part 2: Payment/Reservation Deep Dive (8:00–16:00)
+
+**Transition script:**
+
+> "Now I want to zoom into the most technically interesting subsystem — the payment and reservation flow. This is where consistency, audit trails, and failure handling matter most, and I think it connects directly to your domain at Coinbase."
+
+#### Payment Architecture (8:00–11:00)
+
+**Script:**
+
+> "When we added deposits — consumers putting real money down on a vehicle — I needed to design a payment flow that was safe, auditable, and resilient to failures. The key decision was auth-then-capture: we authorize the card immediately to hold funds, but don't actually charge until the dealer confirms the deal. This means cancellation before confirmation is free — no refund needed, just release the hold.
+>
+> [Draw on Miro: Client → Transaction Service → Payment Provider, showing auth-then-capture split]
+>
+> The async piece: the payment provider confirms out-of-band via webhook. I don't block the user on settlement — they get a 'reservation confirmed' immediately after auth succeeds. The capture happens later when the dealer takes action."
+
+#### State Machine & Audit Trail (11:00–14:00)
+
+**Script:**
+
+> "The reservation lifecycle is a formal state machine: STARTED → CONFIRMED → CAPTURED → PAID OUT. With branches for CANCELLED (from STARTED or CONFIRMED) and REFUNDED (from CAPTURED).
+>
+> [Draw state machine on Miro]
+>
+> For auditability — because this is real money — I event-sourced the state transitions. Each state change is an Action record in a linked list: it stores the payment intent ID, the transition type, and a pointer to the previous action. This gives a full audit trail: I can reconstruct exactly what happened to any reservation, in what order, and reconcile against the payment provider's records.
+>
+> The linked-list design means I never mutate state — I only append. That's critical for dispute resolution and compliance."
+
+#### Failure Handling (14:00–16:00)
+
+**Script:**
+
+> "Three failure patterns I designed for:
+>
+> First, synchronous failures: payment provider returns an error during auth. The transaction service rolls back the reservation to STARTED state and returns the error to the user. Compensating transaction — no partial state left behind.
+>
+> Second, async failures: webhook never arrives (provider timeout). I have a reconciliation job that polls the payment provider for any reservations stuck in CONFIRMED for longer than a threshold. If the provider says it failed, I cancel. If it succeeded, I advance the state.
+>
+> Third, idempotency: webhooks can arrive multiple times. Each action is idempotent — if I receive a 'confirmed' webhook but the reservation is already CONFIRMED or beyond, I no-op. The action linked list makes this check trivial."
+
+---
+
+### Part 3: Wrap-Up (16:00–18:00)
+
+**Script:**
+
+> "To summarize the key decisions and tradeoffs:
+>
+> - Started simple (monolith), extracted when complexity justified — never pre-optimized
+> - Consistency matched to domain: strong for money flows, eventual for display data
+> - Auth-then-capture for safe payment lifecycle — cancel is free before capture
+> - Event-sourced audit trail for compliance and reconciliation
+> - Feature flags from day one — experiments retired safely, zero incidents
+>
+> Results: launched on timeline, captured meaningful revenue during a business-critical period, architecture grew organically, and multiple experiments were safely retired using the playbook I created.
+>
+> Happy to go deeper on any part — payments, the event architecture, scaling concerns, or how I'd improve this with AI today."
+
+---
+
+### Part 4: Q&A (~40 minutes)
+
+This is where you prove depth. The interviewer will dig into specifics.
 
 ---
 
 ## Likely Follow-Up Questions (prepare answers)
 
+**Architecture & Tradeoffs:**
 - "Why Kafka instead of [SQS / direct HTTP / etc.]?"
 - "What would break first at 10x scale?"
 - "How do you handle out-of-order events?"
+- "Why event sourcing for the actions? Why not just update in place?"
+- "How do you handle schema evolution on the event bus?"
+
+**Payments & Reliability:**
 - "What if a lead is captured but the downstream dealer notification fails?"
+- "What if the webhook never arrives?"
+- "How do you reconcile with the payment provider?"
+- "What if two webhooks arrive at the same time for the same reservation?"
+- "How do you handle partial failures in a multi-step checkout?"
+
+**Testing & Operations:**
 - "How do you test this end-to-end?"
+- "How did you validate payments in staging without real money?"
+- "What monitoring/alerting did you have?"
+- "How did you handle deployments with active reservations in flight?"
+
+**Evolution & AI:**
 - "What would you do differently if you rebuilt it today?"
 - "How would you use AI tools to build or improve this?" ← EXPECT THIS ONE
+- "What was the hardest part to get right?"
+- "What's the next thing you'd extract or rebuild?"
+
+---
+
+## Talking Points (keep in back pocket)
+
+### Technical Judgment Under Ambiguity
+
+> "Nobody had built digital shopping before at my company. Product had a vision, not a spec. My first job wasn't writing code — it was translating ambiguity into scope. Lead capture went first because it's the revenue path. Inventory was deferred to eventual consistency because the data is already stale from dealer feeds. Merchandising was explicitly scoped out — not because it wasn't important, but because we didn't have signal yet."
+
+**Why this works for Staff+:** You're showing *judgment*, not architecture. The architecture is evidence.
+
+### Why Auth-Then-Capture
+
+> "We authorize immediately to hold funds, but don't charge until the dealer confirms. Cancellation before capture is free — just release the hold, no refund. This reduces friction for consumers and eliminates refund disputes for dealers. It's the same pattern used in hotel bookings and ride-sharing holds."
+
+### Why Event-Sourced Actions
+
+> "For anything involving money, I need a full audit trail. I never mutate state — I append an action record. This gives me: (1) complete history for dispute resolution, (2) ability to reconcile with the payment provider by replaying actions, (3) idempotent webhook processing — if I've already seen a transition, I no-op."
+
+### Connection to Coinbase
+
+> "This maps directly to your domain. Auth-then-capture is like placing a limit order — you've committed intent but the trade hasn't settled. The state machine (STARTED → CONFIRMED → CAPTURED) is like your order states (PENDING → OPEN → FILLED). Event-sourced audit trail is essential for any regulated financial system. And the webhook reconciliation pattern applies to any external settlement system."

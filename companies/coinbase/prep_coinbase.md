@@ -1,18 +1,18 @@
 # Coinbase — Staff Software Engineer, Backend - Platform
 
 > **VO prep doc.** Applied to 3 Platform Backend roles: FinHub Tooling, Overseer, Payment Rails.
-> Last updated: May 4, 2026
+> Last updated: May 7, 2026
 
 ---
 
-## Virtual On-Site — Round-by-Round Guide (confirmed from Kael, May 4)
+## Virtual On-Site — Round-by-Round Guide (confirmed from Kael, May 4 + May 7)
 
 | # | Round | Format | Key Advice from Recruiter |
 |---|---|---|---|
-| 1 | **Coding** | CodeSignal platform | Think out loud, clarify algorithm + edge cases before coding, write test cases, split into files if time |
-| 2 | **System Design** | CodeSignal whiteboard | Clarify requirements, **lead and drive the conversation** — don't let interviewer prompt you |
-| 3 | **Domain Interview** | Whiteboard — present YOUR prior work | Come prepared to showcase a system you designed; expect "how would you build this differently with AI tools?" |
-| 4 | **Behavioral** | Conversational | Staff+ level stories, metrics, cross-org impact |
+| 1 | **Coding** | CodeSignal platform (60 min) | Think out loud, clarify algorithm + edge cases before coding, write test cases, split into files if time |
+| 2 | **System Design** | CodeSignal whiteboard (60 min) | Clarify requirements, **lead and drive the conversation** — don't let interviewer prompt you |
+| 3 | **Domain Interview** | **Miro whiteboard** (60 min) — YOU present | Present Digital Shopping + Payments deep-dive (~18 min present, ~40 min Q&A); expect "how would you build this differently with AI tools?" |
+| 4 | **Behavioral** | Conversational (45 min) | Staff+ level stories, metrics, cross-org impact |
 
 **Overall strategy:** Only 1 coding round. The other 3 rounds are ambiguous/conversational — your job is to **lead confidently and demonstrate Staff+ judgment**. Don't be passive or wait for prompts.
 
@@ -41,16 +41,23 @@
 - Must self-clarify real-time / subscription / brokerage boundaries — interviewer won't spell them out
 - Lead with the hard problem (fanout to 2M clients) not the easy one (ingestion)
 
-**Round 3 — Domain Interview (showcase YOUR work):**
-- **This is your chance to shine.** You come prepared with a system YOU designed and present it.
-- Presenting: **Digital Shopping system** — see `domain_interview_prep.md` for full prep
-- Walk through: problem → architecture → key technical decisions → results → what you'd do differently
+**Round 3 — Domain Interview (Miro whiteboard, 60 min):**
+- **This is a full hour.** ~18 min you present, ~40 min they dig in with questions.
+- **Whiteboard tool is Miro** (not CodeSignal whiteboard). Practice drawing on Miro beforehand.
+- Presenting: **Digital Shopping system** with **Payments subsystem deep-dive**
+- See `domain_interview_prep.md` for full scripts and structure
+- See `domain_interview_diagram.html` for reference diagram (practice recreating on Miro)
+- **Structure:**
+  - Part 1 (0-8 min): Context, judgment arc, architecture evolution (3 stages on Miro)
+  - Part 2 (8-16 min): Payment/reservation deep-dive (component architecture + state machine)
+  - Part 3 (16-18 min): Tradeoffs summary, results, open for questions
+  - Part 4 (18-60 min): Their Q&A — this is where you prove depth
 - **Expect the AI question:** "How would you build this differently with AI tools?"
   - AI for inventory data quality (detect stale/wrong listings)
   - AI for lead scoring (which leads are high-intent?)
   - AI for testing (auto-generated integration tests across services)
   - AI for monitoring (anomaly detection on lead volume, inventory freshness)
-- **Staff+ signal:** Show you made tradeoffs, influenced multiple teams, set standards — not just "I wrote the code"
+- **Staff+ signal:** Show judgment under ambiguity, deliberate scoping, consistency tradeoffs, not just "I wrote the code"
 
 **Round 4 — Behavioral (Staff+ level):**
 - Formal STAR interview — have Stories 1, 3, 4, 5, 8 polished
@@ -586,25 +593,43 @@ Story numbering references star_stories.md (1=API Mod, 2=Parity, 3=AI Platform, 
 
 ## 15. Pre-Interview Checklist
 
-### Before Virtual On-Site (May 4)
-- [ ] Re-read Sections 3–5 of this doc (roles, fit, VO round guide)
-- [ ] Re-read resume_coinbase.html
-- [ ] Re-read star_stories.md — Stories 1, 2, 3, 4, 7, 8 polished (lead with metrics)
-- [ ] Re-read the domain interview prep doc for Story 1 (API Modernization) — practice the walkthrough and the AI question answer
-- [ ] Practice Stories 1, 2, 4 aloud (2 min each — lead with metrics, platform impact)
-- [ ] Review coding prep: LC 2043 bank system follow-up progression (Section 12) + HashMap patterns
-- [ ] Review VO coding topics: Pagination (OOD design), Block Mining (greedy fee/size), Food Delivery, Crypto Order state machine
-- [ ] Review system design: Payment System, Rate Limiter, Distributed Message Queue (Section 13)
-- [ ] Review common patterns/red flags table (Section 13a) — idempotency, DLQ, SLO alerting, distributed tracing
+### Before Virtual On-Site
+
+**Coding (DONE):**
+- [x] Pagination — solved all levels + production architecture discussion
+- [x] Block Mining — solved L1 + L2, understand greedy approach, know the trap
+- [x] Food Delivery — solved all 4 levels (TreeMap for range queries)
+- [x] Crypto Order Event Processing — solved L1 + L2, understand idempotency
+- [x] Interleave Iterator — understood, Deque for L3
+- [x] Log File Parser — understood, split(":", 4) key insight
+- [ ] Review LC 2043 bank system follow-up progression (Section 12) — concurrency + distributed levels
+
+**System Design (THIS WEEK):**
+- [ ] **Coinbase Explore / Real-Time Price Feed** — #1 topic, do a 45-min timed practice
+- [ ] Review Payment/Settlement System design (Section 13)
+- [ ] Review common patterns/red flags table (Section 13a)
+
+**Domain Interview (DONE):**
+- [x] Presentation scripts written (domain_interview_prep.md)
+- [x] Diagram created (domain_interview_diagram.html)
+- [ ] **Practice drawing on Miro** — 15 min, recreate the evolution + payments diagrams
+- [ ] Practice talking through the scripts aloud (time yourself — aim for 16-18 min)
+
+**Behavioral (THIS WEEKEND):**
+- [ ] Practice Stories 1, 3, 4, 5, 8 aloud (2 min each)
+- [ ] Review Direct Questions section in star_stories.md
+- [ ] Review Staff+ Strengths section
+- [ ] Brush up on "Why Coinbase?" answer (Section 8)
+
+**Logistics:**
+- [ ] Familiarize with CodeSignal IDE (coding + SD rounds)
+- [ ] Create Miro account and practice the whiteboard tool
 - [ ] Brush up on blockchain/crypto basics (Section 9) — finality, reconciliation, hot/cold wallets
-- [ ] Practice Excalidraw or whatever whiteboard tool they use (CodeSignal whiteboard for SD round)
-- [ ] Familiarize yourself with CodeSignal IDE (coding round uses it — multi-file support available)
 
 ### Key Reminders for VO Day
 - Only 1 coding round — the other 3 are conversational. Lead confidently, don't wait for prompts.
-- Coding: think out loud before writing anything. Clarify algorithm + edge cases first.
-- System Design: YOU drive. Proactively address scale, correctness, fault tolerance.
-- Domain Interview: come with Story 1 prepared end-to-end. Expect the AI question.
+- Coding: think out loud before writing anything. Clarify algorithm + edge cases first. Start simple, submit, then iterate.
+- System Design: YOU drive. Lead with the hard problem first. Proactively address scale, correctness, fault tolerance.
+- Domain Interview: Miro whiteboard. Present ~18 min (evolution + payments), then handle ~40 min Q&A. Show judgment, not just architecture.
 - Behavioral: every answer needs metrics. 2 min max per story. Pause after STAR for follow-ups.
 - Common bug patterns to avoid: new level breaks old methods (blast radius check), copy-paste boolean conditions
-- Start simple, submit, then iterate — don't overengineer upfront
