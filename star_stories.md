@@ -15,6 +15,9 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 **"Tell me your strengths."**
 > "I'm strong at seeing across team boundaries. After working across many product features, I naturally spot systemic problems that no single team owns — and I have the follow-through to turn that into a cross-org initiative. The API modernization at CarGurus started that way: I identified the bottleneck, pitched the solution, led 10 teams through it, and set the architectural standard for the org."
 
+**"Why should we hire you?" / "What makes you different from other candidates?"**
+> "Three things. First, I see across team boundaries — after working across many product features, I naturally identify systemic problems that no single team owns, and I have the follow-through to turn that into a cross-org initiative with buy-in. Second, I've shipped under real pressure — 0→1 products, high-traffic platform rewrites, migrations with zero regressions — not just at one company, but across early-stage (Toast), mid-stage (Applause), and public company (CarGurus) environments. Third, I combine deep hands-on engineering with written communication — I write the RFC, build the prototype, align 10 teams, and mentor the engineers who'll own it after me. That's rare at Staff+ level — most candidates are strong at one of those, not all three."
+
 **"Tell me your weaknesses."**
 > "I tend to dive deep into the technical solution before fully validating the product context. I had a case where I designed an aggressive caching strategy that was technically sound but didn't account for how frequently the product team was running experiments — it caused stale data in A/B tests. Since then, I always ask 'what's the mutation pattern?' before designing caching or any data strategy. I catch myself and ask the product question first now."
 
@@ -57,6 +60,35 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 
 **"Tell me about a time you had to say no."**
 > "I don't say no — I say 'here's what that costs.' On the MCP project, a PM wanted a new capability that would require significant rework. Instead of refusing, I said: 'We can do this in two days for the demo, but it won't be production-safe. Here's the alternative that gets you 80% of the value and stays on the production path.' They chose the alternative. Transparent tradeoffs, not binary yes/no."
+
+---
+
+## Staff+ Strengths — What Sets You Apart
+
+### Core Differentiators (the "why you?" answer)
+
+- **Cross-boundary problem identification** — I see systemic issues that no single team owns, and I turn them into cross-org initiatives with buy-in (API modernization, cross-domain validation, RFC standards)
+- **Technical judgment under ambiguity** — I know which problems to solve, not just how. I scope for maximum impact, make deliberate tradeoffs, and communicate them transparently
+- **Full-lifecycle ownership** — I write the RFC, build the prototype, align 10 teams, mentor the engineers who'll own it, and define the success metrics. Rare to find all of that in one person
+- **Delivery across company stages** — early-stage (Toast, 0→1 from scratch), mid-stage (Applause, platform modernization), public company (CarGurus, org-wide influence at scale)
+
+### What Staff+ Engineers Do That Senior Engineers Don't
+
+- **Set direction, not just execute** — I define what to build and why, not just how
+- **Operate at org scope** — my impact is measured across 10+ teams, not within one team's codebase
+- **Force-multiply** — I make other engineers more effective through standards, mentoring, and reusable patterns
+- **Communicate upward and outward** — RFCs, design docs, architecture reviews, stakeholder alignment — written persuasion is a core tool
+- **Navigate tradeoffs explicitly** — I don't just pick the "right" answer, I document alternatives, explain what we're giving up, and commit transparently
+- **Own ambiguity** — I deliver in environments where requirements are shifting, the solution isn't known, and multiple stakeholders disagree
+
+### How to Signal Staff+ in Interviews
+
+- Lead with the **why** (problem identification, judgment), not the **how** (implementation details)
+- Show that you **chose** the problem, not that it was assigned
+- Demonstrate **influence without authority** — aligning teams that don't report to you
+- Use **"we"** for execution, **"I"** for identification and direction-setting
+- Mention **what you said no to** — scoping and prioritization signals maturity
+- Connect your work to **business outcomes**, not just technical metrics
 
 ---
 

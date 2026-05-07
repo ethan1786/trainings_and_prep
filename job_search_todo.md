@@ -83,7 +83,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 ## On Hold — Monitor Career Pages Regularly
 
 ### Actively monitoring:
-- **Stripe** — waiting for new backend platform roles. Message YiYi when one appears.
+- **Stripe** — waiting for new backend platform roles. Message YiYi when one appears. When applying: update base resume to add "daily AI-assisted development (Claude Code)" + "building internal AI tools" to Leadership Highlights.
 - **Spotify** — lifeatspotify.com/jobs — checked Apr 30, only Senior level ($160-234K), too low. Monitor for Staff.
 
 ### Lower priority:
@@ -101,11 +101,11 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Coinbase** | VO scheduling, 14% layoff announced | Check if Kael replies by Fri 5/9 — if silent, send neutral follow-up | **Fri May 9** |
 | **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
-| **NVIDIA** | 2 roles forwarded to HM | Eleza forwarded resume + questionnaire to hiring teams; waiting | — |
+| **NVIDIA** | Call being scheduled | HR or HM call (TBD) — provided availability | Waiting for confirmation |
 | **DoorDash** | Applied ✅ | Staff SWE, Security Engineering (cold) | Applied May 5 |
 | **OpenAI** | Applied ✅ | Principal SWE, Infrastructure Security (cold) | Applied May 5 |
 | **Twilio** | Applied ✅ | Waiting | — |
-| **Elastic** | Applied ✅ | Principal Java Eng II, Security - Elasticsearch | — |
+| ~~Elastic~~ | Rejected | — | — |
 
 ---
 
@@ -117,7 +117,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **NVIDIA** | Senior + Principal | Lead SWE Fleet Mgmt + Principal Physical AI Tooling | Done ✅ | — | Yes (x2) | Sourcer responded ✅ | **Both roles forwarded to hiring teams** |
 | **Cherry** | Staff | Full-Stack (fintech BNPL) | Done ✅ | Done ✅ | Inbound | Director of Eng + HR | **HM call May 11** |
 | **Twilio** | Principal (P5) | Principal Eng, Phone Numbers Platform | Done ✅ | — | Yes | Cold | Applied — waiting |
-| **Elastic** | Principal | Principal Java Eng II, Security - Elasticsearch | Done ✅ | — | Yes | Cold | Applied — waiting |
+| ~~**Elastic**~~ | Principal | Principal Java Eng II, Security - Elasticsearch | Done ✅ | — | Yes | Cold | **Rejected** |
 | **HashiCorp/IBM** | Staff | Staff SWE, HashiCorp Secure (Vault/Boundary) | Done ✅ | — | Yes | Recruiter ✅ | **HR done — HM call next** |
 | **Circle** | Staff | — | Done | Done | Yes | VP of Eng | Waiting (slow process) |
 | **Meta** | E6 (Staff) | Backend Infra | Done | Done | In progress | Close friend (referral) | **On hold — mass layoffs** |
@@ -141,6 +141,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **OpenAI** | Principal | Principal SWE, Infrastructure Security (remote) | Done ✅ | — | Yes | Cold (Vishal as backup) | **Applied May 5** |
 | **DoorDash** | Staff | Staff SWE, Security Engineering (remote) | Done ✅ | — | Yes | Cold | **Applied May 5** |
 | **OpenAI** | — (prev) | Dead (prev) | Retried with InfraSec Principal (remote) ✅ |
+| **Elastic** | Principal, Security - Elasticsearch | Rejected (cold) | No response/connection |
 | **Datadog** | Staff (cold) | Rejected | Skip — NYC in-office, no connection |
 | **Snap, Palantir, Plaid** | — | Skipped | No remote roles |
 | **Discord, Vercel, Ramp/Juno** | — | Skipped | Stack mismatch (Python/TypeScript) |
