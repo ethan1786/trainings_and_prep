@@ -132,58 +132,237 @@ Practice in an IDE with no autocomplete to simulate the environment.
 They'll pick something from your resume and drill. For each technology/concept below, be ready to explain HOW it works, not just that you used it.
 
 **Kubernetes / EKS:**
-- Pod lifecycle: Pending → Running → Succeeded/Failed. What triggers each transition?
-- Deployments vs StatefulSets — when to use each (stateless services vs databases/queues)
-- Rolling update strategy: maxSurge, maxUnavailable — how to do zero-downtime deploys
-- Readiness vs Liveness probes — readiness gates traffic, liveness restarts the pod. Your JVM warmup story (DGS) is a readiness probe use case.
-- HPA (Horizontal Pod Autoscaler) — what metrics do you scale on? CPU? Custom metrics (queue depth, request latency)?
-- Resource requests vs limits — what happens when a pod exceeds its memory limit? (OOMKilled)
-- Service discovery — K8s Services, DNS resolution, headless services for StatefulSets
-- **Your story:** "We deployed on EKS. Each microservice is a Deployment with readiness probes that validate JVM warmup. We use HPA scaling on request latency p99. Rolling updates with maxUnavailable=0 for zero-downtime."
+
+- **Pod lifecycle: Pending → Running → Succeeded/Failed. What triggers each transition?**
+  - Pending: pod accepted by the cluster but not yet scheduled (waiting for node resources, image pull, or volume mount)
+  - Running: at least one container is running. Kubelet on the assigned node pulled the image and started the process.
+  - Succeeded: all containers exited with code 0 (for Jobs/batch). For long-running pods, they stay Running until killed.
+  - Failed: at least one container exited non-zero or was killed by the system (OOMKilled, evicted).
+  - Key point: the scheduler assigns pods to nodes based on resource requests, affinity rules, and taints/tolerations.
+
+- **Deployments vs StatefulSets — when to use each?**
+  - Deployment: stateless services. Pods are interchangeable, can be killed/replaced freely. Horizontal scaling is trivial.
+  - StatefulSet: stateful workloads (databases, Kafka brokers, ZooKeeper). Pods get stable network identity (pod-0, pod-1), persistent volume claims that survive restarts, and ordered startup/shutdown.
+  - Rule of thumb: if the pod needs stable storage or identity, use StatefulSet. Everything else is Deployment.
+
+- **Rolling update strategy: maxSurge, maxUnavailable — how to do zero-downtime deploys?**
+  - maxSurge: how many extra pods can exist above desired count during rollout (e.g., 1 means create 1 new pod before killing an old one)
+  - maxUnavailable: how many pods can be unavailable during rollout (0 = never drop below desired count)
+  - Zero-downtime: set maxUnavailable=0, maxSurge=1. New pod starts, passes readiness probe, gets traffic. Only then old pod terminates.
+  - Also need proper readiness probes — if the new pod fails readiness, rollout pauses automatically.
+
+- **Readiness vs Liveness probes?**
+  - Readiness: "Can this pod serve traffic?" Fails → pod removed from Service endpoints, no traffic routed to it. Pod stays alive.
+  - Liveness: "Is this pod stuck/deadlocked?" Fails → kubelet kills and restarts the container.
+  - Common mistake: using liveness for slow startup — pod gets killed in a restart loop. Use startup probe or generous initialDelaySeconds instead.
+  - My JVM warmup example: readiness probe calls a `/health/ready` endpoint that returns 200 only after the warmup routine (synthetic GraphQL queries) completes. Traffic doesn't flow until JIT has compiled hot paths.
+
+- **HPA (Horizontal Pod Autoscaler) — what metrics to scale on?**
+  - Default: CPU utilization (e.g., scale up when avg CPU > 70%)
+  - Better for services: custom metrics — request latency p99, queue depth, error rate
+  - For our orchestration service: scaled on request latency p99. When latency rose, we added pods before CPU was maxed — latency is a leading indicator, CPU is lagging.
+  - For Kafka consumers: scale on consumer lag (messages behind). Lag growing → add consumers.
+  - HPA checks metrics every 15s by default. Cooldown prevents thrashing (scale-down stabilization window).
+
+- **Resource requests vs limits?**
+  - Requests: guaranteed minimum. Scheduler uses this to place pods. Pod won't be scheduled unless a node has this much free.
+  - Limits: hard ceiling. If pod exceeds memory limit → OOMKilled. If exceeds CPU limit → throttled (not killed).
+  - Best practice: set requests = typical usage, limits = peak burst. Don't set limits too low or you get unnecessary OOMKills under load spikes.
+  - No limits set at all → pod can consume entire node's resources, starving neighbors. Always set at least memory limits.
+
+- **Service discovery?**
+  - ClusterIP Service: gets a virtual IP + DNS entry (my-service.my-namespace.svc.cluster.local). kube-proxy routes traffic to healthy pod endpoints.
+  - Headless Service (clusterIP: None): no virtual IP. DNS returns all pod IPs directly. Used for StatefulSets where clients need to address specific pods.
+  - External: LoadBalancer type provisions cloud LB. Ingress controller for HTTP routing rules.
+
+- **Your story:** "We deployed on EKS. Each microservice is a Deployment with readiness probes that validate JVM warmup — I built a warmup routine that sends synthetic queries through the full pipeline before the readiness endpoint returns 200. We use HPA scaling on request latency p99 as a custom metric. Rolling updates with maxUnavailable=0 for zero-downtime. Each service has CPU requests matching steady-state usage, memory limits set to 2x typical heap to absorb GC spikes without OOMKill."
 
 **Terraform / Infrastructure as Code:**
-- State file — what is it, where do you store it (S3 + DynamoDB lock), what happens if two people apply simultaneously?
-- Modules — how do you structure reusable infra? (module per service, shared networking module)
-- Plan → Apply workflow — what does `terraform plan` actually do?
-- Drift detection — how do you know if someone manually changed infra? (`terraform plan` shows diff)
-- **Your story:** "We use Terraform for all AWS provisioning — VPCs, EKS clusters, RDS instances, SQS queues. State in S3 with DynamoDB locking. Each service team owns their Terraform module, shared networking is managed centrally."
+
+- **State file — what is it, where do you store it, what if two people apply simultaneously?**
+  - State file: JSON that maps your Terraform config to real-world resources. Tracks resource IDs, metadata, dependencies.
+  - Remote state: stored in S3 bucket with DynamoDB table for locking. Never commit state to git (contains secrets, gets stale).
+  - Concurrent apply: DynamoDB lock prevents two `terraform apply` from running simultaneously. Second person gets "state locked" error and must wait.
+  - If lock gets stuck (crashed apply): `terraform force-unlock <lock-id>` — but dangerous, verify no apply is actually running.
+
+- **Modules — how to structure reusable infra?**
+  - Module = reusable Terraform package with inputs (variables) and outputs.
+  - Structure: shared modules for common patterns (e.g., `modules/ecs-service`, `modules/rds-postgres`, `modules/sqs-with-dlq`). Each team composes these into their service config.
+  - Root module per service/environment: `services/lead-service/prod/main.tf` calls shared modules with service-specific variables.
+  - Versioning: modules stored in separate repo or registry, pinned to version. Breaking changes require version bump.
+
+- **Plan → Apply workflow?**
+  - `terraform plan`: reads current state, compares to config, generates an execution plan showing what will be created/modified/destroyed. No changes made.
+  - `terraform apply`: executes the plan. Makes actual API calls to AWS/GCP/etc.
+  - In CI/CD: plan runs on PR (visible in PR comment), apply runs on merge to main. Human reviews plan before merge.
+  - `terraform plan -out=plan.bin`: saves plan to file, `terraform apply plan.bin` ensures exactly that plan is applied (no drift between plan and apply).
+
+- **Drift detection?**
+  - Drift: someone manually changes infrastructure via AWS console, CLI, or another tool. State no longer matches reality.
+  - Detection: `terraform plan` shows diff — "this resource was changed outside Terraform, will be reverted."
+  - Options: (1) let Terraform revert it (enforce IaC as source of truth), (2) `terraform import` to adopt the manual change into state, (3) `terraform refresh` to update state without changing infra.
+  - Prevention: restrict AWS console write access via IAM. All changes go through Terraform in CI.
+
+- **Your story:** "We use Terraform for all AWS provisioning — VPCs, EKS clusters, RDS instances, SQS queues. State stored in S3 with DynamoDB locking. Each service team owns their Terraform module, shared networking and security groups are managed centrally by the platform team. Plan runs in CI on every PR — reviewers see exactly what infra changes a code change requires."
 
 **AWS Services (know these at depth):**
-- **ECS vs EKS** — ECS is AWS-native container orchestration (simpler), EKS is managed Kubernetes (portable, more control). When to pick each.
-- **SQS** — standard vs FIFO. Visibility timeout. Dead letter queue. At-least-once delivery. Long polling. How to handle duplicate messages (idempotency).
-- **SNS** — pub/sub fan-out. SNS → SQS pattern for decoupling. Filter policies.
-- **S3** — eventual consistency for overwrites (before 2020, now strong). Storage classes (Standard, IA, Glacier). Pre-signed URLs for secure access.
-- **RDS** — Multi-AZ (synchronous standby for HA). Read replicas (async, for read scaling). Failover behavior. Connection pooling.
-- **IAM** — least privilege. Role-based access. Service roles vs user roles. Cross-account access with assume-role.
+
+- **ECS vs EKS — when to pick each?**
+  - ECS: AWS-native, simpler. No K8s complexity. Good for teams that just want containers running without managing cluster control plane. Fargate mode = fully serverless (no EC2 instances to manage).
+  - EKS: managed Kubernetes. Portable (can migrate to GKE or on-prem K8s). Full K8s ecosystem (Helm, Istio, ArgoCD). More control, more operational overhead.
+  - Decision: if you're already invested in K8s tooling or need multi-cloud portability → EKS. If you want simplicity and are AWS-only → ECS/Fargate.
+
+- **SQS — standard vs FIFO, visibility timeout, DLQ?**
+  - Standard: unlimited throughput, at-least-once delivery, best-effort ordering. Messages can be delivered more than once → need idempotent consumers.
+  - FIFO: exactly-once processing, strict ordering within a message group. 300 msg/sec (3000 with batching). Use when order matters (financial transactions).
+  - Visibility timeout: after a consumer receives a message, it becomes invisible for X seconds. If consumer doesn't delete it before timeout, message reappears for another consumer. Set timeout > max processing time.
+  - Dead letter queue (DLQ): after N failed receive attempts (maxReceiveCount), message moves to DLQ. Alert on DLQ depth. Manually replay after fixing the bug.
+  - Long polling: consumer waits up to 20s for a message (reduces empty responses and cost vs short polling).
+  - Handling duplicates: store processed message IDs in a set (Redis or DB). Check before processing. Or design idempotent operations.
+
+- **SNS — pub/sub fan-out?**
+  - Publish one message, deliver to many subscribers (SQS queues, Lambda, HTTP endpoints, email).
+  - SNS → SQS pattern: decouple publishers from consumers. Publisher sends to SNS topic, each consumer team has their own SQS queue subscribed to that topic. Teams can consume at their own pace.
+  - Filter policies: subscriber can filter which messages it receives based on message attributes (e.g., only receive events where `eventType = "lead.submitted"`). Reduces noise per consumer.
+  - Fanout example: "When a lead is captured, SNS publishes once. Three SQS queues subscribe: notification service, analytics service, CRM sync service. Each processes independently."
+
+- **S3 — consistency, storage classes, access patterns?**
+  - Consistency: since Dec 2020, S3 provides strong read-after-write consistency for all operations. (Before that, overwrites/deletes were eventually consistent.)
+  - Storage classes: Standard (frequent access), IA (infrequent, cheaper storage, retrieval fee), Glacier (archive, minutes-to-hours retrieval), Deep Archive (cheapest, 12hr retrieval).
+  - Lifecycle policies: automatically transition objects between classes based on age (e.g., 90 days → IA, 1 year → Glacier).
+  - Pre-signed URLs: generate a time-limited URL that grants temporary access to a private object without requiring IAM credentials. Used for file downloads/uploads from untrusted clients.
+  - Multipart upload: for large files (>100MB), upload in parallel chunks, then assemble. Handles network failures gracefully — retry individual parts.
+
+- **RDS — HA, read replicas, failover?**
+  - Multi-AZ: synchronous replication to a standby in a different AZ. If primary fails, automatic failover to standby (~60-120s). No data loss (sync replication).
+  - Read replicas: asynchronous replication. For read scaling — route read queries to replicas. Can have up to 5 replicas. Lag is typically seconds but can grow under write load.
+  - Failover behavior: DNS endpoint (CNAME) automatically points to new primary. Application reconnects using same endpoint. Connection pool must handle brief interruption.
+  - Connection pooling: RDS has a max_connections limit. At high concurrency, use a connection pool (HikariCP in Java) or RDS Proxy (managed pooling layer).
+  - Backups: automated daily snapshots + transaction logs for point-in-time recovery (PITR) to any second within retention window.
+
+- **IAM — least privilege, roles, cross-account?**
+  - Principle of least privilege: grant only permissions needed for the specific task. No wildcards in production policies.
+  - Service roles (instance profiles): EC2/ECS tasks assume an IAM role. No long-lived credentials. Temporary credentials rotated automatically via STS.
+  - User roles: for humans — assume a role via SSO. MFA required for privileged roles.
+  - Cross-account access: Service in Account A assumes a role in Account B via `sts:AssumeRole`. The role in Account B has a trust policy allowing Account A.
+  - Policy evaluation: explicit Deny always wins. Then explicit Allow. Default is implicit Deny.
 
 **Circuit Breakers / Resilience:**
-- Three states: Closed (normal) → Open (failing, fast-fail) → Half-Open (testing recovery)
-- When to trip: failure rate threshold (e.g., 50% failures in 10-second window)
-- What happens when open: return fallback immediately, don't call downstream
-- Difference from retry: retry tries again, circuit breaker STOPS trying for a cooling period
-- Libraries: Resilience4j (Java), Hystrix (deprecated)
-- **Your story:** "Each downstream service in the orchestration layer has its own circuit breaker with tuned thresholds. When the pricing service degrades, the breaker opens and we return cached stale data rather than timing out the entire request."
+
+- **Three states: Closed → Open → Half-Open?**
+  - Closed (normal): requests pass through. Failures counted in a sliding window (e.g., last 10 seconds or last 100 calls).
+  - Open (tripped): failure rate exceeded threshold (e.g., >50% failures). All requests immediately fail-fast with fallback response. No calls to downstream. Timer starts (e.g., 30s cooling period).
+  - Half-Open (testing): after cooling period, allow a small number of trial requests through. If they succeed → back to Closed. If they fail → back to Open.
+
+- **When to trip?**
+  - Rate-based: >50% failure rate in a 10-second sliding window with minimum 20 calls (don't trip on 1 failure out of 2 calls).
+  - Slow-call threshold: if >80% of calls exceed a latency threshold (e.g., 2s), trip the breaker — slow is as bad as failing.
+  - Both conditions configurable per downstream dependency (fast service gets tight timeout, slow batch service gets lenient).
+
+- **What happens when open — what does the caller get?**
+  - Return a fallback: cached stale data, default value, degraded response, or explicit "service unavailable" for non-critical features.
+  - For critical paths: return partial response with available data, omit the failed section.
+  - Never block the request waiting for a timeout — the whole point is fast-fail.
+
+- **Difference from retry?**
+  - Retry: individual request failed, try again (with backoff). Good for transient failures (network blip).
+  - Circuit breaker: pattern of failures detected, STOP trying for a period. Good for sustained failures (downstream is dead, overloaded, or deploying).
+  - Use together: retry first (2-3 attempts with exponential backoff), if all retries fail → count as a breaker failure. Breaker trips after threshold of such failures.
+
+- **Resilience4j (Java) specifics:**
+  - Annotations: `@CircuitBreaker(name = "pricingService", fallbackMethod = "pricingFallback")`
+  - Config: `slidingWindowSize`, `failureRateThreshold`, `waitDurationInOpenState`, `slowCallRateThreshold`
+  - Monitoring: exposes metrics (state transitions, failure counts) to Prometheus/Datadog via micrometer.
+  - Bulkhead: limits concurrent calls to a dependency (prevents thread pool exhaustion). Separate from circuit breaker but complementary.
+
+- **Your story:** "Each downstream service in the orchestration layer has its own Resilience4j circuit breaker with tuned thresholds. The pricing service has a 50% failure threshold with a 30s cool-down. When it trips, we return the last cached price (acceptable staleness for a display page). The lead submission service has NO fallback — if it trips, we return an error because we can't silently drop a lead. Per-service tuning based on business criticality."
 
 **Distributed Tracing / Observability:**
-- Trace ID propagated across all services in headers (W3C Trace Context or B3)
-- Span = one unit of work (one service call). Trace = tree of spans.
-- Instrumentation: auto-instrument HTTP clients/servers, add manual spans for critical business logic
-- Datadog APM vs Jaeger vs X-Ray — how traces are collected, stored, queried
-- **Your story:** "Every request gets a trace ID at the gateway. Each downstream call is a child span. We set SLO budgets per span — if the inventory service consistently uses 40ms of our 50ms p99 budget, that's immediately visible in Datadog."
+
+- **Trace ID propagation — how does it work end-to-end?**
+  - Gateway generates a trace ID (128-bit UUID) on first request entry. Injected into HTTP headers (W3C `traceparent` header or Zipkin B3 headers).
+  - Every downstream HTTP client reads the trace ID from incoming request and propagates it in outgoing calls. Each service adds its own span.
+  - Result: a tree of spans where root = gateway, children = each downstream call. You can see the entire request journey.
+  - For async (Kafka/SQS): trace ID goes in message headers/attributes. Consumer creates a linked span.
+
+- **Span = one unit of work. Trace = tree of spans. What data is in a span?**
+  - Operation name (e.g., "GET /api/listings"), start time, duration
+  - Tags/attributes: HTTP status, service name, error flag, custom business fields
+  - Parent span ID: links child to parent, forming the tree
+  - Events/logs: timestamped annotations within the span (e.g., "cache miss", "retry attempt 2")
+
+- **Instrumentation approaches?**
+  - Auto-instrumentation: agent/library automatically wraps HTTP clients, DB drivers, frameworks. Zero code changes. Captures 80% of value.
+  - Manual spans: for business logic that matters (e.g., "inventory enrichment" step within a handler). Wrap with `tracer.startSpan()` / `span.end()`.
+  - Libraries: OpenTelemetry (vendor-neutral standard), Datadog APM agent, AWS X-Ray SDK.
+
+- **Datadog APM vs Jaeger vs X-Ray?**
+  - Datadog APM: SaaS, auto-instrumentation agents for Java/.NET/Python/Go, correlated with metrics/logs in same platform. Expensive at scale.
+  - Jaeger: open-source, self-hosted. Good for K8s environments. Stores in Elasticsearch or Cassandra. More operational overhead.
+  - AWS X-Ray: native AWS integration, good if you're all-in on AWS. Limited customization vs Datadog/Jaeger.
+  - All support OpenTelemetry — you can instrument once and switch backends.
+
+- **SLO-based observability — how does it work?**
+  - Define per-service latency budgets: "inventory service must respond in <30ms at p99"
+  - Dashboard shows each service's contribution to total request latency. Sum of parts = total p99.
+  - Alert when a single service consumes more than its budget — catch degradation before it impacts the user-facing SLA.
+  - Error budgets: "we accept 0.1% errors per month. Once budget is burned, freeze deploys until reliability improves."
+
+- **Your story:** "Every request gets a trace ID at the API gateway. Each downstream call is a child span with Datadog APM auto-instrumentation. I set SLO latency budgets per downstream service — if the inventory service starts using 40ms of our 50ms p99 budget, we see it immediately in the Datadog dashboard and can investigate before the user-facing page degrades. We also correlate traces with structured logs — every log line includes the trace ID so you can jump from a metric spike to the exact trace to the exact log line."
 
 **Event-Driven Architecture (Kafka / SQS/SNS):**
-- Kafka: topics, partitions, consumer groups, offsets. Ordering guarantee (per-partition only).
-- At-least-once vs exactly-once: Kafka defaults to at-least-once. Exactly-once requires idempotent producers + transactional consumers.
-- Consumer lag — what does it mean, how to monitor, what to do when it grows
-- Backpressure — what happens when consumers can't keep up? (Kafka: lag grows. SQS: messages pile up, eventually hit DLQ after max receives.)
-- **Your story:** "Lead events go through Kafka partitioned by dealer_id — guarantees ordering per dealer. Inventory updates use SQS with a DLQ. If a consumer fails 3 times, the message goes to DLQ and we alert."
+
+- **Kafka: topics, partitions, consumer groups, offsets?**
+  - Topic: logical channel for events (e.g., "lead-events", "inventory-updates")
+  - Partition: ordered, append-only log within a topic. Messages in a partition are strictly ordered by offset. A topic has N partitions for parallelism.
+  - Consumer group: set of consumers that cooperatively read from a topic. Each partition is assigned to exactly one consumer in the group. More partitions = more parallelism.
+  - Offset: position of a message within a partition. Consumer tracks "last committed offset" — on restart, resumes from there.
+  - Partition key: determines which partition a message goes to (hash of key mod N partitions). Same key = same partition = ordering guaranteed.
+
+- **At-least-once vs exactly-once?**
+  - At-least-once (default): producer retries on failure, message might be written twice. Consumer processes a message, commits offset. If consumer crashes before commit → reprocesses same message.
+  - Exactly-once: requires idempotent producers (`enable.idempotence=true`, deduplicates by producer ID + sequence number) AND transactional consumers (read-process-commit in single transaction).
+  - In practice: most systems use at-least-once + idempotent consumers (cheaper, simpler). Store processed event IDs, check before processing.
+
+- **Consumer lag — what is it, how to handle?**
+  - Lag = latest offset on partition minus consumer's committed offset. Measures "how far behind" a consumer is.
+  - Monitor lag in Datadog/Prometheus. Alert if lag exceeds threshold (e.g., >10K messages or >5 minutes of events).
+  - Growing lag means: consumer is slower than producer. Fix: add more consumers (up to partition count), optimize processing logic, or scale the consumer instances.
+  - Sudden lag spike: often means a consumer crashed or is stuck on a poison message (that's where DLQ helps).
+
+- **Backpressure — what happens when consumers can't keep up?**
+  - Kafka: lag grows indefinitely (Kafka retains messages per retention policy, e.g., 7 days). Messages are NOT lost — just delayed. Consumer will eventually catch up or you scale it.
+  - SQS: messages pile up in queue. After maxReceiveCount failed attempts → message goes to DLQ. Queue depth is the backpressure metric. Alert when depth exceeds threshold.
+  - Handling: scale consumers, increase processing capacity, or shed low-priority work. Never drop messages silently in a financial system.
+
+- **Your story:** "Lead events go through Kafka partitioned by dealer_id — guarantees ordering per dealer so leads for the same dealer are processed sequentially. Inventory updates use SQS (ordering not critical) with a DLQ. If a consumer fails a message 3 times, it moves to DLQ and we alert. We monitor consumer lag in Datadog — any lag above 5 minutes triggers a page."
 
 **In-Memory Caching:**
-- Why in-memory over Redis: avoid network hop + serialization cost at high rpm
-- Cache invalidation: TTL-based (short TTL for dynamic data) vs event-based (cache busted on write event)
-- Cache-aside pattern: check cache → miss → load from DB → put in cache → return
-- Cache stampede: what happens when TTL expires and 1000 requests hit simultaneously? (lock/single-flight pattern)
-- **Your story:** "At 8K rpm with deeply nested response objects, Redis serialization cost would eat latency gains. In-memory cache with short TTL for dynamic data, long TTL for static (dealer metadata). Cache invalidation tied to Kafka events for critical data."
+
+- **Why in-memory over Redis?**
+  - Redis adds: network round-trip (~0.5-1ms) + serialization cost (marshal/unmarshal complex nested objects). At 8K rpm, this adds up.
+  - In-memory: direct object reference access, zero serde, sub-microsecond reads. Tradeoff: per-instance (not shared), uses heap space, stale across instances.
+  - When Redis IS better: multiple instances need same cached data with consistency guarantees, or cache is too large to fit in each instance's heap.
+  - Hybrid: in-memory L1 cache (short TTL, per-instance) + Redis L2 cache (longer TTL, shared). Check L1 first, fall back to L2, fall back to DB.
+
+- **Cache invalidation strategies?**
+  - TTL-based: simplest. Set short TTL (e.g., 30s) for dynamic data, long TTL (e.g., 1hr) for static data. Acceptable staleness = TTL duration.
+  - Event-based: Kafka event triggers cache eviction. "Inventory changed for listing X" → evict from cache → next read fills fresh data. Near-real-time freshness.
+  - Versioned: cache key includes a version. When data changes, bump version → old key expires naturally, new key is filled. No explicit eviction needed.
+  - Best for financial data: event-based (can't show stale prices). Best for display data: TTL-based (acceptable staleness, simpler).
+
+- **Cache-aside pattern (most common)?**
+  - Read: check cache → hit? return. Miss? → load from DB → put in cache → return.
+  - Write: write to DB → invalidate/evict cache entry. (DON'T write-through cache unless you need strong consistency between cache and DB.)
+  - Why not write-through: adds latency to writes and complexity. Cache-aside is simpler for read-heavy workloads.
+
+- **Cache stampede — what is it, how to prevent?**
+  - Problem: TTL expires on a hot key. 1000 concurrent requests all see cache miss simultaneously. All 1000 hit the database → DB overwhelmed.
+  - Solution 1: single-flight / request coalescing. Only one goroutine/thread fetches, others wait for its result. (Guava `LoadingCache` does this automatically in Java.)
+  - Solution 2: early expiration with jitter. Refresh cache slightly before TTL expires. Background thread refreshes proactively.
+  - Solution 3: lock-based. Acquire a distributed lock before fetching. Others wait or return stale data.
+
+- **Your story:** "At 8K rpm with deeply nested response objects, the network hop to Redis plus JSON serialization cost would eat 2-3ms per request — that's 10% of our latency budget. I chose in-memory Caffeine cache with two tiers: long TTL (1hr) for static dealer metadata, short TTL (30s) for dynamic inventory data. For lead-related data that must be fresh, we use event-based invalidation — Kafka event triggers eviction. Caffeine's `LoadingCache` handles stampede prevention automatically — only one thread fetches on miss, others wait."
 
 ---
 
