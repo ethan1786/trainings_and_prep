@@ -25,7 +25,8 @@
 | **Sat-Sun May 10-11** | BQ practice + Cherry HM prep |
 | **Mon May 11** | Cherry HM call with Tim |
 | **Wed May 13** | HashiCorp/IBM HM video interview (2:00 PM ET) |
-| **~May 14-15** | Cherry coding round (if HM goes well — warmup before Coinbase) |
+| **Wed May 14** | **NVIDIA technical interviews** (11AM + 1PM, MS Teams) |
+| **~May 15-16** | Cherry coding round (if HM goes well — warmup before Coinbase) |
 | **~May 21-22** | **Coinbase Virtual On-Site (Wed/Thu preferred)** — waiting for Kael to confirm |
 | **May 23-25** | Memorial weekend — travel to in-laws, no interviews |
 | **~May 27-28** | HashiCorp coding round (if scheduled by then) |
@@ -109,7 +110,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Coinbase** | VO scheduling, 14% layoff announced | Check if Kael replies by Fri 5/9 — if silent, send neutral follow-up | **Fri May 9** |
 | **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
 | **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
-| **NVIDIA** | Call being scheduled | HR or HM call (TBD) — provided availability | Waiting for confirmation |
+| **NVIDIA** | Interview confirmed ✅ | 2 technical rounds (Senior SWE + Lead SWE) | **Wed May 14, 11AM + 1PM** |
 | **DoorDash** | Applied ✅ | Staff SWE, Security Engineering (cold) | Applied May 5 |
 | **OpenAI** | Applied ✅ | Principal SWE, Infrastructure Security (cold) | Applied May 5 |
 | **Twilio** | Applied ✅ | Waiting | — |
