@@ -73,6 +73,27 @@
 
 **Key principle**: Don't follow this rigidly. The interviewer may want to spend 20 min on deep dives. Be flexible, but make sure you cover requirements and a high-level diagram before diving deep.
 
+### Time Budget (60-min round)
+
+| Phase | Time | What to produce |
+|---|---|---|
+| Requirements + NFRs + estimation | 5-7 min | APIs listed, key numbers written |
+| High-level design | 8-10 min | Component diagram with data flows |
+| Deep dive (hardest part) | 25-30 min | Detailed design of 1-2 components |
+| Operational concerns | 10-12 min | Monitoring, failure modes, scaling |
+
+### What Goes on the Whiteboard vs Scratch Paper
+
+| What | Where | Why |
+|---|---|---|
+| APIs / functional requirements | **Whiteboard** — top-left corner | Interviewer references them throughout; shows you scoped clearly |
+| NFR numbers (QPS, volume) | **Whiteboard** — below APIs, small text | Interviewer sees you justified scale decisions |
+| Back-of-envelope math | **Scratch paper** (say numbers out loud) | Messy work, not part of the final diagram |
+| Architecture diagram | **Whiteboard** — center | The main deliverable |
+| Deep-dive details | **Whiteboard** — near relevant component | Data model, state machine, etc. |
+
+**Rule:** Anything you'll reference later goes on whiteboard. Anything that's intermediate calculation stays on paper but spoken aloud.
+
 ---
 
 ## 1. Requirements & Scoping (5 min)
@@ -88,6 +109,11 @@ Prioritize ruthlessly. For a URL shortener:
 ### Non-Functional Requirements
 Always quantify. Don't say "high availability" — say "99.99% uptime."
 
+**Mental model — 3+3+2:**
+- 3 Service: Scale, Latency, Availability
+- 3 Data: Consistency, Durability, Volume
+- +2 Operations (mention later): Security, Observability
+
 | Dimension | Questions to Ask |
 |---|---|
 | **Scale** | How many users? QPS for reads vs writes? |
@@ -96,6 +122,31 @@ Always quantify. Don't say "high availability" — say "99.99% uptime."
 | **Consistency** | Strong or eventual? What happens on stale reads? |
 | **Durability** | Can we lose data? What's the RPO? |
 | **Data volume** | How much storage? Growth rate? Retention? |
+
+#### Design Impact — What Each NFR Actually Changes
+
+| NFR | Design Impact | Example Decision |
+|---|---|---|
+| **Scale** (traffic) | DB choice, caching, CQRS, sharding, horizontal scaling | Read-heavy at 100K rps → add read replicas + CQRS split |
+| **Latency** | Cache layer choice (in-memory vs Redis), async vs sync, CDN | p99 < 50ms → in-memory cache, async fan-out for parallel calls |
+| **Availability** | Replication, failover, redundancy, circuit breakers | 99.99% → multi-AZ, active-active, no single points of failure |
+| **Consistency** | Sync write-through vs async eventual, event-driven | "Can the user see stale data?" Yes → eventual + Kafka. No → sync write. |
+| **Durability** | WAL, sync replication, backup/PITR strategy | "Can we lose a transaction?" No → WAL + sync replica + no Redis-only store |
+| **Volume** | DB choice (relational vs NoSQL vs blob), partitioning, tiering | 10TB+ → shard by key, archive old data to S3/cold storage |
+
+#### When NFRs Drive Architecture vs. When They're Addons
+
+**For most interview problems (content, social, e-commerce):**
+- Scale + Latency + Consistency + Volume drive the core diagram
+- Availability and Durability are "add a replica, add backups" — mention in operational concerns section
+
+**For financial/payment systems (Coinbase, Stripe, banking):**
+- Durability and Availability are FIRST-CLASS constraints that determine your entire architecture
+- "Zero data loss" → WAL + sync replication, NOT Redis as primary store
+- "99.99% uptime" → multi-region active-active with conflict resolution
+- These aren't bolt-ons — they dictate which DB you pick, how you write data, and your replication topology
+
+**Rule of thumb:** If the interviewer says "this handles money" or "we can't lose a transaction" — lead with durability and availability. They're telling you the hard constraints.
 
 ### Back-of-Envelope Estimation
 
@@ -581,6 +632,20 @@ Client → Read  → Read Replica 1, 2, 3
 ```
 User ID % N → Shard N
 ```
+
+#### When to Shard
+
+| Trigger | Symptom | Threshold |
+|---|---|---|
+| **Traffic-bound (compute)** | Write QPS exceeds single node | > 5K writes/sec for Postgres |
+| **Traffic-bound (connections)** | Connection pool exhaustion | Max connections hit under concurrency |
+| **Storage-bound (disk)** | DB size exceeds practical limit | > 2-5 TB for Postgres (performance degrades) |
+| **Storage-bound (memory)** | Indexes don't fit in RAM | Index size > available RAM → disk seeks on queries |
+| **Operations-bound** | Backup/restore time unacceptable | Multi-TB backups take hours |
+
+**In practice, traffic hits first.** A single Postgres handles terabytes fine if QPS is low. But at high QPS, even a small dataset needs sharding because CPU/connections are maxed.
+
+**Interview framing:** Always state WHICH constraint forces the shard — "Our write throughput at 50K/sec exceeds single-node Postgres capacity, so I'd shard by user_id to distribute writes across N nodes." Don't just say "let's shard for scale."
 
 | Sharding Strategy | Pros | Cons |
 |---|---|---|

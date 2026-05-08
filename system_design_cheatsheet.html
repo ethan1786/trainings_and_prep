@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>System Design Cheat Sheet</title>
+<style>
+  @page { size: letter; margin: 0.4in; }
+  @media print {
+    body { margin: 0; padding: 0; }
+    .page-break { page-break-before: always; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.35;
+    color: #1a1a1a;
+    max-width: 7.5in;
+    margin: 0 auto;
+    padding: 0.4in 0;
+  }
+  h1 {
+    font-size: 14pt;
+    text-align: center;
+    color: #1a365d;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #1a365d;
+    padding-bottom: 4px;
+  }
+  h2 {
+    font-size: 10pt;
+    color: #fff;
+    background: #1a365d;
+    padding: 3px 8px;
+    margin: 10px 0 6px;
+    border-radius: 3px;
+  }
+  h3 {
+    font-size: 9pt;
+    color: #2c5282;
+    margin: 8px 0 4px;
+    border-bottom: 1px solid #bee3f8;
+    padding-bottom: 2px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0 8px;
+    font-size: 8pt;
+  }
+  th {
+    background: #edf2f7;
+    color: #2d3748;
+    font-weight: 700;
+    text-align: left;
+    padding: 3px 6px;
+    border: 1px solid #cbd5e0;
+  }
+  td {
+    padding: 2px 6px;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f7fafc; }
+  .cols-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .cols-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .box {
+    border: 1.5px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 8px;
+  }
+  .box-blue { border-color: #63b3ed; background: #ebf8ff; }
+  .box-green { border-color: #68d391; background: #f0fff4; }
+  .box-orange { border-color: #f6ad55; background: #fffaf0; }
+  .box-red { border-color: #fc8181; background: #fff5f5; }
+  .box-purple { border-color: #b794f4; background: #faf5ff; }
+  .box h3 { margin-top: 0; border: none; padding: 0; }
+  code {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 7.5pt;
+    background: #edf2f7;
+    padding: 1px 3px;
+    border-radius: 2px;
+  }
+  .formula {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 8pt;
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 4px 0;
+  }
+  .highlight {
+    background: #fefcbf;
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+  ul { padding-left: 14px; margin: 2px 0; }
+  li { margin-bottom: 1px; }
+  .small { font-size: 7.5pt; color: #718096; }
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 7pt;
+    font-weight: 700;
+    color: #fff;
+  }
+  .badge-blue { background: #3182ce; }
+  .badge-green { background: #38a169; }
+  .badge-red { background: #e53e3e; }
+</style>
+</head>
+<body>
+
+<h1>System Design Cheat Sheet</h1>
+
+<!-- ===== STEP 1 ===== -->
+<h2>Step 1: Requirements (always do first)</h2>
+
+<div class="cols-2">
+  <div class="box box-blue">
+    <h3>Functional Requirements</h3>
+    <p>List 3-5 core APIs / use cases. Prioritize. Say: "I'll focus on these, and defer X."</p>
+  </div>
+  <div class="box box-green">
+    <h3>Non-Functional (3 + 3 + 2)</h3>
+    <table>
+      <tr><th>Service</th><th>Data</th><th>Ops</th></tr>
+      <tr><td>Scale (QPS)</td><td>Consistency</td><td>Security</td></tr>
+      <tr><td>Latency (p99)</td><td>Durability</td><td>Observability</td></tr>
+      <tr><td>Availability (%)</td><td>Volume</td><td></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== STEP 2 ===== -->
+<h2>Step 2: Back-of-Envelope Estimation</h2>
+
+<div class="formula">1 day = 100K seconds &nbsp;&nbsp;|&nbsp;&nbsp; Daily &divide; 100K = QPS &nbsp;&nbsp;|&nbsp;&nbsp; Peak = Avg &times; 3-5x</div>
+
+<div class="cols-3">
+  <div>
+    <h3>Throughput Limits (single node)</h3>
+    <table>
+      <tr><th>System</th><th>Capacity</th></tr>
+      <tr><td>Postgres writes</td><td>~5K QPS</td></tr>
+      <tr><td>Postgres reads</td><td>~50K QPS</td></tr>
+      <tr><td>Redis</td><td>~100-500K ops/s</td></tr>
+      <tr><td>Kafka (broker)</td><td>~100-500K msg/s</td></tr>
+      <tr><td>Nginx / Gateway</td><td>~50-100K req/s</td></tr>
+      <tr><td>Web server</td><td>~5-50K req/s</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>Data Sizes</h3>
+    <table>
+      <tr><th>Data</th><th>Size</th></tr>
+      <tr><td>UUID</td><td>36B (str) / 16B (bin)</td></tr>
+      <tr><td>Short text</td><td>200-500B</td></tr>
+      <tr><td>DB row (typical)</td><td>500B - 2KB</td></tr>
+      <tr><td>JSON response</td><td>1-10 KB</td></tr>
+      <tr><td>Thumbnail</td><td>50-200 KB</td></tr>
+      <tr><td>Image (hi-res)</td><td>2-5 MB</td></tr>
+      <tr><td>Video (1min 1080p)</td><td>20-50 MB</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>Latency</h3>
+    <table>
+      <tr><th>Operation</th><th>Time</th></tr>
+      <tr><td>RAM access</td><td>~100 ns</td></tr>
+      <tr><td>SSD read</td><td>~100 us</td></tr>
+      <tr><td>Redis GET</td><td>~0.5-1 ms</td></tr>
+      <tr><td>DB query (indexed)</td><td>~1-5 ms</td></tr>
+      <tr><td>Network (same DC)</td><td>~0.5 ms</td></tr>
+      <tr><td>Network (cross-region)</td><td>~150 ms</td></tr>
+    </table>
+    <h3>Quick Math</h3>
+    <table>
+      <tr><td>1M &times; 1KB</td><td>= 1 GB</td></tr>
+      <tr><td>1B &times; 500B</td><td>= 500 GB</td></tr>
+      <tr><td>100GB/day &times; 365</td><td>= 36 TB/yr</td></tr>
+      <tr><td>Storage &times; 3</td><td>= with replication</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== STEP 3 ===== -->
+<h2>Step 3: Architecture Patterns</h2>
+
+<div class="cols-2">
+  <div>
+    <h3>DB Selection</h3>
+    <table>
+      <tr><th>Need</th><th>Choose</th></tr>
+      <tr><td>Structured + transactions + joins</td><td><strong>Postgres</strong></td></tr>
+      <tr><td>Flexible schema + horizontal scale</td><td><strong>DynamoDB / MongoDB</strong></td></tr>
+      <tr><td>High-write time-series</td><td><strong>Cassandra / ClickHouse</strong></td></tr>
+      <tr><td>Full-text search</td><td><strong>Elasticsearch</strong> (secondary)</td></tr>
+      <tr><td>Binary / media</td><td><strong>S3</strong> + metadata in DB</td></tr>
+      <tr><td>Cache (shared)</td><td><strong>Redis</strong></td></tr>
+      <tr><td>Cache (per-instance, low latency)</td><td><strong>In-memory</strong> (Caffeine)</td></tr>
+    </table>
+
+    <h3>Communication Protocols</h3>
+    <table>
+      <tr><th>Protocol</th><th>Best For</th></tr>
+      <tr><td>REST</td><td>Public APIs, CRUD, browser</td></tr>
+      <tr><td>gRPC</td><td>Service-to-service, low latency</td></tr>
+      <tr><td>GraphQL</td><td>Mobile, flexible queries</td></tr>
+      <tr><td>WebSocket</td><td>Real-time bidirectional</td></tr>
+      <tr><td>SSE</td><td>Server &rarr; client one-way push</td></tr>
+      <tr><td>Kafka / SQS</td><td>Async, decoupling, event-driven</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>Scaling Patterns</h3>
+    <table>
+      <tr><th>Pattern</th><th>When</th></tr>
+      <tr><td>Read replicas</td><td>Read-heavy, single writer</td></tr>
+      <tr><td>CQRS</td><td>Reads/writes have different patterns</td></tr>
+      <tr><td>Sharding</td><td>Single DB can't handle volume</td></tr>
+      <tr><td>Consistent hashing</td><td>Distributed cache, minimize rebalance</td></tr>
+      <tr><td>CDN</td><td>Static/media, global users</td></tr>
+      <tr><td>In-memory cache</td><td>Hot data, avoid DB/Redis hop</td></tr>
+    </table>
+
+    <h3>When to Split Services</h3>
+    <ul>
+      <li>Different scaling needs (read vs write heavy)</li>
+      <li>Different team ownership</li>
+      <li>Different deployment cadence</li>
+      <li>Different availability requirements</li>
+    </ul>
+
+    <h3>Sharding Strategies</h3>
+    <table>
+      <tr><th>Strategy</th><th>Pro</th><th>Con</th></tr>
+      <tr><td>Hash-based</td><td>Even distribution</td><td>Resharding painful</td></tr>
+      <tr><td>Range-based</td><td>Range queries work</td><td>Hot spots</td></tr>
+      <tr><td>Consistent hash</td><td>Minimal redistribution</td><td>More complex</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== PAGE 2 ===== -->
+<div class="page-break"></div>
+
+<h2>Step 4: Deep Dive Toolkit</h2>
+
+<div class="cols-2">
+  <div>
+    <h3>Caching</h3>
+    <table>
+      <tr><th>Strategy</th><th>How</th></tr>
+      <tr><td>Cache-aside</td><td>App: cache &rarr; miss &rarr; DB &rarr; fill cache</td></tr>
+      <tr><td>Write-through</td><td>Write cache + DB together (consistent)</td></tr>
+      <tr><td>Write-behind</td><td>Write cache, async to DB (fast, risky)</td></tr>
+    </table>
+    <p style="margin-top:3px;"><strong>Invalidation:</strong> TTL (simple) | Event-driven (fresh) | Versioned (no invalidation)</p>
+    <p><strong>Stampede fix:</strong> single-flight / lock / early refresh / jitter</p>
+
+    <h3>Consistency Models</h3>
+    <table>
+      <tr><th>Model</th><th>Guarantee</th></tr>
+      <tr><td>Strong (linearizable)</td><td>Always see latest write</td></tr>
+      <tr><td>Eventual</td><td>Converges eventually</td></tr>
+      <tr><td>Read-your-writes</td><td>You see your own writes</td></tr>
+      <tr><td>Causal</td><td>Causally related ops in order</td></tr>
+    </table>
+    <p><strong>Quorum:</strong> W + R > N guarantees overlap. Standard: N=3, W=2, R=2</p>
+
+    <h3>Messaging</h3>
+    <table>
+      <tr><th></th><th>Queue (SQS)</th><th>Stream (Kafka)</th></tr>
+      <tr><td>Consumed</td><td>Once, deleted</td><td>Retained, replayable</td></tr>
+      <tr><td>Ordering</td><td>Per-queue (FIFO)</td><td>Per-partition</td></tr>
+      <tr><td>Fan-out</td><td>Separate queue/consumer</td><td>Consumer groups</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3>Reliability Patterns</h3>
+    <table>
+      <tr><th>Pattern</th><th>What it does</th></tr>
+      <tr><td><strong>Circuit breaker</strong></td><td>Stop calling failing svc, fast-fail</td></tr>
+      <tr><td><strong>Retry + backoff</strong></td><td>Handle transient failures</td></tr>
+      <tr><td><strong>Bulkhead</strong></td><td>Isolate resources per dependency</td></tr>
+      <tr><td><strong>Idempotency key</strong></td><td>Safe retries, no duplicates</td></tr>
+      <tr><td><strong>DLQ</strong></td><td>Capture failed msgs for investigation</td></tr>
+      <tr><td><strong>Graceful degradation</strong></td><td>Partial/cached data vs 500</td></tr>
+      <tr><td><strong>Timeout</strong></td><td>Bound wait time, always set</td></tr>
+    </table>
+
+    <h3>Replication</h3>
+    <table>
+      <tr><th>Model</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>Single-leader</td><td>Simple, strong consistency</td><td>Leader = bottleneck</td></tr>
+      <tr><td>Multi-leader</td><td>Multi-DC, low write latency</td><td>Conflict resolution</td></tr>
+      <tr><td>Leaderless</td><td>High availability</td><td>Quorum math, read repair</td></tr>
+    </table>
+
+    <h3>Distributed Consensus / Coordination</h3>
+    <table>
+      <tr><th>Pattern</th><th>Use</th></tr>
+      <tr><td>2PC</td><td>Strong consistency, blocking, SPOF</td></tr>
+      <tr><td>Saga + compensate</td><td>Microservices, eventual consistency</td></tr>
+      <tr><td>Event sourcing</td><td>Append-only log, audit trail</td></tr>
+      <tr><td>Raft/Paxos</td><td>Leader election, log replication</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===== STEP 5 ===== -->
+<h2>Step 5: Operational Excellence (last 10 min)</h2>
+
+<div class="cols-2">
+  <div>
+    <h3>Four Golden Signals (Google SRE)</h3>
+    <table>
+      <tr><td><strong>1. Latency</strong></td><td>p50, p99, p99.9</td></tr>
+      <tr><td><strong>2. Traffic</strong></td><td>QPS — detect spikes/drops</td></tr>
+      <tr><td><strong>3. Errors</strong></td><td>5xx rate, error ratio</td></tr>
+      <tr><td><strong>4. Saturation</strong></td><td>CPU, memory, connections, disk</td></tr>
+    </table>
+
+    <h3>Deployment</h3>
+    <ul>
+      <li><strong>Canary:</strong> 1-5% traffic &rarr; watch metrics &rarr; full rollout</li>
+      <li><strong>Blue-green:</strong> instant rollback, 2x resources</li>
+      <li><strong>Feature flags:</strong> decouple deploy from release, kill switch</li>
+    </ul>
+  </div>
+  <div>
+    <h3>Failure Modes to Address</h3>
+    <table>
+      <tr><th>Failure</th><th>Mitigation</th></tr>
+      <tr><td>DB overload</td><td>Read replicas, cache, circuit breaker</td></tr>
+      <tr><td>Cascading failure</td><td>Circuit breaker, bulkhead, fallback</td></tr>
+      <tr><td>Hot partition</td><td>Better shard key, scatter-gather</td></tr>
+      <tr><td>Data corruption</td><td>Audit log, reconciliation, PITR</td></tr>
+      <tr><td>Dependency down</td><td>Retry, fallback, graceful degradation</td></tr>
+    </table>
+
+    <h3>Staff+ On-Call Test</h3>
+    <p><em>"If paged at 3AM: what dashboard do I check? What runbook do I follow? What lever can I pull?"</em></p>
+  </div>
+</div>
+
+<!-- ===== FINANCIAL ===== -->
+<h2 style="background:#c53030;">Financial Systems (Coinbase/Stripe) &mdash; Extra Constraints</h2>
+
+<div class="box box-red">
+  <div class="cols-2">
+    <div>
+      <p><strong>When interviewer says "this handles money":</strong></p>
+      <ul>
+        <li><strong>Idempotency</strong> on every write (client-generated key)</li>
+        <li><strong>WAL + sync replication</strong> (zero data loss)</li>
+        <li><strong>Double-entry ledger</strong> (debit + credit = balanced)</li>
+        <li><strong>Reconciliation</strong> job (internal vs external provider)</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong>Event sourcing</strong> for full audit trail</li>
+        <li><strong>Auth-then-capture</strong> for payment holds</li>
+        <li>No Redis as <em>primary</em> store for financial data</li>
+        <li>Availability + Durability are FIRST-CLASS, not addons</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NFR IMPACT ===== -->
+<h2>NFR &rarr; Design Impact (Quick Reference)</h2>
+
+<table>
+  <tr><th>NFR</th><th>What It Changes</th><th>Example Decision</th></tr>
+  <tr><td><strong>High scale</strong></td><td>Sharding, caching, CQRS</td><td>100K rps reads &rarr; read replicas + cache</td></tr>
+  <tr><td><strong>Low latency</strong></td><td>In-memory cache, async fan-out, CDN</td><td>p99 &lt; 50ms &rarr; no Redis (network hop), use in-memory</td></tr>
+  <tr><td><strong>High availability</strong></td><td>Multi-AZ, active-active, circuit breakers</td><td>99.99% &rarr; no single points of failure</td></tr>
+  <tr><td><strong>Strong consistency</strong></td><td>Sync writes, single leader, no eventual</td><td>"Can user see stale?" No &rarr; sync write-through</td></tr>
+  <tr><td><strong>Zero data loss</strong></td><td>WAL, sync replication, no cache-only</td><td>Financial &rarr; Postgres sync replica, not Redis primary</td></tr>
+  <tr><td><strong>Large volume</strong></td><td>Partition, tier (hot/warm/cold), archival</td><td>10TB+ &rarr; shard + archive cold data to S3</td></tr>
+</table>
+
+</body>
+</html>
