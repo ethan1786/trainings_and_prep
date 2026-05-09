@@ -183,9 +183,9 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 
 | # | Story | LP Gap It Fills | Status |
 |---|-------|-----------------|--------|
-| 14 | Failure & Learning | Are Right A Lot, Learn and be Curious | ⚠️ NEEDS REAL STORY |
-| 15 | Customer Obsession | Customer Obsession | ⚠️ PLACEHOLDER |
-| 16 | Peer Conflict Resolution | Have Backbone, Disagree and Commit (peer, not leader) | ⚠️ PLACEHOLDER |
+| 14 | Failure & Learning (caching decision) | Are Right A Lot, Learn and be Curious | ✅ Ready |
+| 15 | Customer Obsession (dealer real-time notifications) | Customer Obsession, Delivers Results | ✅ Ready |
+| 16 | Peer Conflict Resolution (service boundary disagreement) | Have Backbone, Disagree and Commit (peer) | ✅ Ready |
 
 ---
 
@@ -703,11 +703,11 @@ Story 9 (THIS)               → combines both: AI agent validates cross-domain
 
 ---
 
-## Story 14: Failure & Learning — TODO: NEEDS REAL STORY
+## Story 14: Failure & Learning
 
 **Anchor:** Cross-cutting · **LPs:** Are Right A Lot, Learn and be Curious
 **Best for:** All companies
-**Status:** ⚠️ PLACEHOLDER — previous content was fabricated. Need a real failure story before interviews. Think about: a technical decision that seemed right but wasn't, underestimated complexity, didn't push back hard enough, or moved too fast.
+**Status:** Ready — based on real caching decision during Digital Shopping (same story used in "weakness" answer)
 
 ### STAR Spoken-Style
 
@@ -742,19 +742,55 @@ I wrote a retrospective documenting what I assumed, what I missed, and what the 
 
 ---
 
-## Story 15: Customer Obsession — TODO: PLACEHOLDER
+## Story 15: Customer Obsession — Prioritizing Dealer Experience Over Engineering Convenience
 
-**Anchor:** Cross-cutting · **LPs:** Customer Obsession
+**Anchor:** Digital Shopping · **LPs:** Customer Obsession, Delivers Results
 **Best for:** All companies
-**Status:** ⚠️ PLACEHOLDER — Need a story about making a decision that prioritized the end user/customer over engineering convenience. Think about: responding to dealer/user feedback, changing a technical approach because of customer impact, advocating for user experience in a technical decision.
+
+### STAR Spoken-Style
+
+**Situation:** During the Digital Shopping project, our lead notification system was designed for engineering simplicity — leads were batched and delivered to dealers in hourly digests via email. It was easy to build, easy to monitor, and reduced load on the notification pipeline. From an engineering perspective, it was the right call.
+
+**Task:** But dealers were complaining. In the automotive industry, the first dealer to respond to a lead has a much higher close rate. A one-hour delay meant our dealers were losing deals to competitors using platforms with real-time notifications. Product brought this feedback to me, and I had to decide: keep the simple, maintainable batch system, or redesign for real-time delivery.
+
+**Action:** I chose the customer. I redesigned the lead notification flow from batched to near-real-time — leads pushed to dealers within seconds of capture. This wasn't trivial: it meant introducing a Kafka-based event pipeline (replacing the cron-based batch job), adding per-dealer delivery preferences (some dealers wanted email, some wanted CRM webhook integration), and building retry logic with backoff for failed deliveries. I also kept the batch digest as a fallback — if real-time delivery failed 3 times, the lead still appeared in the next hourly digest. Belt and suspenders.
+
+The engineering cost was real: more complexity, more failure modes to handle, more monitoring. But the business case was clear — dealer response time was directly tied to revenue.
+
+**Result:** Dealer response time to leads dropped from hours to minutes. Dealers reported higher conversion rates, and dealer satisfaction scores improved. The real-time pipeline became the default for all new lead types going forward. The fallback digest caught ~2% of leads that would have been lost to transient failures.
+
+### Bullet Recap
+
+- **S:** Lead notifications batched hourly for engineering simplicity; dealers losing deals due to delayed response
+- **T:** Decide between maintaining simple system vs. redesigning for customer (dealer) needs
+- **A:** Chose the customer; redesigned to near-real-time via Kafka pipeline; per-dealer delivery preferences; retry logic with batch fallback for reliability
+- **R:** Dealer response time hours→minutes; higher conversion rates; became default for all lead types; fallback caught 2% of failures
 
 ---
 
-## Story 16: Peer Conflict Resolution — TODO: PLACEHOLDER
+## Story 16: Peer Conflict Resolution — Service Boundary Disagreement
 
-**Anchor:** Cross-cutting · **LPs:** Have Backbone, Disagree and Commit
+**Anchor:** API Modernization · **LPs:** Have Backbone, Disagree and Commit, Earn Trust
 **Best for:** All companies
-**Status:** ⚠️ PLACEHOLDER — Need a story about disagreeing with a peer (not a senior leader — Story 8 covers that). Think about: disagreeing with another principal engineer on an approach, resolving a technical disagreement between two teams, a time you and a peer had different opinions and how you resolved it.
+
+### STAR Spoken-Style
+
+**Situation:** During the API modernization, I had a disagreement with another principal engineer who owned one of the downstream services we were consolidating. I proposed that their service should expose a well-defined API contract that the new orchestration layer would call. They pushed back — they wanted to keep their logic inside the monolith and have the orchestration service call their code directly via internal method calls, not network calls. Their argument: network calls add latency, complexity, and failure modes. Why introduce a service boundary where a function call works?
+
+**Task:** We were both principals with equal standing. Neither could overrule the other. But the decision would affect the architecture for years — if we didn't establish clean service boundaries now, the "just call the function" pattern would spread and we'd never decompose the monolith.
+
+**Action:** I didn't escalate or force the issue. Instead, I scheduled a 1-on-1 to understand their real concerns. It turned out their worry wasn't philosophical — it was practical: they were afraid that a service boundary would mean they'd now own a separately-deployed service with on-call responsibility, and their team was already stretched thin. That was a legitimate constraint I hadn't considered.
+
+So I proposed a compromise: we'd define the API contract now (clean interface with clear input/output), but implement it as an in-process library call initially — no network hop, no separate deployment. The contract was the important part. When their team had capacity (or if the monolith needed to split for other reasons), the extraction to a network service would be a mechanical change, not a redesign. I documented this as an ADR: "We're choosing an in-process implementation today because of team capacity, but the interface is designed to be extractable. Here's the trigger for when we'd extract."
+
+**Result:** They agreed — the compromise addressed their real concern (operational burden) without sacrificing the long-term architecture (clean contracts). Six months later, when another team needed that data, they extracted it to a proper service in under a week because the interface was already well-defined. The other principal told me the ADR was key — it made the decision transparent and reversible, not political. We went on to collaborate closely on two more service boundaries using the same pattern.
+
+### Bullet Recap
+
+- **S:** Disagreement with peer principal about service boundaries — they wanted function calls, I wanted API contracts
+- **T:** Neither could overrule the other; decision affects long-term architecture
+- **A:** Had 1-on-1 to understand real concern (operational burden, not philosophy); proposed compromise: define contract now, implement in-process initially, extract later when ready; documented as ADR with trigger conditions
+- **R:** Both agreed; service was extracted in under a week 6 months later (interface was already clean); pattern reused for 2 more boundaries; built trust with peer
 
 ---
 
@@ -762,19 +798,19 @@ I wrote a retrospective documenting what I assumed, what I missed, and what the 
 
 | LP | Stories |
 |---|---|
-| **Customer Obsession** | 3, 4, 15 (TODO) |
+| **Customer Obsession** | 3, 4, 15 |
 | **Ownership** | 1, 4, 5, 11, 13 |
 | **Invent and Simplify** | 2, 7, 9, 12 |
-| **Are Right A Lot** | 4, 14 (TODO) |
-| **Learn and be Curious** | 7, 10, 13 |
+| **Are Right A Lot** | 4, 14 |
+| **Learn and be Curious** | 7, 10, 13, 14 |
 | **Hire & Develop The Best** | 5 |
 | **Insists on Highest Standards** | 1, 7 |
 | **Think Big** | 1, 7, 9 |
 | **Bias for Action** | 3, 4, 13 |
 | **Dive Deep** | 1, 2, 10, 11 |
-| **Earn Trust** | 1, 3, 5, 6 |
-| **Delivers Results** | 1, 3, 4, 11 |
-| **Have Backbone; Disagree and Commit** | 6, 8, 16 (TODO) |
+| **Earn Trust** | 1, 3, 5, 6, 16 |
+| **Delivers Results** | 1, 3, 4, 11, 15 |
+| **Have Backbone; Disagree and Commit** | 6, 8, 16 |
 
 ## Company Quick-Reference Matrix
 

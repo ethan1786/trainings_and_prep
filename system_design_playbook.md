@@ -134,6 +134,145 @@ Always quantify. Don't say "high availability" — say "99.99% uptime."
 | **Durability** | WAL, sync replication, backup/PITR strategy | "Can we lose a transaction?" No → WAL + sync replica + no Redis-only store |
 | **Volume** | DB choice (relational vs NoSQL vs blob), partitioning, tiering | 10TB+ → shard by key, archive old data to S3/cold storage |
 
+#### NFR Playbook — How to Satisfy Each Constraint
+
+**Scale / Traffic (high QPS)**
+
+| QPS Range | Read Strategy | Write Strategy |
+|---|---|---|
+| < 10K | Single DB, maybe Redis cache | Single Postgres |
+| 10K-50K | Redis cache + read replicas | Single Postgres with connection pooling |
+| 50K-500K | Redis cluster + multiple replicas | Sharded Postgres (by user/tenant) |
+| 500K+ | In-memory cache (per-instance) + Redis L2 | Sharded + CQRS (separate write from read path) |
+
+Key levers:
+- **Read-heavy:** add cache layers (in-memory L1 → Redis L2 → DB). Most systems are 10:1 read:write.
+- **Write-heavy:** shard the DB, batch writes, use async queues for non-critical writes, CQRS.
+- **Both:** separate read and write paths entirely. Write to primary, async replicate to read replicas/cache.
+- **Connection pooling:** always use (HikariCP for Java). A Postgres node can handle more QPS than most people think if you're not exhausting connections.
+
+---
+
+**Latency (reducing P50 / P99)**
+
+| Technique | P50 Impact | P99 Impact | Tradeoff |
+|---|---|---|---|
+| In-memory cache (Caffeine) | Huge (sub-ms) | Huge | Memory cost, staleness |
+| Redis cache | Good (~1ms) | Good | Network hop, serialization cost |
+| Async fan-out (parallel calls) | Big (total = max, not sum) | Big | Complexity, partial failure handling |
+| CDN for static content | Big for global users | Big | Cache invalidation complexity |
+| Connection pooling | Moderate | Big (eliminates connection setup spikes) | Pool sizing tuning |
+| DB index optimization | Moderate | Big (prevents full scans on edge cases) | Write overhead per index |
+| JVM warmup / pre-compilation | None for steady state | Big (eliminates cold-start spikes) | Startup time |
+| Pre-computation / materialized views | Big | Big | Staleness, storage cost |
+
+P99 specifically (tail latency):
+- **GC pauses:** tune JVM heap, use G1/ZGC for low-pause collection
+- **Cold starts:** JVM warmup routine before accepting traffic (your DGS story)
+- **Outlier dependencies:** circuit breaker + timeout so one slow call doesn't block entire request
+- **Retry amplification:** capped retries with backoff, otherwise slow calls cascade
+- **Per-service timeout budgets:** "inventory gets 30ms max, pricing gets 20ms max, total budget is 50ms"
+
+---
+
+**Availability (pushing toward 99.9% → 99.99%)**
+
+| SLA | Allowed Downtime/Year | What You Need |
+|---|---|---|
+| 99% | 3.65 days | Basic monitoring, manual failover |
+| 99.9% | 8.76 hours | Multi-AZ, health checks, auto-restart |
+| 99.99% | 52.6 minutes | Multi-AZ active-active, zero-downtime deploys, automatic failover, no SPOF |
+| 99.999% | 5.26 minutes | Multi-region active-active, consensus protocols, extensive automation |
+
+Key levers by tier:
+
+**99% → 99.9%:**
+- Deploy in multiple AZs (RDS Multi-AZ, EKS across AZs)
+- Readiness/liveness probes → auto-restart failed pods
+- Load balancer health checks → remove unhealthy instances
+- Basic alerting (PagerDuty on 5xx spike)
+
+**99.9% → 99.99%:**
+- Eliminate ALL single points of failure (every component has a replica/fallback)
+- Zero-downtime deploys (rolling updates, blue-green)
+- Circuit breakers → graceful degradation (serve partial response vs. 500)
+- Redundant dependencies (if Redis dies, fall back to DB with degraded latency)
+- Auto-scaling (handle traffic spikes without manual intervention)
+- Chaos engineering (test failure modes before they happen in prod)
+
+**99.99% → 99.999%:**
+- Multi-region active-active (survive entire region failure)
+- Conflict resolution for multi-region writes (CRDTs, last-write-wins, or single-leader per entity)
+- Sub-minute failover detection + automatic rerouting (DNS failover or global load balancer)
+- No maintenance windows — everything upgradable in-place
+
+---
+
+**Consistency (strong vs eventual — what each requires)**
+
+| Consistency Level | Implementation | Use When | Cost |
+|---|---|---|---|
+| **Strong (linearizable)** | Single leader, sync replication, or consensus (Raft) | Money, inventory counts, auth | Higher latency, lower throughput |
+| **Read-your-writes** | Route user reads to same replica they wrote to (session affinity) | User-facing UX (see your own post) | Sticky routing complexity |
+| **Eventual** | Async replication, event-driven updates | Display data, feeds, analytics | Stale reads (seconds to minutes) |
+| **Causal** | Version vectors, logical clocks | Chat ordering, collaborative editing | Moderate complexity |
+
+How to implement strong consistency:
+- Single-leader Postgres (all writes to primary, reads from primary for critical paths)
+- Distributed transactions (2PC) — expensive, avoid if possible
+- Saga with compensating actions — eventual but semantically correct
+- Idempotency keys — safe retries without duplicating effects
+
+How to implement eventual consistency safely:
+- Accept that reads can be stale — design UI to tolerate it ("updating..." indicators)
+- Use event-driven: write to primary → publish event → consumers update their read models
+- Reconciliation jobs to catch drift between primary and derived stores
+- Versioned data (optimistic concurrency) — detect conflicts on write, resolve or reject
+
+---
+
+**Durability (can we lose data?)**
+
+| Durability Level | Implementation | RPO (Recovery Point Objective) |
+|---|---|---|
+| **Zero data loss** | WAL + sync replication to standby | RPO = 0 (no data loss even on crash) |
+| **Minimal loss** | Async replication + frequent WAL archiving | RPO = seconds (lose last few uncommitted) |
+| **Best effort** | Single node, periodic backups | RPO = hours (lose data since last backup) |
+
+Key levers:
+- **WAL (Write-Ahead Log):** every write is logged before acknowledged. On crash, replay WAL to recover.
+- **Synchronous replication:** standby confirms write before primary acknowledges to client. Zero data loss, higher latency.
+- **Point-in-Time Recovery (PITR):** WAL archiving lets you restore to any second within retention window.
+- **Backups:** automated daily snapshots + continuous WAL archiving. Test restores regularly.
+- **Multi-AZ:** data exists in 2+ availability zones. Survives AZ failure without data loss (RDS Multi-AZ does this automatically with sync replication).
+
+For financial systems (Coinbase):
+- Sync replication (non-negotiable for transactions)
+- Append-only ledger (never delete/mutate financial records)
+- Event sourcing (full audit trail, replayable)
+- Reconciliation (verify internal state matches external sources)
+- NO Redis-only storage for anything financial (Redis persistence is best-effort)
+
+---
+
+**Volume (large data — how to handle 10TB, 100TB, PB)**
+
+| Data Size | Strategy |
+|---|---|
+| < 500 GB | Single Postgres, no special handling |
+| 500 GB - 5 TB | Postgres with partitioning (by time or key), archive old data |
+| 5 TB - 50 TB | Sharded Postgres or move to DynamoDB/Cassandra |
+| 50 TB+ | Data lake (S3 + Parquet), query with Athena/Spark. Hot data in DB, cold in S3. |
+
+Key levers:
+- **Table partitioning:** split large tables by time (monthly partitions). Drop old partitions cheaply. Queries on recent data only scan relevant partitions.
+- **Hot/warm/cold tiering:** recent data in fast store (memory/SSD), older in cheaper store (S3/Glacier). Lifecycle policies automate transitions.
+- **Compression:** columnar formats (Parquet, ORC) compress 5-10x vs raw. Use for analytics/archive.
+- **TTL / data retention:** delete or archive data older than X days. Don't keep everything forever unless compliance requires it.
+- **Separate OLTP from OLAP:** transactional DB for real-time operations, data warehouse (Snowflake, BigQuery, Redshift) for analytics on historical data.
+
+---
+
 #### When NFRs Drive Architecture vs. When They're Addons
 
 **For most interview problems (content, social, e-commerce):**
@@ -516,9 +655,64 @@ Staff+ engineers are expected to think about **day 2 operations**, not just day 
 |---|---|---|
 | **DB overload** | Connection pool exhaustion, latency spike | Read replicas, caching, circuit breaker |
 | **Cascading failure** | Error rate spike across services | Circuit breaker, bulkhead isolation, fallbacks |
-| **Hot partition** | Uneven load across shards | Better partition key, scatter-gather |
+| **Hot partition** | Uneven load across shards | See Hot Partition Solutions below |
 | **Data corruption** | Checksum mismatch, anomaly detection | Immutable audit log, point-in-time recovery |
 | **Dependency failure** | Health check failure, timeout increase | Retry with backoff, fallback, graceful degradation |
+
+### Hot Partition Solutions
+
+Consistent hashing solves even distribution of many keys. It does NOT solve a single hot key getting massive traffic (same key always routes to same node by design).
+
+| Technique | How | Tradeoff |
+|---|---|---|
+| **Replicate hot key** to N nodes | Read from random replica | Slightly stale reads, write complexity |
+| **Local in-memory cache** | Cache hot key in app layer, never hit the partition | Staleness (TTL-based) |
+| **Key splitting** | Append random suffix: `key_shard_0` through `key_shard_9` | Scatter-gather on read (read all 10, merge) |
+| **Vertical scale the hot node** | Give it more CPU/memory | Hardware ceiling, expensive, band-aid |
+| **Detect and reroute** | Monitor per-key QPS, auto-promote hot keys to dedicated handling | Operational complexity |
+
+**Interview framing:** "Consistent hashing prevents hot *nodes* (uneven key distribution). It doesn't prevent hot *keys* (one key getting disproportionate traffic). Different problem, different solution."
+
+### Bulkhead Pattern (Detailed)
+
+Named after ship compartments that contain flooding. Isolate resources per dependency so one failing dependency can't take down everything.
+
+```
+WITHOUT bulkhead:
+  Shared thread pool (100 threads):
+    Service A (healthy, uses 20) + Service B (stuck, consumes 80) 
+    → Service C starved, no threads left → cascading failure
+
+WITH bulkhead:
+  Service A pool (30 threads) — isolated
+  Service B pool (40 threads) — isolated (if stuck, only its 40 burned)
+  Service C pool (30 threads) — works fine regardless of B
+```
+
+Implementation: Resilience4j `@Bulkhead` annotation, separate thread pools, separate connection pools per dependency.
+
+**Why this matters for orchestration services:** In a GraphQL resolver model, the framework controls execution — all resolvers share the same pool. Getting per-dependency isolation means forking the framework. A custom orchestration service gives you per-dependency bulkheads natively.
+
+### On-Call / Incident Response (Staff+ Level)
+
+At 3 AM when paged, your mental checklist:
+
+1. **Look at the alert** — what metric tripped?
+2. **Check dashboard** — how bad, how many users affected, getting worse?
+3. **Do the cheapest reversible fix:**
+   - Feature flag off (instant, zero risk)
+   - Rollback last deploy (if deployed recently)
+   - Restart service (if memory leak / stuck process)
+   - Reroute traffic (if one AZ/node is bad)
+   - Rate limit / shed load (if overwhelmed)
+   - Kill switch (nuclear — stops the feature entirely)
+4. **Confirm bleeding stopped** — check same metric, wait 2 min
+5. **Escalate if needed** — page someone else if can't stabilize in 15 min
+
+**What you DON'T do at 3 AM:** read code, deploy a fix forward, write a postmortem. That's tomorrow.
+
+**Concrete example for a payment system (Coinbase-relevant):**
+> "Dashboards I need: payment success rate (per-provider), webhook delivery lag, reservation state distribution (are they piling up in CONFIRMED?), reconciliation job status. Emergency levers: kill switch for new reservations, provider failover, manual reconciliation trigger, webhook replay for a time range."
 
 ### Deployment Strategy
 - **Blue-green**: instant rollback, but 2x resources during deploy
@@ -766,6 +960,8 @@ Consistent hashing comes up when:
 
 ### CAP Theorem (Practical Version)
 
+**Important:** "P" in CAP means **network partition** (nodes can't talk to each other due to network failure) — NOT database partitioning/sharding. Completely different concept, confusing shared name.
+
 In a network partition, you must choose:
 - **CP** (Consistency + Partition tolerance): refuse requests rather than return stale data. Example: ZooKeeper, etcd.
 - **AP** (Availability + Partition tolerance): serve requests but may return stale data. Example: Cassandra, DynamoDB.
@@ -773,6 +969,13 @@ In a network partition, you must choose:
 **In practice**, network partitions are rare. The real tradeoff is **consistency vs latency** (PACELC theorem):
 - During **P**artition: choose **A**vailability or **C**onsistency
 - **E**lse (normal operation): choose **L**atency or **C**onsistency
+
+**When CAP comes up in interviews:** It's rarely asked directly. It shows up as:
+- "Why Postgres over Cassandra?" → consistency tradeoff
+- "What happens if this node goes down?" → failover, replication
+- "Can users see stale data?" → your consistency choice
+
+Don't bring up "CAP theorem" unprompted. Just make a consistency decision and justify it. If asked directly: "I'm choosing CP for payment data — refuse writes during partition rather than risk inconsistency."
 
 ### Consistency Models
 
@@ -834,6 +1037,24 @@ User posts message → Kafka topic "posts"
 **Backpressure**: When consumers are slower than producers:
 - Queue-based: queue grows (bounded queue rejects when full)
 - Stream-based: consumer lag increases, monitor and alert
+
+### Queue Limitations (When NOT to Use Async Queues)
+
+Queues are good for **absorbing traffic spikes** (temporary burst, consumers catch up later). They are NOT a solution for **sustained high volume exceeding processing capacity.**
+
+| Problem | Why queues fail |
+|---|---|
+| Producer rate permanently > consumer rate | Queue grows unbounded → OOM or disk full eventually |
+| Data piles up | Recovery time grows linearly with backlog — hours of replay on restart |
+| Ordering guarantees weaken | Under heavy backlog + consumer scaling, ordering is harder to maintain |
+| Failover with large backlog | Restoring millions of unprocessed messages after crash is an operational nightmare |
+| Latency grows | Messages queued for hours → stale data when finally processed |
+
+**When to use queues:** Absorb spikes (burst 5x for 10 min, then normal). Decouple systems with different deployment cadences. Non-critical async work (notifications, analytics).
+
+**When NOT to use queues:** Sustained write volume exceeds processing capacity permanently. Financial data requiring strong consistency and immediate reads. Any case where growing lag = growing business risk.
+
+**If sustained write QPS > single DB capacity:** Shard the DB, don't buffer with a queue. The queue just delays the problem and adds operational risk.
 
 ### Event Sourcing
 Store **events** (immutable facts) instead of current state:
@@ -967,6 +1188,20 @@ When a popular cache key expires, thousands of requests hit DB simultaneously.
 | **Elasticsearch** | Full-text search, aggregations | Not a source of truth, resource-heavy | Search, log analytics |
 | **S3** | Infinite capacity, cheap, durable | High latency, no queries | Files, media, backups, data lake |
 | **Kafka** | High-throughput streaming, replay | Not a database, operational complexity | Event streaming, CDC, data pipelines |
+
+### Postgres vs MySQL
+
+Default to Postgres in interviews. It covers more ground.
+
+| | Postgres | MySQL |
+|---|---|---|
+| **Features** | Richer (JSON, arrays, CTEs, window functions, full-text, geospatial, RLS) | Simpler, fewer advanced features |
+| **Correctness** | Stricter SQL compliance, better isolation levels | Historically looser (silent truncation) |
+| **Extensions** | PostGIS, pg_cron, TimescaleDB | Limited |
+| **Replication** | Logical + physical | Historically simpler replication |
+| **Best for** | Default choice for new systems, complex queries | Legacy systems, Vitess for sharding (YouTube/Slack) |
+
+**In interviews, just say Postgres** unless the problem specifically benefits from MySQL. If asked why: "Richer feature set, better correctness guarantees, native JSON/geospatial without external dependencies."
 
 ### SQL vs NoSQL Decision
 

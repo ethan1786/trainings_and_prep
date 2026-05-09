@@ -3,6 +3,8 @@
 > Amazon-style leadership principles with example questions and mapped STAR stories.
 > Stories are in `star_stories.md`. Each has STAR spoken-style, bullet recap, and long-form formats.
 > Useful for any behavioral interview (Coinbase, Cherry, NVIDIA, etc.)
+>
+> **Story numbering (current):** 1=API Mod, 2=Parity, 3=MCP/AI, 4=Digital Shopping, 5=Mentoring, 6=RFCs, 7=GenAI, 8=Disagree&Commit, 9=AI Cross-Domain, 10=DGS, 11=Applause Auth, 12=Applause CQRS, 13=Toast, 14=Failure, 15=Customer Obsession, 16=Peer Conflict
 
 ---
 
@@ -11,9 +13,10 @@
 
 | Question | Best Stories |
 |---|---|
-| A time you used customer feedback to drive improvement | **6** (MCP stakeholder mgmt — adapted based on PM/director feedback) |
-| Most difficult customer interaction | **6** (MCP — competing stakeholders with conflicting needs) |
-| Balance needs of customer vs. business | **9** (Digital shopping — pragmatic tradeoffs to ship fast for customers during pandemic) |
+| A time you used customer feedback to drive improvement | **15** (Dealer notifications — redesigned from batch to real-time based on dealer feedback) |
+| Most difficult customer interaction | **3** (MCP — competing stakeholders with conflicting needs: PMs, AI team, directors) |
+| Balance needs of customer vs. business | **4** (Digital shopping — pragmatic tradeoffs to ship fast for customers during pandemic) |
+| Prioritized customer over engineering convenience | **15** (Chose real-time delivery for dealers over simpler batch system) |
 
 ---
 
@@ -22,9 +25,9 @@
 
 | Question | Best Stories |
 |---|---|
-| A time you were unsatisfied with the status quo. How would you change it? | **2** (API mod — refused to accept "a bit faster," pushed for 5x latency reduction) |
+| A time you were unsatisfied with the status quo. How would you change it? | **1** (API mod — refused to accept "a bit faster," pushed for 5x latency reduction) |
 | Describe the most significant improvement project you've led | **1** (API mod — full cross-org modernization, 5x latency, 99.9% avail) |
-| How do you seek out feedback on performance? | **8** (DGS warmup — profiled JVM, measured cold-start vs. steady-state, load tested) |
+| How do you seek out feedback on performance? | **10** (DGS warmup — profiled JVM, measured cold-start vs. steady-state, load tested) |
 
 ---
 
@@ -33,9 +36,9 @@
 
 | Question | Best Stories |
 |---|---|
-| Realized halfway in it may not be the best goal | **20** (Failure — caching strategy wrong for experimentation context, pivoted) |
+| Realized halfway in it may not be the best goal | **14** (Failure — caching strategy wrong for experimentation context, pivoted) |
 | A goal that took a long time to achieve | **1** (API mod — 6-month first milestone, completed ahead of schedule) |
-| Delivered a project under tight deadline | **9** (Digital shopping — 0→1 product under pandemic pressure) |
+| Delivered a project under tight deadline | **4** (Digital shopping — 0→1 product under pandemic pressure) |
 
 ---
 
@@ -44,9 +47,9 @@
 
 | Question | Best Stories |
 |---|---|
-| A difficult decision and how you knew it was right | **19** (Disagree & commit — structured 5-dimension analysis to push back on tech choice) |
-| A decision without data | **5** (MCP — bias for action, built modular architecture before requirements were clear) |
-| A bad decision and how you learned from it | **20** (Failure — aggressive caching broke A/B tests, learned to ask about mutation patterns) |
+| A difficult decision and how you knew it was right | **8** (Disagree & commit — structured 5-dimension analysis to push back on tech choice) |
+| A decision without data | **3** (MCP — bias for action, built modular architecture before requirements were clear) |
+| A bad decision and how you learned from it | **14** (Failure — aggressive caching broke A/B tests, learned to ask about mutation patterns) |
 
 ---
 
@@ -55,9 +58,9 @@
 
 | Question | Best Stories |
 |---|---|
-| Calculated risk where speed was crucial | **9** (Digital shopping — launched with eventual consistency to ship faster) |
-| Important decision without consulting your manager | **5** (MCP — chose modular architecture and delivered demo in first sprint) |
-| Removed serious roadblocks preventing progress | **5** (MCP — unblocked PM/director demos by delivering working POC quickly) |
+| Calculated risk where speed was crucial | **4** (Digital shopping — launched with eventual consistency to ship faster) |
+| Important decision without consulting your manager | **3** (MCP — chose modular architecture and delivered demo in first sprint) |
+| Removed serious roadblocks preventing progress | **3** (MCP — unblocked PM/director demos by delivering working POC quickly) |
 
 ---
 
@@ -66,9 +69,9 @@
 
 | Question | Best Stories |
 |---|---|
-| Most innovative thing you've done | **17** (GenAI — hybrid rules + LLM architecture with explainability) |
-| Solved a complex problem with a simple solution | **3** (Parity testing — replayed prod traffic for structural diff instead of manual QA) |
-| Creative idea that was difficult to implement | **14** (Applause CQRS — event sourcing paradigm shift, required education and POC) |
+| Most innovative thing you've done | **7** (GenAI — hybrid rules + LLM architecture with explainability) |
+| Solved a complex problem with a simple solution | **2** (Parity testing — replayed prod traffic for structural diff instead of manual QA) |
+| Creative idea that was difficult to implement | **9** (AI cross-domain validation — LLM + spec validation to automate multi-team coordination) |
 
 ---
 
@@ -77,9 +80,9 @@
 
 | Question | Best Stories |
 |---|---|
-| Took on something significant outside your responsibility | **16** (Toast — built DevOps/QA from scratch, not assigned) |
-| Sacrificed short-term for long-term goal | **10** (Digital shopping — invested in feature flags + retirement playbook upfront) |
-| Saw a peer struggling and stepped in | **11** (Mentoring — pulled senior engineers into cross-team problems, helped them grow) |
+| Took on something significant outside your responsibility | **13** (Toast — built DevOps/QA from scratch, not assigned) |
+| Sacrificed short-term for long-term goal | **4** (Digital shopping — invested in feature flags + retirement playbook upfront) |
+| Saw a peer struggling and stepped in | **5** (Mentoring — pulled senior engineers into cross-team problems, helped them grow) |
 
 ---
 
@@ -88,9 +91,9 @@
 
 | Question | Best Stories |
 |---|---|
-| Went down several layers to figure out a problem | **8** (DGS — profiled JVM startup, found JIT + DGS lazy init as dual cold-start causes) |
-| Linked two or more problems and identified underlying issue | **2** (API mod — traced redundant fan-out + poor caching + no batching as compound latency cause) |
-| A metric you used to identify need for change | **2** (API mod — p99 latency + per-hop SLO budgets revealed bottlenecks) |
+| Went down several layers to figure out a problem | **10** (DGS — profiled JVM startup, found JIT + DGS lazy init as dual cold-start causes) |
+| Linked two or more problems and identified underlying issue | **1** (API mod — traced sequential calls + shared timeouts + no circuit breaking as compound latency cause) |
+| A metric you used to identify need for change | **1** (API mod — p99 latency + per-hop SLO budgets revealed which services were the bottleneck) |
 
 ---
 
@@ -99,10 +102,10 @@
 
 | Question | Best Stories |
 |---|---|
-| Needed deeper subject matter expertise | **7** (DGS — learned Netflix DGS framework, federation spec, subgraph patterns from scratch) |
-| Took on work outside comfort area and found it rewarding | **17** (GenAI — independent project exploring LLM architecture, Bayesian optimization) |
-| Didn't know what to do next / challenging problem | **5** (MCP — new protocol, evolving SDK, no internal precedent) |
-| Coolest thing you learned on your own that helped your job | **17** (GenAI — self-directed LLM exploration, applied to production evaluation platform) |
+| Needed deeper subject matter expertise | **10** (DGS — learned Netflix DGS framework, federation spec, subgraph patterns from scratch) |
+| Took on work outside comfort area and found it rewarding | **7** (GenAI — independent project exploring LLM architecture, Bayesian optimization) |
+| Didn't know what to do next / challenging problem | **3** (MCP — new protocol, evolving SDK, no internal precedent) |
+| Coolest thing you learned on your own that helped your job | **7** (GenAI — self-directed LLM exploration → directly led to MCP work and AI initiative) |
 
 ---
 
@@ -111,11 +114,11 @@
 
 | Question | Best Stories |
 |---|---|
-| Strongly disagreed with your manager | **19** (Pushed back on senior leader's tech stack choice with structured analysis) |
-| Unpopular stance in a meeting with peers/leaders | **19** (Same — advocated against momentum with data) |
-| Went along with group decision even if you disagreed | **19** (Committed fully on testing strategy decision where group went different direction) |
-| Strongly disagreed on something important to the business | **19** (Tech stack choice — prepared 5-dimension comparison, advocated firmly but respectfully) |
-| Submitted good idea and manager didn't take action | **12** (RFC process — pre-socialized proposals, incorporated feedback, drove adoption through consensus) |
+| Strongly disagreed with your manager/leader | **8** (Pushed back on senior leader's tech stack choice with structured 5-dimension analysis) |
+| Unpopular stance in a meeting with peers/leaders | **8** (Same — advocated against momentum with data) |
+| Went along with group decision even if you disagreed | **8** (Committed fully on testing strategy decision where group went different direction) |
+| Disagreed with a peer — how did you resolve it? | **16** (Service boundary disagreement — found real concern, proposed compromise, documented as ADR) |
+| Submitted good idea and faced resistance | **6** (RFC process — pre-socialized proposals, incorporated feedback, drove adoption through consensus) |
 
 ---
 
@@ -124,9 +127,10 @@
 
 | Question | Best Stories |
 |---|---|
-| Significantly contributed to improving morale/productivity | **11** (Mentoring — helped engineers grow scope, one promoted) |
-| 3 things you're working on to improve effectiveness | **4** (Standards adoption — writing better docs, incorporating cross-team feedback, pairing with other teams) |
-| A time you received tough or critical feedback | **20** (Failure — PMs frustrated by caching decision, took ownership and fixed it) |
+| Significantly contributed to improving morale/productivity | **5** (Mentoring — helped engineers grow scope, one promoted) |
+| How do you build trust with new teams? | **6** (RFCs — pre-socialized, incorporated feedback, committed to group decisions publicly) |
+| A time you received tough or critical feedback | **14** (Failure — PMs frustrated by caching decision, took ownership and fixed it) |
+| Resolved a conflict between two people/teams | **16** (Peer conflict — 1-on-1 to find real concern, proposed compromise both sides accepted) |
 
 ---
 
@@ -135,8 +139,9 @@
 
 | Question | Best Stories |
 |---|---|
-| How you help team members develop their careers | **11** (Mentoring — cross-team exposure, design doc feedback, modeling decision-making) |
-| Provided feedback to develop someone's strengths | **11** (Same — specific, actionable feedback on communication framing for cross-org audience) |
+| How you help team members develop their careers | **5** (Mentoring — cross-team exposure, design doc feedback, modeling decision-making) |
+| Provided feedback to develop someone's strengths | **5** (Same — specific, actionable feedback on communication framing for cross-org audience) |
+| Raised the engineering bar for the org | **1** (API mod influence layer — RFCs, standards, paired with other teams) |
 
 ---
 
@@ -145,5 +150,6 @@
 
 | Question | Best Stories |
 |---|---|
-| Radical approach to solve a big problem | **14** (Applause CQRS — introduced event sourcing paradigm to decouple shared-database architecture) |
-| Took a big risk and it failed | **20** (Failure — aggressive caching was a calculated bet that didn't account for experimentation) |
+| Radical approach to solve a big problem | **9** (AI cross-domain validation — using LLM + MCP to automate multi-team coordination) |
+| Took a big risk and it failed | **14** (Failure — aggressive caching was a calculated bet that didn't account for experimentation) |
+| Proposed something ambitious that others were skeptical of | **1** (API mod — proposed full modernization of highest-traffic page, some thought it was too risky) |

@@ -174,17 +174,36 @@
 >
 > The linked-list design means I never mutate state — I only append. That's critical for dispute resolution and compliance."
 
-#### Failure Handling (14:00–16:00)
+#### Failure Handling & Durability (14:00–16:00)
 
 **Script:**
 
-> "Three failure patterns I designed for:
+> "Because this is real money, durability and availability were primary design constraints — not addons.
+>
+> For durability: every state transition is written to a WAL-backed Postgres with synchronous replication to a standby before we acknowledge to the user. No in-memory-only or cache-only storage for payment state. The event-sourced action log means I never mutate — only append. If anything goes wrong, I can replay the entire history of a reservation and reconcile against the payment provider's records. Zero data loss even on node crash.
+>
+> For availability: the payment flow has no single point of failure. The transaction service runs multi-AZ. If the primary DB fails, automatic failover to the sync standby — same data, no loss. The reconciliation worker is the safety net: even if a webhook is lost or the service is briefly unavailable, the worker catches up by polling the provider for any stuck reservations.
+>
+> Three failure patterns I designed for:
 >
 > First, synchronous failures: payment provider returns an error during auth. The transaction service rolls back the reservation to STARTED state and returns the error to the user. Compensating transaction — no partial state left behind.
 >
 > Second, async failures: webhook never arrives (provider timeout). I have a reconciliation job that polls the payment provider for any reservations stuck in CONFIRMED for longer than a threshold. If the provider says it failed, I cancel. If it succeeded, I advance the state.
 >
 > Third, idempotency: webhooks can arrive multiple times. Each action is idempotent — if I receive a 'confirmed' webhook but the reservation is already CONFIRMED or beyond, I no-op. The action linked list makes this check trivial."
+
+#### Tips: Durability & Availability Talking Points (say these out loud)
+
+When presenting or answering Q&A, drop these naturally:
+
+- **"WAL before acknowledge"** — "We write to the WAL before confirming to the client. Even if the node crashes mid-write, we replay the log on restart. Zero data loss."
+- **"Sync replication"** — "The standby confirms it received the write before the primary acknowledges to the client. If the primary dies, the standby has everything."
+- **"Append-only / never mutate"** — "For financial data, I never update in place. Every state change is a new record. This gives me a full audit trail and makes reconciliation trivial."
+- **"Reconciliation as safety net"** — "Even with all these guarantees, I run a nightly reconciliation comparing our internal ledger against the payment provider's settlement file. Belt and suspenders."
+- **"No single point of failure"** — "Every component in the payment path has a fallback: multi-AZ DB, reconciliation worker as webhook backup, idempotent operations for safe retries."
+- **"Graceful degradation outside the money path"** — "For non-payment features (inventory display, notifications), I accept eventual consistency and cache staleness. But for anything touching money: strong consistency, sync replication, no shortcuts."
+
+**Connection to Coinbase:** "This is the same principle you use for trading — you can't lose a trade, you can't double-execute an order, and you need to reconcile against the blockchain. The durability and consistency requirements are identical."
 
 ---
 
