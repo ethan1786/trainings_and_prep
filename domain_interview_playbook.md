@@ -118,15 +118,21 @@
 
 ### Part 1: System Overview (0:00–8:00)
 
-#### Context & Judgment Arc (0:00–3:00)
+#### Opening Hook + Context (0:00–3:00)
 
 **Script:**
 
-> "I'm going to walk you through a digital shopping platform I built from scratch. The context: pandemic hit, consumers couldn't visit dealerships, and we needed to enable online transactions — browsing, expressing purchase intent, and eventually putting down deposits. There was enormous business pressure, but no spec — nobody at the company had done this before.
+> "I designed and shipped a digital transaction platform that processes deposits on vehicles — real money, strong consistency, payment state machine with auth-then-capture. This is the project that got me promoted to Principal — I'll show you why.
 >
-> My first job wasn't writing code. It was translating ambiguity into priorities. I worked with product to break 'digital shopping' into concrete features. Lead capture was the critical business path — that's money flowing to dealers — so it went first with strong consistency guarantees. Inventory display could be eventually consistent because the data was already slightly stale from dealer feeds. Merchandising and pricing experiments were explicitly deferred — not because they weren't important, but because we didn't have enough signal on what would work.
+> **My role:** I was the sole backend architect and primary implementer. I worked with product on requirements, defined all API contracts with frontend, made all the architecture decisions, and wrote the majority of the backend code. Started with 2 backend engineers — myself and one other. I was the architectural constant from day one through every evolution, even as the team grew and went through re-orgs.
 >
-> The key judgment: ship the minimum that proves the business model works, with enough architectural room to grow without rewriting."
+> **Context:** Pandemic hit, consumers couldn't visit dealerships, we needed to enable online transactions. Enormous business pressure, but no spec — nobody at the company had done this before.
+>
+> **My approach:** My first job wasn't writing code. It was working with product and management to drive the design through ambiguity — translate a vague vision into concrete priorities. I had a head start: at Toast I'd designed a similar order management system, so the foundational patterns — configurational vs transactional data separation, state machine design for order lifecycles, DB structure — translated directly.
+>
+> **Key early decisions:** Lead processing is eventually consistent (acceptable latency). Transaction state transitions are strongly consistent (money — no stale state). Payments deferred to phase 2 — ship lead capture first to prove the business model. Everything started inside the monolith — no premature extraction. This let us ship 3 weeks earlier and start generating revenue while competitors were still building their microservice architectures.
+>
+> **The technical complexity isn't in the scale** — it's in the correctness requirements. When money is involved, you can't have stale state, you can't lose a transaction, and you can't double-charge. The patterns — state machine, idempotency, reconciliation, event sourcing — matter more than the throughput numbers."
 
 **[Draw on Miro: Stage 1 — monolith with modules]**
 
@@ -134,13 +140,17 @@
 
 **Script:**
 
-> "I started simple. A few helper modules inside the monolith — lead capture, inventory display, dealer config. Single DB, single deploy, zero operational overhead. The team was small, we co-located, and it let us iterate daily.
+> "I started simple. A few service and repository classes inside the monolith — transaction CRUD, a lead processing path for digital transactions, dealer and customer configuration management. Single DB, single deploy, zero operational overhead. The team was small, we co-located, and it let us iterate daily.
 >
-> [Draw Stage 2] As the product grew and we understood the domain better, I extracted services one at a time. Lead capture came out first — it needed an independent SLA because that's revenue. It got its own DB with strong write consistency. Inventory sync moved to event-driven because it tolerates eventual consistency — the data is already stale from dealer feeds. I added feature flags at this point because I knew product would want to experiment.
+> [Draw Stage 2] As the product grew, the core app remained the transaction CRUD engine with dealer and customer config management — that's the strongly consistent path. What I extracted to event-driven was the lead processing: after a transaction commits, an event is published. A downstream consumer picks it up, saves a lead record, then notifies the dealer — either via email or an external API call. This decoupling was deliberate: the transaction commit is the critical path (strong consistency, must not fail), but lead notification is eventually consistent (dealer gets notified within seconds, not in the same DB transaction). I added feature flags at this point because I knew product would want to experiment.
 >
-> [Draw Stage 3] The mature state: independent services connected via event bus. Lead Service, Inventory Service, Merchandising Service — each with its own data store, independent deployment, clean boundaries. Notification and analytics services subscribe to events. Experiments can be safely retired without touching core services.
+> [Draw Stage 3] The mature state: the core app evolved into a transaction state machine AND orchestrator. It manages the transaction lifecycle and coordinates downstream services via sync HTTP calls: a fee/tax service (calls 3rd party for dealer fees and regional taxes), a trade-in service (3rd party estimate), a loan service (3rd party rate estimate), and a payment service for deposits.
 >
-> Each extraction was triggered by real pain — deploy coupling, SLA requirements, or team ownership boundaries — not by theory."
+> The payment service is interesting because it has a dual communication pattern: the core app calls it synchronously to create and update payments, but the payment provider sends webhook events back asynchronously. The payment service listens to those webhooks, then publishes events to the event bus — which the core app consumes to update the transaction state and notify the customer of payment status changes. So it's sync outbound, async inbound.
+>
+> The lead processor and notification service remain as async consumers from the event bus — same as Stage 2 but now with richer events flowing from the expanded system.
+>
+> Each service extraction was triggered by real need — different ownership, different deployment cadence, or different reliability requirements — not by theory."
 
 **[Three-panel evolution diagram on Miro]**
 
@@ -207,21 +217,24 @@ When presenting or answering Q&A, drop these naturally:
 
 ---
 
-### Part 3: Wrap-Up (16:00–18:00)
+### Part 3: Wrap-Up + Coinbase Bridge (16:00–18:00)
 
 **Script:**
 
 > "To summarize the key decisions and tradeoffs:
 >
 > - Started simple (monolith), extracted when complexity justified — never pre-optimized
-> - Consistency matched to domain: strong for money flows, eventual for display data
+> - Consistency matched to domain: strong for money flows, eventual for display/lead data
 > - Auth-then-capture for safe payment lifecycle — cancel is free before capture
 > - Event-sourced audit trail for compliance and reconciliation
 > - Feature flags from day one — experiments retired safely, zero incidents
+> - Sized correctly for actual load — no over-engineering (10:1 read-write, in-memory cache, single DB handles writes fine)
 >
-> Results: launched on timeline, captured meaningful revenue during a business-critical period, architecture grew organically, and multiple experiments were safely retired using the playbook I created.
+> Results: launched on timeline, captured meaningful revenue during a business-critical period, architecture grew organically. This project got me promoted to Principal.
 >
-> Happy to go deeper on any part — payments, the event architecture, scaling concerns, or how I'd improve this with AI today."
+> **Connection to your domain:** This maps directly to Coinbase. Auth-then-capture is like placing a limit order — intent committed but not settled. The payment state machine mirrors your order states (PENDING → OPEN → FILLED). Event-sourced audit trail is essential for any regulated financial system. The webhook reconciliation pattern applies to any external settlement — whether it's a payment provider or the blockchain. And the correctness requirements are identical: can't lose a transaction, can't double-charge, can't have stale state when money is involved.
+>
+> Happy to go deeper on any part — payments, orchestration patterns, scaling concerns, or how I'd improve this with AI today."
 
 ---
 
@@ -280,3 +293,139 @@ This is where you prove depth. The interviewer will dig into specifics.
 ### Connection to Coinbase
 
 > "This maps directly to your domain. Auth-then-capture is like placing a limit order — you've committed intent but the trade hasn't settled. The state machine (STARTED → CONFIRMED → CAPTURED) is like your order states (PENDING → OPEN → FILLED). Event-sourced audit trail is essential for any regulated financial system. And the webhook reconciliation pattern applies to any external settlement system."
+
+---
+
+## Numbers to Mention (quantify during presentation)
+
+| Metric | Value | Implication |
+|---|---|---|
+| Config/consumer reads | 10-15K rpm | Read-heavy, cached in-memory |
+| Transaction reads | ~2K rpm | Moderate, strong consistency |
+| Transaction creates | 100-200/min | Low write volume — single DB is fine |
+| Read:write ratio | ~10:1 | Cache-first architecture, invalidate via Kafka |
+| Caching strategy | In-memory, Kafka-driven invalidation | No TTL staleness — events keep cache consistent |
+
+**How to drop these naturally:**
+
+> "Traffic-wise, we're looking at about 10-15K rpm for config and consumer data reads — heavily cached in-memory. Transaction creation is much lower, about 100-200 per minute. So it's a 10:1 read-write ratio. The single DB handles writes fine; the read path is served almost entirely from in-memory cache kept consistent via Kafka events. We didn't need sharding or read replicas — the cache does the heavy lifting."
+
+**Why this matters for the interview:** Shows you sized the system correctly — you DIDN'T over-engineer (no sharding, no Redis, no read replicas needed) because you understood the actual load. That's judgment.
+
+---
+
+## "What Was the Hardest Part?" (prepare this — it'll be asked)
+
+> "Honestly, the technical architecture wasn't the hard part — the load is moderate and the patterns are well-known. The hard part was driving alignment across product, frontend, data engineering, and dealers when nobody had done this before and requirements were shifting weekly. The system I designed needed to be flexible enough to absorb those changes without rework — that's why I invested in configurable flows, feature flags, and a non-linear transaction model where steps are optional and order-independent. The architecture's job was to absorb organizational uncertainty, not just handle traffic."
+
+**Why this answer works for Staff+:** You're not pretending 200 writes/min is a scaling challenge. You're naming the REAL difficulty — organizational alignment under ambiguity — which is where Staff+ engineers actually spend their time. The technical decisions (configurable flows, feature flags, flexible state model) are the evidence that you solved the real problem.
+
+---
+
+## Deep-Dive Expansion — Questions to Answer (fill in offline)
+
+These expand the presentation from ~18 min to ~25 min and prepare for 35+ min of Q&A depth. Answer each in 2-4 sentences — enough to speak fluently when asked.
+
+---
+
+### A. Payment Service — Failure Handling & Edge Cases
+
+1. **Partial failure: auth succeeds but DB write fails.** What happens? Does the customer get charged without a record? How do you recover?
+the 3rd service is always treated as the source of truth. Normally db txn is only committed on a 200 API response. If the db txn fails, it can be corrected by two methods: 1. on a successful auth, there is a webhook event listened by the system to validate or correct the db records. 2. Before making any payment updates, I always query the 3rd service for the latest status, and only process when the state matches. If db is behind, it is allowed to update programmatically, otherwise it will prompt support to review and manually override.
+
+2. **Webhook idempotency:** Same webhook arrives twice (provider retries). How does the payment service handle it? What's the dedup mechanism?
+Webhook events have ideompotency key and the key is saved in db after processed.
+
+3. **Webhook ordering:** What if "captured" webhook arrives before "confirmed"? Does order matter? How do you handle out-of-order?
+There are different out-of-order tolenrance setup in the state machine. Some out of order events are allowed, some are not. When an out of order event occors, it will prompt to support to review.
+
+4. **Webhook never arrives (provider timeout).** How long do you wait? What's the reconciliation strategy? Polling? Alert threshold?
+We don't wait for failed webhooks, as we actively poll in the next action, and in a reconsiliation job that runs daily to batch validate active payments.
+
+5. **Hold expiration:** Auth hold typically expires in 7 days. What if the dealer doesn't confirm in time? Who handles the expiry — your system or the provider?
+If the dealer does not handle it, it will expire in the 3rd service, and core app will update the record on the expired webhook event. However we still provide a re-auth-and-capture function if the deal is made after the payment is expired.
+
+6. **Refund after capture:** Dealer cancels after money moved. What's the refund flow? State machine transition? Who initiates?
+There is a separate refund flow, that is not directly allowed and needs support to review. It is because we lose the processing fee on each refund, so it does not come for free.
+
+7. **Duplicate payment attempts:** Customer clicks "pay" twice. How do you prevent double-charging? Idempotency key design?
+There is idempotency key for each payment, simply using the customer id and vehicle id, because there is only one payment allowed per customer for each vehicle. The key is posted in Redis as a dedup key when request is received, and checked before making auth service calls to prevent concurrent payments.
+
+---
+
+### B. Orchestration Patterns — Core App as Orchestrator
+
+8. **Call ordering and parallelism:** Which downstream calls are independent (can run in parallel) and which have dependencies (must be sequential)? Draw the dependency graph.
+The downstream calls are sequential because they have real data dependencies — trade-in value affects fee/tax calculation, and fee/tax totals affect the final deposit amount. There's nothing that can run in parallel here. Each step is triggered by a customer action, and the next step depends on the previous one's output.
+
+9. **Timeout and circuit breaker strategy:** Fee/Tax service is slow — what happens? Do you block the whole transaction or return partial data? What are the per-service timeouts?
+Static fee-tax data are cached by dealer, and calculations are done in memory for specific vehicle and trade in. If there is a cache miss and the service is slow, it will return partial data with errors, to notify the customer missing data, and is polled/fixed before the final deposit.
+
+10. **Graceful degradation:** If loan service is down, does the transaction fail? Or can the customer proceed without a loan estimate and add it later?
+If loan service is done, we also return the error to customer but allow customer to proceed without an estimate. Customer can see the fix this error any time afterwards before the deposit.
+
+11. **Configurable transaction flows:** Not all dealers offer trade-in or loan. How do you handle configurable flows — skip services that don't apply? Is this config-driven or code-driven?
+If trade-in or loan is not configured, it will skip the flow in UI, and the actual code path should not be triggered (with config validation before each txn).
+
+12. **Adding a new service:** Product wants to add an insurance quote service. How do you add it without changing the core app's state machine? Is the orchestrator extensible?
+I will add it in backend flow as an optional state first, have all the integration plugged in and tested. Then gradually release in UI by a feature flag.
+
+13. **Why orchestration over choreography?** Each service called by the core app doesn't know about the others. Why not have each service publish events and let the next one react?
+Orchestration gives us full visibility into the transaction flow — I can trace exactly where a transaction is, what failed, and what to retry. With choreography, debugging becomes "which event got lost between which services?" — much harder. The data dependencies between steps also make choreography awkward: trade-in → fee/tax → deposit is a natural pipeline, not independent reactions. At our scale, the operational complexity of choreography isn't justified.
+
+---
+
+### C. Transaction State Machine — States & Transitions
+
+14. **What are all the states?** List them (e.g., CREATED, FINANCE_PENDING, READY, RESERVED, CONFIRMED, COMPLETED, CANCELLED...). Which are terminal?
+The payment has its own state machine: CREATED, CONFIRMED, CAPTURED, CANCELLED, DECLINED, PAID_OUT. But the transaction itself isn't a rigid state machine — it's a data processing flow. Steps are optional and can be done in any order. The only terminal states are "deposit placed" or "appointment made." If anything changes mid-flow (e.g., trade-in added after initially skipped), it triggers cascading recalculation through dependent processors in order: trade-in → fee/tax → loan. This is more flexible than a strict state machine — the customer can go back and change things, and the system recomputes downstream automatically.
+
+15. **What triggers each transition?** User action? System event? Timer? Dealer action?
+Mostly customer of dealer trigger the action, and some states can be triggered by webhooks
+
+16. **Invalid transitions:** What happens if a "capture" event arrives for a transaction in CREATED state? How do you guard against invalid state transitions?
+There are critical events and non critical ones. If critical ones arrives out of order, we usually needs to bring support to review.
+
+17. **Concurrent state mutations:** Two requests try to update the same transaction simultaneously (e.g., customer cancels while dealer confirms). How do you handle the race?
+We don't need complex distributed locking because the 3rd party payment service is the source of truth. Whoever gets a 200 from the provider first wins — that's the committed state, and we update our DB to match. If customer cancels and dealer captures simultaneously, the provider will only accept one (you can't capture a cancelled payment). Our poll-before-action pattern also helps: before any state-changing call, we query the provider for the latest status, so we never act on stale local state. The daily reconciliation job catches any edge cases that slip through.
+
+18. **State machine persistence:** Is the state machine in application code only, or is it enforced at the DB level too (e.g., CHECK constraints, triggers)?
+It is application code for simplicity, and is checked before update in db.
+
+---
+
+### D. Staff+ Design Judgment — Why You Made These Choices
+
+19. **Why orchestration over choreography?** What would choreography look like here? What breaks?
+Same as #13. With choreography, each service publishes events and the next one reacts — trade-in publishes "estimate ready," fee/tax consumes it and recalculates, then publishes "fees ready," loan consumes that. The problems: (1) debugging is a nightmare — "where did the transaction stall?" requires correlating events across 4 services. (2) The data dependency chain (trade-in → fee/tax → loan → deposit) is a natural pipeline, not independent reactions. (3) Error handling becomes "who compensates?" instead of one orchestrator knowing the full picture. Orchestration trades some coupling for visibility and control — at our scale, that's the right call.
+
+20. **Why monolith-first then extract?** What if you'd started with microservices from day one? What would have gone wrong?
+Simply not needed. This was a new product with no traffic — microservices would have added operational overhead for zero benefit. Adding to the existing monolith was the lowest-cost way to ship and validate the business model. We also didn't know the domain boundaries yet — product requirements were ambiguous, features might get cut. Once the product proved itself and we understood the real fault lines, we extracted where it made sense. Starting with microservices would have meant guessing boundaries wrong, paying cross-service refactoring costs, and moving slower when speed mattered most.
+
+21. **How did you decide what to extract vs. keep in the monolith?** What's your extraction criteria?
+Extraction isn't needed until traffic or complexity forces it. When the time comes, the real criteria are operational: (1) CI/CD pipeline is ready to support another service, (2) team has bandwidth for the extra operational cost, (3) product and management agree on the investment. On the technical side, it's straightforward — different deployment cadence, different ownership, or different reliability requirements. But the organizational readiness gates matter more than the technical justification. You can always justify extraction technically; the question is whether you can afford it operationally.
+
+22. **How do you handle the config vs. transactional data split in the DB?** Same schema? Same DB? Different tables? Read replicas for config?
+Same DB, different tables. Config data (dealer settings, product eligibility, fee schedules) is read-heavy, changes rarely, and is cached aggressively in-memory with long TTL. Transactional data (transactions, payments, leads) is write-heavy, strongly consistent, no caching for active records. The split is logical (table separation + different access patterns) not physical (separate DB) — at our scale, one DB handles both fine. If config reads ever became a bottleneck, I'd add a read replica or promote the cache to the primary read path.
+
+23. **What would you redesign today?** With everything you know now, what's the one thing you'd architect differently? Why?
+I'd keep most of the system the same — it's been proven to work well with customers and the market. The core architecture (orchestrator + state machine + event-driven lead processing) is sound. What I'd add from the beginning: (1) more integrations upfront — customer management system (CRM) as a first-class integration rather than bolted on later, (2) GraphQL as the data serving layer from day one — we added it later and had to migrate consumers, would have been cheaper to start there, (3) AI-powered features (fraud detection, conversational shopping agent) baked into the architecture rather than retrofitted. The system design was right; what I'd change is scope of integration — I was too conservative about external touchpoints early on.
+
+24. **How would you use AI to improve this system?** Think: anomaly detection on payment failures, AI-powered fraud scoring on transactions, LLM-based test generation for state machine edge cases, AI for dealer config validation.
+Three areas: (1) AI-powered fraud detection and personal verification — flag suspicious payment patterns (unusual deposit amounts, rapid create-cancel cycles, mismatched identity signals) before they reach the payment provider. Use ML models trained on historical fraud data to score transactions in real-time. (2) Integrate conversational AI shopping agents with the digital transaction flow — instead of a multi-step form UI, the customer interacts with an AI agent that guides them through configuration (trade-in, financing, add-ons) conversationally. One smart unified entrance that understands context, answers questions, and drives toward deposit. The backend MCP APIs I built (Story 3/15) are exactly the foundation for this. (3) Anomaly detection on operational metrics — if payment auth rates drop, webhook latency spikes, or transaction funnel conversion changes unexpectedly, AI alerts before customers or product notice.
+
+---
+
+### E. Operational Excellence — Day 2
+
+25. **What metrics/dashboards do you monitor?** Transaction success rate? Payment auth success rate? State machine stuck-in-state alerts? Lead delivery latency?
+Two levels. Product/BI dashboards track transaction funnel conversion and drop-off — that's how product measures whether the feature is working for customers. Engineering dashboards are what I own: (1) 200/500 rates per endpoint, (2) RPM and response time (p50/p99), (3) cache miss rate, (4) DB connection pool, memory, CPU, (5) payment auth errors broken down by error code and provider, (6) webhook delivery errors and processing lag, (7) reconciliation job mismatches per run. I care about both — if the product funnel drops, it's often an engineering issue (slow response, payment failure spike) that shows up in my dashboards first.
+
+26. **What's your on-call playbook?** If payment auth rate drops at 3 AM, what do you check first? What levers can you pull?
+First check: is it one dealer or all dealers? If one dealer, likely their account config or a card issue — notify them, not our emergency. If all dealers: check the payment provider's status page — is it their outage? If provider is healthy: check our recent deploys (rollback if recent), check connection pool / timeout metrics, check if we're sending malformed requests (bad API version, expired credentials). Emergency lever: disable payments via feature flag until morning. Customers can still browse and configure their transaction — they just can't submit the deposit until we restore. We don't have a backup payment provider, and we can't queue payments for later retry — payment data is PII and holding it in a queue violates compliance. So the only safe option is disable and investigate in the morning.
+
+27. **How do you deploy without affecting in-flight transactions?** Blue-green? Feature flags? State machine versioning?
+Canary deploys — new version goes to a small percentage of traffic first, we watch metrics, then roll out fully. For in-flight transactions: Spring Boot handles graceful shutdown — it finishes processing any active requests/transactions before killing the application and booting the new version. So no transaction is ever interrupted mid-processing. For risky changes (e.g., new payment flow), we also wrap them in a feature flag so new transactions use the new path while existing ones continue on the old path until they reach a terminal state.
+
+28. **How do you test the full flow end-to-end?** Staging with real payment provider (test mode)? Mock services? Contract tests?
+Staging environment connects to the real payment provider in test mode (test card numbers, real API calls, real webhooks) with a production database copy. This gives us the closest-to-real environment possible — real data shapes, real provider behavior, real webhook timing. We test the full customer journey: transaction creation → fee/tax → trade-in → loan → deposit auth → webhook confirm → state transitions. No mocking the payment provider — it's too critical to fake.

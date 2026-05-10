@@ -104,6 +104,7 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 - Use **"we"** for execution, **"I"** for identification and direction-setting
 - Mention **what you said no to** — scoping and prioritization signals maturity
 - Connect your work to **business outcomes**, not just technical metrics
+- **Align decisions with company/department direction** — "I probe within the company's strategic initiatives, not just what's technically interesting to me. Every architecture decision should serve the business objective, not just engineering elegance."
 
 ---
 

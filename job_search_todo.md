@@ -45,16 +45,23 @@
 - [ ] **Fri May 9:** Check if Kael replied with VO dates
 
 ### Week of May 10-13 — BQ + HM Calls
-- [ ] **Sat-Sun:** Practice STAR stories aloud (Stories 1, 3, 4, 5, 8 — 2 min each)
-- [ ] **Sat-Sun:** Review Direct Questions + Staff+ Strengths sections
+- [x] **Sat-Sun:** Practice STAR stories — all updated with real stories, LP coverage complete
+- [x] **Sat-Sun:** Review Direct Questions + Staff+ Strengths sections — all polished
+- [x] Domain interview deep-dive expansion — 28 Q&A answers prepared
 - [ ] **Sun:** Skim Cherry HM prep doc
 - [ ] **Mon May 11: Cherry HM call with Tim**
+- [ ] **Tue May 12:** Review NVIDIA prep doc + resume, practice "tell me about yourself"
 - [ ] **Wed May 13: HashiCorp/IBM HM video interview (2:00 PM ET)**
-- [ ] If Cherry HM goes well, schedule coding for May 14-15
+- [ ] **Thu May 14: NVIDIA technical interviews (11AM + 1PM, MS Teams)**
+- [ ] If Cherry HM goes well, schedule coding for May 15-16
 - [ ] If no reply from YiYi by Thu May 8, cold apply Stripe Identity
+- [ ] When Kael confirms CB VO dates, reply with:
+  > Hi Kael, quick question about the domain interview — I'll be using Miro to whiteboard. Should I plan to present my system walkthrough upfront (maybe 15-20 min) and then take questions, or is it more interactive where the interviewer guides the conversation and I draw as we go? Want to calibrate how much I prepare to present vs. discuss.
 
 ### Week of May 18 — Coinbase VO Week
 - [ ] Mon-Tue: light review, re-read prep doc, practice domain interview on Miro, practice stories one more time
+- [ ] **Miro practice** — draw domain interview diagram (system evolution + payment deep-dive)
+- [ ] **System design: Coinbase Explore / Real-Time Price Feed** — 45 min timed practice
 - [ ] **Wed/Thu: Coinbase Virtual On-Site** (pending confirmation from Kael)
 - [ ] Fri: decompress
 
