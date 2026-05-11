@@ -133,7 +133,9 @@
       "WebFetch(domain:www.hashicorp.com)",
       "WebFetch(domain:www.ibm.com)",
       "WebFetch(domain:jobs.elastic.co)",
-      "Bash(pandoc *)"
+      "Bash(pandoc *)",
+      "mcp__atlassian__getConfluencePage",
+      "mcp__atlassian__searchConfluenceUsingCql"
     ]
   }
 }

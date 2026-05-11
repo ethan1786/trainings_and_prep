@@ -7,9 +7,22 @@
 
 ## What They're Evaluating
 
-From the interview doc: "how you collaborate, make decisions, balance technical excellence with business needs, navigate challenges, and grow in a professional setting."
+From their website: "how you collaborate, make decisions, balance technical excellence with business needs, navigate challenges, and grow in a professional setting."
 
-Translation: They want stories about real situations, not hypotheticals.
+They'll ask about "projects you've worked on, challenges you've faced, and decisions you've made in a team setting" with follow-ups on collaboration, end-to-end ownership, and navigating differing perspectives.
+
+**Strong conversations include "thoughtful reflection with clear examples" and "what you've learned along the way."** → End each story with a takeaway/learning, not just a result.
+
+### Their Focus → Your Story
+
+| What They Probe | Your Answer | Learning to End With |
+|---|---|---|
+| Collaborate with cross-functional partners | Story 4 (Digital Shopping — product, frontend, data eng under ambiguity) | "I learned that clearing ambiguity is more valuable than writing code early" |
+| Take ownership end-to-end | Story 13 (Toast — built everything, nobody assigned it) | "The best architecture at early-stage is the simplest one that doesn't prevent evolution" |
+| Navigate differing perspectives | Story 8 (GraphQL — disagreed, committed, helped succeed) | "Sometimes the right move is to commit, help succeed, and fix problems as they emerge" |
+| Balance tech excellence with business needs | Story 4 (eventual consistency to ship fast + flags for long-term) | "I always ask: what's the minimum that proves the business model while leaving room to grow?" |
+| Challenges you've faced | Organizational alignment under shifting requirements | "Technical complexity is rarely the hard part — alignment under ambiguity is" |
+| How you've grown | Shifted from over-indexing design to operational thinking | "Design is only half the job — the other half is how it survives production" |
 
 ---
 
