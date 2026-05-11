@@ -81,6 +81,7 @@ These serve double duty — they show thoughtfulness AND give you information to
 
 **About the business:**
 - How does the BNPL model work for healthcare specifically? What makes it different from consumer BNPL?
+- "In my experience building loan products, one challenge is the credit spectrum — customers who need financing most often have the hardest time qualifying for reasonable rates. How does Cherry approach that in healthcare? Is your underwriting model different from traditional BNPL?"
 - What's the growth trajectory? Are you pre-revenue, post-revenue, profitable?
 - What's the team's relationship with compliance/regulatory? (BNPL in healthcare = regulated)
 
