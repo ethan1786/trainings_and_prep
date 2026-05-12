@@ -27,7 +27,7 @@
 | **Wed May 13** | HashiCorp/IBM HM video interview (2:00 PM ET) |
 | **Wed May 14** | **NVIDIA technical interviews** (11AM + 1PM, MS Teams) |
 | **~May 15-16** | Cherry coding round (if HM goes well — warmup before Coinbase) |
-| **~May 21-22** | **Coinbase Virtual On-Site (Wed/Thu preferred)** — waiting for Kael to confirm |
+| **Tue May 19 + Wed May 20** | **Coinbase Virtual On-Site** ✅ CONFIRMED |
 | **May 23-25** | Memorial weekend — travel to in-laws, no interviews |
 | **~May 27-28** | HashiCorp coding round (if scheduled by then) |
 
@@ -49,7 +49,7 @@
 - [x] **Sat-Sun:** Review Direct Questions + Staff+ Strengths sections — all polished
 - [x] Domain interview deep-dive expansion — 28 Q&A answers prepared
 - [ ] **Sun:** Skim Cherry HM prep doc
-- [ ] **Mon May 11: Cherry HM call with Tim**
+- [x] **Mon May 11: Cherry HM call with Tim** ✅ went well, scheduling technical round post-Memorial
 - [ ] **Tue May 12:** Review NVIDIA prep doc + resume, practice "tell me about yourself"
 - [ ] **Wed May 13: HashiCorp/IBM HM video interview (2:00 PM ET)**
 - [ ] **Thu May 14: NVIDIA technical interviews (11AM + 1PM, MS Teams)**
@@ -59,14 +59,14 @@
   > Hi Kael, quick question about the domain interview — I'll be using Miro to whiteboard. Should I plan to present my system walkthrough upfront (maybe 15-20 min) and then take questions, or is it more interactive where the interviewer guides the conversation and I draw as we go? Want to calibrate how much I prepare to present vs. discuss.
 
 ### Week of May 18 — Coinbase VO Week
-- [ ] Mon-Tue: light review, re-read prep doc, practice domain interview on Miro, practice stories one more time
+- [ ] Mon: light review, re-read prep doc, practice domain interview on Miro, practice stories one more time
 - [ ] **Miro practice** — draw domain interview diagram (system evolution + payment deep-dive)
 - [ ] **System design: Coinbase Explore / Real-Time Price Feed** — 45 min timed practice
-- [ ] **Wed/Thu: Coinbase Virtual On-Site** (pending confirmation from Kael)
-- [ ] Fri: decompress
+- [ ] **Tue May 19 + Wed May 20: Coinbase Virtual On-Site** ✅ CONFIRMED
+- [ ] Thu-Fri: decompress
 
 ### Week of May 25 — Post-Memorial
-- [ ] Cherry coding round (if not done earlier)
+- [ ] **Tue May 27: Cherry Technical Rounds** (3 x 1hr: System Design, Application Design, Coding) ✅ CONFIRMED
 - [ ] HashiCorp coding round (if scheduled)
 - [ ] NVIDIA call (date TBD)
 
@@ -96,17 +96,12 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 ---
 
-## On Hold — Monitor Career Pages Regularly
+## Cold Applications (no active monitoring needed)
 
-### Actively monitoring:
-- **Stripe** — waiting for new backend platform roles. Message YiYi when one appears. When applying: update base resume to add "daily AI-assisted development (Claude Code)" + "building internal AI tools" to Leadership Highlights.
-- **Spotify** — lifeatspotify.com/jobs — checked Apr 30, only Senior level ($160-234K), too low. Monitor for Staff.
-
-### Lower priority:
-- **Apple** — careers.apple.com (less likely remote)
-- **Microsoft** — careers.microsoft.com
-- **Salesforce** — careers.salesforce.com
-- **ByteDance/TikTok** — careers.tiktok.com
+- **Stripe** — Cold applied Staff Engineer, Identity (May 12). YiYi messaged but no response.
+- **DoorDash** — Cold applied Staff SWE, Security Engineering (May 5).
+- **OpenAI** — Cold applied Principal SWE, Infrastructure Security (May 5). Also applied Identity Infrastructure Engineering (May 11).
+- **Twilio** — Cold applied Principal Eng, Phone Numbers Platform.
 
 ---
 
@@ -114,10 +109,11 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 
 | Company | Status | Next Action | When |
 |---|---|---|---|
-| **Coinbase** | VO scheduling, 14% layoff announced | Check if Kael replies by Fri 5/9 — if silent, send neutral follow-up | **Fri May 9** |
+| **Coinbase** | VO confirmed ✅ | Virtual On-Site (4 rounds) | **Tue-Wed May 19-20** |
 | **HashiCorp/IBM** | HR screen done ✅ | HM video interview (1 hr) | **Wed May 13, 2:00 PM ET** |
-| **Cherry** | HR done, resume sent | HM call with Tim | **Mon May 11** |
-| **NVIDIA** | Interview confirmed ✅ | 2 technical rounds (Senior SWE + Lead SWE) | **Wed May 14, 11AM + 1PM** |
+| **Cherry** | HM done ✅ | Technical rounds (3 x 1hr: SD, App Design, Coding) | **Tue May 27** |
+| **NVIDIA** | Interview confirmed ✅ | 2 technical rounds (Senior SWE + Lead SWE) | **Thu May 14, 11AM + 1PM** |
+| **Stripe** | Applied ✅ | Staff Engineer, Identity (cold — YiYi no response) | Applied May 12 |
 | **DoorDash** | Applied ✅ | Staff SWE, Security Engineering (cold) | Applied May 5 |
 | **OpenAI** | Applied ✅ | Principal SWE, Infrastructure Security (cold) | Applied May 5 |
 | **Twilio** | Applied ✅ | Waiting | — |
