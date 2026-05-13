@@ -67,9 +67,15 @@
 - How do you handle backward compatibility with thousands of users depending on your APIs?
 - What's the deployment model — how do you ship changes to a security product safely?
 
-**About growth:**
+**About growth + AI:**
 - What does Staff level look like at HashiCorp? How is it different from Senior in practice?
 - How do you see the Secure product evolving over the next 2 years?
+- How is AI impacting infrastructure security? Are there new challenges (or opportunities) around securing AI workloads, model weights, or agent-to-agent auth?
+- Is the team exploring AI-assisted tooling for security operations — like automated threat detection or policy generation?
+
+**About logistics (save for offer stage unless hard dealbreaker):**
+- What's the work model for this role — fully remote, or are there in-office expectations?
+- How is the team distributed across time zones? Any core collaboration hours?
 
 ---
 

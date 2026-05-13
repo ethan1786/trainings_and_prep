@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HashiCorp HM — Quick Reference</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 8px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    max-width: 340px;
+  }
+  h1 { font-size: 13px; color: #64ffda; margin-bottom: 6px; }
+  h2 { font-size: 11px; color: #ffd700; margin: 8px 0 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  td { padding: 2px 4px; vertical-align: top; border-bottom: 1px solid #2a2a3e; }
+  td:first-child { font-weight: bold; color: #64ffda; white-space: nowrap; width: 95px; }
+  .tip { background: #2a2a3e; padding: 4px 6px; border-radius: 4px; margin: 4px 0; font-size: 10px; color: #ccc; }
+  .question { color: #ffd700; font-size: 10px; margin: 3px 0; }
+  .warn { color: #ff6b6b; font-size: 10px; }
+</style>
+</head>
+<body>
+
+<h1>HashiCorp/IBM HM — Staff SWE, Secure</h1>
+
+<h2>MINDSET: Platform/Infra Mode</h2>
+<div class="tip">Lead with TECHNICAL depth + RELIABILITY, not shipping speed or cross-org collaboration. You build infra other engineers depend on.</div>
+
+<h2>Direct Questions</h2>
+<table>
+  <tr><td>About you</td><td>3 chapters: Toast (infra from scratch) → Applause (auth: Keycloak, Kong, mTLS) → CarGurus (platform lead, SLOs, 10+ teams). Auth + platform background maps to Vault/Boundary.</td></tr>
+  <tr><td>Why Hashi</td><td>1) Terraform daily user — know ecosystem from consumer side. 2) Auth background (Keycloak, Kong, mTLS) maps to Vault/Boundary. 3) IBM gives stability to invest long-term.</td></tr>
+  <tr><td>Why leaving</td><td>Want vertical tech depth. After years of broad product work, want to own a domain deeply and build infra relied upon by thousands. Sustained ownership, not re-orgs.</td></tr>
+  <tr><td>Strengths</td><td>Consumer perspective (I've BEEN a platform user) + technical depth + operational ownership (dashboards, SLOs, on-call, not just ship-and-move-on).</td></tr>
+</table>
+
+<h2>Their Question → Your Story</h2>
+<table>
+  <tr><td>Auth/security</td><td>Story 11: Applause — Keycloak SSO, Kong RBAC plugins, mTLS, dual-auth bridge migration</td></tr>
+  <tr><td>Platform infra</td><td>Story 1: API Mod — built infra 10+ teams depend on, per-service SLOs, zero regressions</td></tr>
+  <tr><td>Ownership</td><td>Story 13: Toast — built AWS infra, pipelines, monitoring from scratch, nobody assigned</td></tr>
+  <tr><td>Disagreement</td><td>Story 8: GraphQL — lost argument, committed, helped succeed anyway</td></tr>
+  <tr><td>Failure</td><td>Story 14: Mongo connection starvation — learned peak × resource ceilings → bulkheads</td></tr>
+  <tr><td>Tech decision</td><td>Story 16: GraphQL federation — deployed dev router, let data decide</td></tr>
+</table>
+
+<h2>My Edge</h2>
+<div class="tip">"Most infra engineers only build. I've also been the consumer — I've depended on Terraform, Keycloak, Kafka. I know what frustrates platform users: breaking changes, bad errors, undocumented edge cases. I'll build the infra I wish I had."</div>
+
+<h2>Vault/Boundary Knowledge</h2>
+<table>
+  <tr><td>Vault</td><td>Secrets mgmt — dynamic secrets (short-lived, auto-revoke), PKI/certs, encryption as service, identity-based access</td></tr>
+  <tr><td>Boundary</td><td>Identity-based access to infra (VPN replacement). Just-in-time access without exposing creds.</td></tr>
+  <tr><td>Key insight</td><td>Secrets should be short-lived + programmatic, not long-lived + manual rotation</td></tr>
+</table>
+
+<h2>Questions for HM (pick 3-4)</h2>
+<div class="question">- Biggest technical challenge the Secure team faces right now?</div>
+<div class="question">- What does Staff look like here vs Senior in practice?</div>
+<div class="question">- How does the IBM acquisition affect team autonomy/roadmap?</div>
+<div class="question">- How is AI impacting infra security? New challenges around securing AI workloads?</div>
+<div class="question">- Balance between feature dev vs reliability/platform work?</div>
+<div class="question">- What's the tech stack beyond Go?</div>
+
+<h2>Reminders</h2>
+<div class="tip">Lead with Applause auth story, not CarGurus product stories.</div>
+<div class="tip">"Solid first, fast second" — correctness > shipping speed for platform infra.</div>
+<div class="tip">Don't mention PE acquisition killed Applause. Keep it positive.</div>
+<div class="tip">Don't ask about office/remote yet — save for offer stage.</div>
+<div class="warn">DON'T: over-emphasize AI/MCP, shipping speed, or product collaboration.</div>
+
+</body>
+</html>
