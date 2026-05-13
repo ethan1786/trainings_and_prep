@@ -23,11 +23,26 @@
 
 ## What We Know
 
-**Role context (from memory):**
-- Senior Cloud Software Engineer — cloud infrastructure, likely DGX Cloud / fleet management adjacent
+**Role context (JD found — JR2014764):**
+- Senior Cloud Software Engineer — building cloud-based GPU service platforms for Deep Learning / AI
+- **Java-first role**: Core Java (Collections, Streams, Concurrency, I/O) explicitly required
+- Key skills: large-scale distributed systems, REST API/gRPC design, RDBMS + NoSQL (Cassandra, DynamoDB, Redis), cloud technologies (5+ yrs), streaming (Kafka, Spark, Flink)
+- "Nice to have": operational experience with large-scale apps, cloud certs, open source contributions, InfluxDB, Elasticsearch
+- **NOT a GPU/CUDA/hardware role** — it's the cloud services platform layer on top of GPU compute
 - Salary range spans L4 (Senior) and L5 (Staff) — actual leveling unclear
 - Location: Westford, MA or remote (need to confirm post-interview)
 - Applied ~1 month ago, recruiter (Eleza) forwarded to hiring team
+
+**Your fit (almost 100% match):**
+- ✅ Core Java 13 years (Collections, Streams, Concurrency — daily use)
+- ✅ Large-scale distributed systems (API Mod: 8K rpm, circuit breakers, orchestration)
+- ✅ REST API design (RFC standards, API contracts for 10+ consuming teams)
+- ✅ RDBMS + NoSQL (MySQL, Redis, Mongo — designed caching layers)
+- ✅ Cloud (AWS: ECS/EKS, SQS/SNS, S3, RDS, Terraform)
+- ✅ Streaming (Kafka event pipelines, SQS/SNS)
+- ✅ Operational experience with large-scale apps (SLOs, Datadog, on-call)
+- ✅ gRPC (GraphQL federation, service-to-service communication)
+- ✅ "Drive pragmatic technical discussions" (RFCs, design reviews, cross-team alignment)
 
 **Interview format (confirmed from recruiter, May 7):**
 - **No set structure or format** — depends on the interviewer and how conversation goes
@@ -424,17 +439,23 @@ Since this is a Cloud Software Engineer role, likely topics:
 
 ### Behavioral Prep
 
-Since no dedicated BQ round exists, expect behavioral questions woven into technical rounds:
+Since no dedicated BQ round exists, expect behavioral questions woven into technical rounds. Lead with TECHNICAL DEPTH, not leadership/coordination.
 
-- "Tell me about yourself" — 90-sec version, emphasize platform/infra
-- "Tell me about a complex system you designed" → Story 1 (API Modernization)
-- "How do you handle ambiguity?" → Story 3 (MCP) or Story 4 (Digital Shopping)
-- "Tell me about a disagreement" → Story 8
-- "Why NVIDIA?" → See below
+**"Tell me about yourself."**
+> "Senior/Principal Java backend engineer, 13 years. I build large-scale distributed systems on cloud infrastructure. Most recently: redesigned a high-traffic API platform — 8K rpm, per-service circuit breakers, in-memory caching, SLO-based monitoring. Before that, built event-driven architectures with Kafka, deployed on AWS with Kubernetes, and built auth infrastructure with service mesh. Core Java is my primary language — concurrency, performance tuning, JVM optimization. I'm looking to apply these skills to GPU cloud computing."
+
+**"Tell me about a complex system you designed."** → Story 1 TECHNICAL layer:
+> "Orchestration service consolidating 12 downstream integrations into 5 services. Per-service timeouts, connection pools (HikariCP), circuit breakers (Resilience4j), async fan-out with CompletableFuture for parallel calls. In-memory cache (Caffeine) — chose over Redis to avoid network hop + serialization cost at 8K rpm. Per-hop SLO budgets monitored in Datadog. Rolled out with parity testing — zero regressions."
+
+**"Tell me about a disagreement."** → Story 16 (peer conflict):
+> "Disagreement about GraphQL federation design — nested entity resolution. I believed IDs-only was correct to avoid a sync hop in the critical path. Built a dev router, measured the latency difference, showed the data. Other lead agreed. Let measurements decide, not philosophy."
+
+**"Tell me about a failure."** → Story 14:
+> "Deployed Mongo collection sized for average traffic. Fell over during lunch spike — connection pool starvation. Root cause: peak-to-average ratio was 5x, and connection pools don't degrade linearly. Fix: partitioned to separate cluster, load-tested against peaks. Lesson shaped all my later work — per-service pools, bulkheads, always design for ceiling not average."
 
 ### "Why NVIDIA?" Answer
 
-> "The platform challenge is what excites me — distributed systems, high-performance data pipelines, and infrastructure that engineering orgs depend on. That maps directly to what I've done for 13 years. The scale of GPU fleet management and cloud infrastructure is genuinely interesting, and my background in distributed systems translates directly. Plus my academic work in control systems and neural networks gives me context on the AV/robotics domain."
+> "This role is a direct match for what I've been doing — large-scale Java backend systems, REST/gRPC API design, distributed services with Kafka and cloud infrastructure. What excites me is applying these skills to GPU cloud computing — it's a domain I haven't worked in, but the engineering patterns are exactly my strength. I want to build the platform layer that makes GPU computing accessible as a service. Plus my academic background in control systems and sensor processing gives me context on the AI/ML workloads this platform serves."
 
 ---
 
@@ -451,21 +472,59 @@ Since no dedicated BQ round exists, expect behavioral questions woven into techn
 
 ## Prep Strategy — "Explain Your Work" Format
 
-Since this is project-deep-dive style, prep is:
+Since this is project-deep-dive style AND the JD is Java/distributed-systems focused:
 
-1. **Review your resume_nvidia.html** — be ready to go deep on ANYTHING listed there
-2. **Pick 2-3 projects to present if asked "tell me about something you built":**
-   - **Story 1 (API Modernization)** — distributed systems, performance, cross-team leadership
-   - **Story 4 (Digital Shopping)** — 0→1 product, event-driven architecture, cloud infra
-   - **Story 11 (Auth/Keycloak)** — security, service mesh, K8s — relevant to cloud infra
-3. **For each project, be ready to answer:**
-   - What was the architecture? (Draw it if needed)
-   - What were the key technical decisions and why?
-   - What would you do differently?
-   - How did you handle failures/edge cases?
-   - What was the scale? How did you monitor it?
-4. **Know NVIDIA products:** DGX Cloud, GPU clusters, fleet management, CUDA, data center infrastructure
-5. **Prepare questions for them** (shows interest — recruiter explicitly called this out)
+### Lead Projects (match JD requirements directly)
+
+**Primary: Story 1 (API Modernization) — TECHNICAL LAYER ONLY**
+- 8K rpm, per-service circuit breakers, connection pools, bulkheads
+- In-memory caching (Caffeine) vs Redis — WHY in-memory (serialization cost at 8K rpm)
+- Per-hop SLO latency budgets in Datadog
+- Parity testing framework for zero-regression rollout
+- **Java specifics to mention:** async thread fan-out (CompletableFuture), connection pool tuning (HikariCP), JVM performance monitoring
+
+**Secondary: Story 4 (Digital Shopping) — TECHNICAL LAYER**
+- Kafka event pipeline design (partition key strategy, consumer groups, DLQ)
+- Transaction state machine with strong consistency
+- In-memory cache with Kafka-driven invalidation (not TTL)
+- MySQL schema design: configurational vs transactional data separation
+
+**Tertiary: Story 10 (DGS/GraphQL) — if asked about API design or JVM**
+- Netflix DGS subgraph, batch data loaders (N+1 prevention)
+- JVM cold-start problem: profiled, found JIT + DGS lazy init, built warmup routine
+- Federation schema design, per-consumer authorization
+
+### What to Emphasize (from JD)
+
+| JD Requirement | Your Example | Be Ready to Go Deep |
+|---|---|---|
+| Core Java (Collections, Streams, Concurrency) | Async fan-out with CompletableFuture, thread pools, connection pooling | How does HikariCP work? ConcurrentHashMap vs synchronized? |
+| Large-scale distributed systems | API Mod orchestration (12→5 services, 8K rpm) | Circuit breaker states, bulkhead isolation, retry with backoff |
+| REST API / gRPC design | API standards RFCs, pagination (cursor vs offset), versioning | Backward compatibility, idempotency keys |
+| RDBMS + NoSQL + Redis | MySQL (transactional), Redis (caching), Mongo (events) | When to use each, caching strategies, connection pool sizing |
+| Cloud technologies | AWS (ECS/EKS, SQS/SNS, S3, RDS), Terraform, K8s | ECS vs EKS decision, rolling deploys, readiness probes |
+| Streaming (Kafka) | Event-driven pipeline, partition by dealer_id, DLQ | Ordering guarantees, consumer lag, at-least-once + idempotent consumers |
+| Troubleshooting complex issues | Story 14 (Mongo connection starvation), DGS cold-start | Root cause analysis methodology, peak vs average |
+
+### Framing (learned from HashiCorp)
+
+**DON'T lead with:** "I led 10 teams, drove alignment, coordinated with product"
+**DO lead with:** "Here's what I built, here's the technical decision, here's why it works at scale"
+
+Let the interviewer discover your leadership through follow-up questions. Lead with DEPTH.
+
+### For Each Project, Be Ready to Answer:
+- What was the architecture? (Draw it if needed)
+- What were the key technical decisions and why?
+- What would you do differently?
+- How did you handle failures/edge cases?
+- What was the scale? How did you monitor it?
+- **What Java-specific patterns did you use?** (concurrency, caching, connection management)
+
+### Know About NVIDIA Cloud Products (context, not required):
+- DGX Cloud: GPU-as-a-service for AI training
+- The team likely builds the control plane / service layer (Java backend) that manages GPU resources
+- You'd be building REST/gRPC APIs, distributed services, streaming pipelines — NOT writing CUDA code
 
 ### Questions to Ask Interviewers
 
