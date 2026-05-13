@@ -84,7 +84,28 @@
 - **Terraform daily user** — "I'm a consumer of your ecosystem, so I understand what your users need"
 - **Document-driven culture** — "I drive decisions through RFCs and design docs, which I understand is how HashiCorp operates"
 - **Auth depth** — Keycloak, OAuth 2.0, SAML, JWT validation, RBAC, mTLS, service mesh — this isn't surface knowledge
-- **Platform builder** — "I build infrastructure other teams depend on. That's what Vault/Boundary is."
+- **Software quality for distributed deployments** — "When you ship a product that thousands of companies self-host, a bug isn't one team's outage — it's a CVE affecting every customer. I think in terms of backward compatibility, graceful failure modes by default, and upgrade paths that don't break existing deployments."
+
+## Operational Framing — Adjusted for HashiCorp
+
+**Important:** HashiCorp builds products others run (open-source + enterprise self-hosted + HCP managed). They don't operate customer infrastructure. Reframe accordingly:
+
+**DON'T say:** "I keep it running at 99.99%, on-call at 3 AM"
+
+**DO say:** "I build software designed to be operationally excellent when thousands of companies deploy it in their own environments. That's a harder bar — I can't hotfix a customer's deployment at 3 AM. The software must be correct on release."
+
+**What matters at HashiCorp:**
+- **Security correctness** — one bug = potential CVE across all users
+- **Backward compatibility** — every release must upgrade safely for every customer
+- **Release quality** — you ship binaries, not deploy to your own infra. No "we'll hotfix in prod."
+- **Upgrade path design** — customers must upgrade without downtime or data loss
+- **Failure mode design** — graceful defaults, because you can't intervene when it breaks at a customer site
+- **Documentation** — customers operate it, so your docs must be flawless
+
+**What matters LESS (unless HCP managed service):**
+- On-call / incident response for customer deployments
+- Your own dashboards / monitoring (you provide monitoring tooling, customers set it up)
+- Your own SLOs (you define best practices, customers implement them)
 
 ---
 
