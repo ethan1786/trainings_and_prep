@@ -67,6 +67,84 @@
 No need for hard LC. Focus on clean, bug-free implementation of medium problems.
 Practice in an IDE with no autocomplete to simulate the environment.
 
+#### HashMap from Scratch (classic "no library" question)
+
+```java
+class MyHashMap<K, V> {
+    private static final int DEFAULT_CAPACITY = 16;
+    private Node<K, V>[] buckets;
+    private int size;
+
+    MyHashMap() {
+        buckets = new Node[DEFAULT_CAPACITY];
+    }
+
+    void put(K key, V value) {
+        int index = hash(key);
+        Node<K, V> current = buckets[index];
+        // Check if key exists — update
+        while (current != null) {
+            if (current.key.equals(key)) {
+                current.value = value;
+                return;
+            }
+            current = current.next;
+        }
+        // Key not found — insert at head
+        Node<K, V> newNode = new Node<>(key, value);
+        newNode.next = buckets[index];
+        buckets[index] = newNode;
+        size++;
+        // Optional: resize if load factor > 0.75
+    }
+
+    V get(K key) {
+        int index = hash(key);
+        Node<K, V> current = buckets[index];
+        while (current != null) {
+            if (current.key.equals(key)) return current.value;
+            current = current.next;
+        }
+        return null;
+    }
+
+    V remove(K key) {
+        int index = hash(key);
+        Node<K, V> current = buckets[index];
+        Node<K, V> prev = null;
+        while (current != null) {
+            if (current.key.equals(key)) {
+                if (prev == null) buckets[index] = current.next;
+                else prev.next = current.next;
+                size--;
+                return current.value;
+            }
+            prev = current;
+            current = current.next;
+        }
+        return null;
+    }
+
+    private int hash(K key) {
+        return Math.abs(key.hashCode() % buckets.length);
+    }
+
+    static class Node<K, V> {
+        K key;
+        V value;
+        Node<K, V> next;
+        Node(K key, V value) { this.key = key; this.value = value; }
+    }
+}
+```
+
+**Key points if asked follow-ups:**
+- **Hash collision:** chaining with linked list (simple). Java 8+ uses tree (red-black) when bucket exceeds 8 nodes.
+- **Load factor:** resize (double capacity, rehash all entries) when size/capacity > 0.75
+- **Why Math.abs?** hashCode() can be negative. Modulo of negative = negative index.
+- **Equals + hashCode contract:** if `a.equals(b)` then `a.hashCode() == b.hashCode()`. Broken contract = lost entries.
+- **Thread safety:** this isn't thread-safe. ConcurrentHashMap uses lock striping (segment-level locks) for concurrency.
+
 **Priority list (do 3-4/day Sat-Tue, 15-20 min each):**
 
 | # | LC # | Problem | Pattern | Why |

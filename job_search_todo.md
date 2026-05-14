@@ -114,6 +114,7 @@ $280K cash + equity ($500-600K total comp). Private company, remote.
 | **Cherry** | HM done ✅ | Technical rounds (3 x 1hr: SD, App Design, Coding) | **Tue May 27** |
 | **NVIDIA** | Interview confirmed ✅ | 2 technical rounds (Senior SWE + Lead SWE) | **Thu May 14, 11AM + 1PM** |
 | **Stripe** | Applied ✅ | Staff Engineer, Identity (cold — YiYi no response) | Applied May 12 |
+| **OpenAI** | Intro call scheduling ✅ | SWE, Identity Infrastructure Engineering | Schedule after CB VO |
 | **DoorDash** | Applied ✅ | Staff SWE, Security Engineering (cold) | Applied May 5 |
 | **OpenAI** | Applied ✅ | Principal SWE, Infrastructure Security (cold) | Applied May 5 |
 | **Twilio** | Applied ✅ | Waiting | — |
