@@ -593,43 +593,76 @@ Story numbering references star_stories.md (1=API Mod, 2=Parity, 3=AI Platform, 
 
 ## 15. Pre-Interview Checklist
 
-### Before Virtual On-Site
+### Prep Schedule (Thu May 14 → Tue-Wed May 19-20)
 
-**Coding (DONE):**
-- [x] Pagination — solved all levels + production architecture discussion
-- [x] Block Mining — solved L1 + L2, understand greedy approach, know the trap
-- [x] Food Delivery — solved all 4 levels (TreeMap for range queries)
-- [x] Crypto Order Event Processing — solved L1 + L2, understand idempotency
-- [x] Interleave Iterator — understood, Deque for L3
-- [x] Log File Parser — understood, split(":", 4) key insight
-- [ ] Review LC 2043 bank system follow-up progression (Section 12) — concurrency + distributed levels
+| Day | Focus |
+|---|---|
+| **Thu evening** | System design: read Explore doc + new paid resource |
+| **Fri** | Coding: timed dry run (1 question 45 min), skim all 6 solutions |
+| **Sat** | Domain interview: read playbook, practice drawing on Miro |
+| **Sun** | Behavioral: read stories, practice aloud. Skim prep doc top-to-bottom. |
+| **Mon** | Light review: re-read cheatsheet, draw Explore once, talk through domain opening, rest. |
+| **Tue-Wed** | **Coinbase VO** |
 
-**System Design (THIS WEEK):**
-- [ ] **Coinbase Explore / Real-Time Price Feed** — #1 topic, do a 45-min timed practice
-- [ ] Review Payment/Settlement System design (Section 13)
+---
+
+### Round 1: System Design
+
+- [ ] `companies/coinbase/questions/systemDesign/realtime_market_data.md` — #1 topic, read thoroughly
+- [ ] New paid resource for Coinbase Explore ("four questions" framing, pipeline split)
+- [ ] `system_design_playbook.md` — skim NFR section + estimation framework + common patterns (lines 1-500)
+- [ ] `cheatsheets/system_design_cheatsheet.html` — print, keep on desk
+- [ ] Practice drawing the Explore architecture from memory on paper (once)
+- [ ] `companies/coinbase/questions/systemDesign/crypto_exchange_order_system.md` — backup topic
+- [ ] `companies/coinbase/questions/systemDesign/credit_approval_risk_engine.md` — backup topic
 - [ ] Review common patterns/red flags table (Section 13a)
 
-**Domain Interview (DONE):**
-- [x] Presentation scripts written (domain_interview_prep.md)
-- [x] Diagram created (domain_interview_diagram.html)
-- [ ] **Practice drawing on Miro** — 15 min, recreate the evolution + payments diagrams
-- [ ] Practice talking through the scripts aloud (time yourself — aim for 16-18 min)
+### Round 2: Coding
 
-**Behavioral (THIS WEEKEND):**
-- [ ] Practice Stories 1, 3, 4, 5, 8 aloud (2 min each)
-- [ ] Review Direct Questions section in star_stories.md
-- [ ] Review Staff+ Strengths section
-- [ ] Brush up on "Why Coinbase?" answer (Section 8)
+- [ ] `companies/coinbase/questions/senior/query_pagination.md` — #1 frequency, rewrite L1+L2 from memory
+- [ ] `companies/coinbase/questions/senior/mining_block.md` — #2, recall greedy NOT DP, rewrite L1
+- [ ] `companies/coinbase/questions/senior/food_delivery_system.md` — #3, skim solution structure
+- [ ] `companies/coinbase/questions/senior/crypto_order_event_processing.md` — #4, skim state machine
+- [ ] `companies/coinbase/questions/senior/interleave_iterator.md` — Deque for L3
+- [ ] `companies/coinbase/questions/senior/log_file_parser.md` — split(":", 4) key insight
+- [ ] `java_playbook.md` — skim pitfalls section (5 min, catch careless bugs)
+- [ ] Review LC 2043 bank system follow-up progression (Section 12)
+- [ ] Timed dry run: pick 1 question, solve in 45 min cold
 
-**Logistics:**
-- [ ] Familiarize with CodeSignal IDE (coding + SD rounds)
-- [ ] Create Miro account and practice the whiteboard tool
-- [ ] Brush up on blockchain/crypto basics (Section 9) — finality, reconciliation, hot/cold wallets
+### Round 3: Domain Interview (Miro)
+
+- [ ] `domain_interview_playbook.md` — read full presentation scripts + deep-dive Q&A
+- [ ] `cheatsheets/domain_interview_diagram.html` — study 3-stage evolution + payment architecture
+- [ ] Practice drawing on Miro (15 min) — evolution diagram + payment state machine
+- [ ] Practice talking through opening hook + context aloud (2 min)
+- [ ] Review "Numbers to Mention" section
+- [ ] Review "What Was the Hardest Part?" answer
+- [ ] Review "Durability & Availability Talking Points"
+- [ ] Review deep-dive answers (Sections A-E, all 28 questions)
+
+### Round 4: Behavioral
+
+- [ ] `behavioral_playbook.md` — Direct Questions section (strength, weakness, why CB, why leaving)
+- [ ] `behavioral_playbook.md` — Stories 1, 3, 4, 5, 8, 14, 15, 16 (Bullet Recaps only)
+- [ ] Section 13b of this doc (Behavioral prep, Coinbase values)
+- [ ] Review "Why Coinbase?" answer (Section 8)
+- [ ] Review "Addressing Potential Concerns" (Section 10 — no Go, no crypto, smaller scale)
+- [ ] Practice: 2 stories aloud, 2 min each max
+
+### General / Logistics
+
+- [ ] Print `cheatsheets/system_design_cheatsheet.html`
+- [ ] Set up Miro account + test whiteboard tool
+- [ ] Familiarize with CodeSignal IDE (coding + SD rounds use it)
+- [ ] Skim crypto basics (Section 9) — finality, reconciliation, hot/cold wallets (5 min)
+- [ ] Prepare 3-4 questions to ask interviewers
+
+---
 
 ### Key Reminders for VO Day
 - Only 1 coding round — the other 3 are conversational. Lead confidently, don't wait for prompts.
 - Coding: think out loud before writing anything. Clarify algorithm + edge cases first. Start simple, submit, then iterate.
-- System Design: YOU drive. Lead with the hard problem first. Proactively address scale, correctness, fault tolerance.
-- Domain Interview: Miro whiteboard. Present ~18 min (evolution + payments), then handle ~40 min Q&A. Show judgment, not just architecture.
-- Behavioral: every answer needs metrics. 2 min max per story. Pause after STAR for follow-ups.
-- Common bug patterns to avoid: new level breaks old methods (blast radius check), copy-paste boolean conditions
+- System Design: YOU drive. Lead with the hard problem first ("fanout to 2M clients is harder than ingestion"). Don't waste time on estimation if interviewer says skip it — jump to architecture.
+- Domain Interview: Miro whiteboard, interactive discussion. Draw WHILE explaining. Be ready to pivot if they ask about payments at minute 5.
+- Behavioral: every answer needs metrics. 2 min max per story. Pause and ask "would you like me to elaborate?"
+- Common bug patterns to avoid: new level breaks old methods (blast radius check), copy-paste boolean conditions, `while` vs `!while` typos

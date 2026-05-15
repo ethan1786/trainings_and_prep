@@ -162,7 +162,11 @@
       "WebFetch(domain:www.simplyhired.com)",
       "WebFetch(domain:s3.amazonaws.com)",
       "WebFetch(domain:cdn.openai.com)",
-      "WebFetch(domain:blog.openai.com)"
+      "WebFetch(domain:blog.openai.com)",
+      "WebFetch(domain:www.datanyze.com)",
+      "WebFetch(domain:builtwith.com)",
+      "WebFetch(domain:www.g2.com)",
+      "WebFetch(domain:jobs.lever.co)"
     ]
   }
 }

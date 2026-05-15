@@ -322,6 +322,23 @@ This is where you prove depth. The interviewer will dig into specifics.
 
 ---
 
+## Deep-Dive Checklist (applicable to Coinbase Domain + OpenAI Technical Deep Dive)
+
+Before presenting any project, make sure you can answer ALL of these:
+
+| Question | Your Answer (Digital Shopping) |
+|---|---|
+| What was the goal and success metric? | Enable online transactions. Metric: leads captured, deposits placed, revenue generated. |
+| Why was it needed? | Pandemic — consumers couldn't visit dealerships. Competitors racing. |
+| What were YOUR exact responsibilities? | Sole backend architect + primary implementer. All architecture decisions mine. |
+| Key design decisions + alternatives rejected? | Monolith-first (not microservices), eventual consistency for leads (not strong), auth-then-capture (not charge-immediately) |
+| Hardest problem/incident? | Organizational alignment under shifting requirements — not technical complexity |
+| Performance & cost — how measured/optimized? | 10-15K rpm reads cached in-memory (Kafka-invalidated), 100-200 writes/min — single DB, no over-engineering |
+| Data & experiments — how validated? | Feature flags for A/B, parity between old/new flows, reconciliation against payment provider |
+| Retrospective — what would you do differently? | Add more integrations (CRM) from day one, GraphQL as data layer earlier, AI features baked in |
+
+---
+
 ## Deep-Dive Expansion — Questions to Answer (fill in offline)
 
 These expand the presentation from ~18 min to ~25 min and prepare for 35+ min of Q&A depth. Answer each in 2-4 sentences — enough to speak fluently when asked.
