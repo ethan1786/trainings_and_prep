@@ -5,6 +5,25 @@
 **Time Estimate:** 45-60 min
 **Key Topics:** Async workflows, idempotency, state machines, external provider fan-out, financial auditability
 
+### Key Insights from hack2hire (Staff-level framing)
+
+**The core tension:** Applicants want a fast answer. Evidence comes from slow, flaky, contradictory providers. The architecture earns its keep when the deadline turns that conflict into a predictable branch instead of a lottery.
+
+**Three deep-dive areas that matter (ignore everything else if short on time):**
+1. **Bounded deadline orchestration** — hard 5s cap. If mandatory evidence isn't ready, return `manual_review` honestly. Don't hang the HTTP response.
+2. **Reproducible decision snapshots** — the score is NOT the decision. Decision = versioned policy + model outputs + signal snapshots, frozen immutably. Replay must produce same outcome months later.
+3. **Manual review as first-class lifecycle** — not a "vague escalation." It's ~5% of volume with queues, SLAs, assignments, and structured overrides that append (never rewrite) history.
+
+**Clarifying question to ask first:**
+> "Am I allowed to return `manual_review` when key evidence is missing? That single permission changes latency, API semantics, and how hard I lean on async callbacks."
+
+**What separates Senior from Staff here:**
+- Senior: separates intake from underwriting, mentions idempotency and manual review
+- **Staff: owns the tension between applicant latency and evidence completeness. Articulates deadline-bounded orchestration with mandatory gates. Treats decision snapshots with policy/model versions as the compliance boundary. Connects audit to snapshot design, not "we have logs."**
+
+**Golden line:**
+> "Provider dashboards are not authoritative. Our rows are. If a callback arrives twice, the second is a no-op. If conflicting payloads show up, policy routes toward manual review and we preserve both observations."
+
 ---
 
 ## Problem Statement

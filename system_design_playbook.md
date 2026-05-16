@@ -82,6 +82,50 @@
 | Deep dive (hardest part) | 25-30 min | Detailed design of 1-2 components |
 | Operational concerns | 10-12 min | Monitoring, failure modes, scaling |
 
+### Natural Interview Flow (How to Actually Drive It)
+
+**Opening line:** "I'm going to start by understanding the picture — let me draw a high-level happy path, then add more detail."
+
+```
+Step 1: High-level happy path (3-5 min)
+  → Boxes + arrows showing data flow direction
+  → No technology choices yet — just the logical flow
+  → "Data comes in here, gets processed here, clients read from here"
+
+Step 2: Understand the scale (2-3 min)
+  → Ask about inbound volume, outbound fanout, peak vs average
+  → This JUSTIFIES the technology choices you're about to make
+  → "At 2M events/sec, a single DB can't keep up — that tells me I need streaming"
+
+Step 3: Add technology choices (5-8 min)
+  → Kafka here (why: replay + decoupling + backpressure)
+  → Redis here (why: hot reads, sub-ms latency for page load)
+  → WS gateways here (why: stateful connections, keep thin)
+  → For each choice: ONE sentence on WHY, not just WHAT
+
+Step 4: Walk through + deep dive together (15-25 min)
+  → Trace a request/event end to end through the system
+  → AT EACH COMPONENT, naturally mention the failure mode:
+    "Ticks come in here... and if this exchange stops sending,
+     we detect via heartbeat and mark stale"
+  → At the hard parts, go deeper: "This is the bottleneck —
+    let me explain how I'd handle it"
+  → The interviewer may jump in with questions — follow their lead
+  → If they DON'T interrupt, YOU identify depth areas:
+    "This fanout piece is the hardest part, let me dig in"
+  → This is a conversation, not a monologue — pause between components
+
+Step 6: Observability + on-call closure (2-3 min, if time)
+  → "For production, I'd monitor [3-4 key metrics]"
+  → "If paged at 3 AM, I'd check [X] first"
+  → Shows operational maturity
+```
+
+**Key principle:** Don't do two separate passes (happy path THEN failures). Weave failure handling into the walkthrough naturally. That's how real engineers think — "I put Kafka here because if the aggregator crashes, I can replay from offset."
+
+**If the interviewer says "skip that" or "don't worry about estimation":**
+→ Jump straight to Step 3 or wherever they point. Be flexible. The structure is a guide, not a script.
+
 ### What Goes on the Whiteboard vs Scratch Paper
 
 | What | Where | Why |

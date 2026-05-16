@@ -166,7 +166,17 @@
       "WebFetch(domain:www.datanyze.com)",
       "WebFetch(domain:builtwith.com)",
       "WebFetch(domain:www.g2.com)",
-      "WebFetch(domain:jobs.lever.co)"
+      "WebFetch(domain:jobs.lever.co)",
+      "Bash(mv query_pagination.md 1_query_pagination.md)",
+      "Bash(mv mining_block.md 2_mining_block.md)",
+      "Bash(mv food_delivery_system.md 3_food_delivery_system.md)",
+      "Bash(mv crypto_order_event_processing.md 4_crypto_order_event_processing.md)",
+      "Bash(mv crypto_order_system.md 5_crypto_order_system.md)",
+      "Bash(mv realtime_market_data.md 1_realtime_market_data.md)",
+      "Bash(mv crypto_exchange_order_system.md 2_crypto_exchange_order_system.md)",
+      "Bash(mv credit_approval_risk_engine.md 3_credit_approval_risk_engine.md)",
+      "Bash(mv object_storage_s3.md 4_object_storage_s3.md)",
+      "Bash(mv reverse_system_design_practice.md 5_reverse_system_design_practice.md)"
     ]
   }
 }

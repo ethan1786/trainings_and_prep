@@ -5,6 +5,43 @@
 **Time Estimate:** 45-60 min
 **Key Topics:** Async order lifecycle, multi-exchange routing, idempotency, timeout recovery, financial consistency
 
+### Key Insights from hack2hire (Staff-level framing)
+
+**The core tension:** The user taps "buy" and expects an instant response. The exchange is external, slow, may partially fill over minutes, and may lose a callback entirely. If you pretend these two worlds operate at the same speed, your design will either lie to users or overdraw their accounts.
+
+**The aha moment:**
+> "The hold is NOT the trade. The exchange fill is the trade. Your system is a reliable state machine that bridges the gap between what the user requested and what the exchange actually did."
+
+**Two-phase split (say this early):**
+> "Phase 1 is synchronous and user-facing: validate buying power, create a hold, accept the order, return immediately. Phase 2 is asynchronous and exchange-facing: submit, process fills, adjust holds. This split is the backbone."
+
+**Golden principles:**
+- **"HTTP is truth, WebSocket is optimization"** — same as Explore. GET /orders/{id} is always authoritative. WebSocket pushes are hints.
+- **"The exchange is the authority on execution"** — broker can REQUEST a cancel, but the exchange DECIDES. Fills always win over cancel requests.
+- **"Reconciliation is not error handling, it's a safety net that runs continuously"** — mention the poller early, it signals you understand external integration is inherently unreliable.
+
+**Cancel-fill race (the signature edge case):**
+- User taps cancel. Exchange fills the order simultaneously. Both are valid. Only one terminal state can win.
+- **Rule: exchange decides.** If exchange already filled → FILLED wins, cancel is discarded. If exchange hasn't matched → CANCELLED wins.
+- State machine: CANCEL_REQUESTED allows transitions to BOTH Cancelled and Filled. Whichever the exchange reports first wins. PostgreSQL transaction serialization on the order row picks the winner.
+- "If you answer 'cancel always wins' or 'fill always wins' without explaining the exchange's role as authority, you have missed the point."
+
+**Buying power under concurrency:**
+- Two concurrent buy orders for same account → both check balance before either writes a hold → overdraft.
+- **Fix:** SERIALIZABLE isolation in PostgreSQL for the buying-power transaction. DB detects read-write conflicts and aborts one. Narrow transaction scope: balance check + hold creation only.
+- Redis cache as fast filter ("clearly insufficient → reject without touching DB"), but NEVER the decision-maker.
+
+**Partial fill accounting:**
+- Hold adjustment uses ACTUAL execution price, not the limit price.
+- 200 shares filled at $49.95 → reduce hold by $9,990, not by 200 × limit_price.
+- Residual difference released when order reaches terminal state.
+
+**Senior bar (from interviewer expectations):**
+> "A senior candidate should drive the core tension between user-facing certainty and exchange-side uncertainty from the start. The clearest senior signal is the ability to explain why the hold is not the trade, and why the state machine exists to bridge the gap between user intent and exchange execution."
+
+**Clarifying question to ask first:**
+> "Are we handling limit orders only, or market orders too? And is the exchange a single venue or do we route to multiple exchanges for best price?"
+
 ---
 
 ## Problem Statement

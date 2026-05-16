@@ -252,15 +252,108 @@ This is the hardest part — say so.
 
 ---
 
-## Interview Checklist
+---
 
-- [ ] Distinguished between 20K visible assets and 1M upstream tickers — different design concerns
-- [ ] Named fanout as the hardest part before diving into ingestion
-- [ ] Defined Tick, WindowAggregate, MarketSnapshot, ExchangeFeedStatus
-- [ ] Justified Redis hot store (vs. DB read) for the list API
-- [ ] Chose REST for initial load + WebSocket for deltas — and explained why
-- [ ] Described stream partitioning by symbol for aggregator scalability
-- [ ] Explained staleness detection and how it surfaces to clients
-- [ ] Covered the dedup strategy for exchange reconnects
-- [ ] Mentioned WebSocket subscription scoping (only visible symbols)
-- [ ] Addressed observability / monitoring for feed health
+## Key Framing (from hack2hire — memorize these)
+
+### The Four Questions to Answer
+
+Frame your design around these four problems:
+1. **How do we choose one displayed reference price?** (multi-source normalization, canonical asset ID)
+2. **How do rankings and search stay fast?** (materialized sort keys, pre-ranked top movers, not full-catalog scan)
+3. **How do deltas reach clients cheaply?** (coalesce, group subscriptions, batch per interval)
+4. **How does the UI stay honest when a source goes stale?** (heartbeat → threshold → stale flag → surface to client)
+
+### Two Stories in One System
+
+> "One pipeline owns authoritative ingest, normalization, and incremental rollups. Another layer serves precomputed snapshots and rankings and fans out small deltas. They are NOT the same subsystem."
+
+Say this early — it shows you understand the separation.
+
+### Golden Principles
+
+- **"HTTP is truth, WebSocket is optimization."** If the stream lies by omission, the user still has a way to recover via REST. Streams can batch, drop, or gap under load — HTTP cannot hide staleness.
+- **"Fanout is a scheduling problem, not a socket problem."** Coalesce, group subscriptions, and make recovery cheap with snapshots.
+- **"Show stale, never pretend data is fresh."** Availability > consistency, but NEVER silently serve old prices as if they're current.
+
+### Recovery Semantics
+
+When WebSocket disconnects or detects a sequence gap:
+1. Server sends `resync_required` flag
+2. Client discards local optimistic state
+3. Client refetches via GET /assets (HTTP snapshot)
+4. Client re-subscribes to stream with fresh cursor
+
+### Reference Price — Clarify Before Designing
+
+> "Before I lock the stale-data rules, I'd ask: is the displayed number a last trade, a midpoint, or a vendor-normalized reference?"
+
+This shows domain awareness. The answer changes your fallback policy.
+
+### Clarifying Question for the Interviewer
+
+Ask early: "When we say real-time prices — are we aggregating from multiple exchanges into one canonical price per asset, or showing per-exchange prices?" This scopes the normalization layer.
+
+---
+
+## What the Interviewer Expects at Senior/Staff Level
+
+From hack2hire's grading rubric:
+
+> "Senior answer should own incremental rolling aggregates, replayable event semantics, explicit stale-data policy tied to source health. Expect subscription grouping and coalescing for fanout, cursor pagination against materialized sorts, and a clear line that HTTP is authoritative while streams are best-effort freshness."
+
+**Must-hit to pass:**
+1. Incremental window computation (not "scan all ticks per request")
+2. Replayable events (Kafka retention → rebuild state on crash)
+3. Explicit stale policy (heartbeat → threshold → mark stale → UI flag)
+4. Coalesce + group subscriptions for fanout
+5. HTTP authoritative, WebSocket best-effort
+6. Clarify reference price definition early
+
+**Differentiators (Staff+ signal):**
+- Explain HOW rolling windows update in O(1) per tick (ring buffer or running OHLCV)
+- Explain WHY materialized rankings (top movers) instead of full-catalog sort
+- Mention backpressure: what happens when aggregator can't keep up with ingest burst
+- Mention per-asset rate limiting: one viral asset shouldn't starve fanout for others
+
+---
+
+## Quick Skim Checklist (Before Interview)
+
+**Architecture (draw this):**
+- [ ] Exchange WS adapters (2-3, active-active) → Kafka raw ticks
+- [ ] Normalizer/dedup → Kafka normalized ticks  
+- [ ] Aggregator (partitioned by symbol, stateless, ring buffer windows) → Kafka snapshots + Redis
+- [ ] REST API reads from Redis (initial page load)
+- [ ] WS Gateways (20-40 nodes) consume Kafka snapshots → fan out to 2M clients
+- [ ] Exchange health monitor → stale flags propagate through pipeline
+
+**Key numbers (mention naturally):**
+- 20K visible assets, 1M total catalog
+- 1-2M ticks/sec peak ingest
+- 2M concurrent WebSocket clients
+- 50-100K connections per WS gateway node → 20-40 nodes
+- 250-500ms delta batch interval
+- < 1s tick-to-client latency target
+- 99.95% availability target
+
+**Verbal (don't draw, say when asked):**
+- Data entities: Tick, WindowAggregate, MarketSnapshot, ExchangeFeedStatus
+- APIs: GET /assets (paginated, sorted), WS /market-stream (subscribe visible symbols)
+- Window math: O(1) update per tick (running OHLCV in memory)
+- Dedup: (exchange_id, sequence_id) — prevents replay corruption
+- Recovery: resync_required flag → client refetches HTTP → re-subscribes
+
+**Stale policy (say proactively):**
+- Heartbeat per exchange every 1s
+- Missing > 10s → mark feed degraded
+- Missing > 30s → mark stale, surface flag to UI
+- Multi-source: hot assets (BTC, ETH) have 2-3 feeds. If one goes down, others keep it fresh.
+- Single-source assets: last known price + stale badge. NEVER hide the badge.
+
+**Operational (mention at the end if time):**
+- Per-exchange feed lag metric
+- Stale symbol count alert
+- Consumer lag (aggregator falling behind)
+- WS connection count + delta delivery latency
+- On-call: "Check exchange status first. If our aggregator is lagging, check consumer lag and restart."
