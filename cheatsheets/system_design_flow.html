@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>System Design — Mental Model + Cheat Sheet</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 10px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    max-width: 700px;
+  }
+  h1 { font-size: 14px; color: #64ffda; margin-bottom: 8px; }
+  h2 { font-size: 11px; color: #ffd700; margin: 10px 0 4px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+  h3 { font-size: 10px; color: #81d4fa; margin: 8px 0 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  td { padding: 2px 5px; border-bottom: 1px solid #2a2a3e; font-size: 10px; vertical-align: top; }
+  td:first-child { color: #64ffda; font-weight: bold; white-space: nowrap; width: 120px; }
+  .flow-step { color: #64ffda; font-size: 10px; margin: 2px 0; padding-left: 6px; }
+  .keypoint { color: #ccc; font-size: 10px; margin: 1px 0; padding-left: 10px; }
+  .phrase { color: #ffd700; font-style: italic; font-size: 10px; margin: 3px 0; padding: 3px 6px; background: #2a2a3e; border-radius: 3px; }
+  .warn { color: #ff6b6b; font-size: 10px; font-weight: bold; margin: 2px 0; }
+  .section { margin-bottom: 12px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .golden { background: #2a2a3e; border-left: 3px solid #ffd700; padding: 4px 8px; margin: 6px 0; font-size: 10px; color: #ffd700; }
+</style>
+</head>
+<body>
+
+<h1>System Design — Mental Model + Cheat Sheet</h1>
+
+<!-- THE FLOW -->
+<div class="section">
+<h2>The Flow (same for EVERY question)</h2>
+<div class="flow-step">1. PRODUCT REQUIREMENTS — what the user needs</div>
+<div class="flow-step">2. FACTS — inbound data, outbound users, volume, scale</div>
+<div class="flow-step">3. FACTS → CONSTRAINTS → DECISIONS — each fact forces a design choice</div>
+<div class="flow-step">4. TRACE THE DATA PATH — draw real components as you explain</div>
+<div class="flow-step">5. FAILURE MODES — walk back through, what breaks at each step</div>
+</div>
+
+<!-- HARD PROBLEM -->
+<div class="section">
+<h2>The Hard Problem — Say in First 2 Minutes</h2>
+<table>
+  <tr><td>Explore</td><td>Fanout — pushing right deltas to 2M users. Ingestion is solved; delivery is not.</td></tr>
+  <tr><td>Exchange Order</td><td>User wants instant certainty, exchange is slow/unreliable/might silently fill or drop. Bridge that gap without losing money.</td></tr>
+  <tr><td>Credit Approval</td><td>User wants instant answer, evidence comes from slow flaky providers. Need bounded deadline that stays honest.</td></tr>
+  <tr><td>Object Storage</td><td>Deletion — every chunk might be shared. Delete too eagerly = data loss. Too conservatively = storage leak.</td></tr>
+</table>
+</div>
+
+<!-- OPENINGS -->
+<div class="section">
+<h2>Opening Phrases (first 30 seconds)</h2>
+<table>
+  <tr><td>Explore</td><td>"We're building a real-time market data page — users see live crypto prices across thousands of assets. Let me understand: what does the user see on this page, and what data is available to power it?"</td></tr>
+  <tr><td>Exchange Order</td><td>"We're building a brokerage system where users place orders and we execute against external exchanges. Let me understand: does the user get an instant answer, or is this a submit-and-wait flow?"</td></tr>
+  <tr><td>Credit Approval</td><td>"We're building a credit application system that evaluates applicants against multiple providers. First question: does the user expect an instant decision, or is this submit-and-check-back-later?"</td></tr>
+  <tr><td>Object Storage</td><td>"We're building a storage system like S3 — upload, download, delete at petabyte scale. Let me clarify: are we designing the storage engine itself, or just the API routing layer?"</td></tr>
+  <tr><td>Any question</td><td>"Let me understand the product requirements first — what the user needs. Then I'll look at the data: what's coming in, what's going out, and at what volume. That will tell me where the hard problem is."</td></tr>
+</table>
+</div>
+
+<!-- UNIVERSAL FINANCIAL PRINCIPLES -->
+<div class="section">
+<h2>Universal Financial System Principles</h2>
+<div class="keypoint">1. Atomic hold before acknowledging (prevent double-spend)</div>
+<div class="keypoint">2. Kafka for async decoupling + replay + audit trail</div>
+<div class="keypoint">3. Idempotency at every boundary (client→you, you→provider)</div>
+<div class="keypoint">4. Reconciliation as permanent safety net (not error handling)</div>
+<div class="keypoint">5. Provider is the authority (never assume state, always verify)</div>
+<div class="keypoint">6. State machine with explicit terminal states</div>
+<div class="keypoint">7. Consistency > availability for money movement</div>
+<div class="golden">"I need: atomic holds to prevent double-spend, idempotency to prevent double-execution, reconciliation to catch lost callbacks, and clear authority on who decides state in a race."</div>
+</div>
+
+<!-- KEY POINTS PER QUESTION -->
+<div class="section">
+<h2>Key Points Per Question</h2>
+
+<div class="two-col">
+<div>
+<h3>Coinbase Explore</h3>
+<div class="keypoint">1. Snapshot on page load (Redis)</div>
+<div class="keypoint">2. Live deltas via WebSocket</div>
+<div class="keypoint">3. Time window aggregation (1m/5m/1h/1d)</div>
+<div class="keypoint">4. Stale flag when source is down</div>
+<div class="keypoint">5. Pre-ranked default page</div>
+<div class="keypoint">6. Coalescing (batch per 250ms)</div>
+<div class="keypoint">7. Subscription scoping (only visible symbols)</div>
+</div>
+
+<div>
+<h3>Crypto Exchange Order</h3>
+<div class="keypoint">1. Hold funds (atomic, before 200)</div>
+<div class="keypoint">2. State machine (created→submitted→filled/rejected)</div>
+<div class="keypoint">3. Kafka (async, burst buffer, replay)</div>
+<div class="keypoint">4. Idempotency (client + exchange side)</div>
+<div class="keypoint">5. Reconciliation (continuous poller)</div>
+<div class="keypoint">6. Race conditions (query before acting)</div>
+<div class="keypoint">7. Exchange is the authority</div>
+</div>
+
+<div>
+<h3>Credit Approval</h3>
+<div class="keypoint">1. Bounded deadline (5s cap → manual_review)</div>
+<div class="keypoint">2. Fan-out parallel providers</div>
+<div class="keypoint">3. Decision snapshot (immutable, reproducible)</div>
+<div class="keypoint">4. Manual review = first-class state</div>
+<div class="keypoint">5. Idempotency (no duplicate bureau pulls)</div>
+<div class="keypoint">6. YOUR rows are authoritative, not provider</div>
+<div class="keypoint">7. Audit trail (every decision reproducible)</div>
+</div>
+
+<div>
+<h3>Object Storage (S3)</h3>
+<div class="keypoint">1. Content-addressed chunks (SHA-256)</div>
+<div class="keypoint">2. Manifest = ordered chunk list</div>
+<div class="keypoint">3. Reference counting (transactional)</div>
+<div class="keypoint">4. GC safety window (24h grace period)</div>
+<div class="keypoint">5. Presigned URLs (gateway never proxies)</div>
+<div class="keypoint">6. 3x rack-aware replication</div>
+<div class="keypoint">7. Metadata/data separation</div>
+</div>
+</div>
+</div>
+
+<!-- DOMAIN DESIGN -->
+<div class="section">
+<h3>Domain Design (Your Payment System)</h3>
+<div class="keypoint">1. Auth-then-capture ("Auth is not the charge")</div>
+<div class="keypoint">2. State machine (STARTED→AUTHORIZED→CAPTURED→COMPLETED)</div>
+<div class="keypoint">3. Kafka for event-driven (lead/dealer notification)</div>
+<div class="keypoint">4. Idempotency (customer_id + vehicle_id)</div>
+<div class="keypoint">5. Webhook handling (Stripe async → reconcile if lost)</div>
+<div class="keypoint">6. Reconciliation (daily check against Stripe)</div>
+<div class="keypoint">7. Feature flags + experiment retirement</div>
+</div>
+
+<!-- EXPLORE SPECIFICS -->
+<div class="section">
+<h2>Explore — Facts → Decisions</h2>
+<table>
+  <tr><td>2M ticks/sec</td><td>Can't poll → Inbound WebSockets</td></tr>
+  <tr><td>2M users live</td><td>Can't poll → Outbound WebSockets (20-30 nodes)</td></tr>
+  <tr><td>WS is stateful</td><td>Keep thin → separate processing</td></tr>
+  <tr><td>Different failure profiles</td><td>Decouple → Kafka between layers</td></tr>
+  <tr><td>Fast page load</td><td>Can't compute on demand → Redis snapshots</td></tr>
+  <tr><td>1000 ticks/sec BTC</td><td>Can't push all → Coalesce per 250ms</td></tr>
+  <tr><td>Exchange goes silent</td><td>Heartbeat → stale flag → propagate to UI</td></tr>
+</table>
+</div>
+
+<!-- DATA PATH -->
+<div class="section">
+<h2>Explore — Data Path</h2>
+<div class="flow-step">Exchange WS → Inbound nodes (active-active) → Kafka raw ticks</div>
+<div class="flow-step">→ Processing server (dedup, aggregate O(1), detect stale)</div>
+<div class="flow-step">→ Redis (snapshot for REST) + Kafka (deltas for push)</div>
+<div class="flow-step">→ Outbound WS Gateways (subscribe, coalesce, stagger delivery)</div>
+<div class="flow-step">→ Clients</div>
+</div>
+
+<!-- FAILURE MODES -->
+<div class="section">
+<h2>Explore — Failure Recovery</h2>
+<table>
+  <tr><td>Inbound WS dies</td><td>Active-active, dedup downstream</td></tr>
+  <tr><td>Processor crashes</td><td>Redis snapshot + Kafka replay from offset</td></tr>
+  <tr><td>Gateway dies</td><td>Users reconnect, refetch HTTP snapshot</td></tr>
+  <tr><td>Exchange silent</td><td>Heartbeat timeout → stale flag → propagate</td></tr>
+  <tr><td>Client disconnects</td><td>Check sequence gap → small: catch up / large: refetch snapshot</td></tr>
+</table>
+</div>
+
+<!-- ORDER SYSTEM DATA PATH + FAILURE -->
+<div class="section">
+<h2>Order System — Data Path</h2>
+<div class="flow-step">User → API Server (validate + hold funds + persist order) → return 200</div>
+<div class="flow-step">→ Order Engine (one service: find best price → submit to exchange with idempotency key)</div>
+<div class="flow-step">→ External Exchange (async — may take seconds)</div>
+<div class="flow-step">→ Webhook callback: filled/partially filled/rejected</div>
+<div class="flow-step">→ Update DB + adjust hold + update position → Notify user</div>
+<div class="flow-step" style="color:#ff6b6b;">Safety net: Reconciliation Poller → query exchange for stuck orders → resolve</div>
+</div>
+
+<div class="section">
+<h2>Order System — Failure Recovery</h2>
+<table>
+  <tr><td>Exchange timeout</td><td>Poller detects stuck > 60s → queries exchange → filled? apply. Not filled? cancel + retry next exchange.</td></tr>
+  <tr><td>Webhook never arrives</td><td>Same as timeout — poller catches it</td></tr>
+  <tr><td>Double submit</td><td>Idempotency key (order_id) on exchange. Exchange returns existing order.</td></tr>
+  <tr><td>User cancels mid-fill</td><td>Exchange is authority. Query state first. If filled → fill wins. If open → cancel.</td></tr>
+  <tr><td>Concurrent orders (same account)</td><td>Atomic hold in DB transaction (SERIALIZABLE). Second order sees reduced balance.</td></tr>
+  <tr><td>Traffic spike (1000x)</td><td>Kafka queue absorbs burst. Workers process at controlled rate. 429 if queue full.</td></tr>
+</table>
+</div>
+
+<!-- CREDIT APPROVAL DATA PATH + FAILURE -->
+<div class="section">
+<h2>Credit Approval — Data Path</h2>
+<div class="flow-step">User → POST /apply → 200 (application_id) → client polls every 500ms</div>
+<div class="flow-step">→ Processing server: fan out to providers in parallel (identity, bureau, fraud, income)</div>
+<div class="flow-step">→ Each provider: sync response OR async callback</div>
+<div class="flow-step">→ As each responds: update DB status → client sees progress on next poll</div>
+<div class="flow-step">→ All mandatory checks done within deadline? → auto-decide (approve/deny)</div>
+<div class="flow-step">→ Deadline hit with incomplete evidence? → manual_review (honest fallback)</div>
+<div class="flow-step">→ Decision snapshot: freeze policy_version + signals + reason codes (immutable)</div>
+</div>
+
+<div class="section">
+<h2>Credit Approval — Failure Recovery</h2>
+<table>
+  <tr><td>Provider timeout</td><td>Per-provider timeout (3s). One retry if time remains in budget. If still fails → route to manual_review.</td></tr>
+  <tr><td>Provider down (circuit open)</td><td>Circuit breaker trips. Skip that check. Route to manual_review with reason "provider unavailable."</td></tr>
+  <tr><td>Conflicting signals</td><td>Policy routes to manual_review. Preserve both observations in history.</td></tr>
+  <tr><td>Deadline expires</td><td>Return manual_review honestly. Never hang the response. Never guess.</td></tr>
+  <tr><td>Duplicate application</td><td>Idempotency key (session_id). Return existing application_id.</td></tr>
+  <tr><td>Crash mid-processing</td><td>Each provider result persisted independently. On restart, check what's done, resume from there.</td></tr>
+</table>
+</div>
+
+<!-- OBJECT STORAGE DATA PATH + FAILURE -->
+<div class="section">
+<h2>Object Storage — Data Path</h2>
+<div class="flow-step">Upload: Client → API Gateway (chunk file into 64MB pieces, compute SHA-256 per chunk)</div>
+<div class="flow-step">→ Check metadata: chunk hash exists? Skip (dedup). New? → issue presigned URL</div>
+<div class="flow-step">→ Client uploads directly to data nodes (gateway never proxies bytes)</div>
+<div class="flow-step">→ Replicate chunk to 3 nodes (rack-aware) → commit manifest atomically (Postgres)</div>
+<div class="flow-step">Download: Client → Gateway → lookup manifest → presigned URLs → client fetches from data nodes</div>
+<div class="flow-step">Delete: Remove object row + decrement ref counts → zero? → GC queue (24h grace)</div>
+</div>
+
+<div class="section">
+<h2>Object Storage — Failure Recovery</h2>
+<table>
+  <tr><td>Upload interrupted</td><td>Manifest never committed → object not visible. Orphan chunks cleaned by GC later.</td></tr>
+  <tr><td>Data node dies</td><td>Heartbeat timeout (30s) → identify under-replicated chunks → re-replicate from surviving copy to new node.</td></tr>
+  <tr><td>GC races with upload</td><td>24h grace period. Don't delete zero-ref chunks immediately. Upload commits within hours → count goes back above 0.</td></tr>
+  <tr><td>Ref count drift</td><td>PUT/DELETE wrap ref-count update in same transaction as object row. Can't drift.</td></tr>
+  <tr><td>Bit rot</td><td>Background scrubber re-computes SHA-256 per chunk. Mismatch → corrupt → re-replicate from healthy copy.</td></tr>
+  <tr><td>Read during node outage</td><td>3 replicas. Client falls back to another replica. Transparent.</td></tr>
+</table>
+</div>
+
+<!-- KEY PHRASES -->
+<div class="section">
+<h2>Key Phrases</h2>
+<div class="phrase">"The hard problem is fanout, not ingestion"</div>
+<div class="phrase">"Fanout is a scheduling problem, not a socket problem"</div>
+<div class="phrase">"HTTP is truth, WebSocket is optimization"</div>
+<div class="phrase">"Show stale, never pretend data is fresh"</div>
+<div class="phrase">"The hold is not the trade"</div>
+<div class="phrase">"Never act without knowing the current state"</div>
+<div class="phrase">"Reconciliation is not error handling — it runs continuously"</div>
+</div>
+
+<!-- DON'T FORGET -->
+<div class="section">
+<h2 style="color:#ff6b6b;">DON'T FORGET</h2>
+<div class="warn">Coalescing: "Can I push everything to 2M users?" NO → batch per 250ms</div>
+<div class="warn">Stale: heartbeat missing → mark flag → propagate to UI</div>
+<div class="warn">Hold BEFORE 200: validate + hold + persist in one atomic txn</div>
+<div class="warn">Query before retry: never blindly re-submit to exchange</div>
+</div>
+
+<!-- GENERIC CHECKLIST -->
+<div class="section">
+<h2>Generic SD Checklist (any question)</h2>
+<div class="keypoint">□ What data comes in? (shape, volume, source)</div>
+<div class="keypoint">□ What data goes out? (who sees it, how, latency)</div>
+<div class="keypoint">□ What processing happens in between?</div>
+<div class="keypoint">□ What happens when something fails/goes stale?</div>
+<div class="keypoint">□ How do we avoid overwhelming the outbound side?</div>
+<div class="keypoint">□ How does the user recover from disconnection?</div>
+</div>
+
+</body>
+</html>

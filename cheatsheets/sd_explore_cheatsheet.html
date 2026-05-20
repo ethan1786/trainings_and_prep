@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SD — Coinbase Explore</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, sans-serif;
+    font-size: 10px;
+    line-height: 1.3;
+    padding: 6px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    max-width: 320px;
+  }
+  h1 { font-size: 12px; color: #64ffda; margin-bottom: 4px; }
+  h2 { font-size: 10px; color: #ffd700; margin: 6px 0 3px; border-bottom: 1px solid #333; padding-bottom: 2px; }
+  .flow { color: #64ffda; font-size: 9px; margin: 2px 0; }
+  .check { color: #ccc; font-size: 9px; margin: 1px 0; padding-left: 8px; }
+  .phrase { color: #aaa; font-style: italic; font-size: 9px; margin: 2px 0; }
+  .warn { color: #ff6b6b; font-size: 9px; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin: 3px 0; }
+  td { padding: 1px 3px; border-bottom: 1px solid #2a2a3e; font-size: 9px; }
+  td:first-child { color: #64ffda; white-space: nowrap; width: 70px; }
+</style>
+</head>
+<body>
+
+<h1>SD: Coinbase Explore</h1>
+
+<h2>Flow</h2>
+<div class="flow">1. Product reqs → 2. Facts/scale → 3. Constraints→Decisions → 4. Trace data path → 5. Failure modes</div>
+
+<h2>Product Reqs (write on board)</h2>
+<div class="check">□ Snapshot on page load</div>
+<div class="check">□ Live deltas via WebSocket</div>
+<div class="check">□ Time window changes (1m/5m/1h/1d)</div>
+<div class="check">□ Stale flag when source is down</div>
+<div class="check">□ Pre-ranked default page</div>
+<div class="check">□ Custom watchlist (auth)</div>
+
+<h2>Numbers</h2>
+<table>
+  <tr><td>Inbound</td><td>10-15 exchanges, 1-2M ticks/sec peak</td></tr>
+  <tr><td>Outbound</td><td>2M concurrent users</td></tr>
+  <tr><td>Assets</td><td>20K displayed</td></tr>
+  <tr><td>WS/node</td><td>100K connections → 20-30 nodes</td></tr>
+  <tr><td>Coalesce</td><td>Batch per 250ms</td></tr>
+  <tr><td>Latency</td><td>&lt;1s tick-to-client, &lt;100ms page load</td></tr>
+</table>
+
+<h2>Data Path</h2>
+<table>
+  <tr><td>Exchanges</td><td>→ Inbound WS (active-active)</td></tr>
+  <tr><td></td><td>→ Kafka (raw ticks)</td></tr>
+  <tr><td></td><td>→ Processing (dedup, aggregate, stale detect)</td></tr>
+  <tr><td></td><td>→ Redis (snapshot) + Kafka (deltas)</td></tr>
+  <tr><td></td><td>→ Outbound WS Gateways (coalesce, subscribe)</td></tr>
+  <tr><td></td><td>→ Clients</td></tr>
+</table>
+
+<h2>Failure Recovery</h2>
+<table>
+  <tr><td>Inbound WS</td><td>Active-active, dedup downstream</td></tr>
+  <tr><td>Processor</td><td>Redis snapshot + Kafka replay</td></tr>
+  <tr><td>Gateway</td><td>Users reconnect, refetch HTTP snapshot</td></tr>
+  <tr><td>Exchange</td><td>Heartbeat → stale flag → propagate</td></tr>
+</table>
+
+<h2>Key Phrases</h2>
+<div class="phrase">"Hard problem is fanout, not ingestion"</div>
+<div class="phrase">"Fanout is a scheduling problem, not a socket problem"</div>
+<div class="phrase">"HTTP is truth, WebSocket is optimization"</div>
+<div class="phrase">"Show stale, never pretend data is fresh"</div>
+
+<h2 class="warn">DON'T FORGET</h2>
+<div class="warn">Coalescing: "Can I push everything to 2M users?" NO → batch per 250ms</div>
+<div class="warn">Stale: heartbeat missing → mark flag → propagate to UI</div>
+
+</body>
+</html>
