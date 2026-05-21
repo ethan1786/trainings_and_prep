@@ -112,129 +112,144 @@
 
 ## Presentation Plan (1-hour Domain Interview)
 
-**Format:** ~18 min presentation + ~40 min Q&A from interviewer
+**Format:** Draw the final system on Miro, explain decisions as you go, then handle Q&A.
+**Approach:** Start from the final architecture (not the evolution story). Present the system, explain WHY for each component, then deep-dive into payments.
 
 ---
 
-### Part 1: System Overview (0:00–8:00)
+### Reference Diagram (Miro)
 
-#### Opening Hook + Context (0:00–3:00)
+**Board URL:** https://miro.com/app/board/uXjVHXu9d5Q=/?focusWidget=3458764672763797588
 
-**Script:**
-
-> "I designed and shipped a digital transaction platform that processes deposits on vehicles — real money, strong consistency, payment state machine with auth-then-capture. This is the project that got me promoted to Principal — I'll show you why.
->
-> **My role:** I was the sole backend architect and primary implementer. I worked with product on requirements, defined all API contracts with frontend, made all the architecture decisions, and wrote the majority of the backend code. Started with 2 backend engineers — myself and one other. I was the architectural constant from day one through every evolution, even as the team grew and went through re-orgs.
->
-> **Context:** Pandemic hit, consumers couldn't visit dealerships, we needed to enable online transactions. Enormous business pressure, but no spec — nobody at the company had done this before.
->
-> **My approach:** My first job wasn't writing code. It was working with product and management to drive the design through ambiguity — translate a vague vision into concrete priorities. I had a head start: at Toast I'd designed a similar order management system, so the foundational patterns — configurational vs transactional data separation, state machine design for order lifecycles, DB structure — translated directly.
->
-> **Key early decisions:** Lead processing is eventually consistent (acceptable latency). Transaction state transitions are strongly consistent (money — no stale state). Payments deferred to phase 2 — ship lead capture first to prove the business model. Everything started inside the monolith — no premature extraction. This let us ship 3 weeks earlier and start generating revenue while competitors were still building their microservice architectures.
->
-> **The technical complexity isn't in the scale** — it's in the correctness requirements. When money is involved, you can't have stale state, you can't lose a transaction, and you can't double-charge. The patterns — state machine, idempotency, reconciliation, event sourcing — matter more than the throughput numbers."
-
-**[Draw on Miro: Stage 1 — monolith with modules]**
-
-#### Architecture Evolution (3:00–8:00)
-
-**Script:**
-
-> "I started simple. A few service and repository classes inside the monolith — transaction CRUD, a lead processing path for digital transactions, dealer and customer configuration management. Single DB, single deploy, zero operational overhead. The team was small, we co-located, and it let us iterate daily.
->
-> [Draw Stage 2] As the product grew, the core app remained the transaction CRUD engine with dealer and customer config management — that's the strongly consistent path. What I extracted to event-driven was the lead processing: after a transaction commits, an event is published. A downstream consumer picks it up, saves a lead record, then notifies the dealer — either via email or an external API call. This decoupling was deliberate: the transaction commit is the critical path (strong consistency, must not fail), but lead notification is eventually consistent (dealer gets notified within seconds, not in the same DB transaction). I added feature flags at this point because I knew product would want to experiment.
->
-> [Draw Stage 3] The mature state: the core app evolved into a transaction state machine AND orchestrator. It manages the transaction lifecycle and coordinates downstream services via sync HTTP calls: a fee/tax service (calls 3rd party for dealer fees and regional taxes), a trade-in service (3rd party estimate), a loan service (3rd party rate estimate), and a payment service for deposits.
->
-> The payment service is interesting because it has a dual communication pattern: the core app calls it synchronously to create and update payments, but the payment provider sends webhook events back asynchronously. The payment service listens to those webhooks, then publishes events to the event bus — which the core app consumes to update the transaction state and notify the customer of payment status changes. So it's sync outbound, async inbound.
->
-> The lead processor and notification service remain as async consumers from the event bus — same as Stage 2 but now with richer events flowing from the expanded system.
->
-> Each service extraction was triggered by real need — different ownership, different deployment cadence, or different reliability requirements — not by theory."
-
-**[Three-panel evolution diagram on Miro]**
+Open this in a separate tab during the interview as reference. Contains:
+- Full transaction system architecture (orchestrator + services)
+- Payment system deep-dive (state machine + webhooks + reconciliation)
 
 ---
 
-### Part 2: Payment/Reservation Deep Dive (8:00–16:00)
+### Opening (1-2 min)
 
-**Transition script:**
+> "I designed and shipped a digital transaction platform that processes deposits on vehicles — real money, strong consistency, payment state machine. This project got me promoted to Principal. Let me walk you through the architecture."
 
-> "Now I want to zoom into the most technically interesting subsystem — the payment and reservation flow. This is where consistency, audit trails, and failure handling matter most, and I think it connects directly to your domain at Coinbase."
-
-#### Payment Architecture (8:00–11:00)
-
-**Script:**
-
-> "When we added deposits — consumers putting real money down on a vehicle — I needed to design a payment flow that was safe, auditable, and resilient to failures. The key decision was auth-then-capture: we authorize the card immediately to hold funds, but don't actually charge until the dealer confirms the deal. This means cancellation before confirmation is free — no refund needed, just release the hold.
->
-> [Draw on Miro: Client → Transaction Service → Payment Provider, showing auth-then-capture split]
->
-> The async piece: the payment provider confirms out-of-band via webhook. I don't block the user on settlement — they get a 'reservation confirmed' immediately after auth succeeds. The capture happens later when the dealer takes action."
-
-#### State Machine & Audit Trail (11:00–14:00)
-
-**Script:**
-
-> "The reservation lifecycle is a formal state machine: STARTED → CONFIRMED → CAPTURED → PAID OUT. With branches for CANCELLED (from STARTED or CONFIRMED) and REFUNDED (from CAPTURED).
->
-> [Draw state machine on Miro]
->
-> For auditability — because this is real money — I event-sourced the state transitions. Each state change is an Action record in a linked list: it stores the payment intent ID, the transition type, and a pointer to the previous action. This gives a full audit trail: I can reconstruct exactly what happened to any reservation, in what order, and reconcile against the payment provider's records.
->
-> The linked-list design means I never mutate state — I only append. That's critical for dispute resolution and compliance."
-
-#### Failure Handling & Durability (14:00–16:00)
-
-**Script:**
-
-> "Because this is real money, durability and availability were primary design constraints — not addons.
->
-> For durability: every state transition is written to a WAL-backed Postgres with synchronous replication to a standby before we acknowledge to the user. No in-memory-only or cache-only storage for payment state. The event-sourced action log means I never mutate — only append. If anything goes wrong, I can replay the entire history of a reservation and reconcile against the payment provider's records. Zero data loss even on node crash.
->
-> For availability: the payment flow has no single point of failure. The transaction service runs multi-AZ. If the primary DB fails, automatic failover to the sync standby — same data, no loss. The reconciliation worker is the safety net: even if a webhook is lost or the service is briefly unavailable, the worker catches up by polling the provider for any stuck reservations.
->
-> Three failure patterns I designed for:
->
-> First, synchronous failures: payment provider returns an error during auth. The transaction service rolls back the reservation to STARTED state and returns the error to the user. Compensating transaction — no partial state left behind.
->
-> Second, async failures: webhook never arrives (provider timeout). I have a reconciliation job that polls the payment provider for any reservations stuck in CONFIRMED for longer than a threshold. If the provider says it failed, I cancel. If it succeeded, I advance the state.
->
-> Third, idempotency: webhooks can arrive multiple times. Each action is idempotent — if I receive a 'confirmed' webhook but the reservation is already CONFIRMED or beyond, I no-op. The action linked list makes this check trivial."
-
-#### Tips: Durability & Availability Talking Points (say these out loud)
-
-When presenting or answering Q&A, drop these naturally:
-
-- **"WAL before acknowledge"** — "We write to the WAL before confirming to the client. Even if the node crashes mid-write, we replay the log on restart. Zero data loss."
-- **"Sync replication"** — "The standby confirms it received the write before the primary acknowledges to the client. If the primary dies, the standby has everything."
-- **"Append-only / never mutate"** — "For financial data, I never update in place. Every state change is a new record. This gives me a full audit trail and makes reconciliation trivial."
-- **"Reconciliation as safety net"** — "Even with all these guarantees, I run a nightly reconciliation comparing our internal ledger against the payment provider's settlement file. Belt and suspenders."
-- **"No single point of failure"** — "Every component in the payment path has a fallback: multi-AZ DB, reconciliation worker as webhook backup, idempotent operations for safe retries."
-- **"Graceful degradation outside the money path"** — "For non-payment features (inventory display, notifications), I accept eventual consistency and cache staleness. But for anything touching money: strong consistency, sync replication, no shortcuts."
-
-**Connection to Coinbase:** "This is the same principle you use for trading — you can't lose a trade, you can't double-execute an order, and you need to reconcile against the blockchain. The durability and consistency requirements are identical."
+**My role:** Sole backend architect + primary implementer. All architecture decisions mine. 2 backend engineers at start.
 
 ---
 
-### Part 3: Wrap-Up + Coinbase Bridge (16:00–18:00)
+### Layer 1: The Transaction System (draw + explain, 5-8 min)
 
-**Script:**
+**Draw the final architecture. At each component, explain the WHY.**
 
-> "To summarize the key decisions and tradeoffs:
->
-> - Started simple (monolith), extracted when complexity justified — never pre-optimized
-> - Consistency matched to domain: strong for money flows, eventual for display/lead data
-> - Auth-then-capture for safe payment lifecycle — cancel is free before capture
-> - Event-sourced audit trail for compliance and reconciliation
-> - Feature flags from day one — experiments retired safely, zero incidents
-> - Sized correctly for actual load — no over-engineering (10:1 read-write, in-memory cache, single DB handles writes fine)
->
-> Results: launched on timeline, captured meaningful revenue during a business-critical period, architecture grew organically. This project got me promoted to Principal.
->
-> **Connection to your domain:** This maps directly to Coinbase. Auth-then-capture is like placing a limit order — intent committed but not settled. The payment state machine mirrors your order states (PENDING → OPEN → FILLED). Event-sourced audit trail is essential for any regulated financial system. The webhook reconciliation pattern applies to any external settlement — whether it's a payment provider or the blockchain. And the correctness requirements are identical: can't lose a transaction, can't double-charge, can't have stale state when money is involved.
->
-> Happy to go deeper on any part — payments, orchestration patterns, scaling concerns, or how I'd improve this with AI today."
+**Critical points to hit:**
+
+```
+┌─────────────────────────────────────────────┐
+│ Core App (Transaction Orchestrator)          │
+│                                             │
+│ • Transaction state machine                 │
+│ • Calls downstream services via sync HTTP   │
+│ • Manages the lifecycle end-to-end          │
+└──────────┬──────────┬──────────┬────────────┘
+           │          │          │
+    ┌──────▼───┐ ┌───▼────┐ ┌──▼──────┐
+    │ Fee/Tax  │ │Trade-In│ │  Loan   │
+    │(3rd party)│ │(3rd p.)│ │(3rd p.) │
+    └──────────┘ └────────┘ └─────────┘
+           │
+    ┌──────▼──────────────────┐
+    │ Payment Service          │
+    │ (sync outbound,          │
+    │  async inbound webhooks) │
+    └──────┬──────────────────┘
+           │
+    ┌──────▼──────┐      ┌──────────────┐
+    │   Stripe    │─────▶│  Webhooks    │
+    │  (3rd party)│      │  (async back)│
+    └─────────────┘      └──────────────┘
+           
+    ┌──────────────────────────────────┐
+    │ Event Bus (Kafka)                 │
+    │ • Lead notifications (eventual)   │
+    │ • Dealer notifications            │
+    │ • Payment status events           │
+    └──────────────────────────────────┘
+```
+
+**Key decisions to state at each component:**
+
+| Component | WHY this design |
+|---|---|
+| **Orchestrator pattern** | Full visibility into transaction flow. One place to see where things are, what failed, what to retry. |
+| **Sync HTTP to services** | Data dependencies between steps (trade-in → fee/tax → deposit amount). Must be sequential. Strong consistency on the critical path. |
+| **Eventual consistency for leads** | Dealer notification can lag seconds. Not in the transaction's critical path. Decoupled via Kafka. |
+| **Single DB (Postgres)** | 100-200 writes/min. Doesn't justify microservice DB split. Config + transactional in same DB, different tables, different access patterns. |
+| **In-memory cache** | 10-15K rpm config reads. Kafka-driven invalidation (not TTL). No Redis needed at this scale. |
+| **Feature flags** | Product experiments. Safe retirement playbook. Each experiment can be killed without code deploys. |
+
+**The "hardest part" line (say proactively):**
+> "The technical complexity isn't scale — it's correctness. When money is involved: can't lose state, can't double-charge, can't have stale data. That drives every design choice."
+
+---
+
+### Layer 2: Payment Deep Dive (draw + explain, 5-8 min)
+
+**Critical points to hit:**
+
+**1. Auth-then-capture pattern:**
+> "Authorize immediately (hold funds). Capture only when dealer confirms. Cancel before capture is free — just release the hold."
+
+**2. Payment state machine:**
+```
+CREATED → AUTHORIZED → CAPTURED → PAID_OUT
+              ↓              ↓
+         CANCELLED      REFUNDED
+              ↓
+         DECLINED
+```
+
+**3. Dual communication pattern:**
+- Outbound: sync HTTP to Stripe (auth, capture, cancel)
+- Inbound: async webhooks from Stripe (confirmation, failure events)
+
+**4. Audit trail (append-only):**
+> "Never mutate payment state. Every transition is a new Action record (linked list). Full history for disputes, compliance, and reconciliation."
+
+**5. Idempotency:**
+> "Customer ID + vehicle ID as dedup key in Redis. Checked before any auth call. Prevents double-charge on double-click or network retry."
+
+**6. Reconciliation:**
+> "Daily job compares our records against Stripe's settlement. Catches: missed webhooks, stuck payments, silent failures. Belt and suspenders."
+
+---
+
+### Layer 3: Failure Modes (explain per component, 3-5 min)
+
+| Failure | What happens | Recovery |
+|---|---|---|
+| **Stripe returns error on auth** | Roll back to CREATED. Return error to user. | Compensating transaction, no partial state. |
+| **Webhook never arrives** | Payment stuck in AUTHORIZED. | Reconciliation job polls Stripe after threshold. Advances or cancels. |
+| **Duplicate webhook** | Same event arrives twice. | Idempotency key saved in DB. Second event is no-op. |
+| **DB write fails after auth succeeds** | Money held but no record. | Webhook event will arrive and create/correct the record. Poll-before-action pattern ensures next action reads latest state from Stripe. |
+| **Hold expires (7 days)** | Stripe auto-releases. | Expired webhook triggers state update. Re-auth available if deal is still active. |
+| **Cancel-capture race** | Customer cancels while dealer captures. | Stripe is authority. Only one succeeds. Poll-before-action ensures we check latest state before attempting either. |
+| **Fee/Tax service slow** | Can't calculate total. | Return partial data with error. Customer can fix before deposit. |
+| **Loan service down** | Can't get rate estimate. | Non-blocking. Customer can proceed without it and add later. |
+
+---
+
+### Wrap-Up + Coinbase Bridge (1-2 min)
+
+> "This maps directly to Coinbase: auth-then-capture = limit order (intent committed, not settled). Payment state machine = order lifecycle. Webhook reconciliation = blockchain settlement verification. Same correctness requirements: can't lose, can't double-execute, must reconcile."
+
+---
+
+### Key Principles to Weave In (say naturally, not all at once)
+
+- **"Auth is not the charge"** — same as "hold is not the trade"
+- **"Provider is the source of truth"** — always poll before acting
+- **"Append-only, never mutate"** — audit trail for financial compliance
+- **"Reconciliation is not error handling — it runs always"**
+- **"Strong consistency for money, eventual for everything else"**
+- **"Sized for actual load — didn't over-engineer"** (100-200 writes/min, single DB is fine)
 
 ---
 
