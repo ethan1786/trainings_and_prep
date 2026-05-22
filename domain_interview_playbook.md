@@ -38,7 +38,8 @@ CarGurus is a car marketplace, we connect buyers with dealers. The gap we solved
 | **Single DB (Postgres)** | 100-200 writes/min. Doesn't justify separate DBs. Config + transactional in same DB, different tables. |
 | **Redis cache (write-through)** | Improves read performance. Write to DB first, then update Redis. No race condition concern — one customer updates one transaction at a time. |
 | **Feature flags** | Product experiments. Safe retirement. Kill experiments without code deploys. |
-| **State machine** (transaction) | CREATED → TRADE_IN → FEE_TAX → FINANCING → DEPOSIT. Enforces data dependency chain. If customer updates trade-in, everything downstream recalculates. |
+| **Configurable steps** (transaction) | Steps: create txn, trade-in, fee/tax, financing, deposit. Each step is optional (dealer config). If a service fails, customer proceeds with empty data and fixes later. If earlier step is updated, downstream recalculates. No rigid state machine — flexible to dealer config and service availability. |
+| **Transaction dedup** | New transactions: compound key (user_id + vehicle_id) with unique constraint — second create returns existing. Step updates: each request carries a session ID. Short-lived in-memory cache checks for recent duplicates — if found, return cached result, skip downstream call. If cache expired, enough time has passed that data may have changed — fresh downstream call is justified. Audit log in DB records all actions permanently regardless. |
 
 ---
 
