@@ -198,6 +198,204 @@ queue.take();       // blocks if empty
 
 ---
 
+## Concurrency Patterns — Web API Examples
+
+### LC 1114 — Three Solutions (Print in Order)
+
+```java
+// Solution 1: Lock + Condition + state variable
+// - signalAll() wakes all CURRENTLY waiting threads
+// - The boolean persists, so NEW threads arriving later check the boolean
+//   and skip the await() entirely (while loop condition is false)
+// - await() releases the lock, so other threads can acquire it
+class Foo {
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition cond = lock.newCondition();
+    private int step = 1;  // shared state — safe because only accessed under lock
+
+    void first(Runnable r) throws InterruptedException {
+        lock.lock();
+        try {
+            r.run();
+            step = 2;
+            cond.signalAll(); // wake all currently waiting threads
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void second(Runnable r) throws InterruptedException {
+        lock.lock();
+        try {
+            while (step != 2) cond.await(); // releases lock, waits, re-acquires on wake
+            r.run();
+            step = 3;
+            cond.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void third(Runnable r) throws InterruptedException {
+        lock.lock();
+        try {
+            while (step != 3) cond.await();
+            r.run();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+// Solution 2: Semaphore (simplest for ordering)
+// - Permits persist — if first() runs before second() starts, the permit is already there
+// - acquire() returns immediately if permit available, blocks if 0
+class Foo {
+    private final Semaphore sem2 = new Semaphore(0);
+    private final Semaphore sem3 = new Semaphore(0);
+
+    void first(Runnable r) throws InterruptedException {
+        r.run();
+        sem2.release();  // +1 permit for second()
+    }
+
+    void second(Runnable r) throws InterruptedException {
+        sem2.acquire(); // blocks until first() releases
+        r.run();
+        sem3.release();  // +1 permit for third()
+    }
+
+    void third(Runnable r) throws InterruptedException {
+        sem3.acquire(); // blocks until second() releases
+        r.run();
+    }
+}
+
+// Solution 3: CountDownLatch (one-shot, can't reuse)
+// - count stays at 0 after countDown — late arrivals pass through immediately
+class Foo {
+    private final CountDownLatch latch1 = new CountDownLatch(1);
+    private final CountDownLatch latch2 = new CountDownLatch(1);
+
+    void first(Runnable r) throws InterruptedException {
+        r.run();
+        latch1.countDown();
+    }
+
+    void second(Runnable r) throws InterruptedException {
+        latch1.await(); // blocks until count = 0
+        r.run();
+        latch2.countDown();
+    }
+
+    void third(Runnable r) throws InterruptedException {
+        latch2.await();
+        r.run();
+    }
+}
+```
+
+**Why `while` + state variable in the Lock solution?**
+1. **Spurious wakeups:** `await()` can return without `signal()` (JVM spec). While loop re-checks.
+2. **Late arrivals:** If step2 thread arrives AFTER step1 signaled, signal is lost. The boolean persists and step2 sees `step == 2`, skips `await()` entirely.
+3. **Thread safety:** The boolean is safe because it's only read/written while holding the lock.
+
+**Comparison:**
+
+| Solution | Handles late arrival? | Handles spurious wakeup? | Reusable? | Complexity |
+|---|---|---|---|---|
+| Lock + Condition | Yes (boolean persists) | Yes (while loop) | Yes | Most |
+| Semaphore | Yes (permits persist) | N/A (no spurious) | Yes | Least |
+| CountDownLatch | Yes (count stays 0) | N/A (no spurious) | No (one-shot) | Least |
+
+---
+
+### Scenario 1: Lock + Conditions (Web API — ordering, no count limit)
+
+Use when: step 2 must wait for step 1's result (data dependency). No limit on how many times step 2 can be called after.
+
+```java
+class OrderedApiService {
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition step1Done = lock.newCondition();
+    private final Condition step2Done = lock.newCondition();
+    private boolean step1Completed = false;
+    private boolean step2Completed = false;
+
+    void apiStep1() {
+        lock.lock();
+        try {
+            doStep1Work();
+            step1Completed = true;
+            step1Done.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void apiStep2() throws InterruptedException {
+        lock.lock();
+        try {
+            while (!step1Completed) step1Done.await();
+            doStep2Work();
+            step2Completed = true;
+            step2Done.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    void apiStep3() throws InterruptedException {
+        lock.lock();
+        try {
+            while (!step2Completed) step2Done.await();
+            doStep3Work();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+### Scenario 2: Semaphore (count-bounded — step2 count ≤ step1 count)
+
+Use when: each step 1 completion allows one step 2 to proceed. Like "can't capture more payments than authorized."
+
+```java
+class PaymentService {
+    private final Semaphore capturePermits = new Semaphore(0);
+
+    // Each auth releases one capture permit
+    void authorize(PaymentRequest req) {
+        doAuth(req);
+        capturePermits.release(); // +1 permit
+    }
+
+    // Each capture consumes one permit — blocks if no auths available
+    void capture(PaymentRequest req) throws InterruptedException {
+        capturePermits.acquire(); // blocks if 0 permits (no uncaptured auths)
+        doCapture(req);
+    }
+
+    // Optional: check without blocking
+    boolean canCapture() {
+        return capturePermits.availablePermits() > 0;
+    }
+}
+```
+
+### When to use which:
+
+| Pattern | Guards | Blocks until | Real-world example |
+|---|---|---|---|
+| Lock + Condition | **State** ("is step 1 done?") | Condition becomes true | Fee/tax API waits for trade-in result |
+| Semaphore | **Count** ("how many permits available?") | Permit available | Can't capture more payments than authorized |
+| CountDownLatch | **One-time gate** ("did N things finish?") | Count reaches 0 | Wait for all providers to respond |
+
+> "If it's count-bounded (can't capture more than authorized) → Semaphore. If it's a data dependency (step 2 needs step 1's output) → Lock + Condition. If it's one-time initialization → CountDownLatch."
+
+---
+
 ## Reminders
 
 **Cherry:**
