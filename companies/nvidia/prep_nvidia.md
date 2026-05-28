@@ -1,71 +1,50 @@
-# NVIDIA — Senior Cloud Software Engineer
+# NVIDIA — Senior Cloud Software Engineer (NGC Team)
 
-> **Interview prep doc.** Position: Senior Cloud Software Engineer (applied ~April 2026).
-> JD taken down from website. Salary range covered L4 (Senior) and L5 (Staff).
-> Last updated: May 7, 2026
+> **Interview prep doc.** Position: Senior Cloud Software Engineer, NGC.
+> Team: NGC (NVIDIA GPU Cloud) — catalog/registry platform for GPU-optimized containers and models.
+> Salary range: L4 (Senior) and L5 (Staff).
+> Last updated: May 27, 2026
 
 ---
 
 ## Interview Status
 
-- **No HR or HM screen** — went straight to technical rounds (signals urgency to fill)
-- **Format:** 2 back-to-back technical rounds with ICs
-- **Date:** Wed May 14, 2026
-- **Platform:** Microsoft Teams (camera + mic on)
+- **First round done** (May 14) — 2 technical rounds with ICs, went well
+- **Final round scheduled:** Thu May 29 + Fri May 30, 12:00-3:00 PM each day
+- **Platform:** Microsoft Teams
 - **No outside tools (ChatGPT etc.)** — explicitly stated
-
-| Time | Interviewer | Level | Likely Focus |
-|---|---|---|---|
-| 11:00 AM – 12:00 PM | Michael Anderson | Senior SWE | Coding or system design |
-| 1:00 PM – 2:00 PM | Bargav Cheruku | Lead SWE | System design or technical deep-dive + behavioral |
+- **Format:** No standard structure. Conversational, project deep-dive, possible coding (easy/medium), system design discussion.
 
 ---
 
-## What We Know
+## Role Context
 
-**Role context (JD found — JR2014764):**
-- Senior Cloud Software Engineer — building cloud-based GPU service platforms for Deep Learning / AI
 - **Java-first role**: Core Java (Collections, Streams, Concurrency, I/O) explicitly required
-- Key skills: large-scale distributed systems, REST API/gRPC design, RDBMS + NoSQL (Cassandra, DynamoDB, Redis), cloud technologies (5+ yrs), streaming (Kafka, Spark, Flink)
-- "Nice to have": operational experience with large-scale apps, cloud certs, open source contributions, InfluxDB, Elasticsearch
-- **NOT a GPU/CUDA/hardware role** — it's the cloud services platform layer on top of GPU compute
-- Salary range spans L4 (Senior) and L5 (Staff) — actual leveling unclear
-- Location: Westford, MA or remote (need to confirm post-interview)
-- Applied ~1 month ago, recruiter (Eleza) forwarded to hiring team
+- **Team: NGC** — catalog/registry platform (Docker Hub for GPU software), NOT fleet management
+- Key skills: large-scale distributed systems, REST API/gRPC design, RDBMS + NoSQL, cloud technologies, streaming
+- **NOT a GPU/CUDA/hardware role** — cloud services platform layer
+- Salary range spans L4 (Senior) and L5 (Staff) — leveling TBD
 
-**Your fit (almost 100% match):**
-- ✅ Core Java 13 years (Collections, Streams, Concurrency — daily use)
+**Your fit (near-perfect match):**
+- ✅ Core Java 13 years
 - ✅ Large-scale distributed systems (API Mod: 8K rpm, circuit breakers, orchestration)
 - ✅ REST API design (RFC standards, API contracts for 10+ consuming teams)
-- ✅ RDBMS + NoSQL (MySQL, Redis, Mongo — designed caching layers)
+- ✅ RDBMS + NoSQL (MySQL, Redis, Mongo)
 - ✅ Cloud (AWS: ECS/EKS, SQS/SNS, S3, RDS, Terraform)
-- ✅ Streaming (Kafka event pipelines, SQS/SNS)
-- ✅ Operational experience with large-scale apps (SLOs, Datadog, on-call)
-- ✅ gRPC (GraphQL federation, service-to-service communication)
-- ✅ "Drive pragmatic technical discussions" (RFCs, design reviews, cross-team alignment)
+- ✅ Streaming (Kafka event pipelines)
+- ✅ Operational experience (SLOs, Datadog, on-call)
 
-**Interview format (confirmed from recruiter, May 7):**
-- **No set structure or format** — depends on the interviewer and how conversation goes
-- **Likely asked to explain something you worked on** — with technical follow-up questions to check depth
-- **Prepare to speak at depth about technologies on your resume**
-- **Ask good questions** about team, projects, possible roles
-- **Read up on NVIDIA products/company** — interviewers will ask what you know about them
-- **NOT a standard LC coding interview** — this is a "prove you built real things and understand them" interview
-
-**Interview intel (from forums):**
-- NVIDIA interviews differ by hiring group — no standard question bank
-- Questions are mostly easy/medium if coding comes up
-- String processing is common if they do ask coding
-- Since both interviewers are ICs (Senior + Lead), expect technical depth on your projects
+**Interview approach (learned from first round + HashiCorp):**
+- Lead with TECHNICAL DEPTH, not leadership stories
+- "Here's what I built, here's the technical decision, here's why it works at scale"
+- Let interviewer discover leadership through follow-ups
+- If unfamiliar tech comes up: "Let me reason through this from first principles"
 
 ---
 
-## Prep Plan (Light — May 10-13)
-
-### Coding Prep (light)
+## Coding Prep
 
 No need for hard LC. Focus on clean, bug-free implementation of medium problems.
-Practice in an IDE with no autocomplete to simulate the environment.
 
 #### HashMap from Scratch (classic "no library" question)
 
@@ -459,61 +438,241 @@ They'll pick something from your resume and drill. For each technology/concept b
 
 ---
 
-### NVIDIA DGX Cloud / Fleet Management — Domain Knowledge
-
-**What is DGX Cloud:**
-- NVIDIA's GPU-as-a-service platform — enterprises rent GPU clusters for AI training/inference without owning hardware
-- Runs on partner clouds (Azure, GCP, Oracle Cloud) but NVIDIA manages the GPU layer
-- Key product: "DGX SuperPOD" — rack-scale GPU clusters (8 A100/H100 GPUs per node, hundreds of nodes per cluster)
-- Customers: enterprises doing large-scale AI training (LLMs, autonomous vehicles, drug discovery)
-
-**Fleet Management challenges (what this team likely works on):**
-- **Resource scheduling:** Allocate GPU nodes to training jobs. Jobs need specific GPU types, memory, interconnect bandwidth. Unlike CPU jobs, GPU jobs are expensive ($2-4/hr per GPU) — utilization efficiency matters enormously.
-- **Job orchestration:** Multi-node distributed training jobs (8-1024 GPUs). If one node dies mid-training, what happens? Checkpoint/restart, node replacement, rescheduling.
-- **Health monitoring:** Thousands of GPU nodes. GPU memory errors, thermal throttling, NVLink failures, network partition. Need to detect unhealthy nodes before jobs land on them.
-- **Multi-tenancy:** Multiple customers sharing a cluster. Isolation (security, performance), fair scheduling, billing.
-- **Infrastructure automation:** Provisioning new nodes, firmware updates, driver upgrades — all without disrupting running jobs.
-- **Networking:** GPUs communicate via NVLink (intra-node) and InfiniBand (inter-node). Network topology aware scheduling matters for training performance.
-
-**Relevant parallels from your experience:**
-| NVIDIA Challenge | Your Experience |
-|---|---|
-| Resource scheduling / allocation | Orchestration layer routing requests to downstream services |
-| Health monitoring at fleet scale | SLO-based monitoring, distributed tracing across services |
-| Job failure handling / retry | Circuit breakers, graceful degradation, idempotent retry |
-| Multi-tenant platform | Platform serving 10+ teams with different SLAs and requirements |
-| Infrastructure automation | Terraform, Ansible, deployment pipelines from scratch at Toast |
-| Observability at scale | Datadog dashboards, per-service SLOs, structured logging |
-
-**NVIDIA-specific vocabulary to know:**
-- **CUDA** — NVIDIA's GPU programming framework. You don't need to write CUDA, but know it exists.
-- **NVLink** — high-speed GPU-to-GPU interconnect within a node (900 GB/s on H100)
-- **InfiniBand** — high-speed network between nodes (400 Gbps). Critical for distributed training.
-- **NCCL** — NVIDIA's collective communication library for multi-GPU training
-- **DGX** — NVIDIA's GPU server product line. DGX A100 = 8x A100 GPUs in one box.
-- **Base Command** — NVIDIA's job scheduling/management platform for DGX clusters
-- **NGC (NVIDIA GPU Cloud)** — container registry with pre-built AI containers, models, SDKs
-- **Slurm** — common HPC job scheduler. NVIDIA fleet management may build on or replace this.
-
 ---
 
 ### System Design Prep
 
-Since this is a Cloud Software Engineer role, likely topics:
+**Team context: NGC (NVIDIA GPU Cloud)**
 
-| Topic | Why Relevant |
+NGC is NVIDIA's catalog/registry platform — users browse, pull, and deploy GPU-optimized containers, pre-trained models, and SDKs. Think "Docker Hub for GPU software." NOT fleet management or DGX hardware.
+
+**What NGC offers:**
+- GPU-optimized Docker containers (TensorFlow, PyTorch, RAPIDS pre-configured)
+- Pre-trained models (ready to fine-tune or deploy)
+- Helm charts for K8s deployment
+- SDKs and tools
+- Enterprise licensing / entitlements
+
+**Users:** ML engineers, data scientists, enterprises deploying AI at scale.
+
+---
+
+### Most Likely SD Topic: Content Registry / Catalog Platform
+
+> "Design a system where users browse, search, and download GPU-optimized containers and models from a catalog."
+
+**Key components:**
+```
+User (browser/CLI)
+    │
+    ▼
+API Gateway (auth, rate limiting)
+    │
+    ├──▶ Catalog Service (Postgres)
+    │       - artifact metadata (name, version, description, tags)
+    │       - publisher info (org, team)
+    │       - licensing/entitlement rules
+    │       - download counts, ratings
+    │
+    ├──▶ Search Service (Elasticsearch)
+    │       - full-text search on name, description, tags
+    │       - faceted filtering (framework, GPU arch, use case)
+    │       - ranking by popularity/relevance
+    │
+    ├──▶ Artifact Storage (S3 / Container Registry)
+    │       - actual binaries (containers = layers, models = files)
+    │       - presigned URLs for download (gateway never proxies bytes)
+    │       - content-addressable (SHA digest as key)
+    │       - CDN in front for popular artifacts
+    │
+    └──▶ Access Control Service
+            - free tier vs enterprise licensing
+            - per-org entitlements (team A can access model X)
+            - API key / token management
+            - usage quota enforcement
+```
+
+**Key design points:**
+
+| Area | Details |
 |---|---|
-| Fleet management / resource scheduler | Core to DGX Cloud — allocate GPU clusters to jobs |
-| Distributed job queue / task scheduler | Cloud workload orchestration |
-| Service health monitoring / alerting | Fleet health for thousands of GPU nodes |
-| API gateway / rate limiter | Cloud platform API infrastructure |
-| Log aggregation / metrics pipeline | Observability at fleet scale |
+| **Publish flow** | Publisher uploads artifact → metadata written to Postgres → binary pushed to S3/registry → indexed in Elasticsearch → becomes searchable |
+| **Search/discovery** | Elasticsearch for full-text + facets. Postgres for exact lookups by ID/version. Redis cache for popular items. |
+| **Download flow** | Auth check → entitlement check → generate presigned URL → client downloads directly from S3/CDN. Gateway never proxies large files. |
+| **Versioning** | Immutable once published. New version = new artifact record. Semantic versioning. "Latest" tag points to newest. |
+| **Container specifics** | OCI spec. Layers stored separately (content-addressable by SHA). Pull = download manifest + only missing layers. |
+| **Rate limiting** | Per API key, per org. Free tier gets X pulls/day. Enterprise unlimited. Token bucket algorithm. |
+| **Deprecation** | Mark deprecated → still downloadable but hidden from search. Eventually archive to cold storage. |
 
-**Key framing for NVIDIA:**
-- Think in terms of GPU clusters, not web servers
-- Scale = thousands of GPU nodes, not millions of users
-- Reliability = job completion guarantees, not 5-nines uptime
-- Resources are expensive (each GPU node = $$$) — scheduling efficiency matters
+**Data model:**
+
+```java
+class Artifact {
+    UUID id;
+    String name;             // e.g., "nvidia/pytorch"
+    String type;             // CONTAINER, MODEL, HELM_CHART, SDK
+    String publisher;
+    String description;
+    List<String> tags;       // ["pytorch", "nlp", "a100-optimized"]
+    String license;          // FREE, ENTERPRISE, RESEARCH_ONLY
+    LocalDateTime createdAt;
+}
+
+class ArtifactVersion {
+    UUID id;
+    UUID artifactId;         // FK → Artifact
+    String version;          // "23.04" or "1.2.0"
+    String digest;           // SHA-256 of content
+    Long sizeBytes;
+    String storageUrl;       // S3 key or registry reference
+    Boolean deprecated;
+    LocalDateTime publishedAt;
+}
+
+class Entitlement {
+    UUID id;
+    UUID orgId;
+    UUID artifactId;         // null = access to all
+    String tier;             // FREE, ENTERPRISE
+    Integer pullQuotaDaily;
+    LocalDateTime expiresAt;
+}
+```
+
+**APIs:**
+
+```
+GET  /v1/artifacts?q=pytorch&framework=pytorch&gpu=a100&page=1
+GET  /v1/artifacts/{id}
+GET  /v1/artifacts/{id}/versions
+GET  /v1/artifacts/{id}/versions/{version}/download → 302 redirect to presigned URL
+POST /v1/artifacts                          (create metadata)
+PUT  /v1/artifacts/{id}/versions/{version}  (upload binary)
+GET  /v1/entitlements/check?org={org}&artifact={id}
+```
+
+**Failure modes:**
+
+| Failure | Recovery |
+|---|---|
+| Elasticsearch down | Fall back to Postgres LIKE queries (slower but functional) |
+| S3 unavailable | Return error on download. Metadata/search still works. |
+| CDN cache stale | Content-addressable (SHA in URL) — stale = impossible. Cache miss → S3. |
+| Publisher uploads corrupt artifact | Verify SHA digest on upload. Reject if mismatch. |
+| Rate limit exceeded | Return 429. Client retries with backoff. |
+
+**Scaling:**
+
+| Challenge | Solution |
+|---|---|
+| Popular artifacts (everyone pulls PyTorch) | CDN in front of S3. Cache at edge. |
+| Search at scale (millions of artifacts) | Elasticsearch cluster. Shard by artifact type. |
+| Metadata reads | Redis cache for top/trending. Postgres for long-tail. |
+| Large uploads (GB+ containers) | Multipart upload to S3. Presigned URLs per part. Resume on failure. |
+| Global users | Multi-region CDN. Metadata read replicas. Writes to primary region. |
+
+---
+
+### Backup SD Topics
+
+**Model Registry (you already did this in round 1!):**
+- Metadata in Postgres, binaries in S3, presigned URLs, versioning, access control
+
+**Telemetry Pipeline (same pattern as Coinbase Explore):**
+- Ingest from agents → aggregate per time window → time-series DB → Grafana + alerting
+
+---
+
+### Java Concurrency Patterns (likely to come up)
+
+**LC 1114 — Three Solutions (Print in Order):**
+
+```java
+// Solution 1: Lock + Condition + state variable
+class Foo {
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition cond = lock.newCondition();
+    private int step = 1;
+
+    void first(Runnable r) throws InterruptedException {
+        lock.lock();
+        try { r.run(); step = 2; cond.signalAll(); }
+        finally { lock.unlock(); }
+    }
+    void second(Runnable r) throws InterruptedException {
+        lock.lock();
+        try { while (step != 2) cond.await(); r.run(); step = 3; cond.signalAll(); }
+        finally { lock.unlock(); }
+    }
+    void third(Runnable r) throws InterruptedException {
+        lock.lock();
+        try { while (step != 3) cond.await(); r.run(); }
+        finally { lock.unlock(); }
+    }
+}
+
+// Solution 2: Semaphore (simplest)
+class Foo {
+    private final Semaphore sem2 = new Semaphore(0);
+    private final Semaphore sem3 = new Semaphore(0);
+
+    void first(Runnable r) { r.run(); sem2.release(); }
+    void second(Runnable r) throws InterruptedException { sem2.acquire(); r.run(); sem3.release(); }
+    void third(Runnable r) throws InterruptedException { sem3.acquire(); r.run(); }
+}
+
+// Solution 3: CountDownLatch (one-shot)
+class Foo {
+    private final CountDownLatch latch1 = new CountDownLatch(1);
+    private final CountDownLatch latch2 = new CountDownLatch(1);
+
+    void first(Runnable r) { r.run(); latch1.countDown(); }
+    void second(Runnable r) throws InterruptedException { latch1.await(); r.run(); latch2.countDown(); }
+    void third(Runnable r) throws InterruptedException { latch2.await(); r.run(); }
+}
+```
+
+**Why `while` + state in Lock solution:**
+- Spurious wakeups: `await()` can return without signal
+- Late arrivals: boolean persists so threads arriving after signal skip await
+- Thread safety: boolean only accessed under lock
+
+**When to use which:**
+
+| Pattern | Guards | Use when |
+|---|---|---|
+| Lock + Condition | State ("is step done?") | Data dependency, reusable coordination |
+| Semaphore | Count ("how many permits?") | Count-bounded (can't capture more than authorized) |
+| CountDownLatch | One-time gate ("did N things finish?") | One-shot initialization |
+
+**Web API examples:**
+
+```java
+// Semaphore: can't capture more payments than authorized
+class PaymentService {
+    private final Semaphore capturePermits = new Semaphore(0);
+    void authorize(Request req) { doAuth(req); capturePermits.release(); }
+    void capture(Request req) throws InterruptedException {
+        capturePermits.acquire(); // blocks if no uncaptured auths
+        doCapture(req);
+    }
+}
+```
+
+---
+
+### Back-of-Envelope Numbers
+
+| Thing | Rule of thumb |
+|---|---|
+| Single Postgres | 10-50K writes/sec |
+| Redis | 100K+ ops/sec |
+| Kafka | 1M+ messages/sec per cluster |
+| Single JVM service | 5-10K concurrent requests |
+| WebSocket per node | 50-100K connections |
+| REST API p99 target | < 100ms (internal), < 250ms (user-facing) |
+| DB connection pool | 10-50 connections per service instance |
+| Thread pool | CPU cores × 2 for compute, higher for I/O-bound |
 
 ### Behavioral Prep
 
@@ -599,10 +758,12 @@ Let the interviewer discover your leadership through follow-up questions. Lead w
 - What was the scale? How did you monitor it?
 - **What Java-specific patterns did you use?** (concurrency, caching, connection management)
 
-### Know About NVIDIA Cloud Products (context, not required):
-- DGX Cloud: GPU-as-a-service for AI training
-- The team likely builds the control plane / service layer (Java backend) that manages GPU resources
-- You'd be building REST/gRPC APIs, distributed services, streaming pipelines — NOT writing CUDA code
+### Know About NGC (your team):
+- NGC: catalog/registry platform for GPU-optimized containers, models, SDKs
+- Think "Docker Hub for GPU software" — browse, search, pull, deploy
+- You're building: REST APIs, search/discovery, access control, artifact storage — Java backend
+- Users: ML engineers, data scientists, enterprises deploying AI
+- NOT writing CUDA or managing GPU hardware
 
 ### Questions to Ask Interviewers
 
@@ -630,14 +791,14 @@ Let the interviewer discover your leadership through follow-up questions. Lead w
 
 ---
 
-## Pre-Interview Checklist (May 14)
+## Pre-Interview Checklist (May 29-30)
 
-- [ ] Re-read this doc
+- [ ] Skim this doc (focus on: NGC SD topic, concurrency patterns, behavioral answers)
 - [ ] Re-read resume_nvidia.html — be ready to go deep on every bullet
-- [ ] Practice "tell me about yourself" — platform/infra angle (90 sec)
-- [ ] Practice project deep-dives: Stories 1, 4, 11 — technical details, decisions, tradeoffs
-- [ ] Read up on NVIDIA DGX Cloud, fleet management, GPU-as-a-service
-- [ ] Test Microsoft Teams (camera, mic, screen share)
-- [ ] Have paper/whiteboard ready in case they ask you to draw something
-- [ ] Prepare 2-3 questions per interviewer (team, tech stack, challenges)
-- [ ] Optional: light LC warmup (1-2 easy/medium) in case they do ask a coding question
+- [ ] "Tell me about yourself" — technical angle (90 sec)
+- [ ] Project deep-dives ready: Story 1 (API Mod technical layer), Story 10 (DGS/JVM), Story 14 (Failure)
+- [ ] Know NGC context (catalog platform, not fleet management)
+- [ ] Java concurrency: Lock/Condition, Semaphore, CompletableFuture patterns ready
+- [ ] Block calendar 11:30-3:30 both days
+- [ ] Test Microsoft Teams
+- [ ] 2-3 questions per interviewer ready
