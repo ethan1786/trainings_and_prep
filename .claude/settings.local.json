@@ -179,7 +179,10 @@
       "Bash(mv reverse_system_design_practice.md 5_reverse_system_design_practice.md)",
       "mcp__miro__context_get",
       "mcp__miro__diagram_get_dsl",
-      "mcp__miro__diagram_create"
+      "mcp__miro__diagram_create",
+      "Bash(curl -s \"https://boards-api.greenhouse.io/v1/boards/affirm/jobs\")",
+      "Bash(curl -s \"https://boards-api.greenhouse.io/v1/boards/shopify/jobs\")",
+      "Bash(git add *)"
     ]
   }
 }

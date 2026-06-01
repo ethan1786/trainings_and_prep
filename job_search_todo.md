@@ -27,53 +27,143 @@
 
 ---
 
-## New Target Companies — Priority Order
+## Applications — Active
 
-### Tier 1: Strong fit + high comp (apply first)
+### Applied
 
-| Company | Role Focus | Why It Fits | Status |
+| Company | Role | Status | Resume Used |
 |---|---|---|---|
-| **Netflix** | L5 Senior, Platform/Backend | Java shop, $400-700K all cash, massive scale. | Check cooldown from previous app |
-| **Stripe** | Senior, Payments/Identity | Your exact domain. Already applied Commerce Platform. | Check for new roles / follow up |
-| **LinkedIn** | Senior, Backend/Platform | Java, distributed systems, Microsoft-owned, stable, remote. | Browse careers page |
-| **Databricks** | Senior, Platform/Infra | Distributed systems, data platform, high comp. | Browse careers page |
-| **Uber** | Senior, Platform/Payments | Java backend, payment systems, huge platform org. | Browse careers page |
-| **Square/Block** | Senior, Payment Infrastructure | Literally your payment system domain at scale. | Browse careers page |
-| **Affirm** | Senior, Backend/Platform | BNPL at scale — Cherry's domain but bigger company. | Browse careers page |
+| **Netflix** | L5 Distributed Systems, Membership & Monetization Platform (Remote) | Applied May 30 | Coinbase |
+| **Stripe** | Backend/API Engineer, Money as a Service (Remote) | Applied May 30 | Coinbase |
+| **Affirm** | Senior SWE, Backend - Merchant Advocacy (Remote) | Applied May 30 | Coinbase |
+| **Reddit** | Staff SWE, Community Builders (Remote) | Applied May 30 | Coinbase |
+| **Dropbox** | Staff Backend, Commerce Platform (Remote) | Applied May 26 | Coinbase |
+| **Airbnb** | Senior SWE, Guest & Host - Partner Integrations (Remote) | Applied May 31 | Coinbase |
+| **GitHub** | Staff SWE, Code Search (Remote — stretch) | Applied May 30 | Coinbase |
 
-### Tier 2: Good fit (apply after Tier 1)
+### Apply Now (strong product-backend fits)
 
-| Company | Role Focus | Why It Fits | Status |
-|---|---|---|---|
-| **Lyft** | Senior, Platform/Payments | Same domain as Uber, smaller. Tim (Cherry HM) came from here. | Browse |
-| **Shopify** | Senior, Commerce Platform | Payments, commerce, remote-first. | Browse |
-| **DoorDash** | Senior, Platform (non-security) | Strong eng org, check platform/payments teams. | Browse |
-| **Instacart** | Senior, Marketplace/Payments | Similar patterns (marketplace + payment flows). | Browse |
-| **Klarna** | Senior, Backend/Payments | BNPL competitor to Cherry/Affirm. European HQ, US remote. | Browse |
-| **Twilio** | Senior (if available) | Already applied Principal — check if Senior roles exist. | Check |
+| Company | Role | Why It Fits | URL | Resume |
+|---|---|---|---|---|
+| **Affirm** | Senior SWE, Backend (Merchant Advocacy) - Remote US | Checkout/payment flows. Your exact domain. | https://job-boards.greenhouse.io/affirm/jobs/7636414003 | Coinbase |
+| **Affirm** | Senior SWE, Full Stack (Zero to One Labs) - Remote US | 0→1 product building. Your Digital Shopping story. | https://job-boards.greenhouse.io/affirm/jobs/7686804003 | Cherry |
+| **Reddit** | Senior SWE, GraphQL - Remote US | Your DGS/federation experience directly. | https://job-boards.greenhouse.io/reddit/jobs/7309137 | Coinbase |
+| **Reddit** | Staff SWE, Community Builders - Remote US | Staff product backend, remote. | https://job-boards.greenhouse.io/reddit/jobs/7875645 | Coinbase |
 
-### Tier 3: Stretch / high reward
+### Browse Later (manual check needed)
 
-| Company | Role Focus | Notes |
+| Company | Why | Notes |
 |---|---|---|
-| **Amazon** | L6 Senior SDE | LC Heavy + LP stories (prepped). High comp. |
-| **Snowflake** | Senior, Distributed Systems | Cloud platform, high bar, high comp. |
-| **Apple** | Senior, Backend Services | Apple Pay, iCloud. Less remote-friendly. |
-| **Confluent** | Senior, Platform | Kafka experts. Tried before, no response. Try new role. |
+| **Netflix** | L5 = $400-700K all cash. Java shop. | Workday API blocked — browse jobs.netflix.com manually. Referral-driven. |
+| **LinkedIn** | Java, distributed systems, remote. | Browse careers.linkedin.com for Senior Backend. |
+| **Square/Block** | Payment infra at scale. | No remote roles currently — monitor. |
 
 ---
 
-## What to Fix (Coinbase Feedback)
+## Lane Definition (what to apply for vs skip)
 
-**Problem:** Jumped to solutions without narrating reasoning.
-**Fix:** At every design decision, say 4 sentences:
+**✅ Target (product backend):**
+- Payments, commerce, transactions, checkout
+- User-facing APIs, order systems, state machines
+- Marketplace backends, merchant integrations
+- Financial systems, BNPL, lending platforms
+- GraphQL/API layers serving product features
+- 0→1 product building
+
+**❌ Skip:**
+- Pure infra (compute platform, networking, containers, K8s internals)
+- Security / IAM / identity (HMs don't see enough recent depth)
+- Database / storage internals
+- Search engine internals
+- Developer tools / CI/CD
+- ML/AI research (not ML platform)
+
+---
+
+## What I Learned — Why Coinbase Rejected + How to Fix
+
+### The Root Cause
+
+I prepared TOO well. I knew all the patterns by heart and jumped to solutions immediately without showing the reasoning journey. The interviewer couldn't tell if I was THINKING or RECITING.
+
+**What the interviewer experienced:** "This candidate jumped to a solution in 2 minutes. Did they actually think about this problem, or did they memorize an architecture?"
+
+**The Coinbase feedback ("more proactive on requirements" + "better tradeoff clarification") actually means:**
+- I didn't explore the problem's UNIQUE constraints before designing
+- I didn't show WHY my choices were right for THIS specific problem
+- I didn't demonstrate the design space (alternatives considered, tradeoffs made)
+- I arrived at the correct answer too fast — without bringing the interviewer along
+
+**Same problem showed up at NVIDIA coding:** I said "this is topological sort" immediately. The interviewer was shocked and had to ask "WHY do you think that?" — because I didn't show the reasoning that led me there.
+
+### The Senior vs Staff+ Gap
+
+| Level | What they demonstrate |
+|---|---|
+| **Senior** | "I know the right answer and can implement it" |
+| **Staff+** | "I know WHY it's right, WHEN it's wrong, and WHAT would change my mind" |
+
+**I have the Senior signal down cold.** The Staff+ signal requires showing:
+- Why THIS solution and not the alternatives
+- When this solution would be the WRONG choice
+- What constraint in this specific problem makes it the winner
+- If that constraint changed, would my answer change
+
+### The Fix — Three Habits to Build
+
+**Habit 1: Don't name the solution for 3-5 minutes.**
+
+Even when you recognize the pattern instantly, spend time on:
+1. "What's the core constraint/unique thing about THIS problem?"
+2. "What would a naive approach be and why doesn't it work?"
+3. "What property of the problem points toward [solution]?"
+THEN name the pattern.
+
+**Habit 2: The 4-sentence tradeoff at every decision.**
 
 1. "I need [what]"
 2. "Options are [A vs B vs C]"
-3. "I'm picking [A] because [reason]"
-4. "Tradeoff: [what I give up]"
+3. "I'm picking [A] because [specific constraint in this problem]"
+4. "Tradeoff: [what I give up]. If [constraint X changed], I'd reconsider."
 
-**Practice this as a reflex.** Before any technology choice — pause 10 seconds and say the 4 sentences.
+**Habit 3: Know the WHY depth for every technology.**
+
+For each technology I commonly pick, know:
+- When it's the RIGHT choice (the constraint that makes it win)
+- When it's the WRONG choice (the constraint that makes it lose)
+- The 2 alternatives and what they trade differently
+- The failure modes (what breaks at scale or in edge cases)
+
+### The Doctor Analogy
+
+- Bad doctor: "I don't know what's wrong"
+- Okay doctor: "It's pneumonia. Here's antibiotics." ← THIS IS ME RIGHT NOW
+- Great doctor: "Symptoms suggest respiratory infection. Could be viral or bacterial. Fever duration + chest X-ray point toward bacterial. Prescribing antibiotics because [reason]. If no improvement in 48h, reconsider because [alternative]." ← THIS IS STAFF+
+
+Same diagnosis. Same treatment. But the great doctor showed the differential reasoning.
+
+### The Pacing Problem
+
+| My instinct | What the interviewer values |
+|---|---|
+| Finish early = looks strong | Thoughtful pace = looks senior |
+| Fast answer = confidence | Explored answer = judgment |
+| No wasted time | Time on reasoning IS the evaluation |
+
+**Finishing early ≠ impressing them. It means I left signal on the table.**
+
+Rules:
+- Coding: 3-5 min talking before writing ANY code
+- System Design: 5-8 min on requirements/constraints before drawing ANY boxes
+- If I finish early: discuss alternatives, edge cases, production concerns
+
+### It's NOT That I'm Not Good Enough
+
+The knowledge is there. The experience is there. The correct answers are there. What's missing is the PERFORMANCE of arriving at the answer through visible reasoning — not the knowledge itself.
+
+**The skill to build:** Narrating the journey to a known destination. I know where I'm going — just bring the interviewer along for the ride.
+
+---
 
 ### Quick Tradeoff Reference (have these ready)
 
@@ -85,6 +175,28 @@
 | REST vs gRPC | Human-readable, browser-compatible, universal | Binary, fast, typed, streaming | External/public API? → REST. Internal service-to-service? → gRPC. |
 | Sync vs async | Simple, immediate consistency | Decoupled, handles burst, eventual consistency | Critical path + user waiting? → Sync. Background processing + can lag? → Async. |
 | Monolith vs microservice | Simple ops, fast iteration, one deploy | Independent scaling, separate ownership, fault isolation | Early stage / low traffic? → Monolith. Clear domain boundaries + team ownership? → Extract. |
+
+### WHY Depth Reference (build this out for each technology)
+
+**Template for each technology:**
+
+```
+[Technology X]
+✅ RIGHT choice when: [constraint that makes it win]
+❌ WRONG choice when: [constraint that makes it lose]
+🔄 Alternatives: [A] trades [X], [B] trades [Y]
+💥 Failure modes: [what breaks at scale/edge cases]
+🔑 The deciding question: "[one question that determines if this is right]"
+```
+
+**Example — Kafka:**
+- ✅ RIGHT: Need replay for crash recovery, multiple consumers, ordering guarantees, high throughput
+- ❌ WRONG: Single consumer, simple work queue, low volume, don't need replay. Kafka is operational overhead you don't need.
+- 🔄 Alternatives: SQS (managed, cheap, no replay), direct HTTP (simple, coupled, no buffer), Redis pub/sub (fast but no persistence)
+- 💥 Failure modes: Consumer lag grows unbounded, partition rebalancing storms, offset management bugs lose messages
+- 🔑 Deciding question: "Do I need replay OR multiple consumers? If no to both → SQS is simpler."
+
+(TODO: Build this for Postgres, Mongo, Redis, Elasticsearch, REST, gRPC, WebSocket, in-memory cache, CDN, etc.)
 
 ---
 
