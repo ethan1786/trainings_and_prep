@@ -182,7 +182,9 @@
       "mcp__miro__diagram_create",
       "Bash(curl -s \"https://boards-api.greenhouse.io/v1/boards/affirm/jobs\")",
       "Bash(curl -s \"https://boards-api.greenhouse.io/v1/boards/shopify/jobs\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }

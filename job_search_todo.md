@@ -1,7 +1,8 @@
 # Job Search — Round 2
 
-> Last updated: May 30, 2026
+> Last updated: June 8, 2026
 > Strategy shift: Senior roles at higher-bar companies for growth + comp.
+> Status: PAUSED. Taking a break. Resume in September 2026.
 
 ---
 
@@ -15,15 +16,54 @@
 
 ---
 
-## Pending from Round 1
+## Round 1 — Complete History (April-June 2026)
+
+### Results
+
+| Company | Level | How far | Result | Key Learning |
+|---|---|---|---|---|
+| **Coinbase** | Staff | Full VO (4 rounds: SD + Domain + BQ + Coding) | ❌ Rejected | "More proactive on requirements, better tradeoff clarification." Core insight: jumped to solutions too fast without showing reasoning. |
+| **NVIDIA** | Senior/Staff | Full final (4 rounds: 2 SD + 2 Coding) | ⏳ Waiting (likely dead — no response after follow-up) | Design rounds were strong (NGC domain). Coding: solved Q1 clean, Q2 was LC Hard. Topo sort round — recognized too fast, interviewer had to probe "why." |
+| **Cherry** | Staff | Full tech (3 rounds: Coding + SD + App Design) | ❌ Rejected | HM loved me. Coding + SD were strong. App Design was weakest (tired after 2 rounds, same "jumping to solution" issue). |
+| **HashiCorp/IBM** | Staff → down-leveled to Senior | HM interview done | ⏳ SD round scheduled June 16 (practice opportunity) | HM down-leveled because auth experience is 7 years old. Role is hybrid 3x/week. Low priority backup. |
+| **OpenAI** | SWE | HR intro only | ❌ Rejected by HM ("backend doesn't match") | Identity infra role — same problem as HashiCorp. Auth work too old. |
+
+### Cold Apps (no response)
+
+| Company | Role | Applied | Notes |
+|---|---|---|---|
+| **Netflix** | L5, Membership & Monetization Platform | May 30 | PERFECT fit. Re-apply in September if no response. |
+| **Stripe** | Backend/API Engineer, Money as a Service | May 30 | Strong fit. Connection didn't help previously. |
+| **Affirm** | Senior SWE, Backend (Merchant Advocacy) | May 30 | BNPL domain = Cherry at scale. |
+| **Reddit** | Staff SWE, Community Builders | May 30 | Product backend, remote. |
+| **Dropbox** | Staff Backend, Commerce Platform | May 26 | Strong fit. |
+| **Airbnb** | Senior SWE, Partner Integrations | May 31 | Third-party integrations = your domain interview system. |
+| **GitHub** | Staff SWE, Code Search | May 30 | Stretch — search domain not your core. |
+
+### What Worked vs What Didn't
+
+| What worked | What didn't |
+|---|---|
+| Cold apps to PERFECT JD matches got interviews (Coinbase, NVIDIA) | Cold apps to generic "Staff SWE" postings → silence |
+| Product-backend domain (payments, transactions, state machines) | Security/IAM/identity roles (experience too old) |
+| Java + distributed systems = direct hit | Roles wanting Go/Rust/Python as primary |
+| Leading with technical depth for IC interviewers | Leading with leadership/coordination for IC interviewers (HashiCorp lesson) |
+| Starting simple, iterating (coding rounds) | Jumping to solutions too fast (design rounds) |
+
+---
+
+## Pending (letting these run passively)
 
 | Company | Status | Expected Response |
 |---|---|---|
-| **NVIDIA** | All 4 rounds done | Days to 1 week |
-| **Cherry** | All 3 tech rounds done | Days to 1 week |
-| **Dropbox** | Cold app (Commerce Platform) | 1-2 weeks |
-| **GitHub** | Cold app (Code Search - stretch) | 1-2 weeks |
-| **HashiCorp/IBM** | Coding round done, low priority | Whenever |
+| **NVIDIA** | All 4 rounds done, followed up June 8 | Likely dead if no response by June 13 |
+| **HashiCorp/IBM** | SD round June 16 | Low priority. Using as practice for "why" delivery. |
+| **Netflix** | Cold app (MMP) | If no response by August, re-apply September |
+| **Stripe** | Cold app (MaaS) | If no response by August, re-apply September |
+| **Affirm** | Cold app | If no response by August, re-apply September |
+| **Reddit** | Cold app | If no response by August, re-apply September |
+| **Dropbox** | Cold app | If no response by August, re-apply September |
+| **Airbnb** | Cold app | If no response by August, re-apply September |
 
 ---
 
@@ -216,13 +256,60 @@ The knowledge is there. The experience is there. The correct answers are there. 
 
 ---
 
-## This Week — Action Items
+## September 2026 — Restart Plan
 
-- [ ] Wait for NVIDIA + Cherry results
-- [ ] Browse: Netflix, LinkedIn, Square/Block, Affirm, Uber careers pages
-- [ ] Apply to any matching roles found (use Coinbase resume for platform, HashiCorp resume for infra/security)
-- [ ] Light LC practice — 2-3 mediums per day to stay sharp
-- [ ] Practice tradeoff narration — pick any past design decision, explain it with the 4-sentence framework
+**When to restart:** Mid-September 2026
+**Cooldowns that reset:**
+- Coinbase: ~November 2026 (6 months from May rejection)
+- Google: ~Q1 2027 (failed hiring assessment April 2026)
+- Cherry: Anytime (Tim said "stay connected for future opportunities")
+
+**Before restarting:**
+- [ ] Build "WHY depth" reference for all common technologies (see template below)
+- [ ] Practice "why" delivery 3-5 times with Claude (system design mock with pushback)
+- [ ] Re-apply to Netflix MMP, Stripe MaaS (if still open or new similar roles)
+- [ ] Consider applying at Senior level to wider funnel (worked for Coinbase/NVIDIA getting interviews)
+- [ ] Check new roles at: Affirm, Reddit, Dropbox, Airbnb, Square/Block, Uber, LinkedIn
+
+**Key strategy changes for Round 3:**
+1. Apply at Senior level (companies level you up in the loop if you're strong)
+2. Practice "arriving at" answers instead of "deploying" answers
+3. Same prep docs work — just change the DELIVERY
+4. Reach out to connections casually over summer (plant seeds, don't ask for referrals)
+
+---
+
+## Conversation Summary (for future context)
+
+**Timeline:** April 16 — June 8, 2026 (~8 weeks)
+
+**What happened:**
+- Built complete interview prep system from scratch (behavioral playbook, system design mental model, domain interview walkthrough, coding patterns, company-specific prep docs)
+- Interviewed at 5 companies: Coinbase (Staff), NVIDIA (Senior/Staff), Cherry (Staff), HashiCorp/IBM (Staff→Senior), OpenAI (SWE)
+- Completed 15+ interview rounds across all companies
+- Received rejections from Coinbase, Cherry, OpenAI
+- NVIDIA likely dead (no response after follow-up)
+- Applied to 7 more companies cold (Netflix, Stripe, Affirm, Reddit, Dropbox, Airbnb, GitHub)
+
+**Key insight discovered:** The gap is NOT knowledge — it's delivery. I know all the correct answers but deploy them too fast without showing the reasoning journey. Staff+ requires "narrating the journey to a known destination" — not just arriving at the destination instantly.
+
+**The fix (3 habits):**
+1. Don't name the solution for 3-5 minutes (explore the problem first)
+2. 4-sentence tradeoff at every decision (need → options → pick → tradeoff)
+3. Know WHY depth for every technology (when right, when wrong, alternatives, failure modes)
+
+**Prep assets created (all in this repo):**
+- `behavioral_playbook.md` — all STAR stories + direct questions + LP mapping
+- `domain_interview_playbook.md` — payment system walkthrough (Q&A format)
+- `system_design_playbook.md` — mental model + general patterns
+- `platform_infra_angle.md` — mindset switch for infra roles
+- `leadership_principles.md` — LP questions + story mapping
+- `java_playbook.md` — concurrency, pitfalls, data structures
+- `cheatsheets/` — system design flow, LC patterns, company-specific
+- `companies/` — per-company prep docs, resumes, questions
+- `find_remote_jobs.py` — job scraper for ATS boards
+
+**Current situation:** Employed as Principal at CarGurus. Stable but not growing. Taking a break from active job search. Will restart in September with improved delivery skills.
 
 ---
 
