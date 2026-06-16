@@ -205,6 +205,30 @@ The knowledge is there. The experience is there. The correct answers are there. 
 
 ---
 
+### System Design Layering Approach (start simple, add complexity when FORCED)
+
+**Layer 1:** The simplest thing that works (API → service → database). No optimization.
+
+**Layer 2:** Apply constraints one at a time. Each addition is JUSTIFIED by a specific problem:
+
+| Constraint | What it forces | Options to explore |
+|---|---|---|
+| High read volume | Cache | In-memory (fast, per-instance) vs Redis (shared, survives restart) vs CDN (edge, static) |
+| High write burst (async OK) | Buffer/queue | Kafka (replay, multi-consumer) vs SQS (managed, simple) vs DB-backed queue |
+| High write burst (sync required) | Scale write path OR batch | Shard/partition DB, batch+flush (50-100ms buffer), write-ahead+async-apply, or back-pressure (429) |
+| Slow processing | Async job | Thread pool vs message queue vs scheduled batch |
+| Read/write contention | Separation | Read replica vs CQRS vs materialized views |
+| Data growing unbounded | Tiering | Hot/warm/cold, TTL, archival to S3 |
+| External service slow/unreliable | Resilience | Circuit breaker, retry with backoff, timeout, fallback response |
+| Multiple services need same data | Shared state | Redis/distributed cache vs event-driven invalidation vs shared DB |
+| Need audit trail | Append-only log | Event table in DB vs Kafka topic (retention) vs separate audit service |
+| Caller needs durability guarantee | Sync persist | Must hit DB before returning 200. Scale DB, don't buffer. (Financial systems.) |
+| Caller only needs acceptance | Fast-ack + async | Accept into fast store (Redis/WAL), return 200, persist async. Reconciliation as safety net. |
+
+**The key question at each constraint:** "What specific property of THIS problem forces this complexity?"
+
+---
+
 ### Quick Tradeoff Reference (have these ready)
 
 | Decision | Pick A | Pick B | Deciding factor |
