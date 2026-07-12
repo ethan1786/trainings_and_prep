@@ -233,7 +233,7 @@
 <div class="header">
   <div class="header-left">
     <h1>Yifei Sun</h1>
-    <div class="tagline">Senior Cloud Software Engineer · Java &amp; AWS Cloud Platform Infrastructure · 13 Years</div>
+    <div class="tagline">Staff Software Engineer &middot; Distributed Systems, Cloud Platform &amp; API Infrastructure &middot; 13 Years</div>
   </div>
   <div class="header-right">
     (617) 922-4823<br>
@@ -245,29 +245,40 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Senior cloud platform engineer with 13 years building large-scale distributed services and cloud-native
-  infrastructure in Java on AWS. Deep expertise in core Java (Collections, Streams, Concurrency, I/O),
-  REST API and gRPC design, and cloud infrastructure automation (Terraform, Ansible, SQS/SNS, ECS/EKS).
-  Led cross-team redesign of a high-traffic API serving millions of daily requests (p99 250ms&rarr;50ms,
-  availability 98%&rarr;99.9%), deploying on AWS with Kubernetes orchestration. Established cloud architecture
-  standards and observability practices adopted across 10+ teams and 3 departments. Combines deep hands-on
-  Java engineering with cloud infrastructure expertise and cross-organizational technical leadership.
+  Platform engineer with 13 years building large-scale distributed services and cloud-native
+  infrastructure. Deep expertise in Java (Concurrency, Collections, Streams, I/O), Python, REST/gRPC API design,
+  and cloud infrastructure automation (AWS, Terraform, Kubernetes). Led cross-team redesign of a high-traffic
+  platform API serving millions of daily requests (p99 250ms&rarr;50ms, availability 98%&rarr;99.9%).
+  Recent work includes AI platform backends (MCP server architecture, LLM integration) and GenAI experimentation
+  systems. Combines hands-on systems engineering with cross-organizational technical leadership across 10+ teams.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
 <div class="section-title">Leadership Highlights</div>
 <ul class="highlights">
-  <li>Led cross-team cloud API redesign on AWS: p99 5&times; reduction, 99.9% availability, Kubernetes-orchestrated microservices</li>
-  <li>Built cloud infrastructure from scratch — AWS provisioning (Ansible/Terraform), SQS/SNS event pipelines, ECS/EKS deployments</li>
-  <li>Drove cloud architecture and observability standards across 10+ teams, 3 departments via RFCs and design docs</li>
-  <li>Mentored senior engineers to Principal-level scope; built shared cloud platform services and internal developer tooling</li>
+  <li>Led cross-team platform API redesign: p99 5&times; reduction, 99.9% availability, Kubernetes-orchestrated microservices on AWS</li>
+  <li>Designed AI platform backends (MCP server, LLM integration) and GenAI experimentation systems from scratch</li>
+  <li>Built cloud infrastructure from scratch at early-stage startup &mdash; AWS provisioning, event pipelines, deployment automation</li>
+  <li>Drove architecture standards and observability practices across 10+ teams; mentored engineers to Principal-level scope</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  <strong>Core Java</strong> (Collections, Streams, Concurrency, I/O), Spring Boot, Python, Node.js &middot;
-  <strong>AWS</strong> (EC2, ECS, EKS, SQS, SNS, S3, RDS, DynamoDB), Terraform, Ansible &middot;
-  Kubernetes, Docker, Kafka, Redis, PostgreSQL, Cassandra &middot; REST API, gRPC, GraphQL (Netflix DGS) &middot;
-  Microservices, Event-Driven, CQRS &middot; Datadog, Grafana, Distributed Tracing &middot; CI/CD
+  <strong>Languages:</strong> Java (Concurrency, Streams, I/O), Python, Node.js, Kotlin &middot;
+  <strong>Infrastructure:</strong> AWS (EC2, ECS, EKS, SQS, SNS, S3, RDS, DynamoDB), Terraform, Ansible, Kubernetes, Docker &middot;
+  <strong>Data &amp; Messaging:</strong> Kafka, Redis, PostgreSQL, Cassandra, gRPC, GraphQL (Netflix DGS) &middot;
+  <strong>Practices:</strong> Microservices, Event-Driven, CQRS, Distributed Tracing, SLO Frameworks &middot;
+  Datadog, Grafana, OpenTelemetry &middot; CI/CD
+</div>
+
+<!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
+<div class="section-title">Independent Project</div>
+<div class="project" style="padding-left:8px;">
+  <span class="project-name">GenAI Decision Engine &amp; Experimentation Platform</span>
+  <ul>
+    <li>Architected a hybrid rules + multi-path GenAI engine (fast vs. deep inference) with a policy overlay over heterogeneous telemetry, producing explainable real-time recommendations.</li>
+    <li>Built "Prompt Lab" for end-to-end decision simulation, offline evaluation/backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with multi-provider LLM support.</li>
+    <li>Designed a configurable policy framework with DB-backed configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions.</li>
+  </ul>
 </div>
 
 <!-- ═══════════════════ EXPERIENCE ══════════════════════════════ -->
@@ -281,11 +292,11 @@
   </div>
 
   <div class="project">
-    <span class="project-name">High-Traffic Cloud API Modernization — AWS Microservices</span>
+    <span class="project-name">High-Traffic Platform API Modernization</span>
     <ul>
-      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions), deploying on AWS with Kubernetes-orchestrated microservices.</li>
-      <li>Introduced a new orchestration service consolidating 12 downstream integrations into 5 well-defined cloud services with circuit breaking, fault isolation, and idempotent retry, reducing fan-out and simplifying failure modes.</li>
-      <li>Built automated parity-testing infrastructure comparing new vs. legacy responses at 50% production traffic, enabling safe, data-driven rollout decisions.</li>
+      <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core platform API (~8,000 rpm, millions of daily impressions), deploying as Kubernetes-orchestrated microservices on AWS.</li>
+      <li>Introduced an orchestration service consolidating 12 downstream integrations into 5 well-defined services with per-service circuit breakers, timeout budgets, fault isolation, and idempotent retry.</li>
+      <li>Built automated parity-testing infrastructure comparing new vs. legacy responses at 50% production traffic, catching dozens of edge-case bugs before they reached users.</li>
     </ul>
     <div class="metrics">
       <div class="m">p99: 250 ms &rarr; 50 ms <span>(5&times;)</span></div>
@@ -293,31 +304,39 @@
       <div class="m">Deploy: 1 hr &rarr; 3 min <span>(20&times;)</span></div>
     </div>
     <ul style="margin-left:12px; margin-top:2px;">
-      <li>Defined cloud architecture standards and observability requirements for microservices; instrumented with structured logging, distributed tracing, and SLO-based latency budgets per downstream dependency.</li>
+      <li>Defined architectural standards for new microservices; instrumented with structured logging, distributed tracing, and SLO-based latency budgets per downstream dependency.</li>
     </ul>
   </div>
 
   <div class="project">
-    <span class="project-name">GraphQL Federation — Delivery Lookup DGS Subgraph</span>
+    <span class="project-name">AI Platform Backend &mdash; MCP Server &amp; LLM Integration</span>
     <ul>
-      <li>Designed and integrated a Netflix DGS subgraph into CarGurus' federated GraphQL gateway, exposing vehicle delivery data to frontend, backend, and AI consumers from a single graph.</li>
-      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies to avoid JIT compilation latency spikes on cold starts.</li>
+      <li>Sole backend engineer designing and implementing MCP server architecture for CarGurus' AI platform, exposing product capabilities to LLM-powered agents via tool-calling protocol.</li>
+      <li>Delivered working POC in first sprint unblocking stakeholder demos; modular plugin architecture absorbed 3 rounds of requirement changes without rework. Expanded to designing APIs for multiple conversational AI agents across the org.</li>
     </ul>
   </div>
 
   <div class="project">
-    <span class="project-name">Digital Commerce Platform — Cloud-Native Event-Driven Architecture</span>
+    <span class="project-name">GraphQL Federation &mdash; Netflix DGS Subgraph</span>
     <ul>
-      <li>Led backend design for a new commerce product on AWS using microservice and event-driven architecture (SQS/SNS for async messaging, Kafka for event streaming) with Terraform-managed infrastructure.</li>
-      <li>Built infrastructure for rapid product experimentation — enabling the company to quickly launch, measure, and safely retire product bets without destabilizing core systems.</li>
+      <li>Designed and integrated a Netflix DGS subgraph into the federated GraphQL gateway, exposing data to frontend, backend, and AI consumers from a single graph.</li>
+      <li>Implemented batch data loaders (N+1 prevention) and JVM warmup strategies eliminating cold-start latency spikes.</li>
+    </ul>
+  </div>
+
+  <div class="project">
+    <span class="project-name">Digital Commerce Platform &mdash; Event-Driven Architecture</span>
+    <ul>
+      <li>Led backend design for a 0&rarr;1 commerce product on AWS using event-driven architecture (SQS/SNS, Kafka) with Terraform-managed infrastructure. Shipped under pandemic timeline pressure.</li>
+      <li>Built infrastructure for rapid product experimentation &mdash; launch, measure, and safely retire product bets without destabilizing core systems.</li>
     </ul>
   </div>
 
   <div class="project compact">
-    <span class="project-name">Cross-Org Cloud Platform Leadership &amp; Standards</span>
+    <span class="project-name">Cross-Org Platform Leadership &amp; Standards</span>
     <ul>
-      <li>Established patterns for REST API design, cloud observability, caching, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and decision records.</li>
-      <li>Led 10+ AWS training sessions for engineering teams. Mentored senior engineers on cloud architecture, system design, and path to Principal-level scope.</li>
+      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored design docs, RFCs, and architecture decision records.</li>
+      <li>Mentored senior engineers on system design and path to Principal-level scope. Led 10+ technical training sessions.</li>
     </ul>
   </div>
 </div>
@@ -330,21 +349,17 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Authentication &amp; Identity Modernization</span>
+    <span class="project-name">Authentication &amp; Identity Platform</span>
     <ul>
-      <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform on AWS, unifying auth across internal systems, an enterprise partner platform, and a large external community. Migrated multiple Java and Node.js services behind the new auth gateway with minimal downtime.</li>
-    </ul>
-  </div>
-  <div class="project">
-    <span class="project-name">Event Sourcing &amp; CQRS Initiative</span>
-    <ul>
-      <li>Drove early design and prototyping of a microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
+      <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform on AWS, unifying auth across internal systems, enterprise partners, and external community (OAuth 2.0, SAML, social login). Zero-downtime migration via dual-auth bridge pattern.</li>
+      <li>Built custom RBAC plugins for Kong API gateway (Python); deployed service mesh (Linkerd on Kubernetes) with mTLS for service-to-service trust.</li>
     </ul>
   </div>
   <div class="project compact">
-    <span class="project-name">Cross-Org Collaboration</span>
+    <span class="project-name">Event Sourcing &amp; Microservice Architecture</span>
     <ul>
-      <li>Partnered with product, support, and customer-facing teams to modernize internal workflows and enterprise integrations with clear observability and rollback paths.</li>
+      <li>Drove design and prototyping of microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
+      <li>Partnered with product, support, and customer-facing teams to modernize internal workflows and enterprise integrations.</li>
     </ul>
   </div>
 </div>
@@ -352,21 +367,21 @@
 <!-- ── Toast ─────────────────────────────────────────────────── -->
 <div class="job">
   <div class="job-header">
-    <div><span class="company">Toast Inc.</span><span class="role">— Senior Software Engineer</span></div>
+    <div><span class="company">Toast Inc.</span><span class="role">— Senior Software Engineer (early team, ~20 engineers)</span></div>
     <span class="dates">Sep 2014 – Oct 2017</span>
   </div>
 
   <div class="project">
-    <span class="project-name">Monolith &rarr; Microservices Decomposition</span>
+    <span class="project-name">Core Platform &amp; Infrastructure (Early-Stage)</span>
     <ul>
-      <li>Among the earliest engineers during hypergrowth; designed and implemented core cloud services end-to-end (Order Service, Labor Service, foundational REST APIs) that became the basis for future platform growth.</li>
-      <li>Set up the initial AWS environment using Ansible — provisioned infrastructure, deployment pipelines, and monitoring before a dedicated DevOps team existed. Created the first automated testing framework, enabling safer releases during rapid product expansion.</li>
+      <li>Among the earliest engineers during hypergrowth; designed and implemented core backend services (Order Service, Labor Service, REST APIs) that became the platform foundation for future growth.</li>
+      <li>Built initial AWS environment (Ansible) &mdash; provisioned infrastructure, deployment pipelines, and monitoring before a dedicated DevOps team existed. Created first automated testing framework enabling safer releases.</li>
     </ul>
   </div>
   <div class="project compact">
-    <span class="project-name">Third-Party Integrations &amp; Cross-Functional Leadership</span>
+    <span class="project-name">Third-Party Integrations &amp; Partner Platform</span>
     <ul>
-      <li>Led integrations with key partners (e.g., workforce management), ensuring reliable bidirectional sync and schema evolution. Partnered with PMs, sales, and support to translate early customer feedback into platform capabilities.</li>
+      <li>Led integrations with key partners (workforce management, payment processors), ensuring reliable bidirectional sync. Partnered with PMs, sales, and support to translate customer feedback into platform capabilities.</li>
     </ul>
   </div>
 </div>

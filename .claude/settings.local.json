@@ -184,7 +184,12 @@
       "Bash(curl -s \"https://boards-api.greenhouse.io/v1/boards/shopify/jobs\")",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\"; grep \"tagline\" {}')",
+      "Bash(curl -s \"https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite?q=NGC&locationCountry=bc33aa3152ec42d4995f4791a106ed09\")",
+      "WebFetch(domain:nvidia.wd5.myworkdayjobs.com)",
+      "WebFetch(domain:jobs.careers.microsoft.com)",
+      "WebFetch(domain:apply.careers.microsoft.com)"
     ]
   }
 }
