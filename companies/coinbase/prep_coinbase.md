@@ -1,71 +1,201 @@
 # Coinbase — Staff Software Engineer, Backend - Platform
 
 > **VO prep doc.** Applied to 3 Platform Backend roles: FinHub Tooling, Overseer, Payment Rails.
-> Last updated: May 7, 2026
+> Last updated: July 14, 2026 (post-July 13 blog: "Interviewing Engineers in the AI Era")
 
 ---
 
-## Virtual On-Site — Round-by-Round Guide (confirmed from Kael, May 4 + May 7)
+## CRITICAL UPDATE: July 2026 — AI-Native Interview Process
 
-| # | Round | Format | Key Advice from Recruiter |
-|---|---|---|---|
-| 1 | **Coding** | CodeSignal platform (60 min) | Think out loud, clarify algorithm + edge cases before coding, write test cases, split into files if time |
-| 2 | **System Design** | CodeSignal whiteboard (60 min) | Clarify requirements, **lead and drive the conversation** — don't let interviewer prompt you |
-| 3 | **Domain Interview** | **Miro whiteboard** (60 min) — YOU present | Present Digital Shopping + Payments deep-dive (~18 min present, ~40 min Q&A); expect "how would you build this differently with AI tools?" |
-| 4 | **Behavioral** | Conversational (45 min) | Staff+ level stories, metrics, cross-org impact |
+**Coinbase just published their complete interview rebuild** (July 13, 2026). This is the finalized process after your May interview.
 
-**Overall strategy:** Only 1 coding round. The other 3 rounds are ambiguous/conversational — your job is to **lead confidently and demonstrate Staff+ judgment**. Don't be passive or wait for prompts.
+### What Changed Between Your May Experience and July 2026
+
+**Your May 2026 approach:**
+- Hand-crafted solutions from memory (fast pace, Cosmo was slow)
+- Leaned on memorized LC patterns
+- Didn't use AI tools much during the interview
+
+**Why that approach no longer aligns with their bar (from the blog):**
+> "False positives: Candidates who had studied hard and could recite the right patterns... would pass while demonstrating little of the judgment we actually need on the job. The signal we got was **preparation, not capability**."
+
+**The new bar (what they're explicitly moving toward):**
+- ~100% of their code is now AI-generated (still human-reviewed)
+- Engineers spend time: authoring specs, directing AI, reviewing AI PRs, catching architectural errors AI introduces, making judgment calls AI can't make
+- **Key quote:** "When the cost of building goes to zero, the cost of identifying what to build, verifying it's correct, and getting it out safely becomes the limiting factor."
+
+### What This Means for Your Next Interview
+
+- ✅ **Use AI tools actively** in coding rounds (they enable AI Support & Reference now)
+- ✅ **Demonstrate judgment, not memorization** — catch AI errors, override when needed
+- ✅ **Practice repo-based work** (debugging existing codebases, not blank-slate LC)
+- ✅ **Prepare behavioral stories about AI usage** — concrete examples of where AI helped, failed, or you overrode it
+- ✅ **Frame system design around directing AI** while you apply judgment on constraints/tradeoffs
+- ❌ **Don't hand-craft from scratch** — that's the old bar they're explicitly rejecting
+
+**Early data from blog:** Candidates who pass the AI-Assisted coding assessment advance through onsites at a **meaningfully higher rate** than the old assessment. Using AI effectively is a signal of FIT, not a crutch.
 
 ---
 
-**Round 1 — Coding (CodeSignal):**
-- Platform: CodeSignal — familiarize yourself with the tool before the interview
-- **Think out loud** from the start — clarify your algorithm before writing code
-- Identify and discuss edge cases before implementing
-- Write test cases if time allows
-- Split code into multiple files if complexity warrants it (shows code organization)
-- **Blog intel — VO coding pulls from a DIFFERENT pool than OA.** Top 4 VO coding topics:
-  1. **Pagination** (10 occurrences) — interviewer won't give function signatures, you design OOD
-  2. **Block Mining** (7 occurrences) — **DO NOT use DP/heap, use fee/size greedy sort**
-  3. **Food Delivery** (4 occurrences) — hash dict + binary search + knapsack follow-up
-  4. **Crypto Order/Kafka** (3 occurrences) — state machine + idempotency
-- **Blog intel:** Some interviewers push you toward suboptimal approaches (e.g., DP for Block Mining). State your reasoning clearly, don't cave.
+## Virtual On-Site — Round-by-Round Guide (Updated July 2026)
 
-**Round 2 — System Design (CodeSignal whiteboard):**
-- **YOU lead.** Don't wait for the interviewer to ask "have you thought about scale?" — address it proactively
+| # | Round | Format (Before) | Format (After March 2026) | What Changed |
+|---|---|---|---|---|
+| 1 | **Pre-screen** | Standard coding assessment | **AI-Assisted Coding** — candidates use AI tools throughout | Tests how you direct AI, evaluate output, catch errors |
+| 2 | **Coding / Tech Execution** | No AI permitted | **AI Support & Reference enabled** — use tools like at work | Repo-based questions, realistic codebase debugging |
+| 3 | **System Design** | Standard architecture discussion | Now includes **how you've used AI in real systems** | Directing AI to explore design space while you apply judgment |
+| 4 | **Domain / Behavioral** | Standard leadership questions | **Added AI Competency questions** with rubric | Concrete behavioral evidence of AI usage day-to-day |
+
+**Overall strategy:** They're testing **AI Fluency** across all rounds now. Three dimensions:
+1. **Usage** — Do you use AI effectively and responsibly? Right tool, right workflow, better outcomes?
+2. **Application** — Do you know when AI is/isn't the right solution? Design AI-enabled workflows for real business impact?
+3. **Understanding Limits** — Do you know where AI breaks down? Privacy/security implications? Human judgment as guardrail?
+
+**Early data from the blog:** Candidates who pass the AI-Assisted coding assessment advance through onsites at a **meaningfully higher rate** than the old assessment. This is a signal of FIT, not a barrier.
+
+---
+
+**Round 1 — Coding (AI-Assisted, Repo-Based):**
+
+**New format (post-March 2026):**
+- **AI tools are enabled throughout** — use them like you would at work (Claude, Cursor, Copilot, etc.)
+- **Repo-based questions** — working in an existing codebase, not blank slate
+- Tests: debugging issues, reviewing code for correctness/performance, reasoning about rollback scenarios
+- **Signal they're looking for:** Can you triage issues? Catch subtle bugs AI introduces? Understand what you're accepting when you accept AI-generated code?
+
+**Why your May approach (hand-crafted from memory) no longer fits:**
+> From the blog: "False positives: Candidates who had studied hard and could recite the right patterns... would pass while demonstrating little of the judgment we actually need on the job. The signal we got was preparation, not capability."
+
+**What to do instead:**
+- Use AI to generate initial solutions **BUT review them critically**
+- Catch errors, architectural mistakes, edge cases AI misses
+- Demonstrate **when to trust AI output and when to override it**
+- Focus on judgment: "This solution looks right but misses X" or "AI suggested Y but Z is better because..."
+
+**Old format notes (may still be relevant):**
+- Platform: CodeSignal — familiarize yourself with the tool
+- Think out loud — clarify your algorithm before writing code
+- **VO coding pulls from a DIFFERENT pool than OA.** Top 4 topics from 2026 Q2:
+  1. Pagination (10 occurrences) — design OOD yourself
+  2. Block Mining (7 occurrences) — greedy fee/size, NOT DP/heap
+  3. Food Delivery (4 occurrences) — hash dict + binary search
+  4. Crypto Order/Kafka (3 occurrences) — state machine + idempotency
+- Some interviewers push suboptimal approaches — state your reasoning, don't cave
+
+**Round 2 — System Design (with AI, Early Testing Phase):**
+
+**New angle (July 2026 blog):**
+> "Can a candidate architect complex systems by **directing AI to explore the design space** (generating schemas, drafting API contracts, stress-testing failure modes) while regularly applying the judgment that AI cannot substitute for?"
+
+**What this means:**
+- Frame your design as: "I'd use AI to generate initial schema options, then evaluate which fits our consistency model"
+- Mention: "AI can draft the API contract, but I need to apply judgment on: which constraints matter, which tradeoffs are real, when to override the model"
+- **The scarce resource is no longer pattern recall; it's taste and judgment**
+
+**Traditional SD still applies:**
+- **YOU lead.** Don't wait for prompts — address scale/correctness proactively
 - Clarify requirements upfront (functional, non-functional, scale, SLAs)
-- Drive the conversation through: requirements → high-level design → deep dive → operational concerns
-- Financial/crypto domain likely: payment system, exchange, real-time price, blockchain indexer
+- Drive: requirements → high-level design → deep dive → operational concerns
+- Financial/crypto domain: payment system, exchange, real-time price, blockchain indexer
 - Lead with correctness and fault tolerance (financial systems can't be eventually correct)
-- **Blog intel: Coinbase Explore (real-time price stream) is the #1 SD topic** — 5 out of 10 occurrences
-- Must self-clarify real-time / subscription / brokerage boundaries — interviewer won't spell them out
-- Lead with the hard problem (fanout to 2M clients) not the easy one (ingestion)
 
-**Round 3 — Domain Interview (Miro whiteboard, 60 min):**
-- **This is a full hour.** ~18 min you present, ~40 min they dig in with questions.
-- **Whiteboard tool is Miro** (not CodeSignal whiteboard). Practice drawing on Miro beforehand.
-- Presenting: **Digital Shopping system** with **Payments subsystem deep-dive**
-- See `domain_interview_prep.md` for full scripts and structure
-- See `domain_interview_diagram.html` for reference diagram (practice recreating on Miro)
-- **Structure:**
-  - Part 1 (0-8 min): Context, judgment arc, architecture evolution (3 stages on Miro)
-  - Part 2 (8-16 min): Payment/reservation deep-dive (component architecture + state machine)
-  - Part 3 (16-18 min): Tradeoffs summary, results, open for questions
-  - Part 4 (18-60 min): Their Q&A — this is where you prove depth
-- **Expect the AI question:** "How would you build this differently with AI tools?"
-  - AI for inventory data quality (detect stale/wrong listings)
-  - AI for lead scoring (which leads are high-intent?)
-  - AI for testing (auto-generated integration tests across services)
-  - AI for monitoring (anomaly detection on lead volume, inventory freshness)
-- **Staff+ signal:** Show judgment under ambiguity, deliberate scoping, consistency tradeoffs, not just "I wrote the code"
+**Most likely topics:**
+- **Coinbase Explore (real-time price stream)** — #1 SD topic (5/10 occurrences)
+- Must self-clarify boundaries — interviewer won't spell them out
+- Lead with the hard problem (fanout to 2M clients) not easy one (ingestion)
 
-**Round 4 — Behavioral (Staff+ level):**
-- Formal STAR interview — have Stories 1, 3, 4, 5, 8 polished
-- Lead with metrics and data in every answer
-- Show platform thinking, cross-team leadership, ownership
-- **Blog intel:** HM round specifically probes AI/LLM project experience — have Story 3 (AI Platform) ready
-- **Blog intel:** HM style can be provocative ("if your projects are this good, why haven't you been promoted?") — stay calm, answer factually
-- **Blog intel:** Interviewer quality varies — don't let it rattle you
+**Round 3 — Domain Interview (Now Explicitly Probes AI Usage):**
+
+**New emphasis (July 2026):**
+> "Domain / Reverse System Design now includes questions surfacing **how candidates have used AI in real systems they've built**."
+
+**What they're looking for:**
+- Concrete examples of using AI in production systems (not abstract capability)
+- Where AI helped, where it failed, when you overrode it
+- How you designed workflows around AI's strengths and limits
+
+**Your AI stories to emphasize:**
+1. **MCP server for AI Platform** — agentic tool calling, architecting the backend for LLM-powered agents
+2. **GenAI evaluation platform** — prompt tuning, multi-provider orchestration, hallucination detection
+3. **Daily AI usage** — code review, architecture exploration, documentation generation
+4. **AI in monitoring/testing** — mention how you'd use AI for anomaly detection, auto-generated tests
+
+**Traditional domain interview structure (still applies):**
+- **Full hour:** ~18 min you present, ~40 min Q&A
+- **Whiteboard tool: Miro** — practice drawing beforehand
+- Present: **Digital Shopping + Payments deep-dive**
+- Structure: Context (0-8m) → Deep-dive (8-16m) → Tradeoffs (16-18m) → Q&A (18-60m)
+- **"How would you build this differently with AI tools?"** is now a REQUIRED question
+  - AI for inventory data quality
+  - AI for lead scoring
+  - AI for testing (auto-generated integration tests)
+  - AI for monitoring (anomaly detection)
+- **Staff+ signal:** Judgment under ambiguity, deliberate scoping, not just "I wrote code"
+
+**Round 4 — Behavioral (Now Includes AI Competency Rubric):**
+
+**New emphasis (July 2026):**
+> "Foundational (Hiring Manager interview): Added **AI Competency questions and rubric**; every manager now asks about AI usage as **concrete behavioral evidence** rather than abstract capability."
+
+**Three AI Fluency dimensions they're scoring:**
+1. **Usage** — Do you use AI tools effectively/responsibly? Select right tool, apply in right workflow, produce better outcomes?
+2. **Application** — Do you know when AI is/isn't the right solution? Design AI-enabled workflows for real business impact?
+3. **Understanding Limits** — Do you know where AI breaks down? Privacy/security implications? Apply human judgment as guardrail?
+
+**Direct questions to expect:**
+- "Walk me through how you use AI in your day-to-day engineering work." (Be specific, not abstract)
+- "Tell me about a time AI-generated code introduced a bug. How did you catch it?"
+- "When do you NOT use AI tools? What's your decision framework?"
+- "Describe an AI-enabled workflow you designed. What was the business impact?"
+
+**Your AI answers:**
+- **Story 3 (AI Platform):** MCP server architecture, agentic tool calling, unblocking stakeholder demos
+- **Story 7 (GenAI platform):** Multi-provider orchestration, hallucination detection, prompt tuning
+- **Daily usage:** "I use Claude/Cursor for code review and architecture exploration. I don't use it for financial logic or security-critical code without manual verification."
+- **When AI failed:** "AI suggested a DP solution for [problem]. I overrode it because greedy was correct — AI doesn't always pick the optimal approach for domain-specific constraints."
+
+**Traditional behavioral (still applies):**
+- Formal STAR — Stories 1, 3, 4, 5, 8 polished
+- Lead with metrics every answer
+- Platform thinking, cross-team leadership, ownership
+- HM can be provocative ("why no promotion?") — stay calm, answer factually
+- Interviewer quality varies — don't let it rattle you
+
+---
+
+## 0. Three Durable Signals Coinbase Tests (July 2026)
+
+**Philosophy from the blog:**
+> "As execution gets automated, **judgment and taste** are the traits that matter most. Knowing what's actually worth building, telling a genuinely good solution from one that only looks right, and sensing when to override the model."
+
+**The three signals a complete interview loop MUST produce:**
+
+### 1. Repo-based Coding and Debugging (Live — You'll Get This)
+- How does a candidate work in an existing codebase?
+- Can they triage issues, debug failures in code they didn't write?
+- Reason about performance and compatibility?
+- Use AI effectively on a real codebase?
+- **Show judgment to tell a correct change from one that merely looks plausible?**
+
+**This is the closest analog to real engineering work** — you almost never build on a blank slate.
+
+### 2. System Design with AI (Early Testing — Not Fully Rolled Out)
+- Can a candidate architect complex systems by **directing AI** to explore the design space?
+- Generate schemas, draft API contracts, stress-test failure modes?
+- Apply the judgment AI cannot substitute for?
+
+**The scarce resource is no longer pattern recall; it's the taste and judgment to know:**
+- Which constraints matter
+- Which tradeoffs are real
+- When to override what the model produces
+
+**Status:** Piloting in coming quarters (you may not get this format yet)
+
+### 3. Leadership and Behavioral (Live)
+- Purpose unchanged: how you make decisions, handle disagreement, build trust, grow
+- **New dimension:** Direct questions about **how you use AI day-to-day** as concrete behavioral evidence (not abstract capability)
+
+**One constraint they hold firm on:** No added rounds. Every new signal must replace an existing round or capture something clearly distinct.
 
 ---
 
@@ -229,7 +359,10 @@ You don't need to be a blockchain expert, but show baseline literacy:
 > "Honestly, Staff-level Platform Backend is a better match for what I want to do day-to-day. I want to be hands-on building infrastructure, not primarily defining org-wide strategy. The Senior Staff application was a level mismatch, not a skills mismatch. My background — building platform infrastructure that 10+ teams depend on, driving cross-team architecture, mentoring engineers — maps directly to Staff Platform scope."
 
 ### "What does AI proficiency look like for you?"
-> "Two things. First, I've built AI systems — an MCP server for agentic tool calling and a GenAI evaluation platform with multi-provider orchestration and hallucination detection. Second, I use AI tools daily in my engineering workflow — for code review, architecture exploration, and documentation. When the JD says 'proficiency with generative AI tools in daily workflows,' that's already how I work."
+> "Three things. First, I've built AI systems — an MCP server for agentic tool calling that unblocked stakeholder demos, and a GenAI evaluation platform with multi-provider orchestration and hallucination detection. Second, I use AI tools daily — Claude/Cursor for code review, architecture exploration, documentation generation. Third, I know the limits: I don't use AI for financial logic or security-critical code without manual verification. I've caught bugs AI introduced confidently — like suggesting DP when greedy was correct. When the JD says 'AI fluency,' it's not just using the tool, it's knowing when to trust it and when to override it."
+
+### "Why did you hand-craft everything in May instead of using AI tools?"
+> "Honestly, two reasons. First, the pace was fast and Cosmo (CodeSignal's AI) was slow — it felt like a time trade-off. Second, I leaned on memorized patterns because that's what I prepped for. But I've read your July blog post about the AI-native interview rebuild, and I realize that's exactly the false positive you're trying to avoid — candidates who can recite patterns but lack the judgment you need. If I interview again, I'd use AI actively and demonstrate judgment: reviewing its output critically, catching errors it misses, and showing when to override it. That's the skill that actually transfers to the job."
 
 ---
 
