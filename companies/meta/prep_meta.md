@@ -1,7 +1,14 @@
 # Meta — Staff Software Engineer (E6)
 
 > **Full prep doc.** Read before recruiter screen, phone screen, and on-site.
-> Last updated: April 2026
+> Last updated: July 21, 2026
+> 
+> **Application Status:**
+> - Applied July 21, 2026 to two roles:
+>   1. **Software Engineer, Infrastructure** (E6, $184K-$257K) — MOVED FORWARD FIRST
+>   2. Software Engineer - Product (Technical Leadership) (E6/E7, $219K-$301K) — In review
+> - Referral: Junyan Ji
+> - Availability: 3-4 weeks (mid-Aug target, post-Yellowstone trip)
 
 ---
 
@@ -125,6 +132,7 @@ Meta's on-site typically has **4-5 rounds:**
 | Priority | # | Story | Why It Fits |
 |---|---|---|---|
 | **Must tell** | 1 | API Modernization — Cross-Org Migration | Impact: measurable metrics, cross-team scope, shipped fast |
+| **Must tell** | 2 | AI Agent Platform — Infrastructure & Performance | Impact: 46-59% latency reduction, 50% MongoDB improvement, comprehensive observability, operational maturity for AI at scale |
 | **Must tell** | 5 | MCP Server — 0→1 Under Ambiguity | Move fast: shipped POC to unblock leadership demos |
 | **Must tell** | 9 | Digital Shopping — 0→1 Under Pressure | Bold: launched new product during pandemic, revenue impact |
 | **Strong** | 3 | Parity Testing Framework | Quality: rigorous verification at scale |
@@ -136,11 +144,11 @@ Meta's on-site typically has **4-5 rounds:**
 | **Wildcard** | 20 | Failure & Learning | Openness: self-awareness, learning from mistakes |
 
 **Story mapping to Meta values:**
-- **Move fast:** Stories 5, 9, 15
-- **Be bold:** Stories 5, 9, 19
-- **Focus on impact:** Stories 1, 3 (always lead with metrics)
+- **Move fast:** Stories 2 (iterative tuning without upfront data), 5, 9, 15
+- **Be bold:** Stories 2 (shipped instrumentation + tuning for novel AI workloads), 5, 9, 19
+- **Focus on impact:** Stories 1, 2 (always lead with metrics: 46-59% latency, 50% MongoDB)
 - **Be open:** Stories 19, 20, 12
-- **Build social value:** Stories 1 (user-facing page), 9 (customer-facing product)
+- **Build social value:** Stories 1 (user-facing page), 2 (customer-facing AI), 9 (customer-facing product)
 
 ---
 
