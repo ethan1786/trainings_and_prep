@@ -183,6 +183,7 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 | 1 | API Modernization — Full Story (Leadership + Technical + Influence) | Ownership, Delivers Results, Think Big, Insists on Highest Standards, Dive Deep, Earn Trust | All |
 | 2 | API Modernization — Parity Testing Framework | Invent and Simplify, Dive Deep | Coinbase, Stripe |
 | 3 | AI Platform Backend — MCP & Conversational AI Infrastructure | Bias for Action, Earn Trust, Customer Obsession | Coinbase, All |
+| 3b | AI Agent Platform — Infrastructure & Performance | Ownership, Delivers Results, Insists on Highest Standards, Dive Deep, Bias for Action | All (especially infrastructure-focused: Meta, Stripe, Coinbase, Uber) |
 | 4 | Digital Shopping — 0→1 Product Building | Bias for Action, Delivers Results, Customer Obsession, Ownership, Are Right A Lot | Coinbase, Stripe, Cherry |
 | 5 | Cross-Org Leadership — Mentoring to Staff Level | Hire & Develop The Best, Earn Trust | All |
 | 7 | GenAI Engine — Architecture & Experimentation Platform | Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards | Coinbase, Stripe, Netflix |
@@ -341,8 +342,101 @@ Don't position this as an AI story. Position it as a **platform story** where AI
 - **Keep it to 60-90 seconds.** This is a supporting story, not your flagship. Let them ask follow-ups.
 - **If they dig into technical depth:** Talk about the modular tool plugin architecture, the demo/production boundary separation.
 - **If they dig into stakeholder management:** Talk about the transparent tradeoff approach — "We can do this for the demo, but here's what's needed for production."
-- **If they ask "what else in AI?":** Mention the conversational AI agent APIs and Story 9 initiative. Show the progression.
+- **If they ask "what else in AI?":** Mention the conversational AI agent APIs, Story 3b (AI Agent Platform Infrastructure), and Story 9 initiative. Show the progression.
 - **Don't oversell.** You built the backend platform. You didn't build the AI models or the frontend. That's honest and that's fine — you're interviewing for a platform role.
+
+---
+
+## Story 3b: AI Agent Platform — Infrastructure & Performance
+
+**Anchor:** AI Agent Platform Infrastructure & Performance · **LPs:** Ownership, Delivers Results, Insists on Highest Standards, Dive Deep, Bias for Action
+**Best for:** All companies (especially infrastructure-focused: Meta, Stripe, Coinbase, Uber, Airbnb)
+**Use for:** "Tell me about performance optimization," "Tell me about operational challenges," "Tell me about working with databases at scale," "Tell me about AI/production systems work"
+
+### Why This Story Matters
+
+This is your most recent substantial Staff-level IC work with measurable impact:
+- **46-59% agent latency reduction** (9.3s→3.8s, 14s→7.5s)
+- **50% MongoDB improvement** (200ms→100ms p99)
+- **88% overhead reduction** (1,355ms→167ms)
+- **Comprehensive observability from scratch** (Prometheus, Grafana, OpenTelemetry)
+- **30+ tickets over 4 months** (sustained 3-5 tickets/week pace)
+
+This is different from Story 3 (MCP server):
+- **Story 3 (MCP):** 0→1 under ambiguity, stakeholder management, delivered fast
+- **Story 3b (AI Agent Platform):** Infrastructure ownership, performance optimization, operational maturity at scale
+
+### Angle Guide
+
+| Question Type | Lead With | Expand On | Skip |
+|---|---|---|---|
+| "Tell me about performance optimization" | Performance wins angle — 46-59% latency, 50% MongoDB | Technical deep-dive on specific optimizations | Observability details |
+| "Tell me about operational challenges" | Operational challenges angle — traffic unpredictability, cost visibility, cascading failures | How you solved each (instrumentation first, then iterative tuning) | MongoDB technical details |
+| "Tell me about working with databases at scale" | MongoDB angle — 50% latency reduction via index consolidation, read-replica splitting, connection pool tuning | Key decisions (which reads tolerate staleness) | Agent latency work |
+| "Tell me about a challenging project" | Full story — lead with executive summary (4 months, 30+ tickets, 46-59% improvement) | All three angles as follow-ups | — |
+| "Insists on highest standards" | Performance wins angle — not satisfied with incremental improvement, pushed for 46-59% gains | Technical depth showing rigor | Operational challenges |
+
+### Executive Summary (30-second version)
+
+> "I own the backend infrastructure and performance optimization for CarGurus' production conversational AI platform. Over the past 4 months, I've worked through about 30 tickets improving performance, reliability, and observability. The biggest wins: reduced agent response latency 46-59% across different flows, cut MongoDB query latency in half from 200ms to 100ms, and built comprehensive observability with Prometheus metrics and Grafana dashboards. The work spans database performance tuning, circuit breakers for reliability, cost optimization — we made the welcome flow 60% cheaper while making it faster — and operational maturity for AI workloads that behave completely differently from traditional APIs."
+
+### STAR Spoken-Style
+
+**Situation:** CarGurus launched a production conversational AI platform this year — customer-facing agents that help users search for cars, get pricing, understand delivery options. I own the backend infrastructure supporting these agents. When the system first went live, it was slow and opaque: agent responses took 9-14 seconds, MongoDB queries were hitting 200ms at p99, and we had no visibility into costs or performance bottlenecks. AI workloads are fundamentally different from traditional APIs — traffic is unpredictable, LLM latency varies 10× depending on response length and provider load, and costs were invisible without proper instrumentation.
+
+**Task:** My job was to make this production-ready: improve performance to acceptable latency, build reliability so one bad provider doesn't take down the whole system, and create observability so we can see costs, performance, and quality in real-time. This wasn't a single project — it was sustained infrastructure and performance work over 4 months, working through about 30 tickets at a pace of 3-5 tickets per week.
+
+**Action:**
+
+*Performance optimization angle:* I attacked latency from multiple angles. For MongoDB, I consolidated 6 redundant compound indexes down to 1 by analyzing actual query patterns — most of those indexes were never used. I split read traffic between primary and secondary replicas: critical operations (new messages, writes) stay on the primary for strong consistency, but context reads (loading conversation history) can tolerate eventual consistency and go to secondaries. That reduced primary DB load by 30-40%. I also tuned connection pool settings — increased maxPoolSize from 20 to 50 and added waitQueueTimeoutMS for fast-fail instead of indefinite queueing.
+
+For agent latency, I worked on prompt caching (reordered prompt structure to maximize OpenAI cache hits), token reduction (filtered context 76% smaller by removing unnecessary data), model upgrades (switched to faster inference models like gpt-5.4-mini), and architectural simplification (retired a multi-agent wrapper that added overhead, consolidated to single agent). The memory inheritance overhead went from 1,355 milliseconds to 167 milliseconds — an 88% reduction.
+
+*Operational challenges angle:* The hardest part wasn't the code — it was figuring out how to operate AI workloads without historical data to guide capacity planning. I couldn't size connection pools based on averages because AI traffic spikes unpredictably and LLM latency varies wildly. My approach: instrumentation first, then iterative tuning. I built connection pool metrics (active, idle, wait queue depth) and monitored them in production, then tuned based on real data. I also implemented circuit breakers per LLM provider with fallback logic — when OpenAI degrades (rate limits, timeouts), we fail fast and don't exhaust connection pools.
+
+For cost visibility, the first week in production burned through budget quickly because we had no instrumentation. I built dashboards tracking token usage by endpoint, user, and provider. Now we can see cost hotspots within hours instead of weeks. The token reduction work (76% smaller contexts) saved significant monthly costs.
+
+*Observability angle:* I built this from scratch. 10+ Prometheus metrics covering tool call duration (with error_type labels), error rates, circuit breaker state, connection pool health, in-flight requests, active streams, service start time. Grafana dashboards with deployment annotations so we can correlate releases with performance changes. OpenTelemetry tracing where I inject trace_id and span_id into logs for end-to-end correlation. Alerting for tool-call error rate thresholds, circuit breaker trips, and connection pool exhaustion.
+
+**Result:** Agent latency dropped dramatically: welcome flow went from 9.3 seconds to 3.8 seconds (59% faster, 60% cheaper), and agent orchestration went from 14 seconds to 7.5 seconds (46% faster). MongoDB p99 latency went from 200ms to 100ms — 50% reduction. Memory inheritance overhead dropped 88%. We now have comprehensive observability — before this, cost was invisible, we couldn't diagnose failures, and we had no visibility into LLM provider health. After: token usage tracked by endpoint/user/provider, failures traced end-to-end, proactive alerts. The operational maturity we built means the platform can scale safely and we can catch problems before they become outages.
+
+### Bullet Recap
+
+- **Pain:** Production conversational AI platform launched. Slow (9-14s agent latency, 200ms MongoDB p99), opaque (no cost visibility, no performance metrics), unreliable (no circuit breakers, connection pool starvation risk). AI workloads behave differently from traditional APIs — unpredictable traffic, 10× latency variance, costs invisible without instrumentation.
+- **What I did:** Sustained infrastructure + performance work over 4 months (30+ tickets, 3-5/week). **Performance:** MongoDB (index consolidation 6→1, read-replica splitting, connection pool tuning 20→50); agent latency (prompt caching, 76% token reduction, model upgrades, architectural simplification). **Reliability:** Circuit breakers per provider, timeout tuning 30s→10s, health checks. **Observability:** 10+ Prometheus metrics, Grafana dashboards, OpenTelemetry tracing, alerting. **Operations:** Instrumentation-first approach (couldn't size on averages), iterative tuning based on production data.
+- **Result:** Agent latency 46-59% reduction (9.3s→3.8s, 14s→7.5s), MongoDB 50% faster (200ms→100ms p99), 88% overhead reduction (1,355ms→167ms), 60% cost reduction on welcome flow, 30-40% primary DB load reduction, comprehensive observability from scratch.
+
+### Technical Deep-Dives (for follow-up questions)
+
+**"How did you decide which MongoDB reads could go to secondaries?"**
+> "I analyzed each query type: new message writes and critical user state updates need strong consistency, so those stay on primary. But loading conversation history for context — that's append-only data where a few milliseconds of replication lag doesn't matter. The agent gets the messages from 10 seconds ago instead of 5 milliseconds ago — functionally identical. I also looked at read/write ratios: context reads are 70-80% of MongoDB traffic, so splitting those to secondaries gave huge relief to the primary."
+
+**"Why in-memory cache instead of Redis for the API modernization (Story 1), but Redis caching for AI Agent Platform?"**
+> "Different use cases. For the API modernization (Story 1), we were serving 8,000 rpm with deeply nested response objects. Redis would add network hop + serialization cost that would eat into latency gains — in-memory was faster. For AI Agent Platform, the cache use case is different: LLM call results and tool API responses that need to be shared across multiple agent instances. In-memory doesn't help because each instance has its own memory — you need a shared cache. Redis makes sense here because the cache hit benefit (avoiding a 2-second LLM call) is orders of magnitude larger than the Redis network hop (5-10ms)."
+
+**"How did you identify the 6 redundant MongoDB indexes?"**
+> "I used MongoDB's explain() output on real production queries and checked which indexes were actually being used. Turned out 5 of the 6 compound indexes had overlapping prefixes — MongoDB would always choose the first matching index and ignore the others. I consolidated them into one compound index that covered all the query patterns, then monitored for a week to make sure nothing broke. Removed indexes = less storage overhead, faster writes (fewer indexes to update per insert)."
+
+**"Tell me about the circuit breaker implementation."**
+> "Per-provider circuit breakers with configurable failure thresholds and timeout windows. If OpenAI returns 5 consecutive 429s or timeouts within 60 seconds, the circuit opens — we stop sending requests there and immediately try Anthropic instead. After a cooldown period (e.g., 30 seconds), we allow a single test request through (half-open state). If it succeeds, circuit closes and traffic resumes normally. If it fails, circuit stays open for another cooldown cycle. This prevents cascading failures where one degraded provider exhausts connection pools and takes down the whole service."
+
+**"What was the biggest challenge operationally?"**
+> "Capacity planning without historical data. Traditional APIs: you can extrapolate from past traffic and size connection pools accordingly. AI agents: traffic spikes unpredictably (one viral social post = 50× traffic), sessions vary wildly in length (some 10 seconds, some 5 minutes), and LLM latency varies 10× depending on response length and provider load. You can't size on averages because connection pools don't degrade linearly — once exhausted, everything queues and cascades. My solution: start conservative (small pools, aggressive timeouts), instrument heavily (connection pool metrics, wait queue depth), and tune iteratively based on production data. That's the only way to operate AI workloads safely."
+
+### Interview Tips
+
+- **Lead with the 30-second executive summary** — let them decide which angle to dig into.
+- **Use specific numbers** — 46-59%, 50%, 88%, 30+ tickets, 4 months. Precision signals real work.
+- **Frame as "infrastructure owner"** not "contributor" — you made the technical decisions (capacity planning, consistency trade-offs, reliability tuning).
+- **If they ask "who created the tickets?":** "My tech lead identifies problem areas based on user feedback and monitoring. I analyze the root cause, decide the technical approach, implement it, measure impact, and iterate. The person creating tickets identifies WHAT needs attention; I decide HOW to solve it. Those HOW decisions — which reads tolerate staleness, how to size connection pools without historical data, timeout values, circuit breaker thresholds — those are the Staff-level technical decisions."
+- **Connect to their scale:** For Meta: "At CarGurus scale (millions of users), I learned AI infrastructure challenges. At Meta scale (3B+ users), those challenges are amplified. The patterns I learned — instrumentation-first, iterative tuning, treating AI like external dependencies — will scale." For Stripe/Coinbase: "AI workloads fail differently than payment APIs, but the operational mindset is the same: instrument for observability, design for failure, tune based on production data."
+- **This is your most recent work** — it shows you're still doing hands-on, high-impact IC work right now, not coasting on past projects.
+
+### Connection to Other Stories
+
+- **Story 3 (MCP Server):** Builds on this — MCP was the 0→1, this is the production maturity and performance optimization
+- **Story 9 (AI Cross-Domain Validation):** Leverages this experience — understanding AI operational challenges informed the design
+- **Story 14 (Failure — Connection Starvation):** Lesson learned there directly applied here — sized connection pools for peak traffic, not averages
 
 ---
 
@@ -690,35 +784,38 @@ I took those requirements back and proposed an improved MCP design that served a
 | LP | Stories |
 |---|---|
 | **Customer Obsession** | 3 (MCP — stakeholder management), 4 (Digital Shopping — ship for customers under pressure), 15 (MCP — designed for all consumers proactively) |
-| **Ownership** | 1 (API Mod — identified problem, pitched solution), 4 (Digital Shopping — full lifecycle including retirement), 5 (Mentoring — self-directed), 13 (Toast — built DevOps nobody assigned) |
+| **Ownership** | 1 (API Mod — identified problem, pitched solution), 3b (AI Agent — owned infra & perf end-to-end), 4 (Digital Shopping — full lifecycle including retirement), 5 (Mentoring — self-directed), 13 (Toast — built DevOps nobody assigned) |
 | **Invent and Simplify** | 2 (Parity Testing — simple framework solved complex validation), 7 (GenAI — hybrid architecture), 9 (AI Cross-Domain — LLM + spec validation) |
-| **Are Right A Lot** | 4 (Digital Shopping — consistency tradeoffs), 8 (GraphQL disagreement — committed when overruled), 14 (Failure — learned from wrong sizing decision) |
+| **Are Right A Lot** | 3b (AI Agent — consistency tradeoffs for read replicas, capacity planning without historical data), 4 (Digital Shopping — consistency tradeoffs), 8 (GraphQL disagreement — committed when overruled), 14 (Failure — learned from wrong sizing decision) |
 | **Learn and Be Curious** | 7 (GenAI — self-directed AI learning), 10 (DGS — learned federation from scratch), 14 (Failure — lesson applied to later work) |
 | **Hire & Develop The Best** | 5 (Mentoring — grew engineers to Staff scope) |
-| **Insists on Highest Standards** | 1 (API Mod — pushed for 5x, not "a bit better"), 2 (Parity Testing — zero tolerance for regressions) |
+| **Insists on Highest Standards** | 1 (API Mod — pushed for 5x, not "a bit better"), 2 (Parity Testing — zero tolerance for regressions), 3b (AI Agent — not satisfied with incremental improvement, pushed for 46-59% gains) |
 | **Think Big** | 1 (API Mod — full modernization vs patches), 7 (GenAI — built production-grade AI system independently), 9 (AI Cross-Domain — automate multi-team coordination) |
-| **Bias for Action** | 3 (MCP — delivered POC in first sprint), 4 (Digital Shopping — shipped fast with pragmatic tradeoffs), 13 (Toast — built infra before being asked) |
-| **Dive Deep** | 1 (API Mod — traced compound latency causes), 2 (Parity Testing — byte-level payload diff), 10 (DGS — profiled JVM cold-start root cause) |
+| **Bias for Action** | 3 (MCP — delivered POC in first sprint), 3b (AI Agent — instrumentation-first approach, iterative tuning), 4 (Digital Shopping — shipped fast with pragmatic tradeoffs), 13 (Toast — built infra before being asked) |
+| **Dive Deep** | 1 (API Mod — traced compound latency causes), 2 (Parity Testing — byte-level payload diff), 3b (AI Agent — index analysis, connection pool profiling, circuit breaker tuning), 10 (DGS — profiled JVM cold-start root cause) |
 | **Earn Trust** | 1 (API Mod — pre-socialized, incorporated feedback), 5 (Mentoring — transparent decision-making), 8 (GraphQL — committed and helped after losing), 16 (Peer Conflict — demonstrated with data, no escalation) |
-| **Delivers Results** | 1 (API Mod — 5x latency, ahead of schedule), 4 (Digital Shopping — launched on timeline under pressure), 15 (MCP — 3 teams onboarded in days) |
+| **Delivers Results** | 1 (API Mod — 5x latency, ahead of schedule), 3b (AI Agent — 46-59% latency reduction, 50% MongoDB improvement, sustained 30+ tickets over 4 months), 4 (Digital Shopping — launched on timeline under pressure), 15 (MCP — 3 teams onboarded in days) |
 | **Have Backbone; Disagree and Commit** | 8 (GraphQL — disagreed with decision, committed fully, helped succeed), 16 (Peer Conflict — proved position with deployed dev router) |
 
 ## Company Quick-Reference Matrix
 
 | Company | Lead Stories | Domain-Specific |
 |---|---|---|
-| **Coinbase** | 1 (API Mod), 3 (MCP), 4 (Digital Shopping), 9 (AI Cross-Domain) | 2 (Parity — correctness), 7 (GenAI — AI-first) |
+| **Coinbase** | 1 (API Mod), 3 (MCP), 3b (AI Agent), 4 (Digital Shopping), 9 (AI Cross-Domain) | 2 (Parity — correctness), 7 (GenAI — AI-first) |
+| **Meta** | 1 (API Mod), 3b (AI Agent — operational maturity for AI at scale), 3 (MCP), 4 (Digital Shopping) | 2 (Parity), 7 (GenAI) |
+| **Stripe** | 1 (API Mod), 3b (AI Agent — database perf, observability), 4 (Digital Shopping) | 2 (Parity — correctness), 7 (GenAI) |
+| **Uber/Airbnb** | 1 (API Mod), 3b (AI Agent — infrastructure at scale), 4 (Digital Shopping) | 2 (Parity), 10 (DGS — performance) |
 | **HashiCorp/IBM** | 1 (API Mod), 4 (Digital Shopping) | 11 (Auth/Keycloak), 12 (CQRS), 13 (Toast) |
-| **NVIDIA** | 1 (API Mod), 4 (Digital Shopping) | 7 (GenAI), 10 (DGS — performance) |
+| **NVIDIA** | 1 (API Mod), 3b (AI Agent), 4 (Digital Shopping) | 7 (GenAI), 10 (DGS — performance) |
 | **Cherry** | 1 (API Mod), 4 (Digital Shopping) | 13 (Toast — startup context) |
 
-**Universal stories (use at any company):** 5 (Mentoring), 8 (Disagree & Commit), 14 (Failure), 15 (Customer Obsession), 16 (Peer Conflict)
+**Universal stories (use at any company):** 3b (AI Agent Platform), 5 (Mentoring), 8 (Disagree & Commit), 14 (Failure), 15 (Customer Obsession), 16 (Peer Conflict)
 
 ---
 
 ## LP Question Bank — "When They Ask X, Tell Story Y"
 
-> Story numbering: 1=API Mod, 2=Parity, 3=MCP/AI, 4=Digital Shopping, 5=Mentoring, 7=GenAI, 8=Disagree&Commit (GraphQL direct access), 9=AI Cross-Domain, 10=DGS, 11=Applause Auth, 12=Applause CQRS, 13=Toast, 14=Failure, 15=Customer Obsession, 16=Peer Conflict
+> Story numbering: 1=API Mod, 2=Parity, 3=MCP/AI, 3b=AI Agent Platform Infrastructure, 4=Digital Shopping, 5=Mentoring, 7=GenAI, 8=Disagree&Commit (GraphQL direct access), 9=AI Cross-Domain, 10=DGS, 11=Applause Auth, 12=Applause CQRS, 13=Toast, 14=Failure, 15=Customer Obsession, 16=Peer Conflict
 
 ### Customer Obsession
 | Question | Story |
@@ -731,22 +828,22 @@ I took those requirements back and proposed an improved MCP design that served a
 ### Insists on Highest Standards
 | Question | Story |
 |---|---|
-| A time you were unsatisfied with the status quo | **1** (API mod — pushed for 5x latency reduction, not "a bit faster") |
-| Most significant improvement project you've led | **1** (API mod — full cross-org modernization, 5x latency, 99.9% avail) |
-| How do you seek out feedback on performance? | **1** (API mod — per-hop SLO budgets in Datadog, A/B tested at 50% traffic for correctness) |
+| A time you were unsatisfied with the status quo | **1** (API mod — pushed for 5x latency reduction, not "a bit faster") OR **3b** (AI Agent — not satisfied with incremental improvement, pushed for 46-59% gains) |
+| Most significant improvement project you've led | **1** (API mod — full cross-org modernization, 5x latency, 99.9% avail) OR **3b** (AI Agent — sustained 30+ tickets, 46-59% latency reduction, comprehensive observability from scratch) |
+| How do you seek out feedback on performance? | **1** (API mod — per-hop SLO budgets in Datadog, A/B tested at 50% traffic for correctness) OR **3b** (AI Agent — instrumentation-first: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing, then iterative tuning) |
 
 ### Delivers Results
 | Question | Story |
 |---|---|
 | Realized halfway in it may not be the best goal | **14** (Failure — sizing approach was wrong, pivoted to partition) |
-| A goal that took a long time to achieve | **1** (API mod — 6-month first milestone, completed ahead of schedule) |
+| A goal that took a long time to achieve | **1** (API mod — 6-month first milestone, completed ahead of schedule) OR **3b** (AI Agent — sustained 4-month improvement effort, 30+ tickets at 3-5/week pace) |
 | Delivered a project under tight deadline | **4** (Digital shopping — 0→1 product under pandemic pressure) |
 
 ### Are Right A Lot
 | Question | Story |
 |---|---|
-| A difficult decision and how you knew it was right | **16** (GraphQL peer conflict — proved with deployed dev router and real perf data) |
-| A decision without data | **3** (MCP — built modular architecture before requirements were clear) |
+| A difficult decision and how you knew it was right | **16** (GraphQL peer conflict — proved with deployed dev router and real perf data) OR **3b** (AI Agent — consistency tradeoffs: which reads tolerate staleness, capacity planning without historical data) |
+| A decision without data | **3** (MCP — built modular architecture before requirements were clear) OR **3b** (AI Agent — sized connection pools without historical baseline, instrumentation-first then tuned iteratively) |
 | A bad decision and how you learned from it | **14** (Failure — sized on averages, learned peak-to-average matters) |
 
 ### Bias for Action
@@ -767,15 +864,17 @@ I took those requirements back and proposed an improved MCP design that served a
 | Question | Story |
 |---|---|
 | Took on something outside your responsibility | **1** (API Mod — identified bottleneck across teams, pitched and led without being asked) |
-| Sacrificed short-term for long-term goal | **4** (Digital Shopping — feature flags + retirement playbook upfront) |
+| Sacrificed short-term for long-term goal | **4** (Digital Shopping — feature flags + retirement playbook upfront) OR **3b** (AI Agent — observability infrastructure upfront to enable future optimization) |
 | Saw a peer struggling and stepped in | **5** (Mentoring — pulled engineers into cross-team problems) |
+| Owned end-to-end delivery | **3b** (AI Agent — sustained 4 months, 30+ tickets across performance, reliability, observability) |
 
 ### Dive Deep
 | Question | Story |
 |---|---|
-| Went several layers to figure out a problem | **14** (Failure — traced connection starvation to peak-traffic × shared pool ceiling, not throughput) |
+| Went several layers to figure out a problem | **14** (Failure — traced connection starvation to peak-traffic × shared pool ceiling, not throughput) OR **3b** (AI Agent — traced latency to compound causes: index analysis, prompt structure, connection pool sizing, LLM model selection) |
 | Linked two problems and identified underlying issue | **1** (API mod — sequential calls + shared timeouts + no circuit breaking as compound cause) |
-| A metric you used to identify need for change | **1** (p99 latency + per-hop SLO budgets revealed which services were bottlenecks) |
+| A metric you used to identify need for change | **1** (p99 latency + per-hop SLO budgets revealed which services were bottlenecks) OR **3b** (AI Agent — MongoDB p99, connection pool metrics revealed starvation risk) |
+| Performance optimization / database tuning | **3b** (AI Agent — MongoDB 50% improvement: index consolidation, read-replica splitting, connection pool tuning) |
 
 ### Learn and Be Curious
 | Question | Story |
