@@ -2,3 +2,12 @@ jobs_all_targets.txt
 job_shortlist_check.txt
 jobs_*.txt
 __pycache__/
+
+# PDF resumes in company folders are submitted versions only
+# The source of truth is the HTML files
+companies/*/*.pdf
+companies/**/*.pdf
+
+# macOS system files
+.DS_Store
+**/.DS_Store
