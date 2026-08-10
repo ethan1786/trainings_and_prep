@@ -144,22 +144,40 @@ Response:
 
 ### Real-time Updates (SSE or WebSocket)
 
-**SSE vs WebSocket Trade-off:**
+**Critical: Ask about product requirements FIRST. Don't assume WebSocket because "crypto exchanges use it."**
 
-**Prefer SSE (Server-Sent Events) for operational simplicity:**
-- ✅ Stateless from infrastructure perspective — works with standard HTTP load balancers (ALB, nginx, HAProxy)
-- ✅ No sticky sessions required
-- ✅ Rolling deployments just work (clients auto-reconnect via EventSource API)
-- ✅ Falls into existing API gateway configuration (no special WebSocket API type)
-- ✅ Standard HTTP rate limiting and monitoring
-- ✅ Simpler connection draining during deployments
+**Clarifying questions for the interviewer:**
+1. **"Do users dynamically change subscriptions as they scroll/filter/search, or do they subscribe once on page load?"**
+   - If dynamic → WebSocket (subscribe/unsubscribe over same connection)
+   - If static → SSE works fine (subscribe via REST, stream updates)
 
-**Choose WebSocket only if:**
-- Need bidirectional messaging (dynamic subscriptions over same connection)
-- Need binary protocol (we don't — JSON is fine)
-- Want to match industry standard (most crypto exchanges use WebSocket, but operational cost is real)
+2. **"Do we expect users to open multiple tabs to monitor different markets?"**
+   - If yes → WebSocket (HTTP/1.1 has 6 connection limit per domain, SSE would exhaust it)
+   - If no → SSE works fine
 
-**For this use case (Coinbase Explore), SSE is sufficient:** Subscriptions can be managed via REST POST, and server→client push is one-way. The operational simplicity wins unless there's a strong reason for WebSocket.
+3. **"Do we have a mobile app, or is this web-only?"**
+   - If mobile app → WebSocket (native apps don't have browser connection limits)
+   - If web-only → Depends on other requirements
+
+4. **"Do clients need to send messages to the server (trade orders, alerts), or is it read-only market data?"**
+   - If bidirectional → WebSocket
+   - If read-only → SSE sufficient
+
+**Based on requirements, choose:**
+
+**Use SSE if:**
+- ✅ Subscriptions are static (subscribe once on page load)
+- ✅ Single tab/window per user
+- ✅ Read-only market data (no client→server messages)
+- ✅ Operational simplicity is prioritized
+
+**Use WebSocket if:**
+- ✅ Dynamic subscriptions (users scroll/search, want to subscribe without reopening connection)
+- ✅ Multiple tabs expected (HTTP/1.1 connection limits would exhaust SSE)
+- ✅ Bidirectional messaging (trade orders, alerts alongside market data)
+- ✅ Mobile app (native apps benefit from WebSocket)
+
+**"Industry standard" note:** Most crypto exchanges use WebSocket, which signals that they likely have requirements (dynamic subscriptions, multiple tabs, bidirectional trade orders) that justify the operational complexity. But that's not a reason itself — the requirements are.
 
 | Concern | SSE | WebSocket |
 |---|---|---|
@@ -168,10 +186,14 @@ Response:
 | **Rolling deployments** | ✅ Close connections, clients auto-reconnect | ❌ Complex connection draining |
 | **Rate limiting** | ✅ Standard HTTP per-request | ❌ Per-connection or per-message logic |
 | **Monitoring** | ✅ Standard HTTP logs/metrics | ❌ Separate connection metrics |
+| **Dynamic subscriptions** | ❌ Need REST call + reconnect | ✅ Subscribe/unsubscribe over same connection |
+| **Multiple tabs (HTTP/1.1)** | ❌ Exhausts 6 connection limit | ✅ No browser limit |
 | **Bidirectional** | ❌ Server→client only | ✅ Full duplex |
 | **Binary protocol** | ❌ Text only | ✅ Supports binary |
 
-**SSE Approach (Recommended):**
+**For Coinbase Explore specifically:** The answer depends on product requirements. If users scroll/filter and want instant updates for new visible symbols without reconnecting, that's a dynamic subscription requirement → WebSocket justified. If users have multiple tabs open (common for traders monitoring different markets), HTTP/1.1 connection limits make SSE impractical → WebSocket justified. **Ask the interviewer to clarify these requirements before choosing.**
+
+**SSE Approach (if requirements allow):**
 ```
 # 1. Client subscribes via REST
 POST /api/explore/subscribe
@@ -198,7 +220,7 @@ eventSource.addEventListener('delta', (e) => {
 });
 ```
 
-**WebSocket Approach (if bidirectional needed):**
+**WebSocket Approach (if requirements justify):**
 ```
 WS /ws/explore
 
@@ -300,11 +322,11 @@ This is the hardest part — say so.
 ## Staff+ Angle
 
 - **Fanout is the hard problem.** Ingesting 1M ticks/s is a stream processing problem with known solutions. Pushing correct, low-latency, deduplicated deltas to 2M concurrent clients with subscriptions is where most designs break down. Lead with this.
-- **Operational simplicity matters more than protocol features.** Many candidates default to WebSocket without questioning it. SSE is operationally simpler (stateless from infra perspective, rolling deployments just work, no sticky sessions) and sufficient for one-way server→client push. Choosing the simpler option unless there's a specific reason not to signals production maturity.
+- **Ask about product requirements before picking protocol.** Many candidates default to WebSocket because "crypto exchanges use it." Staff+ engineers ask: "Do users dynamically change subscriptions as they scroll? Do we expect multiple tabs?" If the answer is yes → WebSocket justified (dynamic subscriptions, HTTP/1.1 connection limits). If no → SSE is simpler. **Product requirements drive the choice, not "industry standard."** "Industry standard" is a signal that others found similar requirements, not a reason itself.
+- **Operational simplicity vs product needs.** SSE is operationally simpler (stateless from infra perspective, rolling deployments just work, no sticky sessions). But if product requirements demand dynamic subscriptions or multiple tabs, WebSocket's operational cost is justified. The trade-off is explicit: accept operational complexity to meet product needs, not "WebSocket because everyone else uses it."
 - **Staleness as a first-class feature.** Most candidates handle the happy path but ignore feed failures. At Coinbase, showing a wrong price is worse than showing no price. Design staleness detection into the data model and surface it to the UI.
 - **Sequence number discipline.** The `(exchange_id, sequence_id)` dedup key prevents a reconnecting connector from replaying old ticks into window aggregates. Without it, a reconnect after a 30s outage would corrupt every open window.
 - **Operational observability.** Production market data systems live or die on monitoring. You need metrics for: per-exchange feed lag, tick drop rate, stale symbol count, connection count, and delta delivery latency. Mentioning this signals production experience.
-- **Deployment strategy:** With SSE, rolling deployments are trivial (close connections, clients reconnect). With WebSocket, you need connection draining windows and careful orchestration. This isn't a feature problem, it's an operational cost problem — and Staff+ engineers think about operational cost.
 - **Coinbase-specific angle:** Coinbase ingests from its own exchange (Coinbase Advanced Trade) plus external feeds. The connector abstraction handles this naturally. Also, some symbols are only on one exchange — worth noting that multi-source redundancy isn't available for every ticker.
 
 ---
@@ -347,9 +369,22 @@ When WebSocket disconnects or detects a sequence gap:
 
 This shows domain awareness. The answer changes your fallback policy.
 
-### Clarifying Question for the Interviewer
+### Clarifying Questions for the Interviewer
 
-Ask early: "When we say real-time prices — are we aggregating from multiple exchanges into one canonical price per asset, or showing per-exchange prices?" This scopes the normalization layer.
+**Ask these BEFORE designing the real-time layer:**
+
+1. **Product behavior:** "Do users dynamically change which assets they're watching as they scroll, filter, or search? Or do they subscribe once on page load and watch a fixed set?"
+   - Dynamic → WebSocket (subscribe/unsubscribe without reconnect)
+   - Static → SSE sufficient
+
+2. **Multi-tab usage:** "Do we expect users to open multiple tabs to monitor different markets simultaneously?"
+   - Yes → WebSocket (HTTP/1.1 SSE limited to 6 connections per domain)
+   - No → SSE works
+
+3. **Data source:** "Are we aggregating from multiple exchanges into one canonical price per asset, or showing per-exchange prices?"
+   - This scopes the normalization layer
+
+These questions show you understand that **product requirements drive technical choices**, not "industry standard."
 
 ---
 
