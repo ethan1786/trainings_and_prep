@@ -10,7 +10,9 @@ Conventions used below:
 
 ## Contents
 
-Every pattern in Part 1 carries a **"When you need it, and when you don't"** subsection — the escalation ladder of cheaper things to try first, the real triggers, the anti-cases, and what you permanently inherit by adopting it. That subsection is the decision content; the surrounding text is reference.
+Every pattern in Part 1 **and every tool in Part 3** carries a **"When you need it, and when you don't"** subsection — the escalation ladder of cheaper things to try first, the real triggers, the anti-cases, and what you permanently inherit by adopting it. That subsection is the decision content; the surrounding text is reference.
+
+Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather than a requirement, how to find the cause (latency) or the ceiling (capacity).
 
 - [Part 1: Pattern Recognition (with context)](#part-1-pattern-recognition-with-context)
   - [Caching](#caching)
@@ -74,18 +76,19 @@ Every pattern in Part 1 carries a **"When you need it, and when you don't"** sub
     - [The failure modes unique to high load](#the-failure-modes-unique-to-high-load)
     - [Answering "can it handle 10x?"](#answering-can-it-handle-10x--the-short-procedure)
 - [Part 3: Deep Tool Knowledge](#part-3-deep-tool-knowledge)
-  - [PostgreSQL / MySQL (Relational)](#postgresql-mysql-relational)
-  - [Redis / Valkey](#redis-valkey)
-  - [MongoDB / DynamoDB (Document / NoSQL)](#mongodb-dynamodb-document-nosql)
-  - [Kafka](#kafka)
-  - [Elasticsearch / OpenSearch](#elasticsearch-opensearch)
-  - [GraphQL Federation](#graphql-federation)
-  - [gRPC](#grpc)
-  - [WebSocket and SSE](#websocket-and-sse)
-  - [S3 / Object Storage](#s3-object-storage)
-  - [ZooKeeper / etcd / Consul (Coordination)](#zookeeper-etcd-consul-coordination)
-  - [CDN (Content Delivery Network)](#cdn-content-delivery-network)
-  - [Flink / Stream Processing](#flink-stream-processing)
+  *Each entry carries a "When you need it, and when you don't" decision subsection.*
+  - [PostgreSQL / MySQL (Relational)](#postgresql-mysql-relational) — the default; what would justify leaving
+  - [Redis / Valkey](#redis-valkey) — shared state, not a fast database
+  - [MongoDB / DynamoDB (Document / NoSQL)](#mongodb-dynamodb-document-nosql) — when aggregate and document boundaries coincide
+  - [Kafka](#kafka) — log semantics vs. just moving work off the request path
+  - [Elasticsearch / OpenSearch](#elasticsearch-opensearch) — relevance ranking, not filtering
+  - [GraphQL Federation](#graphql-federation) — multiple schema owners is the real trigger
+  - [gRPC](#grpc) — typed contract and binary framing are separable wants
+  - [WebSocket and SSE](#websocket-and-sse) — direction and timing, not payload size
+  - [S3 / Object Storage](#s3-object-storage) — where the blob/record boundary sits
+  - [ZooKeeper / etcd / Consul (Coordination)](#zookeeper-etcd-consul-coordination) — idempotency beats consensus
+  - [CDN (Content Delivery Network)](#cdn-content-delivery-network) — latency, offload, and protection are three products
+  - [Flink / Stream Processing](#flink-stream-processing) — capability trigger vs. cost trigger
 - [Part 4: Constraint → Solution Mapping (Quick Reference)](#part-4-constraint-solution-mapping-quick-reference)
 - [Part 5: Tradeoff Pairs (One-Liners)](#part-5-tradeoff-pairs-one-liners)
 - [Part 6: Recurring Meta-Principles](#part-6-recurring-meta-principles)
@@ -1550,7 +1553,9 @@ These do not appear in single-request investigation at all. They are properties 
 
 ## Part 3: Deep Tool Knowledge
 
-For each tool: WHY it works the way it does, WHEN it's right, WHEN it breaks.
+For each tool: WHY it works the way it does, WHEN it's right, WHEN it breaks — and, in the **"When you need it, and when you don't"** subsection, the escalation ladder of cheaper alternatives, the real adoption triggers, the anti-cases, and the permanent obligations you take on.
+
+**The recurring shape across all twelve:** the cheapest rung is almost never the tool itself, and the rung most often skipped is the one just below it — OpenAPI + codegen below gRPC, a BFF below federation, native full-text search below a search cluster, a unique constraint below a coordination store, a job table below Kafka, a local cache below Redis. Adoption arguments usually fail at that rung rather than on the tool's merits.
 
 ---
 
@@ -1572,6 +1577,29 @@ For each tool: WHY it works the way it does, WHEN it's right, WHEN it breaks.
 - Index bloat — every index taxes every write
 
 **Capacity reference:** single node ~5K writes/sec, ~50K indexed reads/sec; comfortable to ~2–5TB before ops (backup, vacuum, restore) hurt; ~500–1000 connections with pooling.
+
+#### When you need it, and when you don't
+
+**This is the default, and "default" is the decision content.** For most workloads the question is not "why relational" but "what would justify anything else." A relational store gives you constraints, transactions, ad-hoc query ability, and forty years of operational tooling; every alternative buys one property by surrendering several of those. Start here and let a *measured* constraint push you off.
+
+**Escalation ladder before leaving relational** — most "we've outgrown Postgres" claims die at step 2 or 3:
+1. **Index and query fixes.** Rows-examined ≫ rows-returned (Part 2.4) accounts for most perceived scaling walls.
+2. **Connection pooling.** Exhaustion masquerades as the database being slow when the DB is nearly idle. Size with Little's Law (Part 2.5).
+3. **Read replicas.** Read-heavy workloads scale a long way here, at the cost of replication lag on read-after-write paths.
+4. **Vertical scale.** Unfashionable and frequently correct — a single large node handles far more than people assume, with zero architectural change.
+5. **Partition within the database.** Native table partitioning for time-series and large-table maintenance keeps SQL and transactions intact.
+6. **Move the read shape out** — search index, cache, materialized read model — keeping relational as the source of truth. This is usually the right answer and is not "leaving relational."
+7. **Shard, or adopt a horizontally-scaling store** — only for write throughput a single primary genuinely cannot absorb.
+
+**Real triggers for something else:** sustained write volume beyond one primary with no clean vertical headroom; a genuinely schemaless or per-tenant-variable shape; single-digit-ms KV lookups at a volume where per-query overhead dominates; or a data volume where backup, restore, and migration windows — not query latency — become the operational limit.
+
+**Don't leave relational when:**
+- The pain is a missing index, an N+1, or an exhausted pool. You will carry the same query into the new store and it will still be slow.
+- The schema is "unknown" only because it hasn't been modelled yet. JSON columns handle genuine variability without giving up transactions.
+- Writes are bursty rather than sustained — a queue in front absorbs bursts far more cheaply than a re-platform.
+- You need joins and transactions but were told NoSQL is faster. You will reimplement both in application code, incorrectly.
+
+**What you inherit by staying:** schema migrations as a deploy-coupled discipline, vacuum/MVCC or purge maintenance, a single-writer ceiling you must eventually plan around, and connection count as a scarce resource. All well-understood, all with mature tooling — which is precisely the argument for staying.
 
 **Deciding question:** Need ACID or complex joins? → relational. Simple lookups at massive scale? → look elsewhere.
 
@@ -1600,6 +1628,28 @@ For each tool: WHY it works the way it does, WHEN it's right, WHEN it breaks.
 - **Large values are a trap** — a >500KB payload can turn a ~1ms op into seconds and exhaust the connection pool. Cap object size; move oversized entries to a local cache.
 
 **Capacity reference:** 100K–500K ops/sec per node; ~0.5–1ms per op; memory is what you buy.
+
+#### When you need it, and when you don't
+
+The mistake is treating Redis as "the fast database." It is a **shared-state service with a memory-shaped cost model and no durability guarantee you should rely on.** That framing gets the adoption decision right every time.
+
+**Escalation ladder — reach for the lowest rung that works:**
+1. **No shared state at all.** Can the work be recomputed, or derived per-request? Statelessness is free.
+2. **In-process cache (Caffeine, a plain map).** If one pod's view is sufficient, this is faster than Redis (no network hop, no serialization) and adds no infrastructure. The cost is N copies with independent expiry — acceptable for short TTLs and read-mostly data.
+3. **The database you already have.** A short-TTL table or an advisory lock is often adequate and one fewer dependency, when sub-ms latency is not required.
+4. **Redis/Valkey** — when state must genuinely be *shared and coherent across pods* at low latency.
+
+**Real triggers:** cross-pod coherence matters (a rate-limit counter or lock is wrong if each pod keeps its own); the source is expensive with a measured repeat rate (§ Caching); you need a data structure the database is bad at (sorted sets for leaderboards, HyperLogLog for cardinality, streams for lightweight fan-out); or per-pod memory duplication of a large working set is itself the problem.
+
+**Don't add it when:**
+- **A single service with a local cache would do.** This is the most common over-adoption: a network hop and an operational dependency traded for no coherence benefit.
+- **The data must survive.** Typical configuration fsyncs about once per second, journals may not be backed up, and there may be no restore path. Anything you would miss belongs in a real database.
+- **The working set doesn't fit and eviction is unacceptable.** Memory is the thing you are buying; a cache that evicts your hot set is a slower path to the source.
+- **You need queries.** Redis retrieves by key. Secondary-index-shaped access means you picked the wrong store.
+
+**What you permanently inherit:** a memory ceiling and an eviction policy you must choose deliberately; a single-threaded execution model where one `KEYS` or one 500KB value stalls everything (large values are the classic pool-exhausting trap); a cold-start capacity risk — the source must survive full miss at peak; a serialization format that becomes a compatibility contract across deploys; and one more hop in the failure path, which means every read needs defined behaviour for "Redis is down."
+
+**On the Valkey question:** engine-vs-client is the distinction that matters. Moving the *engine* to a Redis-compatible one (Valkey) is an infrastructure and cost decision with clients unchanged; it is not an architectural migration and shouldn't be planned as one.
 
 **Deciding question:** Multiple instances need shared fast state? → Redis/Valkey. Single instance hot path? → in-memory. Can't lose it? → not Redis.
 
@@ -1649,6 +1699,27 @@ So a relational habit of batching 30–50 rows per read/update **translates dire
 
 **Cost note:** the "MongoDB by default" answer is worth re-checking periodically — a managed dedicated-tier floor per cluster is misaligned with a fleet of low-traffic/non-prod clusters, which is why a cheaper compatible engine may become the default for new workloads with the managed option kept as a justified exception.
 
+#### When you need it, and when you don't
+
+The honest framing: a document store is the right call when **the aggregate boundary and the document boundary coincide** — one document is one unit of read, write, and atomicity. When that alignment holds, you get single-round-trip reads with no join and clean horizontal growth. When it doesn't, you get a relational database with no joins, no constraints, and manual referential integrity.
+
+**Escalation ladder:**
+1. **Relational with a JSON column.** Handles genuine schema variability while keeping transactions, constraints, and ad-hoc SQL. Covers a surprising share of "we need a document store."
+2. **Relational plus a derived read model.** If the problem is read *shape* rather than data model, materialize the shape (Part 2.3) and keep the source relational.
+3. **Document store as a derived read store.** Documents built by ETL from a relational source of truth — chosen for durability and fast recovery, not speed.
+4. **Document store as source of truth** — only when the domain is genuinely document-shaped.
+5. **DynamoDB specifically** — when access patterns are fully known, fixed, and you want operational load near zero at predictable single-digit-ms latency. Its constraint is the strictest: **you must design the keys for the queries you will ever run**, and ad-hoc access later is expensive or impossible.
+
+**Real triggers:** nested structures read and written as a whole (a review with categories, scores, and votes); an ORM visibly fighting the shape by shredding one logical object across many tables and joining it back; per-tenant or per-entity field variability that would otherwise mean sparse columns or an EAV table; write volume needing horizontal distribution; or high-volume operational state (conversation history, spans, working memory) where the document is the natural unit.
+
+**Don't adopt when:**
+- **Multi-document transactions are central.** They exist and they are a design smell — if you need them routinely, the document boundary is wrong.
+- **Access patterns are unknown or changing fast.** This inverts the usual intuition: schema flexibility does *not* mean query flexibility. Relational is the flexible one for unanticipated queries.
+- **The data is relational and you wanted to skip migrations.** You have moved schema management from the database into every reader, forever, with no enforcement.
+- **You want it as a persistence layer for cache-shaped data.** The real cache tier sits *in front* of the document store; using it as "durable Redis" gets you the worst of both cost models.
+
+**What you permanently inherit:** schema enforcement as application-layer discipline (nothing stops a malformed document); index cost on every write, where more than about four indexes on a collection is a design smell; field names repeated in every document, so terse names and omitted nulls are real storage decisions; unbounded arrays as a latent document-size failure; and index creation as an operational hazard — many threads building the same index concurrently can take a cluster down, so create them manually ahead of the deploy. On the cost side, managed dedicated-tier floors are misaligned with fleets of low-traffic and non-prod clusters, which is why "document store by default" deserves periodic re-examination.
+
 **Deciding question:** Document-shaped with known access patterns? → document store. Joins, transactions, ad-hoc queries? → relational.
 
 ---
@@ -1688,6 +1759,28 @@ So a relational habit of batching 30–50 rows per read/update **translates dire
 
 **Correction — the ZooKeeper dependency is going away.** Kafka historically used ZooKeeper for broker membership, topic config, and partition metadata; **KRaft** folds consensus inside Kafka itself. Kafka 4.0 removes ZooKeeper support, which means an old client library that can't do KRaft becomes the thing pinning your Kafka version. Greenfield clusters already run KRaft with no ZooKeeper.
 
+#### When you need it, and when you don't
+
+Kafka is a **durable, replayable, partitioned log**, and every one of those four words is a cost as well as a feature. The decision hinges on whether you need the *log* semantics or merely need to move work off the request path — those have very different cheapest answers.
+
+**Escalation ladder:**
+1. **A synchronous call.** If the caller needs the result and the work is fast, async adds latency-to-consistency and failure surface for nothing.
+2. **An in-process background task or thread pool.** Fine when loss on restart is acceptable.
+3. **A database-backed job table.** Transactional with your data, trivially inspectable, easy to re-run. Genuinely adequate at moderate volume and badly underrated.
+4. **A managed simple queue (SQS).** Fire-and-forget work distribution with a dead-letter queue, near-zero operations, no partition or offset model to reason about.
+5. **A broker with routing (RabbitMQ)** when topic/header-based routing or per-message priority is the actual requirement.
+6. **Kafka** when you need retention, replay, ordered partitions, or several *independent* consumer groups reading the same stream at their own pace.
+
+**Real triggers — any one is sufficient:** multiple independent consumers of the same events (the strongest and most common); **replay** — the ability to rebuild a downstream store by re-reading history (this is what makes derived-store recovery cheap, per Part 2.3); per-key ordering with parallelism, which partitions give you and a plain queue does not; sustained high throughput with durable retention; or an event log that is itself the integration contract between teams.
+
+**Don't adopt when:**
+- **You need a work queue with per-message acknowledgement and retry.** Kafka's offset model fits streams, not task lifecycles. Per-message failure handling is possible but awkward; SQS is purpose-built for it.
+- **You need routing, priority, or selective consumption.** Consumers read partitions, not filtered subsets.
+- **There is one producer and one consumer and no replay requirement.** You have adopted a distributed log to move a function call.
+- **Ordering is required across all messages.** That means one partition, which means no consumer parallelism — you have bought a distributed system to run single-threaded.
+
+**What you permanently inherit:** partition count as a semi-permanent capacity decision (consumers ≤ partitions is a hard parallelism ceiling, and repartitioning breaks key locality); consumer lag as a first-class operational signal; a serialization and schema-evolution contract across teams, with a registry to run; delivery semantics that are at-least-once unless you do real work, so **consumers must be idempotent**; rebalance behaviour during deploys and scaling; retention as an explicit storage cost decision; and — until KRaft is universal — possibly a coordination ensemble alongside it.
+
 **Deciding question:** Need replay OR multiple independent consumers? → Kafka. Simple fire-and-forget queue? → SQS. Routing/filtering? → RabbitMQ.
 
 ---
@@ -1720,6 +1813,26 @@ with a **dedicated ingestor** doing full rebuilds plus incremental updates. See 
 
 **Platform pattern worth stealing:** make search a **self-service platform** rather than one bespoke service — per-dataset config (source query, searchable/filter/sort fields, rebuild schedule, change topics), timestamped indices with **alias-based atomic cutover**, automatic old-index cleanup, and a standard query interface. That turns one product's search service into infrastructure many teams can use, and separates platform concerns from product-specific business logic.
 
+#### When you need it, and when you don't
+
+A search engine's real product is **relevance ranking over analyzed text** — tokenization, stemming, fuzziness, scoring. If you only need filtering and exact matching, you want an index in your database, not a second data system. The test that separates the two: *does the user expect results ordered by how well they match, rather than by a column?*
+
+**Escalation ladder:**
+1. **Database indexes with `LIKE`/prefix matching.** Adequate for typeahead on short fields and for exact/prefix lookups.
+2. **Native full-text search in the relational database** (`tsvector`/`MATCH`). Real stemming and ranking, no new infrastructure, transactionally consistent with your data. Handles far more cases than it gets credit for — this is the rung most often skipped.
+3. **A managed search service** if the need is genuinely search but the operational appetite is low.
+4. **Elasticsearch/OpenSearch** when you need tunable relevance, aggregations over large result sets, multi-field boosting, geo/vector search, or per-field analyzers.
+
+**Real triggers:** free-text queries where ranking quality is the product; faceted navigation with counts across a large corpus (aggregations are a genuine strength); relevance that must be *tuned* — boosts, synonyms, custom analyzers; geo-distance or vector similarity; or read fan-out that would otherwise pressure the primary datastore for the browse path.
+
+**Don't adopt when:**
+- **You need exact filtering, sorting, and pagination on structured fields.** That is a database index. Adding a search cluster gives you an eventually-consistent copy of data you already had.
+- **You would make it the source of truth.** Never. It is a derived index — always rebuildable from source, never the place data lives.
+- **The corpus is small.** A few tens of thousands of rows filter fine in the database, and an index refresh cycle is pure added latency and staleness.
+- **Read-after-write is required.** Refresh is near-real-time, not real-time — writes are not immediately searchable, and designs that assume otherwise break intermittently.
+
+**What you permanently inherit:** an ingestion pipeline and its lag as a monitored SLO; **reindex-as-a-routine-operation**, because mapping changes generally require rebuilding — which makes alias-swap deploys and a repeatable rebuild path non-negotiable (Part 2.3); mapping and analyzer choices that are effectively schema decisions with reindex-shaped migration costs; JVM heap and shard-count tuning, where over-sharding is the classic self-inflicted wound; eventual consistency with the source of truth, meaning a drift-detection and reconciliation story; and cluster-level operational weight — this is a distributed stateful system, not a library.
+
 **Deciding question:** Do users type free-text and expect relevant fuzzy results? → search engine. Exact match on known fields? → database index.
 
 ---
@@ -1737,6 +1850,29 @@ with a **dedicated ingestor** doing full rebuilds plus incremental updates. See 
 **Key mechanisms and their limits:** DataLoader dedup (per-request only), `@provides` (a declaration, only free if the data is already held), flat reference resolution, no cross-subgraph mutation atomicity. Full treatment in Part 2.2.
 
 **Biggest operational risk:** the router becomes a **single point of failure on the critical path** for all composed traffic. Budget for that explicitly.
+
+#### When you need it, and when you don't
+
+Federation solves **client × service fan-out**: many clients each needing data from many services, where the alternative is either chatty clients or a hand-maintained aggregator per surface. It is a *composition* technology, and it earns its keep only when composition is genuinely the problem.
+
+**Escalation ladder:**
+1. **A single REST/GraphQL service.** One domain, one team, no composition problem.
+2. **Client-side composition.** Two or three parallel calls assembled in the client is perfectly reasonable, and the round trips are often not the bottleneck.
+3. **A backend-for-frontend.** One surface, one aggregator, no shared schema governance. The right answer far more often than federation, and the rung most often skipped.
+4. **A monolithic GraphQL gateway** that calls services directly — one schema, no subgraph ownership model or registry.
+5. **Federation** when multiple teams must own slices of one schema and evolve them independently.
+
+**Real triggers:** the schema needs *multiple owners* deploying independently — this is the actual trigger, and it is organizational as much as technical; clients need cross-domain graphs where entity relationships span team boundaries; over- and under-fetching are measurably hurting mobile or low-bandwidth clients; and BFF proliferation has become the maintenance problem, with each new surface requiring a new aggregator.
+
+**Don't adopt when:**
+- **One team owns everything.** You have taken on a registry, a router, and composition rules to solve a coordination problem you do not have.
+- **The surface is internal and latency-critical.** A typed RPC call is faster and simpler; composition overhead buys nothing where the caller knows exactly what it wants.
+- **Clients need a handful of fixed queries.** REST endpoints shaped for those queries are cheaper to build, cache, and debug.
+- **You want it for performance.** Federation's wins are shape and round-trip wins. The router adds a hop, and a naive resolver graph is *slower* than the REST calls it replaced — the performance comes from batching and dedup discipline (DataLoader), which you must actually implement.
+
+**What you permanently inherit:** a router as a critical-path single point of failure needing its own capacity and resilience story; schema composition as a build-time gate, where one team's change can fail the whole graph's check; entity ownership and `@key` design as a cross-team contract that is painful to change later; **N+1 as the default failure mode** unless batching is enforced everywhere; per-field resolver latency attribution as a new observability requirement (a slow field is invisible in endpoint metrics); query cost and depth limiting, since clients can now ask for arbitrarily expensive shapes; and a caching story that is harder than REST's, because the response is client-shaped rather than resource-shaped.
+
+**The subgraph-depth caveat:** keep the resolution graph shallow. A subgraph that re-resolves another team's entity turns one client query into a chain of hops, and that chain is where federation's latency reputation comes from (Part 2.2).
 
 **Deciding question:** Are we past the client × service fan-out threshold on *this* surface? Client-facing and fragmented → yes. Internal, single-domain, latency-critical → no.
 
@@ -1759,6 +1895,27 @@ with a **dedicated ingestor** doing full rebuilds plus incremental updates. See 
 **Adoption discipline:** it overlaps heavily with federation (both are typed contract layers), so adopting it broadly alongside federation fragments the contract story into two schema/codegen toolchains. The non-redundant zones are **wire-level performance on a proven-hot internal hop** and **true bidirectional streaming**. Adopt **per-edge and benchmark-driven**, never as a blanket mandate — its lock-in is at the service edge and therefore reversible per-edge.
 
 **Note:** gRPC often already exists in the infrastructure layer (metrics backends, OTLP collectors, cloud client libraries) even where it's absent from application service-to-service traffic. "We don't have gRPC" usually means "not between our own services."
+
+#### When you need it, and when you don't
+
+gRPC's real offering is a **typed contract with code generation, plus efficient binary framing over HTTP/2**. Those are two separable benefits, and it matters which one you actually want — the first is available more cheaply elsewhere, the second only matters when you have measured it.
+
+**Escalation ladder:**
+1. **REST with JSON.** Universally debuggable, curl-able, cacheable by every intermediary. The default, and correct far longer than people expect.
+2. **REST with a shared schema (OpenAPI) and generated clients.** This gets you most of the contract and codegen benefit with none of the transport change. **The rung that is almost always skipped**, and it dissolves the majority of "we should adopt gRPC" arguments.
+3. **gRPC** for internal service-to-service paths where payload size, serialization cost, or connection overhead has been *measured* as material.
+4. **gRPC streaming** when you genuinely need long-lived bidirectional or server-streaming semantics between services.
+
+**Real triggers:** measured serialization or payload overhead on a hot internal path; strict cross-language contracts where drift between polyglot services is a recurring source of bugs; genuine bidirectional streaming between backend services; very high call volume where per-call overhead is a real fraction of total cost; or strongly-typed streaming where JSON framing has become awkward.
+
+**Don't adopt when:**
+- **Browsers are the client.** Native gRPC is not browser-callable; you need gRPC-Web plus a proxy, and you have added infrastructure to reach parity with REST.
+- **It's a public or partner API.** You would be imposing tooling on people who want to curl an endpoint.
+- **You want typed contracts and nothing else.** OpenAPI plus codegen delivers that without changing transports.
+- **The path isn't hot.** Adopting a binary protocol for a call made twice a minute is complexity with no return.
+- **Caching intermediaries matter.** HTTP caching semantics that CDNs and proxies understand for free do not apply.
+
+**What you permanently inherit:** proto files as a versioned artifact with an evolution discipline (field numbers are forever, and reuse is a data-corruption bug); a build-time codegen step in every consuming service's pipeline; opaque payloads on the wire, so debugging needs reflection tooling rather than reading a log line; HTTP/2 load-balancing subtleties, since long-lived multiplexed connections stick to a backend and defeat naive L4 balancing — this catches teams out repeatedly; deadline propagation as an explicit discipline; and a second API style to document, secure, and observe alongside the REST surface you almost certainly still have.
 
 **Deciding question:** Internal, typed, measured-hot or genuinely bidirectional? → gRPC. External, browser, or cross-domain composition? → REST/GraphQL.
 
@@ -1786,6 +1943,30 @@ with a **dedicated ingestor** doing full rebuilds plus incremental updates. See 
 **Scaling a streaming tier:** the right long-term shape is **route isolation** — put streaming routes on their own pods/target group (or a dedicated streaming BFF), because streaming is I/O-bound, long-lived, and **connection-count-scaled** while page-serving is CPU-bound, millisecond, and **RPS-scaled**. Two different resource profiles in one autoscaling group is the problem.
 
 Sequence the fixes by cost: **per-pod concurrency limiter (503 early) → observability (an `active_streams` gauge) → autoscaling on a dual trigger (CPU for SSR + active-stream count for streaming) → route isolation.** Note that naive CPU or RPS signals are **blind to held-open streams** — ~99% idle streams keep CPU flat, so the first visible symptom of exhaustion is OOM or connection refusal. You must instrument the stream count explicitly.
+
+#### When you need it, and when you don't
+
+The decision is **direction and timing**, not payload size or perceived modernity. Ask two questions in order: does the *server* need to initiate, and does the *client* need to send on the same connection concurrently? Those two answers select the transport, and almost every other consideration is secondary.
+
+**Escalation ladder:**
+1. **Request/response.** If the client can ask when it needs to know, ask.
+2. **Polling with `ETag`/conditional requests.** When a known staleness interval is acceptable, this is stateless, cache-friendly, and trivially debuggable. Underrated — a 30-second poll is frequently the correct engineering answer.
+3. **Long-polling.** Legacy fallback; rarely the right new choice.
+4. **SSE** when the server must push as events occur, one direction, over plain HTTP.
+5. **WebSocket** when the client must also send continuously on the same connection, or the payload is binary, or the message rate is high enough that framing overhead matters.
+
+**Real triggers for SSE:** server-initiated updates with unpredictable timing (progress, notifications, incremental LLM output); a text/event-stream shape that works through ordinary HTTP infrastructure; and automatic client reconnection with `Last-Event-ID` resumption, which you would otherwise build yourself.
+
+**Real triggers for WebSocket:** genuinely simultaneous bidirectional traffic (collaborative editing, multiplayer, live trading input); binary frames; high message rates where per-message HTTP overhead is material; or sub-protocol needs that don't fit event framing.
+
+**Don't adopt streaming when:**
+- **A known refresh interval is acceptable.** Polling is cheaper end to end than any persistent-connection design.
+- **Updates are rare.** A held-open connection per idle user to deliver an occasional message is a poor trade — that is what push notifications are for.
+- **You chose WebSocket for one-way server push.** This is the most common mis-selection. You have taken on a stateful protocol, sticky sessions, and hand-rolled reconnection to do what SSE does over plain HTTP.
+
+**What you permanently inherit — the honest cost:** connection *count* as a capacity dimension rather than request rate, so Little's Law does not apply and you plan for concurrent held connections instead; deploy behaviour becomes a design question, since every restart mass-disconnects clients and the reconnect storm is a thundering herd (stagger with jittered backoff); load balancer and proxy timeouts that must be raised deliberately, plus heartbeats to survive intermediaries that kill idle connections; per-connection memory and file descriptors as the real ceiling — **not a protocol property**, which is the correction worth remembering; and, for WebSocket specifically, statefulness that pushes you toward sticky sessions or an external session store, plus reconnection and message-replay logic you must write yourself.
+
+**The capacity correction, restated because it matters:** WebSocket and SSE hold one long-lived TCP connection each with near-identical per-connection cost. Any large gap between quoted capacities is an application-level throttle or a deployment artifact, not a protocol ceiling. The one genuine SSE constraint is the HTTP/1.1 six-connections-per-domain *browser* cap, removed by HTTP/2.
 
 **Deciding question:** Known interval → poll. Server-driven one-way → SSE. Simultaneous two-way, binary, or high-rate → WebSocket.
 
@@ -1843,6 +2024,28 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 
 **Correctly unused for most shops:** Transfer Acceleration (co-located producers), Requester Pays, S3 Select (superseded by table formats + warehouse), Object Lambda, MRAP, Object Lock (unless compliance demands WORM).
 
+#### When you need it, and when you don't
+
+Object storage is the **cheapest durable place to put bytes you retrieve by name**, and it is close to a default for that job. The decision content is not "should we use it" but **where the boundary sits between a blob and a record** — and what you give up by crossing it.
+
+**Escalation ladder — it runs the other direction here, because object storage is the cheap rung:**
+1. **Don't store it.** Can it be recomputed or streamed through?
+2. **Object storage** for anything blob-shaped: uploads, artifacts, exports, backups, logs, captures, static assets, raw landing data.
+3. **Object storage plus a metadata table.** The pattern that solves most real needs: bytes in the object store, searchable attributes in a database, key as the join. Reach here as soon as you need to *find* objects by anything other than exact key.
+4. **A database column** only for small blobs where transactional atomicity with the row genuinely matters.
+5. **A table format over object storage** (Iceberg/Delta/Hudi) when the objects are analytical data needing schema, evolution, and time travel — this is the modern answer to "query the data in the bucket."
+
+**Real triggers:** the payload is large or variable-sized; the access pattern is get-by-key; you need durability without operating storage; you want lifecycle-managed retention as a cost mechanism; you need a landing zone that decouples ingestion from transformation (Part 2.3); or you want immutable content-addressed artifacts — which, usefully, are Class A cacheable for free (§ Caching).
+
+**Don't use it when:**
+- **You need to query the contents.** Listing and filtering by prefix is not querying. If you are scanning objects to answer a question, you needed a database or a table format.
+- **You need low-latency small reads.** Per-request latency is tens of milliseconds — fine for a file, wrong for a hot path lookup.
+- **You need transactional updates.** Objects are replaced wholesale; there is no partial in-place update and no cross-object transaction.
+- **You need strong ordering or append semantics.** Use a log.
+- **It's the source of truth for structured business data.** A JSON file per entity in a bucket is a database with no schema, no index, no transactions, and no concurrency control.
+
+**What you permanently inherit:** **key layout as a permanent design decision** — the prefix scheme determines listing performance, lifecycle-rule targeting, and access-policy granularity, and it is very hard to change once clients depend on it; eventual-consistency reasoning for listings even where object reads are strongly consistent; lifecycle and storage-class policy as an ongoing cost discipline (intelligent tiering is usually a near-free win); versioning as both a rollback superpower and a silent cost accumulator if unpruned; access control at the bucket, prefix, and object layer, where public-by-accident is the classic incident; per-request cost that makes many-small-objects patterns surprisingly expensive; and egress and cross-region charges that make replication a *cost* decision as much as a DR one.
+
 **Deciding question:** Is it a blob? → object storage. Structured data I need to query? → database.
 
 ---
@@ -1884,6 +2087,30 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 - Storage misuse — these are not databases.
 - **Forgotten criticality** — a quiet coordination store is a hard dependency of loud, revenue-critical services. Mark it P1 and alert on it.
 
+#### When you need it, and when you don't
+
+The framing that gets this right: a coordination store is **consensus as a service**, and consensus is expensive enough that you should be certain you need it. Most requirements that sound like coordination are really "make this operation safe to run twice," which has far cheaper answers.
+
+**Escalation ladder — the first three rungs eliminate most cases:**
+1. **Make the operation idempotent.** If running twice is harmless, you do not need mutual exclusion at all. **This is the single most effective move**, and it removes the requirement rather than satisfying it.
+2. **A database row lock, unique constraint, or advisory lock.** You already run a consistent store; a unique key on a natural identifier is a distributed lock with no new infrastructure. Adequate for the large majority of singleton needs.
+3. **Your platform's built-in primitive.** A Kubernetes lease, a cloud scheduler with a singleton guarantee, or a managed cron already backed by consensus — use the coordination that is already running rather than adding your own.
+4. **The system's embedded consensus.** Modern platforms increasingly ship their own (KRaft and equivalents), removing the external dependency entirely.
+5. **An external coordination store** (ZooKeeper/etcd/Consul) when you need watches, ephemeral session-tied state, or leader election across a fleet with genuine fencing requirements.
+
+**Real triggers:** leader election where exactly one instance must act and failover must be automatic; membership and liveness detection where ephemeral session-tied keys do the work for you; configuration with **change notification** (watches, so consumers do not poll); service discovery with health integration; or locks requiring fencing tokens because a stale lock holder must be prevented from acting.
+
+**Don't adopt when:**
+- **A unique constraint would do.** Enormously cheaper, and it is the correct answer more often than the coordination store is.
+- **The work is idempotent.** You are buying exactly-once semantics for something that does not need them.
+- **Volume or size is more than a few MB, or writes are frequent.** Every write is a round trip to a quorum. These are metadata stores; using one as a database is the classic misuse.
+- **The call is in-process or single-instance.** No distribution, no coordination problem.
+- **You would be adding a second distributed system to avoid one migration.** Weigh the permanent operational weight against the one-time cost.
+
+**What you permanently inherit:** a quorum-sized cluster (3 tolerates one failure, 5 tolerates two; even sizes cost more for no gain) to deploy, patch, monitor, and back up; **session and lease semantics as application-level responsibility** — a client must re-initialize its session on coordinator errors, and forgetting this is the classic bug where a blip leaves an instance permanently unable to recover; a TTL window during which transient dual-leader behaviour is possible, so singleton work must be idempotent or fenced regardless; write cost that permanently caps how much you can put there; **shared-fate coupling**, because a quiet coordination store becomes a hard dependency of loud revenue-critical services; and the operational trap that follows — it must be alerted on as a P1 despite being invisible day to day.
+
+**Correcting the fragility framing:** an ensemble is not a single point of failure; it is quorum-fault-tolerant with the same model as Raft-based alternatives. The real arguments against are operational weight and shared-fate coupling — which is exactly why the industry trend is to *absorb* consensus into systems rather than depend on an external coordinator.
+
 **Deciding question:** Need distributed coordination (leader election, locks, config, discovery)? → a coordination store, sized 3–5 nodes. Storing application data? → a database.
 
 **Industry trend:** toward **self-contained consensus** — absorb the coordinator (KRaft and friends) rather than depend on an external one. Fewer moving parts, fewer hidden coupling surfaces.
@@ -1903,6 +2130,28 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 **Invalidation options:** TTL (accept staleness), purge API (explicit), **versioned URLs** (`/static/app.v42.js` — never invalidate, just deploy a new name). Versioned URLs are the lowest-risk choice.
 
 **Why this matters beyond assets:** the CDN/client edge is the **only place free HTTP caching lives**. Internal service-to-service hops have no edge, and a `POST`-based API edge forfeits it. So if a hot, static, high-repeat resource needs caching, the two real levers are **CDN at the client edge** and an **explicit cache tier at the owning service** — nothing in between recovers it for free.
+
+#### When you need it, and when you don't
+
+A CDN is two products sold as one: **geographic latency reduction** and **origin offload**. Separating them clarifies the decision, because a single-region audience may need the second without the first — and increasingly a third reason dominates both, which is that the CDN is where TLS termination, DDoS absorption, and edge routing live.
+
+**Escalation ladder:**
+1. **Correct cache headers on your origin.** Costs nothing, makes browsers stop asking, and is a prerequisite for every rung below — a CDN in front of uncacheable responses does nothing.
+2. **Content-hashed asset filenames.** Turns static assets into Class A immutable cacheables (§ Caching) with no invalidation problem, forever.
+3. **Compression and payload reduction.** Often a larger win than edge placement for a single-region audience.
+4. **CDN for static assets.** Near-default for anything public and blob-shaped; effectively free at this point.
+5. **CDN for cacheable dynamic responses**, with deliberate keying and short TTLs.
+6. **Edge compute** only when a decision genuinely must be made close to the user (routing, auth checks, A/B assignment, personalization at the edge).
+
+**Real triggers:** geographically distributed users where RTT dominates (a physics problem no origin scaling solves); high-volume static or semi-static content where origin offload is the point; traffic spikes needing absorption in front of the origin; TLS termination and connection reuse close to the user, which improves even single-region latency; and DDoS absorption plus WAF, which for many teams is the actual reason to adopt.
+
+**Don't rely on it when:**
+- **Every response is personalized.** Per-user content has a hit rate near zero — you have added a hop, not a cache. Split shared fragments from personalized ones first (the key-reshaping idea from § Caching).
+- **Users are in one region and the content is dynamic.** The latency win is small; you may still want it for TLS and protection, but not for caching.
+- **Content must be strictly fresh.** Purge propagation is not instantaneous, and designs that assume it are the source of "we purged but users still see the old thing."
+- **Responses vary on dimensions you have not put in the cache key.** This is not a performance bug, it is a **correctness and security** bug — serving one user's response to another. Auth-varying responses at the edge deserve real paranoia.
+
+**What you permanently inherit:** cache-key and `Vary` correctness as a security-sensitive design surface; **purge as an operational procedure** with propagation delay, which pushes you toward versioned URLs so you never need to purge; another layer in the request path to debug, where cache-status headers become essential and "is it the edge or the origin?" becomes a routine question; origin-shield and cold-edge behaviour, since a low hit ratio means the origin still sees the traffic it thought it had offloaded; configuration that lives outside your application repository unless deliberately managed as code; and a capacity dependency of the uncomfortable kind — the origin must be able to serve a full cache miss at peak, exactly as with any other cache.
 
 **Deciding question:** Static/semi-static AND multi-region? → CDN. Dynamic, personalized, single-region? → origin.
 
@@ -1925,6 +2174,8 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 
 **Key concepts:** tumbling/sliding/session windows; **watermarks** (event-time progress, when a window is complete); late-event handling (side output or update); **checkpointing** for exactly-once recovery; state backends.
 
+#### When you need it, and when you don't
+
 **When NOT to jump, and what to use instead:**
 
 | Situation | Right tool |
@@ -1938,6 +2189,8 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 **The escalation ladder (climb only as far as the workload forces):** plain consumer → warehouse ELT → Kafka Streams/ksqlDB → Flink.
 
 **Two independent triggers, and why keeping them separate matters:** if **volume** grows but the pattern stays per-event and stateless, you still don't need Flink — scale consumers horizontally. If a **windowing/join/pattern requirement** appears even at *small* volume, low volume no longer saves you. Capability is the real trigger; volume is only the cost trigger.
+
+**What you permanently inherit:** a stateful cluster with checkpointing, which is a genuinely different operational class from stateless consumers — checkpoint tuning, state-backend sizing, and recovery time all become your problem; **state as a schema with a migration story**, since savepoint compatibility constrains how freely you can change job logic; event-time and watermark semantics that must be reasoned about explicitly, where late-data policy is a business decision disguised as a config value; backpressure behaviour and its interaction with checkpoint duration, the classic cause of a job that degrades rather than fails; a job-deploy lifecycle separate from your service deploys, with savepoint-restore as a routine procedure; and exactly-once guarantees that hold only when sources and sinks cooperate — a non-transactional sink silently reduces you to at-least-once.
 
 **Deciding question:** Do I need fault-tolerant state **across** events, computed continuously at low latency with exactly-once correctness? → stream processor. Simple per-event transform? → consumer. Batch analytics? → warehouse.
 

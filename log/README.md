@@ -18,6 +18,7 @@ Never revise an entry. If understanding changes later, write a new entry and add
 | 2026-08-19 | [Caching: layers, strategies, when it's needed](2026-08-19-caching-strategies.md) | Are the DB's own caches usually disabled? |
 | 2026-08-19 | [Latency investigation decision tree](2026-08-19-latency-investigation.md) | How do you find the bottleneck when many layers are involved? |
 | 2026-08-19 | [Throughput and capacity planning](2026-08-19-capacity-planning.md) | Will it hold at 10x? |
+| 2026-08-19 | [Part 3 decision layer](2026-08-19-part3-decision-layer.md) | Tool entries are descriptive — bring them to the Part 1 standard |
 
 ## Entry template
 
