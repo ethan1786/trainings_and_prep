@@ -65,6 +65,14 @@ Every pattern in Part 1 carries a **"When you need it, and when you don't"** sub
     - [Step 4 — Fix in cost order](#step-4--fix-in-cost-order-cheapest-and-most-permanent-first)
     - [The distributed-transaction variant](#the-distributed-transaction-variant)
     - [The anti-patterns that waste the most time](#the-anti-patterns-that-waste-the-most-time)
+  - [2.5 Throughput and Capacity Planning — "will it hold at 10x?"](#25-throughput-and-capacity-planning--will-it-hold-at-10x)
+    - [The two laws worth actually knowing](#the-two-laws-worth-actually-knowing)
+    - [Step 1 — Find the binding constraint](#step-1--find-the-binding-constraint-not-the-busy-resource)
+    - [Step 2 — Estimate before you test](#step-2--estimate-before-you-test-the-back-of-envelope-pass)
+    - [Step 3 — Measure the ceiling deliberately](#step-3--measure-the-ceiling-deliberately)
+    - [Step 4 — Choose the scaling lever](#step-4--choose-the-scaling-lever-the-constraint-actually-admits)
+    - [The failure modes unique to high load](#the-failure-modes-unique-to-high-load)
+    - [Answering "can it handle 10x?"](#answering-can-it-handle-10x--the-short-procedure)
 - [Part 3: Deep Tool Knowledge](#part-3-deep-tool-knowledge)
   - [PostgreSQL / MySQL (Relational)](#postgresql-mysql-relational)
   - [Redis / Valkey](#redis-valkey)
@@ -1392,6 +1400,152 @@ For internal multi-service transactions (a write flowing through several service
 
 **Attribute before you optimize; classify the shape before you choose a fix; and spend the cheapest, most permanent fix that addresses the dominant term — the cache is the sixth thing to try, not the first.**
 
+**When this tree is the wrong tree:** if the slowness only appears above a certain load level, you are not debugging a request — you are hitting a capacity ceiling, and the procedure is Part 2.5. The routing question is *"is it slow at 1 request/sec?"* If yes, stay here. If no, go there.
+
+---
+
+### 2.5 Throughput and Capacity Planning — "will it hold at 10x?"
+
+Part 2.4 answers *why is this slow*. This answers a different question with different math: **how much load can this take, what breaks first, and what do I need before the traffic arrives.** The two get conflated because both involve latency, but they invert the causality:
+
+| | Latency investigation (2.4) | Capacity planning (2.5) |
+|---|---|---|
+| Question | Why is one request slow? | How many requests can we serve? |
+| Load is | Held constant while you look | The independent variable |
+| You want | The dominant *term* in one request | The **binding constraint** of the system |
+| Latency is | The symptom | The *signal* that capacity is near |
+| Ends in | A fix | A number, a limit, and a plan for exceeding it |
+
+**The load-independence test tells you which one you're doing:** if the slowness is present at 1 request/sec, it is a latency problem. If it only appears above some rate, it is a capacity problem. That single question routes correctly almost every time, and it is worth asking before an investigation rather than after.
+
+#### The two laws worth actually knowing
+
+Almost all capacity reasoning reduces to two relationships. Both are simple enough to do in your head, which is the point.
+
+**1. Little's Law — `L = λ × W`**
+Concurrency = arrival rate × time in system. Rearranged for capacity work:
+
+```text
+required concurrency = throughput × latency
+```
+
+- 1,000 req/s × 200 ms = **200 concurrent requests in flight.** So you need ≥200 workers/threads/connections, or requests queue.
+- Cut latency to 50 ms and the same 1,000 req/s needs only 50 — **latency reduction is a throughput multiplier**, which is why 2.4's fixes are also capacity fixes.
+- Invert it to size pools: 50 DB connections at 10 ms per query serves 5,000 queries/sec *at best*, and nothing you do to the app raises that ceiling.
+
+This one equation answers most "how many pods / threads / connections" questions, and it is the fastest way to catch a plan that cannot possibly work.
+
+**2. Utilization vs. latency — the knee is real and it is not linear**
+For a queueing system, waiting time scales roughly as `1 / (1 − utilization)`:
+
+| Utilization | Relative wait | What it feels like |
+|---|---|---|
+| 50% | 2× | Fine |
+| 70% | 3.3× | Fine |
+| 80% | 5× | Getting sensitive |
+| 90% | 10× | Latency visibly bad |
+| 95% | 20× | Alerting |
+| 99% | 100× | Effectively down |
+
+The consequences are the whole reason capacity planning exists:
+
+- **A system at 50% CPU is not "half capacity."** It is close to as loaded as you want it, because the last 20% of utilization buys throughput at brutal latency cost.
+- **Small load increases past the knee cause enormous latency increases.** A 10% traffic bump takes you from 85% to 94% and latency triples. This is why capacity incidents look sudden — the system was fine until it very abruptly wasn't.
+- **Target 50–70% steady-state utilization** on the binding resource, not 90%. The headroom is not waste; it is the latency budget and the failover budget.
+- **Variance makes it worse.** Bursty arrivals queue even when *average* utilization is low. Averages hide the peaks that actually cause the queueing.
+
+#### Step 1 — Find the binding constraint, not the busy resource
+
+Capacity is set by exactly one thing at a time, and it is usually not the one being monitored most. Candidates, in rough order of how often they are the real answer:
+
+| Constraint | How you recognize it | Note |
+|---|---|---|
+| **Connection pool** | Latency rises, DB CPU low, app threads waiting | The most common surprise. Little's Law sizes it. |
+| **Thread / worker pool** | Queueing before work starts; spans ≪ end-to-end | Same signature as 2.4 bucket 3 |
+| **Single-writer / leader node** | Writes plateau while reads scale fine | Read replicas do not help writes |
+| **Partition / shard count** | Per-partition lag; adding consumers changes nothing | Consumers ≤ partitions is a hard ceiling |
+| **Downstream rate limit / quota** | 429s, or throughput pinned to a suspiciously round number | Their capacity is your capacity |
+| **Disk IOPS / throughput** | I/O wait, commit latency, replication lag | Often invisible in CPU dashboards |
+| **Memory / GC** | p99 sawtooth; throughput drops as heap fills | Allocation rate matters more than heap size |
+| **Network / bandwidth** | Large payloads, cross-AZ or cross-region chatter | Also a cost constraint, not just a speed one |
+| **Lock / hot key contention** | Throughput plateaus with CPU idle; one key dominates | Serialization point — no amount of scaling helps |
+| **CPU** | Actually saturated cores | Frequently *not* the binding constraint |
+
+**Two rules that save the most time:**
+1. **Adding capacity to a non-binding resource changes nothing** — more pods behind an exhausted connection pool make the pool worse, not better.
+2. **The constraint moves when you relieve it.** Fix the pool and the DB becomes the constraint. Capacity planning is iterative by nature, so always predict *what becomes binding next* before celebrating.
+
+#### Step 2 — Estimate before you test (the back-of-envelope pass)
+
+Do the arithmetic first; a load test that contradicts your estimate is telling you your mental model is wrong, which is more valuable than the raw number.
+
+```text
+1. Peak rate, not average.     DAU × actions/day / 86,400 × peak-to-average ratio
+                               (peak:avg is commonly 3–10× for consumer traffic;
+                                daily-cycle and event-driven traffic are far spikier)
+2. Fan-out per request.        1 page → N service calls → M queries. Multiply.
+3. Concurrency (Little's Law). peak rate × latency = in-flight work
+4. Per-unit capacity.          What does one pod/connection/partition actually do?
+5. Units needed + headroom.    required / per-unit ÷ 0.6 target utilization
+6. Failure headroom.           Can the remainder carry peak with one AZ/node gone?
+```
+
+**The two mistakes this pass exists to catch:** planning for *average* load (peak is what breaks you, and the peak-to-average ratio is often 5×), and forgetting fan-out amplification (a 10× traffic increase on a page issuing 20 queries is a 200× increase at the database).
+
+#### Step 3 — Measure the ceiling deliberately
+
+Four distinct tests that answer four distinct questions. Running one and calling it "load testing" is how ceilings get missed:
+
+| Test | Method | Question answered |
+|---|---|---|
+| **Load test** | Hold expected peak steady | Does it meet SLO at planned load? |
+| **Stress test** | Ramp until it degrades | **Where is the knee, and what breaks first?** |
+| **Soak test** | Sustain for hours | Leaks, unbounded growth, log/disk fill, pool exhaustion |
+| **Spike test** | Instant step change | Autoscaling lag, cold caches, thundering herd, connection storms |
+
+The stress test is the one that produces the capacity number, and its most valuable output is not the throughput figure — it is **the identity of the first thing to break**, because that is your binding constraint under real conditions rather than in theory.
+
+Two things that invalidate load tests routinely: **unrealistic data distribution** (uniform synthetic keys give a 100% cache hit rate and no hot-key contention, so you measure a system that does not exist), and **testing a warm system** (see the Class A caveat under Caching). Both make the ceiling look higher than it is.
+
+#### Step 4 — Choose the scaling lever the constraint actually admits
+
+| Constraint type | Lever | Ceiling on that lever |
+|---|---|---|
+| Stateless compute | Horizontal scale-out | Downstream shared resources — you just move the problem |
+| Read volume | Read replicas, cache, CDN | Replication lag; cold-cache capacity risk |
+| Write volume | Batch, shard, partition | Cross-shard transactions; rebalancing cost |
+| Fan-out per request | Batch/dedup, `@provides` | Diminishing after the obvious wins |
+| Latency-bound concurrency | Reduce latency, async | Little's Law is the guide |
+| Third-party quota | Negotiate, cache, queue, degrade | Not yours to raise |
+| Contention / hot key | Shard the key, coalesce, local aggregate | Some serialization is irreducible |
+| Everything at once | Shed load and protect the SLO | Not scaling — survival |
+
+**The most important entry is the last one.** Capacity has a floor you cannot always raise in time, so the plan must include what happens *when demand exceeds capacity anyway*: rate limit, shed the lowest-value traffic, degrade features, queue with back-pressure. A system with no shedding path converts an overload into an outage — and it does so at the worst moment, when load is highest.
+
+#### The failure modes unique to high load
+
+These do not appear in single-request investigation at all. They are properties of *systems under load*, which is why they surprise people who only ever profiled one request:
+
+- **Retry amplification.** Load rises → latency rises → timeouts fire → clients retry → load rises further. A positive feedback loop that turns a brownout into an outage. Fixes: retry budgets, exponential backoff *with jitter*, circuit breakers, and retrying at exactly one layer.
+- **Thundering herd / cold cache.** A restart, deploy, flush, or failover sends 100% of traffic to a source sized for 5%. This is the capacity face of the caching question — *can the source survive full miss at peak?*
+- **Autoscaling lag.** Scaling takes 30 s–3 min (detect → schedule → boot → warm → healthy). Spikes faster than that are absorbed by headroom or not at all. **Autoscaling handles trends; headroom handles spikes.** Also: scaling on CPU misses constraints that are not CPU-bound, which is most of them.
+- **Cascading failure via shared dependency.** Two services look independent until both saturate the same pool, database, or coordination store. Blast radius follows *shared resources*, not org charts.
+- **Coordinated omission in your own measurements.** If your load generator waits for responses before sending more, it stops sending during the slowdown and *under-reports* the latency at exactly the interesting moment. Open-model generators, or fixed-rate submission, avoid this.
+- **Queue as a hidden liability.** A buffer converts a throughput deficit into growing latency instead of errors — which is often correct, but an unbounded queue eventually delivers stale work to nobody, having hidden the deficit until recovery is impossible. Bound your queues and alert on depth *trend*, not depth.
+
+#### Answering "can it handle 10x?" — the short procedure
+
+1. **Which 10x?** Traffic, data volume, users, or tenants? They stress different constraints — 10× data breaks indexes and scans; 10× traffic breaks pools and CPU; 10× tenants breaks per-tenant overhead and noisy-neighbour isolation.
+2. **Estimate** with Little's Law and fan-out multiplication. Find what saturates first *on paper*.
+3. **Stress test to the knee** and check whether reality agrees with the estimate. Disagreement means the model is wrong — investigate that before trusting either number.
+4. **Name the binding constraint and the one after it.** A capacity answer without a *next* constraint is incomplete.
+5. **State the headroom target and the failure headroom** — steady-state utilization, plus surviving peak with a node or AZ gone.
+6. **Define the shedding path** for the case where the 10× arrives before the capacity does.
+
+#### The one-line version
+
+**Capacity is set by one binding constraint at a time; find it with arithmetic before you find it with an outage — and remember that the last 20% of utilization is not capacity you own, it is the latency budget you are spending.**
+
 ---
 
 ## Part 3: Deep Tool Knowledge
@@ -1819,6 +1973,15 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 | Latency ∝ number of items on page | N+1 / fan-out | Batch + dedup (DataLoader), not a cache |
 | Spans sum ≪ end-to-end latency | Queueing before the work starts | Thread/connection pool, event-loop lag, admission control |
 | Rows examined ≫ rows returned | Missing/non-selective index | Index or rewrite the query — never cache over it |
+| **"Will it hold at 10x?"** | Find the binding constraint | Little's Law estimate → stress test to the knee (Part 2.5) |
+| Slow only above a load threshold | Capacity, not latency | Utilization knee — target 50–70%, not 90% |
+| Latency high, DB CPU low | Connection/thread pool exhaustion | Size with `throughput × latency`; add pool before pods |
+| Writes plateau, reads scale fine | Single-writer constraint | Shard/partition; replicas don't help writes |
+| Throughput pinned to a round number | Downstream quota or hand-set throttle | Their limit is your capacity — cache, queue, or negotiate |
+| Throughput plateaus with CPU idle | Lock / hot-key contention | Shard the key, coalesce; some serialization is irreducible |
+| Brownout escalates to outage | Retry amplification | Retry budget at one layer, backoff **with jitter**, breaker |
+| Spike breaks it, gradual growth fine | Autoscaling lag | Headroom absorbs spikes; autoscaling only handles trends |
+| Demand may exceed capacity regardless | Load shedding | Rate limit + degrade + back-pressure — plan it before you need it |
 | **Content slow to produce, revealed progressively** | Stream it | SSE with typed events |
 | **N clients each composing M fragmented services** | Composition layer | GraphQL Federation (shallow graph) |
 | **Same entity referenced many times in one request** | Intra-request dedup | DataLoader batch loader |
@@ -1912,6 +2075,9 @@ Invalidate-then-refetch keeps consumers stateless, which is why a stream process
 
 **11. Simulate the decision in logs before building the mechanism.**
 Most design arguments can be converted into a number for the cost of one log line, with nothing deployed and no risk. Log the cache key you *would* use and count distinct values → projected hit rate. Log the shard key you *would* route on → skew. Log the batch you *would* assemble → real fan-in. Log which fields clients actually read → the projection you should have. The pattern generalizes: when a design choice depends on the shape of production traffic, **instrument the hypothesis, don't debate it.** Corollary: prefer measurements available *before* commitment over metrics you'd only see *after* deploying the thing you're trying to justify.
+
+**12. Headroom is not waste — it is the budget you spend on latency, spikes, and failover.**
+The last 20% of utilization is bought at a brutal latency price, because waiting scales as `1/(1−utilization)`. A system at 90% is not "efficiently provisioned," it is one traffic bump from a latency cliff and has nothing left to absorb a node loss. This is why capacity incidents look sudden: the knee is non-linear, so the system is fine until it very abruptly isn't. Corollary: capacity is set by **one binding constraint at a time**, so adding capacity anywhere else changes nothing — and relieving the constraint just promotes the next one, which you should name in advance.
 
 ---
 
