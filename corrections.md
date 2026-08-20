@@ -134,3 +134,28 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 ### No Flink means a stream-processing gap
 **Accurate:** Two independent reasons it isn't needed, which would fail independently. (1) **Capability:** the workload is per-event and stateless — CDC-invalidate-then-refetch deliberately avoids needing cross-event state. (2) **Cost:** low volume doesn't justify a stateful checkpointing cluster.
 **The real trigger for Flink:** fault-tolerant **state across events** (windows, stream joins, CEP, large keyed aggregates), computed continuously, at low latency, with exactly-once correctness. Volume alone never forces it; a windowing requirement does — even at low volume.
+
+---
+
+## 2026-08-19 — Caching: measuring the trigger (follow-up)
+
+### If you don't know the data shape, you have to guess whether a cache will help
+**Believed:** Repeat rate is knowable by intuition for some data (config data → repeated; per-user data → not) and otherwise unknowable until you build the cache and watch the hit rate.
+**Accurate:** Repeat rate is **measurable before building anything.** Log the cache key you *would* use, count total requests and distinct keys over one candidate-TTL window, and compute `projected hit rate ≈ 1 − (distinct keys / total requests)`. That is the hit rate you would have gotten, obtained for the cost of one log line and zero deployment risk.
+**Why it was tempting:** Hit rate feels like a runtime property of a cache, so it seems to require a cache to observe. But it is really a property of the *access pattern*, which is fully observable at the call site.
+
+### Latency tracing tells you whether to add a cache
+**Accurate:** Tracing and key-logging answer **different questions.** Tracing answers *where does the time go* → which component to fix. Key logging answers *is the work repeated* → whether a cache is the right fix for that component. You need both, attribution first: if the source is 8% of p99, a perfect cache buys 8%.
+**Why it was tempting:** Both are "performance investigation," so they collapse into one step mentally — and finding a slow component feels like finding the answer, when it has only located the problem.
+
+### The investigation is: traffic grows → find the bottleneck → add a cache
+**Accurate:** There is a mandatory gate between those last two steps — **fix source inefficiency first.** Full ladder: symptom → attribute p99 → identify the shape (slow call / N+1 / queueing / payload size) → **fix the source** → *then* measure repeat rate → decide. Caching an unindexed query does not solve it; it hides it, and you inherit invalidation forever to conceal a one-line fix.
+**Why it was tempting:** A cache does make the symptom disappear, and disappearing symptoms feel like fixes. The cost only surfaces at cold-start or cache outage, when the source meets its real load for the first time.
+
+### Low repeat rate means a cache won't help
+**Accurate:** Low repeat rate is usually a **key-cardinality** problem, not a verdict. Every dimension in the key multiplies cardinality and divides repeat rate. `listingId + userId + zip` has almost no repeats; split the shared listing block (keyed on `listingId` alone) from the personalized fragment and most of the page becomes cacheable.
+**Why it was tempting:** Repeat rate is measured against the key you happened to pick, so a bad key looks like bad data. The fix is to change the cache granularity, not to abandon caching.
+
+### Class A caches are invisible, therefore harmless
+**Accurate:** Invisible defaults still **confound measurement.** Warm buffer pools produce "why is it faster the second time," secretly bimodal p99s (warm 2 ms / cold 200 ms), query "fixes" that only worked because test rows were hot, and unexplained slowness for minutes after a restart or failover. Discipline: decide whether you are measuring warm or cold, and label it. Running something three times and taking the best measures the cache, not the query.
+**Why it was tempting:** "Nothing to configure and nothing to invalidate" is true, and it reads as "nothing to think about." The correctness risk really is zero; the *interpretation* risk is not.

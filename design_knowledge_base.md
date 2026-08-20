@@ -104,6 +104,14 @@ These cache something *immutable or content-addressed*, so there is no invalidat
 
 Adopt these immediately. They add no failure mode and no debugging surface, because there is nothing to invalidate.
 
+**But invisible is not the same as harmless — Class A caches quietly corrupt your measurements.** You never touch them, so it is easy to forget they exist, and then they show up as phantom behaviour:
+- "Why is this query faster the second time?" — the pages are now in the buffer pool. The query did not change; its working set got hot.
+- A p99 that looks acceptable is actually **bimodal** — warm reads at 2 ms, cold reads at 200 ms. The aggregate hides it.
+- You "fix" a slow query, redeploy, and it is fast — because your test rows are hot, not because the fix worked.
+- Latency is terrible for minutes after a DB restart or failover and no code changed. That is a cold buffer pool refilling, not a bug.
+
+The habit this generates: **decide deliberately whether you are measuring warm or cold, and label which.** Both are legitimate — warm reflects steady state, cold reflects post-deploy, post-failover, and first-touch of rare data — but an unlabelled latency number is not interpretable. If you benchmark by running something three times and taking the best, you have measured the cache, not the query.
+
 **Class B — coherent caches. Must be justified.**
 These cache *mutable* data, so they introduce a second copy that can disagree with the source: Redis/Valkey entity caches, local entity caches, HTTP caching of dynamic responses. Every one adds staleness, an invalidation obligation, a key-correctness risk, a stampede risk, a cold-start risk, and one more dependency in the failure path. This is the class the "don't add it early" instinct is right about.
 
@@ -127,6 +135,45 @@ High repeat rate + expensive source is the green light. Low repeat rate or a che
 A cache is the right answer when the work is genuinely repeated and genuinely expensive *after* the source itself is efficient.
 
 **The subtle cost most people miss:** a cache doesn't just risk staleness — it *hides* the underlying inefficiency. The slow query is still slow; you stopped noticing. Traffic keeps growing behind a 95% hit rate, and the day the cache is cold, flushed, or unavailable, the source sees 20x its normal load and falls over. That is why **"can the source survive 100% miss at peak?"** is the single most important pre-launch question, and why a cache outage is a *capacity* incident, not a latency incident.
+
+#### How to actually measure `repeat rate × source cost`
+
+The rule is only useful if you can evaluate it. Sometimes you know the data shape by inspection — configuration and reference data are obviously read repeatedly and change rarely; a per-user activity feed obviously is not. But often you genuinely do not know, and the answer is **you do not need to know, you need to measure cheaply.**
+
+**Repeat rate is computable from logs, with nothing deployed.** This is the step most people skip, and it is nearly free:
+
+1. Log the cache key you *would* use — the full key, including every dimension that changes the response (entity id, tenant, locale, permissions, filters).
+2. Over a window equal to your candidate TTL, count total requests and distinct keys.
+3. `projected hit rate ≈ 1 − (distinct keys / total requests)`
+
+If 10,000 requests resolve to 9,500 distinct keys, the projected hit rate is 5% and the answer is "do not build it" — discovered for the cost of one log line. If they resolve to 400 distinct keys, you have a 96% hit rate waiting for you. Either way you have a number instead of an intuition, and you never shipped a cache to find out.
+
+**Source cost is a tracing question, and it answers a different question than repeat rate.** These two measurements get conflated constantly:
+
+| Measurement | Question it answers | What it tells you |
+|---|---|---|
+| Distributed tracing / latency attribution | *Where does the time go?* | **Which** component to fix |
+| Key access logging | *Is the work repeated?* | **Whether a cache** is the right fix for that component |
+
+Attribution comes first. If the source call is only 8% of p99, caching it perfectly buys you 8% and you were looking at the wrong layer.
+
+**The realistic investigation ladder** — the path this actually takes in practice:
+
+1. **Symptom** — traffic grew, or "the API feels slow," or an SLO started breaching.
+2. **Attribute** — trace the request and break p99 down by component. Find the dominant term. Beware the Class A trap here: know whether you are looking at warm or cold numbers.
+3. **Confirm the shape** — is it one slow call, N+1 fan-out, queueing/saturation, or payload size? These have completely different fixes and only one of them is cache-shaped.
+4. **Fix the source first** *(the gate people skip)* — missing index, full scan, N+1, over-fetching, no batching. If the source is inefficient, a cache does not solve the problem; it **hides** it, and you inherit invalidation forever to conceal a one-line fix.
+5. **Then, and only then, measure repeat rate** on the now-efficient-but-still-hot call.
+6. **Decide** — high repeat + expensive source → cache. Low repeat → the cache is pure downside; go back to step 4 or scale the source.
+
+So your instinct is right, with one reordering: the investigation *starts* from the symptom and *goes through* attribution, but the "should this be a cache" question is answered by repeat rate at the end — not assumed at the beginning.
+
+**If repeat rate comes back too low, that is not necessarily a dead end — try re-shaping the key.** Low repeat rate is usually a **key cardinality** problem, and every dimension in the key multiplies cardinality while dividing repeat rate. A whole-page response keyed by `listingId + userId + zip` has almost no repeats. Split it:
+
+- shared listing block → keyed by `listingId` alone → high repeat, cacheable
+- personalized fragment → keyed by user → not cached
+
+Same page, and now the expensive shared part is cacheable. This is the fan-in insight from the composition thread (Part 2.2) applied to caching: **the win comes from many requests mapping to few unique keys**, so cache at the granularity where that is true, not at the granularity of the response.
 
 **Prove it before you build it (all four, or you're not ready):**
 - Log key access and measure the actual **repeat rate** — you can compute the hit rate you would get without deploying anything.

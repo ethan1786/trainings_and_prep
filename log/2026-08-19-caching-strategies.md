@@ -92,8 +92,33 @@ Before adding any cache, define: source of truth, allowed staleness, read-after-
 
 ---
 
+## Follow-up (same day): Class A invisibility, and how to actually measure the trigger
+
+Two notes from re-reading the section as study material.
+
+**Class A caches are invisible defaults — and that is exactly why they confound measurement.**
+You never configure them, so you forget they exist, and then you get phantom behaviour: "why is this query faster the second time" (the pages are now hot), a p99 that is secretly bimodal (warm 2 ms / cold 200 ms), a query "fix" that only looked like it worked because the test rows were hot, and inexplicably terrible latency for minutes after a DB restart or failover. The discipline: **decide whether you are measuring warm or cold, and label it.** Running something three times and taking the best measures the cache, not the query.
+
+**`repeat rate × source cost` is a great rule — but how do you evaluate it when you don't know the data shape?**
+Sometimes shape is obvious by inspection (configuration data → repeated; per-user feeds → not). When it isn't, the resolution is that **you don't need to know, you need to measure cheaply**:
+
+- Log the cache key you *would* use (full key, all response-affecting dimensions).
+- Over one candidate-TTL window, count total requests and distinct keys.
+- `projected hit rate ≈ 1 − (distinct keys / total requests)`
+
+10,000 requests → 9,500 distinct keys = 5% hit rate = don't build it. Cost: one log line, nothing deployed.
+
+**Two measurements that get conflated.** Tracing answers *where does the time go* (which component to fix). Key logging answers *is the work repeated* (whether a cache is the right fix). Attribution comes first — if the source is 8% of p99, a perfect cache buys 8%.
+
+**Corrected ordering of my own guess.** I had assumed the investigation is: traffic grows → dig through layers → measure latency → decide on cache. Right start, but the cache decision belongs at the *end*, and there's a mandatory gate before it: **fix source inefficiency first.** Ladder: symptom → attribute p99 → identify shape (slow call / N+1 / queueing / payload) → fix the source → *then* measure repeat rate → decide.
+
+**New lever: low repeat rate may be a key-cardinality problem, not a verdict.** Every key dimension multiplies cardinality and divides repeat rate. `listingId + userId + zip` has no repeats; splitting the shared listing block (`listingId` only) from the personalized fragment makes most of the page cacheable. Same fan-in insight as DataLoader batching — cache at the granularity where many requests map to few keys.
+
+---
+
 ## What changed in the reference
 
 - `Caching` — rewritten as the decision-oriented template: escalation ladder, coherent vs coherence-free, browser-cache policy table, mechanism-first read/write strategies with verdicts, expanded invalidation, validation checklist
 - `corrections.md` — five entries
 - Became the template for the other eleven Part 1 patterns
+- **Follow-up edit:** `Caching` — Class A measurement-confounding note (warm/cold, bimodal p99, post-failover); new `How to actually measure repeat rate × source cost` subsection with projected-hit-rate formula, tracing-vs-key-logging table, six-step investigation ladder, and cache-key reshaping
