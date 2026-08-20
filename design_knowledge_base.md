@@ -57,6 +57,14 @@ Every pattern in Part 1 carries a **"When you need it, and when you don't"** sub
     - [Ingestion sources and the two-path pattern](#ingestion-sources-and-the-two-path-pattern)
     - [Correction — "the ingestor is one process" is a real limitation, not a design ideal](#correction-the-ingestor-is-one-process-is-a-real-limitation-not-a-design-ideal)
     - [Materialization vs stream processing](#materialization-vs-stream-processing)
+  - [2.4 Latency Investigation — a decision tree for "it got slow"](#24-latency-investigation--a-decision-tree-for-it-got-slow)
+    - [Step 0 — Define the symptom precisely](#step-0--define-the-symptom-precisely-before-touching-anything)
+    - [Step 1 — Split the timeline into three buckets](#step-1--split-the-timeline-into-three-buckets-before-going-deeper)
+    - [Step 2 — The layer walk, outside in](#step-2--the-layer-walk-outside-in)
+    - [Step 3 — Classify the shape](#step-3--classify-the-shape-because-the-shape-determines-the-fix)
+    - [Step 4 — Fix in cost order](#step-4--fix-in-cost-order-cheapest-and-most-permanent-first)
+    - [The distributed-transaction variant](#the-distributed-transaction-variant)
+    - [The anti-patterns that waste the most time](#the-anti-patterns-that-waste-the-most-time)
 - [Part 3: Deep Tool Knowledge](#part-3-deep-tool-knowledge)
   - [PostgreSQL / MySQL (Relational)](#postgresql-mysql-relational)
   - [Redis / Valkey](#redis-valkey)
@@ -167,6 +175,8 @@ Attribution comes first. If the source call is only 8% of p99, caching it perfec
 6. **Decide** — high repeat + expensive source → cache. Low repeat → the cache is pure downside; go back to step 4 or scale the source.
 
 So your instinct is right, with one reordering: the investigation *starts* from the symptom and *goes through* attribution, but the "should this be a cache" question is answered by repeat rate at the end — not assumed at the beginning.
+
+The general form of steps 1–4 — how to attribute latency across edge, gateway, app, and data store when many layers and services are involved — is Part 2.4. This ladder is the caching-specific slice of it.
 
 **If repeat rate comes back too low, that is not necessarily a dead end — try re-shaping the key.** Low repeat rate is usually a **key cardinality** problem, and every dimension in the key multiplies cardinality while dividing repeat rate. A whole-page response keyed by `listingId + userId + zip` has almost no repeats. Split it:
 
@@ -1288,6 +1298,102 @@ Either alone can make plain consumers correct; both together make it obvious. Es
 
 ---
 
+### 2.4 Latency Investigation — a decision tree for "it got slow"
+
+Every other section in this document answers *should I adopt X*. This one answers the question you actually get paged for: **something is slow, and there are eight layers between the user and the data.** The pattern sections are the menu of fixes; this is how you find out which one you need.
+
+The governing rule: **each step must end in a number that eliminates layers.** An investigation that produces theories instead of numbers is guessing with extra steps, and it usually ends with someone adding a cache.
+
+#### Step 0 — Define the symptom precisely before touching anything
+
+Most wasted investigations come from skipping this. Answer four questions first:
+
+| Question | Why it changes everything |
+|---|---|
+| **Which percentile?** p50, p95, p99, or max? | p50 regression = something on the *common* path. p99-only = contention, queueing, GC, a slow tail dependency, or cold cache. These have almost disjoint cause sets. |
+| **Which population?** All requests, one endpoint, one tenant, one region, one client version? | Narrow blast radius points to data shape (one tenant's outlier volume) or a deploy, not to capacity. |
+| **When did it change?** Step-function at a deploy, or gradual over weeks? | Step = a change (deploy, config, feature flag, traffic shift, dependency version). Gradual = growth crossing a threshold (data volume, index size, connection pool, disk). |
+| **Absolute or relative?** Was it always 800 ms, or was it 80 ms last month? | "Always slow" is a design problem. "Recently slow" is a regression, and regressions have a *cause you can revert*. |
+
+**A step-function at a known deploy is the single highest-value finding in this entire tree** — it converts an open-ended performance investigation into a diff review. Check that before anything else.
+
+#### Step 1 — Split the timeline into three buckets before going deeper
+
+Before per-layer analysis, attribute total wall-clock time to three coarse buckets, because they have completely different toolsets:
+
+1. **Client / edge time** — DNS, TLS, connection setup, geographic RTT, request queuing in the browser, payload transfer, client-side render.
+2. **Server processing time** — your code, your dependencies, your data stores.
+3. **Waiting time** — time the request spent in a queue *not being worked on*: thread pool, connection pool, event loop backlog, upstream concurrency limit.
+
+The third bucket is the one people miss, and it is the most common cause of "everything is slow simultaneously." **Queueing time is invisible in per-call latency metrics** — every individual call looks fine while total latency balloons, because the time is spent *before* the call starts. If server-side spans sum to far less than observed end-to-end latency, the gap *is* the answer, and you should stop looking at the database.
+
+#### Step 2 — The layer walk, outside in
+
+Walk from the user inward. Stop at the first layer that accounts for the dominant share of time — do not continue to the database out of habit.
+
+| Layer | What to measure | Signature of the problem being *here* | Typical fixes |
+|---|---|---|---|
+| **Client** | TTFB vs. total, render time, request waterfall | Fast TTFB, slow paint. Serial request chains. | Bundle size, defer non-critical calls, parallelize, client cache |
+| **Network / geo** | RTT, TLS handshake count, connection reuse | Latency tracks distance; handshake per request | CDN/edge termination, keep-alive, HTTP/2 |
+| **Edge / CDN** | Hit ratio, origin fetch time | Low hit ratio; origin sees traffic it shouldn't | Cache headers, key normalization, `Vary` hygiene |
+| **Load balancer / gateway** | Queue depth, upstream connect time, retry counts | Time before your app sees the request; retry storms | Pool sizing, timeout hygiene, retry budgets |
+| **App: admission** | Thread/worker pool saturation, event-loop lag | Bucket 3 dominates; all endpoints degrade together | Concurrency limits, shed load, async, pool sizing |
+| **App: composition** | Number of downstream calls per request, serial vs parallel | Latency ≈ sum of many small calls | Batch/DataLoader, parallelize independent calls, `@provides` |
+| **App: compute** | CPU profile, allocation rate, GC pauses | CPU-bound; p99 spikes correlate with GC | Algorithm, serialization cost, object churn |
+| **Downstream services** | Per-dependency p50/p99, error and timeout rates | One dependency's p99 dominates | Same tree, recursively, at that service |
+| **Data store: query** | Query plan, rows examined vs returned, index usage | One query dominates; rows-examined ≫ rows-returned | Index, rewrite, denormalize, projection |
+| **Data store: capacity** | IOPS, cache hit ratio, lock/latch waits, replication lag | All queries slow together; buffer-pool churn | Scale, read replica, tiering, partitioning |
+
+**The rows-examined vs. rows-returned ratio deserves special mention** — it is the highest-signal single number in database investigation. Returning 10 rows after examining 4 million means a missing index or a non-selective predicate, and no amount of caching or scaling fixes the underlying scan.
+
+#### Step 3 — Classify the shape, because the shape determines the fix
+
+Once you know *where*, you still need *what kind*. Five shapes cover nearly everything, and they are distinguishable from the trace alone:
+
+**1. One slow thing.** A single span dominates. → Fix that thing (index, query, algorithm, payload). Cheapest case; no architecture change.
+
+**2. Many small things (fan-out / N+1).** Latency ≈ N × small, and N scales with result-set size. → Batch, dedup, parallelize. The tell: latency grows linearly with the number of items on the page. **This is the most commonly misdiagnosed as "we need a cache"** — a cache over an N+1 hides it; batching removes it.
+
+**3. Serial chaining.** Independent calls executed one after another. Total = sum, when it could be max. → Parallelize. The tell: a trace that looks like a staircase rather than a comb.
+
+**4. Queueing / saturation.** Individual operations are fast; waiting dominates. Latency is highly load-sensitive and rises non-linearly near a capacity limit. → Add capacity, reduce per-request work, add concurrency limits, shed load. **Never cache your way out of saturation** — you may reduce load enough to mask it until the cache goes cold.
+
+**5. Tail amplification.** p50 is fine, p99 is terrible, and the request touches many components. If a request depends on N components each with a 1% slow tail, the chance of hitting *at least one* slow component is ~1−0.99^N — at N=50 that is 39%. → Reduce fan-out, hedge requests, tighten timeouts, make non-critical calls fail-open. The tell: p99 degrades faster than p50 as fan-out grows.
+
+#### Step 4 — Fix in cost order, cheapest and most permanent first
+
+An explicit ladder, because the temptation is always to jump to the bottom rung:
+
+1. **Delete the work.** Do you need this call, this field, this row set at all? Over-fetching is the most common finding and the cheapest fix.
+2. **Fix the inefficiency.** Missing index, bad plan, N+1, serialization overhead, oversized payload. Permanent and side-effect-free.
+3. **Restructure the calls.** Batch, dedup, parallelize, move work off the request path (async, precompute).
+4. **Right-size the resources.** Pool sizes, timeouts, instance sizing, read replicas. Cheap but recurring cost.
+5. **Add a cache.** Only after 1–4, and only with repeat rate measured (§ Caching). A cache placed before step 2 hides a permanent fix behind a permanent obligation.
+6. **Change the data model / architecture.** Materialized read model, denormalization, partitioning, CQRS. Highest cost, sometimes the only real answer when read shape fundamentally differs from write shape.
+
+#### The distributed-transaction variant
+
+For internal multi-service transactions (a write flowing through several services rather than a user-facing read), the tree is the same with three additions:
+
+- **Trace across the async boundary.** Propagate context through queues and topics, otherwise the timeline breaks exactly where the latency hides. An untraced Kafka hop is an invisible arbitrary delay.
+- **Distinguish processing latency from lag.** Consumer lag means work is queued; slow processing means each item is expensive. Lag with fast processing = partition/concurrency limit. Fast-draining queue with slow processing = the per-item work is the problem.
+- **Look for retry amplification.** Retries at multiple layers multiply: 3 gateway × 3 client × 3 internal = 27 attempts for one logical request. Retry storms present as latency, then as saturation, then as an outage. Budget retries at exactly one layer.
+
+#### The anti-patterns that waste the most time
+
+- **Starting at the database.** It is the deepest layer and the most instrumented, so it attracts attention — but edge, queueing, and composition problems are more common and cheaper to fix.
+- **Averaging away the signal.** A mean latency hides bimodality (warm vs cold, cache hit vs miss, tenant A vs B). Always look at the distribution.
+- **Measuring a warm system and shipping for a cold one.** See the Class A caveat under Caching.
+- **Fixing the loudest thing instead of the dominant thing.** The error-log-noisiest component is often not on the critical path at all.
+- **Stopping at the first plausible cause.** Latency regressions frequently have two causes stacked; verify by *removing* the suspected cause and confirming the number moves.
+- **Optimizing before reproducing.** If you cannot make it slow on demand, you cannot tell whether you fixed it.
+
+#### The one-line version
+
+**Attribute before you optimize; classify the shape before you choose a fix; and spend the cheapest, most permanent fix that addresses the dominant term — the cache is the sixth thing to try, not the first.**
+
+---
+
 ## Part 3: Deep Tool Knowledge
 
 For each tool: WHY it works the way it does, WHEN it's right, WHEN it breaks.
@@ -1706,6 +1812,13 @@ Multipart exists for **reliability and throughput**, not just capacity: parallel
 | **Known refresh interval, client-driven** | Polling | HTTP + `ETag`/deltas |
 | **Server must push immediately, one direction** | Streaming | SSE (stateless, proxy-friendly) |
 | **Simultaneous two-way / binary / high-rate** | Bidirectional channel | WebSocket (stateful — plan sticky sessions) |
+| **"It's slow" — cause unknown, many layers** | Attribute before optimizing | Tracing → layer walk → shape classification (Part 2.4) |
+| p50 regressed at a deploy | Regression, not capacity | Diff review + revert; skip the capacity work |
+| p99 bad, p50 fine, high fan-out | Tail amplification | Reduce fan-out, hedge, timeout, fail-open non-critical |
+| Everything slow simultaneously | Saturation / queueing | Pool + concurrency limits, shed load, add capacity |
+| Latency ∝ number of items on page | N+1 / fan-out | Batch + dedup (DataLoader), not a cache |
+| Spans sum ≪ end-to-end latency | Queueing before the work starts | Thread/connection pool, event-loop lag, admission control |
+| Rows examined ≫ rows returned | Missing/non-selective index | Index or rewrite the query — never cache over it |
 | **Content slow to produce, revealed progressively** | Stream it | SSE with typed events |
 | **N clients each composing M fragmented services** | Composition layer | GraphQL Federation (shallow graph) |
 | **Same entity referenced many times in one request** | Intra-request dedup | DataLoader batch loader |
@@ -1796,6 +1909,9 @@ Leader election works precisely *because* nodes are interchangeable: zero config
 
 **10. Prefer designs that keep the workload simple enough that heavy tooling never becomes necessary.**
 Invalidate-then-refetch keeps consumers stateless, which is why a stream processor isn't needed. Keeping numbers in a hydrated card rather than generated prose is why a text/data mismatch stays rare. The best architectural move is often the one that removes the need for a later one.
+
+**11. Simulate the decision in logs before building the mechanism.**
+Most design arguments can be converted into a number for the cost of one log line, with nothing deployed and no risk. Log the cache key you *would* use and count distinct values → projected hit rate. Log the shard key you *would* route on → skew. Log the batch you *would* assemble → real fan-in. Log which fields clients actually read → the projection you should have. The pattern generalizes: when a design choice depends on the shape of production traffic, **instrument the hypothesis, don't debate it.** Corollary: prefer measurements available *before* commitment over metrics you'd only see *after* deploying the thing you're trying to justify.
 
 ---
 

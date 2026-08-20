@@ -16,6 +16,7 @@ Never revise an entry. If understanding changes later, write a new entry and add
 | 2026-08-19 | [S3 / object storage](2026-08-19-s3-object-storage.md) | What are the actual use cases? |
 | 2026-08-19 | [Coordination stores and stream processing](2026-08-19-coordination-flink.md) | What are ZooKeeper and etcd? When would we need Flink? |
 | 2026-08-19 | [Caching: layers, strategies, when it's needed](2026-08-19-caching-strategies.md) | Are the DB's own caches usually disabled? |
+| 2026-08-19 | [Latency investigation decision tree](2026-08-19-latency-investigation.md) | How do you find the bottleneck when many layers are involved? |
 
 ## Entry template
 
