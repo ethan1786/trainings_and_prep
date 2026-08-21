@@ -193,6 +193,21 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 
 ---
 
+## 2026-08-21 — Autoscaling caches
+
+### Coalescing is one mechanism with one complexity level
+**Believed:** Request coalescing is either simple local locking or requires a difficult cluster-wide leader.
+**Accurate:** Separate **local single-flight** from **distributed per-key leases**. The first is relatively simple; the second adds lease expiry, owner failure, fencing/version checks, bounded waits, and follower policy—but it does not require permanent leader election.
+**Why it was tempting:** Both mechanisms are described as “coalescing,” which hides the difference in coordination scope and failure behavior.
+
+### A pre-loaded distributed cache gives local-memory reads to every node
+**Believed:** If the shared cache is pre-loaded, every autoscaled application instance has the same zero-latency in-memory cache.
+**Accurate:** A pre-loaded distributed cache gives a warm **shared L2** and avoids duplicated source warmup, but application reads still cross the network. Add a local L1 only when its memory and warmup costs are justified.
+**Why it was tempting:** “Distributed cache” and “distributed across application memory” sound similar, but they place data and latency in different locations.
+
+
+---
+
 ## 2026-08-21 — Cache-miss stampede strategies
 
 ### Preloading is the only serious answer to high read volume

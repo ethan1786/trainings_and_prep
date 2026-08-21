@@ -23,6 +23,7 @@ Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather th
     - [Who controls the browser cache](#who-controls-the-browser-cache--and-does-it-belong-in-a-design-doc)
     - [Read/write strategies](#readwrite-strategies)
       - [Preventing cache-miss stampedes — preloading is one strategy](#preventing-cache-miss-stampedes--preloading-is-one-strategy)
+      - [Autoscaling recommendation — coalesce locally, coordinate per key globally](#autoscaling-recommendation--coalesce-locally-coordinate-per-key-globally)
       - [CarGurus pattern — eager local snapshots and Kafka fan-out](#cargurus-pattern--eager-local-snapshots-and-kafka-fan-out)
     - [Invalidation / freshness strategies](#invalidation--freshness-strategies)
   - [Message Queue / Async Processing](#message-queue-async-processing)
@@ -434,6 +435,52 @@ The startup and refresh questions are part of the design:
 * What protects the source during a coordinated deployment or full refresh?
 
 **Teaching summary:** preloading is the strongest answer when the dataset is bounded and known; request coalescing is the strongest answer when misses are localized; shared per-key leases are the cluster answer when no permanent leader exists; and source-side optimization is the answer when reuse is too low for caching to help.
+
+##### Autoscaling recommendation — coalesce locally, coordinate per key globally
+
+**Request coalescing is a common production technique**, but there are two different implementations:
+
+* **Local single-flight:** one in-process caller fills a missing key while concurrent callers on the same node share the result. This is relatively simple and is often the first protection to add.
+* **Distributed coalescing:** one node temporarily owns a key refresh while callers on other nodes wait, serve stale data, or fall back. This is more complex because leases can expire, owners can die, work can exceed the lease, and events can arrive late or twice.
+
+The distributed version does not require leader election. The coordination scope is one key and one refresh window, not the entire application. A short-lived lease plus a fencing token or version check is usually the right abstraction. The follower behavior must be explicit: bounded wait, stale response, source fallback, or failure. “Everyone waits” without a timeout can turn a cache miss into a request queue and a new outage.
+
+For a large auto-scaling fleet, a robust default is:
+
+```text
+request
+  → local L1 cache
+  → shared pre-existing L2 cache
+  → local single-flight
+  → distributed per-key lease on L2 miss
+  → source
+```
+
+The order of single-flight and the distributed lease can vary by implementation, but both scopes matter. L1 reduces latency; L2 lets newly-started pods benefit from existing warm data; local single-flight collapses duplicate work on one pod; the lease prevents one miss from becoming one source request per pod.
+
+**A pre-loaded distributed cache is a valid alternative for a bounded snapshot.** Populate the shared cache once through a controlled warmup job, then let auto-scaled application nodes consume it. This avoids every new pod re-reading the database and avoids multiplying the full dataset by pod count. It still has a network hop, shared-cache capacity and availability concerns, and a cache-build lifecycle to operate.
+
+For a safe snapshot load, use a versioned namespace or double buffer:
+
+```text
+build cache:snapshot:v42 completely
+validate counts/checksum/version
+atomically publish current_snapshot = v42
+readers switch to v42
+```
+
+Do not let readers observe a partially populated namespace. Keep the previous snapshot available during the build, define what happens when the new snapshot is invalid, and make the builder single-run through a job lock or scheduler. A shared preloaded cache gives 100% **L2** hit rate after a successful publish; it does not give 100% local-memory hits unless each application node also warms an L1.
+
+Use this decision rule:
+
+| Data and freshness shape | Preferred design |
+|---|---|
+| Bounded snapshot, read-mostly, eventual updates | Preloaded shared L2; optional local L1; versioned atomic publish |
+| Large or unbounded keyspace, high reuse for hot keys | Lazy shared L2 + local single-flight + distributed per-key lease |
+| Expensive refresh and stale data acceptable | L2/L1 + stale-while-revalidate + jittered refresh |
+| Strict read-after-write or low key reuse | Avoid relying on cache for correctness; optimize or materialize the source |
+
+Production complexity is usually manageable when the boundary is narrow. The hard part is not the lock primitive; it is the behavior around it: timeout, cancellation, stale fallback, owner failure, lease renewal, version ordering, duplicate work tolerance, metrics, and what a new autoscaled pod does while warm data is absent. CG examples include both in-process single-flight for miss filling and Redis-backed locks for cluster-wide cache-warming work.
 
 ##### Read-through — same semantics, different ownership
 
