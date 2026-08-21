@@ -21,6 +21,7 @@ Never revise an entry. If understanding changes later, write a new entry and add
 | 2026-08-19 | [Part 3 decision layer](2026-08-19-part3-decision-layer.md) | Tool entries are descriptive — bring them to the Part 1 standard |
 | 2026-08-21 | [Caching: compact design principles](2026-08-21-caching-design-principles.md) | What are the design principles before moving on? |
 | 2026-08-21 | [Caching: design-time estimation](2026-08-21-caching-design-time-estimation.md) | Should caching be included before production metrics exist? |
+| 2026-08-21 | [Cache-miss stampedes](2026-08-21-cache-stampede-strategies.md) | Is preloading the only answer for high read volume? |
 | 2026-08-21 | [CarGurus cache strategy](2026-08-21-cg-cache-strategy.md) | What strategy uses eager local caches plus Kafka fan-out? |
 
 ## Entry template

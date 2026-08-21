@@ -22,6 +22,7 @@ Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather th
     - [The layer map](#the-layer-map--each-layer-caches-a-different-thing)
     - [Who controls the browser cache](#who-controls-the-browser-cache--and-does-it-belong-in-a-design-doc)
     - [Read/write strategies](#readwrite-strategies)
+      - [Preventing cache-miss stampedes — preloading is one strategy](#preventing-cache-miss-stampedes--preloading-is-one-strategy)
       - [CarGurus pattern — eager local snapshots and Kafka fan-out](#cargurus-pattern--eager-local-snapshots-and-kafka-fan-out)
     - [Invalidation / freshness strategies](#invalidation--freshness-strategies)
   - [Message Queue / Async Processing](#message-queue-async-processing)
@@ -391,6 +392,48 @@ The startup contract also needs to be explicit:
 CG examples reflect these tradeoffs: [finance-transaction’s caching flow](https://code.cargurus.com/cargurus-eng/finance-transaction/blob/main/docs/flows/caching-strategy.md) describes pre-warmed local maps, Kafka-synchronized updates, and Redis-backed caches; [MVT client architecture](https://code.cargurus.com/cargurus-eng/mvt-client-node/blob/main/packages/@cargurus/mvt-client-node/docs/ARCHITECTURE.md) loads active test data into memory and uses Kafka plus a periodic scheduler for freshness; and [Service Provider V2](https://code.cargurus.com/cargurus-eng/service-provider-v2/blob/main/CLAUDE.md) gates readiness on cache warmup. A cache publisher in [cg-main](https://code.cargurus.com/cargurus-eng/cg-main/blob/master/cargurus-iterable-client/src/main/java/com/cargurus/iterable/domain/dao/IterableUserCacheUpdatePublisher.java) also illustrates the important after-commit publication shape.
 
 **Teaching summary:** read strategy = eager snapshot; write strategy = DB-first update; cluster strategy = asynchronous Kafka fan-out. Call it a **pre-warmed, locally replicated cache with event-driven eventual coherence**, and then document the failure and recovery semantics instead of debating whether it fits one taxonomy label.
+
+##### Preventing cache-miss stampedes — preloading is one strategy
+
+A cache miss becomes a **stampede** when many requests discover the same missing or expired key and independently hit the source. Preloading is powerful, but it mainly solves **cold-start misses for a known, bounded dataset**. It does not automatically solve synchronized expiry, newly-created keys, missed update events, or a dataset too large to load into every application process.
+
+The main strategies are:
+
+| Strategy | Best fit | What it prevents | What it costs |
+|---|---|---|---|
+| Eager full snapshot | Bounded, read-mostly data that fits in memory | Per-request cold misses after startup | Boot time, per-pod memory, full-load surge, snapshot freshness |
+| Per-process request coalescing / single-flight | Duplicate misses arriving at one node | N callers on the same node producing N source reads | Does not coordinate other nodes; waiting callers need timeout behavior |
+| Shared L2 cache + per-key lease | Dynamic or unbounded keys across a cluster | Multiple nodes filling the same missing key | Shared dependency, lease expiry/fencing, failure and ownership complexity |
+| Stale-while-revalidate | Stale data is acceptable for a bounded period | Expiry stampedes while keeping reads available | Explicit staleness contract and background refresh |
+| TTL jitter / early refresh | Many keys or nodes would expire together | Synchronized expiration waves | Does not eliminate a hot-key miss by itself |
+| Source-side scaling or materialization | Reads are unique, freshness is strict, or cacheability is low | Repeated cache misses are not the real problem | Read replicas, indexes, materialized views, or a derived store |
+
+**A cluster does not need a permanent leader to coalesce requests.** Use a short-lived, per-key lease: the first node that acquires ownership refreshes the key, while other nodes wait briefly, serve stale data, or fail over to the source according to policy. A Redis `SET NX`-style lease is one implementation, but the design must handle lease expiry, owner failure, duplicate refreshes, fencing/version checks, and bounded wait time. This is much narrower than leader election: there is no single process coordinating the whole application, only temporary ownership of one key’s refresh.
+
+A practical hybrid for many web systems is:
+
+```text
+local L1 cache
+  → shared L2 cache
+  → per-key single-flight or lease on miss
+  → source
+```
+
+The local layer removes network latency for hot keys. The shared layer lets nodes benefit from one another’s fills. The per-key coordination prevents a cluster-wide miss from multiplying into one source request per node. Stale-while-revalidate and TTL jitter can be added when freshness permits.
+
+Choose preloading when the complete keyspace is known, bounded, small enough per pod, bulk-loadable, and acceptable to serve from a snapshot while updates propagate. Choose lazy shared caching when the keyspace is large or unbounded, access is skewed, or the full dataset would waste memory. Choose neither as the primary fix when requests are mostly unique or the source itself is inefficient; improve the query, add a read model, or scale the source instead.
+
+The startup and refresh questions are part of the design:
+
+* Does every pod load the entire snapshot, or is the snapshot shared?
+* Is traffic blocked until warmup completes?
+* How is a partial snapshot detected and rejected?
+* What happens when a hot key expires during a source outage?
+* Can stale data be served, and for how long?
+* How does a node recover after missing a Kafka update?
+* What protects the source during a coordinated deployment or full refresh?
+
+**Teaching summary:** preloading is the strongest answer when the dataset is bounded and known; request coalescing is the strongest answer when misses are localized; shared per-key leases are the cluster answer when no permanent leader exists; and source-side optimization is the answer when reuse is too low for caching to help.
 
 ##### Read-through — same semantics, different ownership
 

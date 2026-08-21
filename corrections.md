@@ -193,6 +193,21 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 
 ---
 
+## 2026-08-21 — Cache-miss stampede strategies
+
+### Preloading is the only serious answer to high read volume
+**Believed:** To avoid a high-traffic cache-miss storm, every cache must be fully populated at application boot.
+**Accurate:** Preloading is best for **bounded, read-mostly, bulk-loadable datasets**. Other shapes call for per-process single-flight, shared L2 plus per-key leases, stale-while-revalidate, TTL jitter, or source-side scaling/materialization.
+**Why it was tempting:** A fully warmed cache gives an appealing 100% hit-rate story and avoids the first-request race. It also hides the fact that boot-time loading can itself create a source surge and per-pod memory cost.
+
+### Cross-node request coalescing requires a leader or primary
+**Believed:** Without leader election, every application node must independently refresh a missing key.
+**Accurate:** Use **temporary per-key ownership** with a short-lived lease, bounded waiting, stale fallback, and fencing/version checks. This coordinates one refresh without electing a permanent application-wide leader.
+**Why it was tempting:** “One owner” sounds like “one global leader.” The narrower problem is only who refreshes this key during this miss window.
+
+
+---
+
 ## 2026-08-21 — CarGurus cache strategy
 
 ### DB → cache → Kafka is simply write-through
