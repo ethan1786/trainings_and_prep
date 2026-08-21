@@ -159,3 +159,18 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 ### Class A caches are invisible, therefore harmless
 **Accurate:** Invisible defaults still **confound measurement.** Warm buffer pools produce "why is it faster the second time," secretly bimodal p99s (warm 2 ms / cold 200 ms), query "fixes" that only worked because test rows were hot, and unexplained slowness for minutes after a restart or failover. Discipline: decide whether you are measuring warm or cold, and label it. Running something three times and taking the best measures the cache, not the query.
 **Why it was tempting:** "Nothing to configure and nothing to invalidate" is true, and it reads as "nothing to think about." The correctness risk really is zero; the *interpretation* risk is not.
+
+
+---
+
+## 2026-08-21 — Caching design principles
+
+### Caching does not serve core business logic, so it cannot affect correctness
+**Believed:** Caching is invisible and outside core business logic; therefore it is only a performance concern.
+**Accurate:** A cache should not own authoritative business truth, but its **freshness, key scope, fallback, and failure behavior** can affect observable correctness, security, and availability. The source remains authoritative; the cache must be removable and its failure survivable.
+**Why it was tempting:** Separating domain truth from optimization is the right architectural instinct. The mistake is extending “does not own truth” into “cannot affect what users observe.”
+
+### Performance is the only reason to prioritize caching
+**Believed:** A cache is normally considered only when an API becomes slow; features should always come first otherwise.
+**Accurate:** Performance pain is the common investigation trigger, and speculative caching should usually lose to feature delivery. But **resource cost, third-party rate limits, capacity protection, security, correctness, or availability** can independently justify cache work.
+**Why it was tempting:** Most cache discussions begin with latency, and caching is often framed as a speed optimization. Its other value is protecting a scarce source and controlling repeated work.

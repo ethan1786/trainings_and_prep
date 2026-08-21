@@ -17,6 +17,7 @@ Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather th
 - [Part 1: Pattern Recognition (with context)](#part-1-pattern-recognition-with-context)
   - [Caching](#caching)
     - [When you actually need one (and when you don't)](#when-you-actually-need-one-and-when-you-dont)
+    - [Caching design principles — the compact mental model](#caching-design-principles--the-compact-mental-model)
     - [The layer map](#the-layer-map--each-layer-caches-a-different-thing)
     - [Who controls the browser cache](#who-controls-the-browser-cache--and-does-it-belong-in-a-design-doc)
     - [Read/write strategies](#readwrite-strategies)
@@ -203,6 +204,21 @@ Same page, and now the expensive shared part is cacheable. This is the fan-in in
 - Confirm the source can serve 100% miss at peak, or design explicit shedding for that case.
 
 **Design cache-ready, not cached.** The early-stage stance isn't "ignore caching" — it's keep the read path *cacheable* so one can be added later without a rewrite: stable and complete cache keys (tenant, locale, permissions, filters), idempotent reads, a single owner per entity, no side effects interleaved into reads. Cache-ability is a property of clean ownership boundaries; you get it for free when the boundaries are right.
+
+#### Caching design principles — the compact mental model
+
+Caching is usually an **invisible optimization layer**: it should not own core business truth or define the authoritative state of the system. Its job is to make an already-correct read path cheaper by avoiding duplicate retrievals, reducing pressure on scarce resources, and improving latency. That is the default posture, not a promise that caching is irrelevant: stale data, incorrect keys, cache leakage, stampedes, or a cache outage can change observable behaviour and can turn a performance mechanism into a correctness or availability concern.
+
+The principles to carry into a design review are:
+
+1. **Start without a Class B cache.** Feature delivery and core correctness normally come first; speculative caching is rarely worth its permanent operational cost. Add it when a measured latency, resource, cost, or availability problem justifies the complexity—not merely because traffic exists.
+2. **Treat performance pain as the investigation trigger, not as proof that caching is the answer.** Start from the symptom, attribute the latency, fix source inefficiency, then measure repeat rate × source cost. The evidence chooses the mechanism.
+3. **Keep the source authoritative and survivable.** A cache miss, cold start, flush, or cache outage must have a defined fallback. Before launch, ask whether the source can survive 100% misses at peak; otherwise the cache is hiding an unpriced capacity risk.
+4. **Assume every mutable cache is a second copy with obligations.** You inherit a freshness contract, invalidation or expiry, key correctness, stampede protection, warmup behavior, eviction policy, observability, and a degraded-mode story.
+5. **Cache at the granularity where requests converge.** Shared, expensive fragments often have high fan-in; personalized or highly unique fragments do not. Split the response rather than accepting a high-cardinality whole-response key.
+6. **Make the cache removable.** Keep reads idempotent, ownership clear, keys complete, and the source path correct without the cache. A cache should improve the system, not become the only reason the system works.
+
+So the practical summary is: **caching is a useful invisible layer, but invisibility is earned by keeping it out of the source of truth and making its failure harmless.** It is normally prioritized after features unless a concrete performance, capacity, cost, correctness, security, or availability risk makes it worth doing sooner.
 
 #### The layer map — each layer caches a different thing
 
