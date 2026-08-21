@@ -189,3 +189,18 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 **Believed:** Without organic traffic, there is no responsible way to estimate whether a cache will help or how much work it will take.
 **Accurate:** Engineering can estimate from **anticipated traffic, key reuse, active cardinality, source cost, value size, freshness, write rate, and fan-out**, using low/base/high scenarios and naming the validation test or metric that will update the estimate.
 **Why it was tempting:** Estimates are less certain before launch, and a forecast must not be presented as a measured hit rate. But uncertainty calls for ranges and explicit assumptions, not silence.
+
+
+---
+
+## 2026-08-21 — CarGurus cache strategy
+
+### DB → cache → Kafka is simply write-through
+**Believed:** Any design that updates the cache as part of a write is write-through.
+**Accurate:** Canonical write-through usually means the application writes the cache and the cache synchronously persists to the DB. DB-first followed by local cache update and Kafka fan-out is better described as **DB-first cache update with asynchronous event-driven propagation**. It is not write-behind unless the cache or event buffer is the durability boundary.
+**Why it was tempting:** The informal term “write-through” is often used for any synchronous-looking cache update, but the ownership and ordering determine the failure semantics.
+
+### Kafka makes the DB write and all cache copies atomic
+**Believed:** Once the writer updates its cache and publishes Kafka, the cluster is consistent.
+**Accurate:** DB commit, local cache update, and Kafka publication are separate operations unless explicitly coordinated. Peer caches are **eventually coherent** and can miss, duplicate, or receive events out of order. Use after-commit publication plus durable outbox/CDC, idempotent versioned events, replay, or periodic full refresh to bound the gap.
+**Why it was tempting:** Kafka feels durable and fast, and normal-case propagation is quick. Durability of the topic does not retroactively make the preceding DB and local-memory operations atomic.

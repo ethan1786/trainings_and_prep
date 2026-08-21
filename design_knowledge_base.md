@@ -22,6 +22,7 @@ Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather th
     - [The layer map](#the-layer-map--each-layer-caches-a-different-thing)
     - [Who controls the browser cache](#who-controls-the-browser-cache--and-does-it-belong-in-a-design-doc)
     - [Read/write strategies](#readwrite-strategies)
+      - [CarGurus pattern — eager local snapshots and Kafka fan-out](#cargurus-pattern--eager-local-snapshots-and-kafka-fan-out)
     - [Invalidation / freshness strategies](#invalidation--freshness-strategies)
   - [Message Queue / Async Processing](#message-queue-async-processing)
   - [Sharding / Partitioning](#sharding-partitioning)
@@ -326,7 +327,7 @@ Two genuine cross-client caveats worth knowing:
 1. **On a read miss, who fetches the source?** Your code (cache-aside) or the cache library (read-through).
 2. **On a write, what happens to the cached copy?** Update it, delete it, or write to it first and persist later.
 
-For 90% of real systems the answer is fixed: **cache-aside for reads, delete-on-write for writes.** So treat most of this table as "good to know so you can name what you're doing and reject the wrong variant in review" — with two exceptions that genuinely change your architecture, flagged below.
+For a generic request-scoped mutable cache, the answer is often fixed: **cache-aside for reads, delete-on-write for writes.** That is not a universal CG rule. Treat most of this table as "good to know so you can name what you're doing and reject the wrong variant in review" — with the eager local-snapshot pattern below as an important exception that changes the architecture.
 
 ##### Cache-aside (lazy loading) — the default, and what you should assume unless told otherwise
 
@@ -353,6 +354,43 @@ Two details carry all the weight:
 Works identically for local (Caffeine) and distributed (Redis/Valkey) caches — the code shape doesn't change, only where the map lives.
 
 **Why it's the default:** the source of truth is never bypassed, only cached data is ever lost on a cache failure, and it degrades gracefully (cache down → all misses → slower but correct).
+
+##### CarGurus pattern — eager snapshot loading + DB-first update + Kafka fan-out
+
+The pattern described in the CG systems is not ordinary lazy cache-aside. It is three separate choices:
+
+**Read path: eager, full-snapshot local cache.** Each application instance loads the expected dataset into memory during startup, aiming for a 100% hit rate on the hot path. This is best named an **eagerly loaded local L1 cache** or a **read-only snapshot cache**. There is no request-time miss for data that was successfully included in the snapshot.
+
+**Write path: DB-first explicit cache update.** The sequence is:
+
+```text
+write authoritative DB
+  → update this instance’s local cache
+  → publish Kafka cache-update event
+  → peer instances update their local caches
+```
+
+The safest description is **DB-first cache update with asynchronous event-driven propagation**. It is not canonical write-through: in the strict definition, the application writes to the cache and the cache synchronously writes the database. It is not write-behind: Kafka is propagating the committed change, not serving as the durability buffer. It is also not pure cache-aside/delete-on-write, because the writer updates the cached value instead of only deleting it. “Cache-aside with explicit write update” is acceptable shorthand; the sequence above is better than relying on an overloaded label.
+
+**Cluster path: broadcast update propagation.** Each pod owns a local copy. Kafka distributes the change so other pods converge. If the message contains the new value, this is **update replication**; if it contains only a key or version, it is **invalidation**, with each consumer reloading the value. Either way, cross-pod consistency is normally eventual: the writer’s pod updates first, and other pods become current after Kafka delivery and processing.
+
+This is a common pattern for **read-mostly, bounded, latency-sensitive data** such as feature flags, configuration, reference data, and selected product metadata. It is much less suitable as the default for large, highly mutable, user-specific datasets, where eager startup loads and per-pod duplication become expensive and event lag is harder to tolerate.
+
+**What this pattern buys:** local-memory read latency, predictable hot-path behavior, reduced source reads, and no cache miss on ordinary requests after warmup. **What it spends:** startup time, memory multiplied by pod count, rollout-time source load, Kafka dependency, eventual-consistency windows, and a correctness gap between the DB commit, local cache update, and event publication.
+
+The last point is the key design question. DB write, local cache write, and Kafka publish are not automatically one atomic operation. If the process dies after the DB commits but before publishing, peer caches can remain stale. A transactional outbox, CDC, durable event log, replayable topic, or periodic full refresh can close or bound that gap. Events should be idempotent and carry a version or timestamp so duplicates and out-of-order delivery cannot move a cache backward. Deletions need explicit tombstones or invalidation events.
+
+The startup contract also needs to be explicit:
+
+* Does readiness wait until the snapshot is complete?
+* What happens when the source is unavailable or the snapshot is partial?
+* Does the service serve stale data, fail closed, or fall back to the source?
+* Can a rolling deployment cause every new pod to reload the full dataset at once?
+* How does a pod recover if it misses a Kafka event?
+
+CG examples reflect these tradeoffs: [finance-transaction’s caching flow](https://code.cargurus.com/cargurus-eng/finance-transaction/blob/main/docs/flows/caching-strategy.md) describes pre-warmed local maps, Kafka-synchronized updates, and Redis-backed caches; [MVT client architecture](https://code.cargurus.com/cargurus-eng/mvt-client-node/blob/main/packages/@cargurus/mvt-client-node/docs/ARCHITECTURE.md) loads active test data into memory and uses Kafka plus a periodic scheduler for freshness; and [Service Provider V2](https://code.cargurus.com/cargurus-eng/service-provider-v2/blob/main/CLAUDE.md) gates readiness on cache warmup. A cache publisher in [cg-main](https://code.cargurus.com/cargurus-eng/cg-main/blob/master/cargurus-iterable-client/src/main/java/com/cargurus/iterable/domain/dao/IterableUserCacheUpdatePublisher.java) also illustrates the important after-commit publication shape.
+
+**Teaching summary:** read strategy = eager snapshot; write strategy = DB-first update; cluster strategy = asynchronous Kafka fan-out. Call it a **pre-warmed, locally replicated cache with event-driven eventual coherence**, and then document the failure and recovery semantics instead of debating whether it fits one taxonomy label.
 
 ##### Read-through — same semantics, different ownership
 
