@@ -20,6 +20,7 @@ Never revise an entry. If understanding changes later, write a new entry and add
 | 2026-08-19 | [Throughput and capacity planning](2026-08-19-capacity-planning.md) | Will it hold at 10x? |
 | 2026-08-19 | [Part 3 decision layer](2026-08-19-part3-decision-layer.md) | Tool entries are descriptive — bring them to the Part 1 standard |
 | 2026-08-21 | [Caching: compact design principles](2026-08-21-caching-design-principles.md) | What are the design principles before moving on? |
+| 2026-08-21 | [Caching: design-time estimation](2026-08-21-caching-design-time-estimation.md) | Should caching be included before production metrics exist? |
 
 ## Entry template
 

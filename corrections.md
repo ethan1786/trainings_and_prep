@@ -174,3 +174,18 @@ Never edit an entry. If a correction is later itself corrected, append a new one
 **Believed:** A cache is normally considered only when an API becomes slow; features should always come first otherwise.
 **Accurate:** Performance pain is the common investigation trigger, and speculative caching should usually lose to feature delivery. But **resource cost, third-party rate limits, capacity protection, security, correctness, or availability** can independently justify cache work.
 **Why it was tempting:** Most cache discussions begin with latency, and caching is often framed as a speed optimization. Its other value is protecting a scarce source and controlling repeated work.
+
+
+---
+
+## 2026-08-21 — Caching: design-time estimation
+
+### Including a cache in the initial design means it is already proven necessary
+**Believed:** If a cache appears in the architecture before production traffic exists, engineering is prematurely optimizing.
+**Accurate:** Early inclusion can be a legitimate **scope-estimation and delivery-planning request**. Keep the distinction explicit: cache-ready path, conditional anticipated cache, and cache required before launch are different commitments.
+**Why it was tempting:** “Measure before optimizing” is a sound runtime rule, but it does not answer a Product Manager’s need to estimate the full possible engineering effort before launch.
+
+### No production metrics means caching cannot be estimated
+**Believed:** Without organic traffic, there is no responsible way to estimate whether a cache will help or how much work it will take.
+**Accurate:** Engineering can estimate from **anticipated traffic, key reuse, active cardinality, source cost, value size, freshness, write rate, and fan-out**, using low/base/high scenarios and naming the validation test or metric that will update the estimate.
+**Why it was tempting:** Estimates are less certain before launch, and a forecast must not be presented as a measured hit rate. But uncertainty calls for ranges and explicit assumptions, not silence.

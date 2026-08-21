@@ -18,6 +18,7 @@ Parts 2.4 and 2.5 are the **diagnostic** counterparts: given a symptom rather th
   - [Caching](#caching)
     - [When you actually need one (and when you don't)](#when-you-actually-need-one-and-when-you-dont)
     - [Caching design principles — the compact mental model](#caching-design-principles--the-compact-mental-model)
+    - [Design-time caching — estimating before metrics exist](#design-time-caching--estimating-before-metrics-exist)
     - [The layer map](#the-layer-map--each-layer-caches-a-different-thing)
     - [Who controls the browser cache](#who-controls-the-browser-cache--and-does-it-belong-in-a-design-doc)
     - [Read/write strategies](#readwrite-strategies)
@@ -219,6 +220,47 @@ The principles to carry into a design review are:
 6. **Make the cache removable.** Keep reads idempotent, ownership clear, keys complete, and the source path correct without the cache. A cache should improve the system, not become the only reason the system works.
 
 So the practical summary is: **caching is a useful invisible layer, but invisibility is earned by keeping it out of the source of truth and making its failure harmless.** It is normally prioritized after features unless a concrete performance, capacity, cost, correctness, security, or availability risk makes it worth doing sooner.
+
+#### Design-time caching — estimating before metrics exist
+
+Sometimes a cache belongs in the initial design even though there is no production traffic or measured hit rate yet. That is a legitimate **scope and delivery-planning question**, especially when a Product Manager needs to understand whether the work fits the organizational plan. It is not evidence that the cache will definitely pay off in production. Engineering should answer with assumptions, scenarios, and confidence—not with a made-up hit rate.
+
+Separate these four decisions:
+
+1. **Should the read path be cache-ready?** Usually yes: define a stable cache-key boundary, keep the source path correct, expose latency and source-load metrics, and make the optimization insertable without rewriting the feature.
+2. **Should the cache appear in the target architecture?** Include it when the anticipated request/data shape makes it a plausible baseline component, or when omitting it would make the delivery estimate misleading. Label it as an assumption or planned optimization if it is not yet validated.
+3. **Must the cache be implemented before launch?** Require that only when a known peak-load, source-capacity, cost, rate-limit, latency, or availability constraint makes the uncached design unacceptable.
+4. **What will validate the assumption?** Name the traffic test, shadow measurement, load test, or early-production metric that will confirm or reject the cache after launch.
+
+**Estimate the shape with scenarios, not a single guess.** For each low/base/high scenario, write down:
+
+| Input | What to estimate | Why it matters |
+|---|---|---|
+| Peak request rate and concurrency | Requests per second, burst size, and duration | Determines cache operations and source miss load |
+| Key reuse | Requests per key during the candidate TTL; active distinct keys | Determines projected hit rate and memory cardinality |
+| Source cost | Query/service latency, CPU/IO, fan-out, rate limit, or per-call price | Determines the value of each avoided miss |
+| Value size | Average and p95 serialized response size | Determines memory, network, and serialization cost |
+| Freshness and writes | Allowed staleness, write rate, read-after-write needs | Determines TTL, invalidation, and consistency work |
+| Request granularity | Shared versus personalized fields; fan-in across callers | Determines whether the whole response or only fragments are cacheable |
+
+With a candidate TTL window, the first-order estimates are:
+
+* `projected hit rate ≈ 1 − (distinct keys / total requests)`
+* `source request rate after warmup ≈ total request rate × (1 − hit rate)`
+* `cache memory ≈ active keys × average value size × serialization/entry overhead × headroom`
+* `invalidation rate ≈ source write rate` for keys that must be actively invalidated
+
+These are planning estimates, not guarantees. Use ranges because reuse may be seasonal, bursts may not warm the cache, values may vary substantially in size, and the access distribution may be skewed. The candidate TTL must be long enough to represent the intended freshness policy; otherwise the projected hit rate is not measuring the system you plan to build.
+
+**Estimate engineering effort as a set of obligations, not just a cache client call.** The scope normally includes the key and ownership model, cache deployment or provisioning, serialization, TTL and invalidation, stampede protection, cold-start and warmup behavior, eviction limits, metrics and alerts, fallback behavior, security review, load testing, rollout controls, and an owner for incidents. Local L1 caching usually has less infrastructure but more per-pod duplication and inconsistent warmup; shared L2 caching adds a dependency, network hops, capacity planning, and failure handling. Stronger freshness requirements can cost more than the cache itself.
+
+A useful planning output has three layers:
+
+* **Guaranteed scope:** the source-backed feature and the observability needed to measure it.
+* **Conditional scope:** the cache implementation, with an estimate based on the stated traffic, reuse, value-size, and freshness scenarios.
+* **Decision gate:** the metric or test that promotes the conditional cache to required work—or removes it from the launch plan.
+
+This lets engineering give Product a useful delivery estimate without turning an unverified optimization into an architectural dependency. The right sentence is not “we know we need a cache”; it is “we will keep the path cache-ready, estimate the cache under these scenarios, and implement it before launch if the stated capacity or latency constraint is real.” A cache box in a diagram with no key model, freshness contract, miss behavior, capacity estimate, or validation gate is not a design; it is only scope inflation.
 
 #### The layer map — each layer caches a different thing
 
