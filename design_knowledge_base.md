@@ -777,6 +777,63 @@ The trigger is not "we have a lot of traffic" — it is **the caller does not ne
 
 ---
 
+#### Choosing a queue: greenfield versus retrofit
+
+There are two different questions hidden inside “should we add a queue?”
+
+**Greenfield:** the work is asynchronous by nature. The caller does not need the result before the request completes, the work can be retried independently, or a separate consumer should scale and deploy independently. In this case the queue is part of the domain and delivery contract; actual traffic is useful for sizing, but it is not the reason the queue exists.
+
+**Retrofit:** an existing synchronous path already has callers, transaction boundaries, latency expectations, and failure behavior. Adding a queue is not merely inserting infrastructure. It may change when data becomes durable, what a successful response means, how retries behave, and which component owns consistency.
+
+Use this sequence:
+
+```text
+Existing operation
+  |
+  +-- Does the caller need the completed result before responding?
+  |      |
+  |      +-- Yes
+  |      |    Keep the external contract synchronous.
+  |      |    Optimize, batch, bound concurrency, scale the source,
+  |      |    or reject excess load with explicit backpressure.
+  |      |
+  |      +-- No
+  |           |
+  |           +-- Is the work a side effect of a synchronous transaction?
+  |           |      → Keep the core transaction synchronous; publish an
+  |           |        outbox event and process the side effect asynchronously.
+  |           |
+  |           +-- Is the whole operation safely deferrable?
+  |                  → Accept a durable command, return 202 plus an operation
+  |                    ID, and let an idempotent worker perform the operation.
+```
+
+**The safest retrofit is usually side-effect extraction.** Keep the source-of-truth database transaction and its existing response semantics. In the same transaction, write an outbox record. A relay publishes the outbox record to the queue, and an idempotent worker handles notifications, indexing, cache refreshes, analytics, or other work that does not need to delay the original response. This avoids the crash window between “database commit” and “message publish.”
+
+If the primary database write itself moves behind the queue, the endpoint is no longer a synchronous write even if the URL stays the same. Make that contract explicit: validate what can be validated up front, durably enqueue a command, return `202 Accepted` with an operation ID, expose status, and define retry/idempotency behavior. Do not silently turn `200 completed` into `202 accepted` only when traffic is high.
+
+There is a third pattern: put a queue in front of the work but have the request wait for the worker result. This can provide a bounded worker pool and smooth short bursts, but it is not truly asynchronous. It adds queueing latency, creates request-timeout and “worker completed but response was lost” ambiguity, and does not increase database capacity. Treat it as an internal concurrency limiter, not as a semantic migration.
+
+Retrofit safeguards:
+
+* Define the source of truth and the transaction boundary before choosing the queue location.
+* Add an idempotency key or deterministic command ID; assume at-least-once delivery and duplicate processing.
+* Preserve ordering only where the business operation requires it; partition by the entity or aggregate key when needed.
+* Make retries bounded and observable; isolate poison messages in a dead-letter path.
+* Use a feature flag, shadow consumer, or canary before making the worker authoritative.
+* Track queue age, depth, processing rate, retry count, and end-to-end completion latency.
+* Define behavior for a producer crash, relay crash, worker crash, database timeout, duplicate message, and lost client response.
+
+| Decision question | Greenfield | Retrofit |
+|---|---|---|
+| Why add the queue? | Async semantics, independent scaling, retry/replay, or fan-out | Safely separate work without breaking existing contracts |
+| What must be decided first? | Delivery semantics and consumer ownership | Transaction boundary, response contract, and migration path |
+| Safest first use | Queue the naturally deferred operation | Extract non-critical side effects via an outbox |
+| Main failure mode | Choosing the wrong delivery semantics | Split-brain ownership or a dual-write gap |
+| Traffic spike response | Scale consumers within source capacity | Do not change sync to async implicitly; apply backpressure or use an explicit async API |
+
+A queue should therefore be judged differently in the two contexts: greenfield design asks “is this work naturally asynchronous?”, while retrofit design asks “can we move this work across a durability and response boundary without changing correctness?”
+
 ### Sharding / Partitioning
 
 **Problem it solves:** A single node can't handle write throughput, connection count, or data volume.

@@ -24,6 +24,7 @@ Never revise an entry. If understanding changes later, write a new entry and add
 | 2026-08-21 | [Cache-miss stampedes](2026-08-21-cache-stampede-strategies.md) | Is preloading the only answer for high read volume? |
 | 2026-08-21 | [Autoscaling caches](2026-08-21-autoscaling-cache-coalescing.md) | How should coalescing and preloaded distributed caches work at scale? |
 | 2026-08-25 | [Performance decision tree](2026-08-25-performance-decision-tree.md) | When a database is the bottleneck, when should the path stay sync versus become async? |
+| 2026-08-25 | [Queue adoption](2026-08-25-queue-adoption-greenfield-retrofit.md) | Why is queue selection straightforward in greenfield systems but difficult as a retrofit? |
 | 2026-08-21 | [CarGurus cache strategy](2026-08-21-cg-cache-strategy.md) | What strategy uses eager local caches plus Kafka fan-out? |
 
 ## Entry template
