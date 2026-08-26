@@ -658,6 +658,68 @@ Ideal for object-storage artifacts, search indices, config bundles, and content-
 
 ---
 
+### Performance investigation decision tree
+
+When performance is bad, do not choose a technology from the symptom alone. First attribute the time and saturation: application CPU/thread pool, network, external dependency, cache, or database. Then choose the remedy for the actual constraint.
+
+```text
+Performance is bad
+  |
+  +-- Where is the time or saturation?
+       |
+       +-- Application CPU / thread pool
+       |     → profile, remove blocking work, bound concurrency, scale instances
+       |
+       +-- External dependency
+       |     → timeout, retry budget, circuit breaker, fallback, or async handoff
+       |
+       +-- Database
+             |
+             +-- Is the query itself inefficient?
+             |     → inspect the query plan, add/fix indexes, remove N+1 work,
+             |       select less data, or rewrite the query
+             |
+             +-- Is this repeated, read-heavy work with acceptable staleness?
+             |     → cache or materialize the read; use local L1, shared L2,
+             |       or both based on sharing and latency needs
+             |
+             +-- Is the DB saturated by concurrent requests?
+             |     → limit DB concurrency, size the connection pool deliberately,
+             |       and apply backpressure
+             |
+             +-- Is the workload bursty and can completion be deferred?
+             |     → queue durable work and process it with a bounded worker pool
+             |
+             +-- Must the caller receive synchronous confirmation?
+             |     → keep the contract synchronous; optimize, batch, scale/shard,
+             |       or reject excess load with 429/503
+             |
+             +-- Is capacity permanently insufficient?
+                   → batch, partition/shard, add a read model/read replica where
+                     consistency permits, or increase database capacity
+```
+
+The order matters. **Do not add a cache before checking whether the source query is simply missing an index or doing accidental N+1 work.** A cache can hide the inefficiency while adding invalidation, staleness, and warmup obligations.
+
+The database branch has two separate axes:
+
+| Question | Preferred response |
+|---|---|
+| Is the source query inefficient? | Fix the query plan, indexes, joins, selected columns, or N+1 behavior |
+| Is the same read repeated? | Cache or materialize it; measure key reuse before accepting cache complexity |
+| Is concurrency exhausting DB capacity? | Bound worker/request concurrency and apply backpressure |
+| Is work safely deferrable? | Queue it and process at a DB-safe rate |
+| Is synchronous completion required? | Keep it synchronous; optimize or scale the write path, then return 429/503 under overload |
+| Is capacity permanently below demand? | Batch, partition/shard, add an appropriate read model, or increase DB capacity |
+
+A queue is therefore a **capacity shaper**, not a reason to change API semantics during a spike. The stable choices are:
+
+* **Synchronous contract:** the request returns only after the required database work is durably complete. Protect the database with query optimization, bounded concurrency, capacity changes, and explicit overload responses.
+* **Asynchronous contract:** the request durably accepts a command, returns an acknowledgment such as `202 Accepted` plus an operation ID, and a bounded worker pool performs the database work later.
+* **Explicit hybrid contract:** choose sync versus async from a stable property such as operation type or payload size—not from transient cluster pressure. If the system cannot complete synchronously during a spike, use backpressure rather than silently changing `200 completed` into `202 accepted`.
+
+A queue absorbs a finite burst only when the average consumer capacity can eventually drain it. If arrival rate remains above database-safe processing rate, backlog grows without bound; the system still needs optimization, more capacity, partitioning, or load shedding.
+
 ### Message Queue / Async Processing
 
 **Problem it solves:** Decouple producer from consumer, absorb traffic spikes, handle work that doesn't need an immediate response.
