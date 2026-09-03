@@ -32,6 +32,12 @@ A queue placed in front of work while the request waits for the worker is a thir
 6. Canary the consumer and observe lag, retries, duplicate handling, and end-to-end latency.
 7. Only then make the asynchronous path authoritative.
 
+
+
+## Follow-up observation
+
+True asynchronous workflows are usually designed that way from the beginning. The queue decision propagates into API response semantics, UI state transitions, operation tracking, retries, notifications, permissions, auditability, and recovery. That is why a retrofit more commonly queues side effects behind an unchanged synchronous transaction, or introduces a separate explicit async workflow, rather than silently converting an existing endpoint during load.
+
 ## What changed in the reference
 
 * `Message Queue / Async Processing` — added greenfield versus retrofit guidance, outbox-based side-effect extraction, explicit async command contracts, and the internal-smoothing caveat

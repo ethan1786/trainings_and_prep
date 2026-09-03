@@ -834,6 +834,8 @@ Retrofit safeguards:
 
 A queue should therefore be judged differently in the two contexts: greenfield design asks “is this work naturally asynchronous?”, while retrofit design asks “can we move this work across a durability and response boundary without changing correctness?”
 
+
+In practice, true asynchronous workflows are usually designed as asynchronous from the beginning because the choice propagates beyond the queue: API responses, UI states, operation tracking, retry behavior, notifications, permissions, auditability, and failure recovery all need to understand states such as `accepted`, `processing`, `completed`, and `failed`. A retrofit therefore more often keeps the user-facing operation synchronous and moves only side effects behind a queue, or introduces a separate explicitly asynchronous endpoint/workflow. A queue added only to smooth an internal burst while the request still waits is a concurrency-control mechanism, not a full sync-to-async migration.
 ### Sharding / Partitioning
 
 **Problem it solves:** A single node can't handle write throughput, connection count, or data volume.
