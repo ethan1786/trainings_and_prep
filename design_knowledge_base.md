@@ -1061,27 +1061,25 @@ Sagas exist because you already lost the ability to use one transaction. So the 
 
 **Design lesson from the fallback side:** always ask what the fallback path costs. A breaker that dumps cache traffic onto the primary datastore trades one outage for another.
 
-##### When you need it, and when you don't
+##### Default resilience bundle for synchronous remote calls
 
-The precondition is often missed: a circuit breaker is only useful if **you have something better to do than wait.** If there is no fallback and no way to degrade, opening the breaker just converts a slow failure into a fast failure — sometimes worthwhile, often not.
+For synchronous calls across a process or network boundary, circuit breaking should usually be part of the default resilience bundle. This applies to REST/RPC calls and, with database-specific care, database calls:
 
-**Order of adoption — the first two matter more than the breaker:**
-1. **Timeouts.** A call with no timeout is the actual root cause of most cascades. This is non-negotiable and gives you most of the protection.
-2. **Bounded concurrency / bulkheads.** Cap how many in-flight calls one dependency can consume so it cannot exhaust the shared pool or thread pool. Often this alone prevents the cascade.
-3. **Circuit breaker.** Adds "stop trying for a while" on top of the above.
-4. **Retries — last, and carefully.** Retries *amplify* an overload. Only with backoff, jitter, a strict budget, and idempotent operations.
+1. **Timeout/deadline:** bound each attempt and the overall request budget. A call with no timeout is a primary cause of cascading failure.
+2. **Bulkhead/concurrency limit:** cap how many in-flight calls, threads, or connections this dependency can consume so it cannot exhaust shared resources.
+3. **Circuit breaker:** after a rate of timeouts or failures, stop sending work for a cooldown period; use half-open probes to test recovery.
+4. **Bounded retry:** retry only transient failures and operations that are safe to repeat, with backoff, jitter, and a strict retry budget. Retries can amplify overload.
+5. **Fallback or explicit fast failure:** use a cache, stale value, degraded response, or `503`/error according to the operation's contract.
 
-**Real triggers:** the dependency is remote and can be slow or down; a meaningful fallback exists (cache, stale value, degraded response, null field); the call is on a shared resource path where pile-up harms unrelated traffic; and the dependency is optional to the response's core value.
+A fallback does not have to be a successful substitute. **Fast failure is itself a valid degradation mode** when the alternative is waiting on a failing dependency, exhausting request threads, holding connections, and creating a larger cascade. A circuit breaker protects the system; it does not guarantee that a mandatory operation can succeed while its dependency is unavailable.
 
-**Don't add one when:**
-- **The dependency is mandatory with no fallback** — you can't render the page without the listing. A timeout plus a clean error is the honest design; a breaker adds machinery without changing the outcome.
-- Traffic is too low to produce a meaningful failure signal. Thresholds on small samples flap, and a flapping breaker is worse than none.
-- It's an in-process call, or a fast local dependency.
-- **You haven't thought through the fallback's capacity.** This is the trap: a breaker in front of a cache that falls back to the primary datastore can turn a cache blip into a database outage. Always compute the fallback load.
+**REST/RPC:** breakers are usually straightforward to apply per dependency or endpoint. Count timeouts and transport/server failures, not normal business errors. Do not retry every `4xx`, and do not let retries bypass the breaker or the overall deadline.
 
-**Tuning that actually matters:** thresholds should be **rate-based over a minimum sample size** (not "5 consecutive failures"), the cooldown must exceed realistic recovery time, half-open must admit only a trickle, and **slow calls should count as failures** — a dependency answering in 30s is failing even if it eventually returns 200. Scope breakers **per dependency**, never one global breaker.
+**Database:** use query/socket timeouts, connection-pool limits, and bulkheads first. A breaker can stop new work when the database is unavailable or consistently timing out, but it does not fix an inefficient query or create database capacity. Retry reads only when safe; retrying a write after an ambiguous timeout can duplicate a transaction unless the operation has an idempotency key or a clearly safe transaction protocol.
 
-**Doesn't fit when:** the dependency is mandatory with no meaningful fallback.
+**Tuning that actually matters:** thresholds should be rate-based over a minimum sample size, the cooldown should exceed realistic recovery time, half-open should admit only a small probe rate, and slow calls should count as failures. Scope breakers per dependency or failure domain, not as one global switch.
+
+**Do not use a breaker as a substitute for:** a timeout, bulkhead, capacity plan, or overload policy. The bundle works together: the timeout bounds each call, the bulkhead bounds concurrency, the breaker stops repeated attempts, retries handle selected transient faults, and the fallback or fast error defines what the caller receives.
 
 ---
 
@@ -2513,7 +2511,7 @@ A CDN is two products sold as one: **geographic latency reduction** and **origin
 | Slow processing | Async job | Message queue + worker pool |
 | Read/write contention | Separation | Read replica, CQRS, materialized views |
 | Data growing unbounded | Tiering | Hot/warm/cold, TTL, archive to object storage |
-| External service unreliable | Resilience | Circuit breaker + timeout + fail-open + fallback |
+| External service unreliable | Resilience | Timeout + bulkhead + circuit breaker + bounded retry; fallback optional |
 | Multiple services need same data | Shared state | Redis, event-driven invalidation, CDC |
 | Need audit trail | Append-only log | Event table, Kafka topic, event sourcing |
 | Caller needs durability guarantee | Sync persist | Must hit the durable store before 200 |
