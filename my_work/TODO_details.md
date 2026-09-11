@@ -166,7 +166,7 @@
 
 Once you fill these in:
 
-1. **Update:** `ai_agent_platform_deepdive.md` (the doc I just created)
+1. **Update:** `ai_agent_platform.md` (the doc I just created)
    - Replace all `[TODO: FILL IN]` sections
    - Use this doc to prep for interviews
 

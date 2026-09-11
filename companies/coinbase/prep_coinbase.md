@@ -744,7 +744,7 @@ Story numbering references star_stories.md (1=API Mod, 2=Parity, 3=AI Platform, 
 - [ ] `companies/coinbase/questions/systemDesign/realtime_market_data.md` — #1 topic, read thoroughly
 - [ ] New paid resource for Coinbase Explore ("four questions" framing, pipeline split)
 - [ ] `system_design_playbook.md` — skim NFR section + estimation framework + common patterns (lines 1-500)
-- [ ] `cheatsheets/system_design_cheatsheet.html` — print, keep on desk
+- [ ] `design/interview/system_design_cheatsheet.html` — print, keep on desk
 - [ ] Practice drawing the Explore architecture from memory on paper (once)
 - [ ] `companies/coinbase/questions/systemDesign/crypto_exchange_order_system.md` — backup topic
 - [ ] `companies/coinbase/questions/systemDesign/credit_approval_risk_engine.md` — backup topic
@@ -784,7 +784,7 @@ Story numbering references star_stories.md (1=API Mod, 2=Parity, 3=AI Platform, 
 
 ### General / Logistics
 
-- [ ] Print `cheatsheets/system_design_cheatsheet.html`
+- [ ] Print `design/interview/system_design_cheatsheet.html`
 - [ ] Set up Miro account + test whiteboard tool
 - [ ] Familiarize with CodeSignal IDE (coding + SD rounds use it)
 - [ ] Skim crypto basics (Section 9) — finality, reconciliation, hot/cold wallets (5 min)

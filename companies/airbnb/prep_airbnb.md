@@ -243,7 +243,7 @@ Airbnb's system design questions are heavily travel/hospitality domain. Expect q
 - [ ] Re-read resume_airbnb.html
 - [ ] Practice Stories 5, 17, 1, 13 aloud (2 min each)
 - [ ] Review system_design_playbook.md: Conversational AI System, Rate Limiter, Distributed Message Queue, Notification System
-- [ ] Review technical_playbook.md: distributed systems, event-driven patterns, caching
+- [ ] Review coding/patterns.md: distributed systems, event-driven patterns, caching
 - [ ] Brush up on RAG patterns: chunking strategies, embedding models, vector stores, retrieval evaluation (precision/recall)
 - [ ] Review agent planning patterns: ReAct, chain-of-thought, tool use, multi-step reasoning
 - [ ] Have "Why Airbnb?" answer ready

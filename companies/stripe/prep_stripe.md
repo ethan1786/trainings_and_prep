@@ -208,6 +208,6 @@ Stripe has a **strong emphasis on API design** — relatively unique among compa
 - [ ] Re-read resume_stripe.html
 - [ ] Practice Stories 1, 3, 5, 12 aloud (2 min each)
 - [ ] Review system_design_playbook.md: Payment System, Rate Limiter, Distributed Message Queue
-- [ ] Review technical_playbook.md: concurrency, distributed transactions
+- [ ] Review coding/patterns.md: concurrency, distributed transactions
 - [ ] Have "Why Stripe?" answer ready
 - [ ] Prepare 3 questions per interviewer

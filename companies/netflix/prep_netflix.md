@@ -293,6 +293,6 @@ Netflix weighs system design very heavily. Key differences from standard intervi
 - [ ] Practice culture fit answers: incomplete info, disagreement, failure
 - [ ] Review system_design_playbook.md: Chat System (WebSocket patterns), Distributed Message Queue
 - [ ] Review Netflix DGS documentation — be ready to discuss @DgsQuery, DataLoader, federation directives
-- [ ] Review technical_playbook.md: JVM internals, concurrency
+- [ ] Review coding/patterns.md: JVM internals, concurrency
 - [ ] Have "Why Netflix?" answer ready
 - [ ] Prepare 3 questions per interviewer
