@@ -100,9 +100,29 @@ Source material for AI-competency stories and the resume rewrite. **Full detail 
 - [ ] **Re-warm Java.** Stale in daily practice since ~March — zero Java at work now. Matters for Netflix and any Java shop.
 - [ ] Identify the actual knowledge holes as they surface, so the eventual WHY-depth list is targeted
 
-### B. Anthropic — time sensitive
+### B. Anthropic — highest fit, gated on location
 
-New large Boston office opened Sept 2026, no reqs posted yet, hiring wave expected. **Repo currently has zero Anthropic material** (only passing mentions in Meta/OpenAI/design docs).
+**Corrected September 11, 2026 after checking the live board.** The earlier premise ("no reqs yet, wait for the hiring wave") was wrong. Anthropic has ~200 engineering roles open *now*, several dead-center in lane:
+
+| Role | Location | Note |
+|---|---|---|
+| **Staff SWE, Billing Platform** | SF / NYC / SEA | Payments + commerce. Best lane match in the entire pipeline, any company. |
+| Staff+ SWE, Backend | SF / NYC / SEA | |
+| Staff+ SWE, Claude Managed Agents | SF / NYC | Agentic systems = current day job |
+| Senior Staff SWE, API | SF / NYC | |
+| Senior / Staff+ SWE, Full-stack | SF / NYC / SEA | |
+
+**The gate is location, not the coding bar.** Product engineering at Anthropic is onsite SF/NYC/SEA; remote-friendly roles cluster in Public Sector, People Products, Data Infrastructure, and Inference Velocity, mostly with travel requirements. Boston is already in their office filter, but the roles tagged Boston today are IT Systems Engineer, Technical Deployment Lead, Head of GovTech Sales, Executive Services PM, and Physical Security Design Lead — **GTM, deployment, IT and physical security, not product engineering.** Exactly one engineering-titled Boston role exists and it's IT/mobile-client under Security.
+
+**His decision (Sept 11):** will **not** relocate to SF or NYC. **Cambridge office 3 days/week is acceptable.** Plans to wait ~1–2 months, then apply, and raise Boston basing if they reach out.
+
+**Trigger to watch is req composition, not the calendar.** If engineering titles beyond IT start appearing for Boston, that's the green light and it may come before November. If Boston fills out with sales and enterprise deployment only, product engineering isn't coming and Anthropic drops down the list regardless of fit.
+
+**Sequencing note:** waiting does not improve eligibility — an SF/NYC/SEA tag today will still be there in November; whether Boston gets product eng is Anthropic's call, not a function of his timing. The wait buys prep; it costs open reqs closing. Also: ask the location question as an *inquiry* (recruiter note or connection: "is this org open to a Boston-based candidate?") rather than applying to an onsite-tagged role and hoping to convert it later. Recruiters screen on location early, so applying-and-hoping yields a fast no that teaches nothing.
+
+**Open:** does he have any Anthropic connection? The ask would be unusually cheap and specific — not "refer me," just "is this org open to Boston." Unlike the Netflix situation, that burns nothing.
+
+**Repo had zero Anthropic material** until today; `companies/anthropic/prep_anthropic.md` is now a stub to build out.
 
 - [ ] Set up a job alert for Anthropic Boston + remote engineering reqs
 - [ ] Create `companies/anthropic/` — prep doc, resume variant, questions
@@ -145,8 +165,10 @@ The delegation split for AI-enabled rounds:
 
 | Company | Status | Timing |
 |---|---|---|
-| **Anthropic** | No reqs yet, Boston office new | Watch weekly. Best fit in the pipeline. |
+| **Anthropic** | ~200 eng roles open now; in-lane ones are SF/NYC/SEA. Boston has no product-eng reqs yet. | Best fit, gated on location. Watch what Boston posts next. Apply ~Nov. |
 | **Coinbase** | Rejected May 2026 (Staff). AI-native format already documented in prep doc. | Cooldown resets **~Nov 2026**. Strong re-target — his current work matches their published bar. |
+
+**November is the convergence point:** Anthropic apply + Coinbase cooldown reset. Working backwards, that makes **resume done by end of October** a hard deadline, landing right as the Sept–Oct study phase closes.
 | **Meta** | Applied, no recruiter contact | Passive. Prep docs exist. |
 | **Netflix** | Two referred apps got no response. Referral connection **resting until ~Feb 2027**. | Cold apply anytime — nothing blocks it. **JR41744 Pricing, Catalog and Offers (USA Remote)** was the best in-lane fit and was never applied to. Verify still open. |
 | **Google** | Failed hiring assessment April 2026 | ~Q1 2027 |
