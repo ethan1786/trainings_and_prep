@@ -1,7 +1,9 @@
-# Interview Prep — Organized Structure
+# Interview Prep
 
-> Updated: July 2026
-> Staff/Senior backend engineer job search materials, organized by topic.
+> Restructured: September 11, 2026
+> Principal SWE job search — Round 3. Organized by **lifecycle**, not by topic.
+
+**→ Start at [`job_search/round3_plan.md`](job_search/round3_plan.md)** — current state, corrected diagnosis, action items, decisions already made. Read it first in a new session.
 
 ---
 
@@ -9,151 +11,111 @@
 
 ```
 interview_prep/
-├── README.md                      ← You are here
 │
-├── behavioral/                    ← Behavioral interview prep
-│   ├── behavioral_playbook.md     — STAR stories, LP mapping, company-specific angles
-│   └── assessment_playbook.md     — Take-home assessment strategies
+├── job_search/                 ← Strategy and state
+│   ├── round3_plan.md          ★ START HERE — active plan, action items, decisions
+│   ├── reapply_timeline.md     — cooldowns and re-application schedule
+│   └── archive/                — round1_todo.md, round2_todo.md (history)
 │
-├── system_design/                 ← System design prep
-│   ├── design_knowledge_base.md   — Core patterns, tools, constraint→solution mapping
-│   ├── system_design_playbook.md  — Interview delivery, layering approach, tradeoffs
-│   ├── domain_interview_playbook.md — Domain-specific scenarios (payments, auth, etc.)
-│   ├── platform_infra_angle.md    — Platform/infra framing for design rounds
-│   ├── chat_system.md             — Example: Chat system design
-│   ├── news_feed.md               — Example: News feed design
-│   ├── notification_system.md     — Example: Notification system
-│   ├── rate_limiter.md            — Example: Rate limiter
-│   ├── twitter.md                 — Example: Twitter-like system
-│   ├── url_shortener.md           — Example: URL shortener
-│   └── youtube.md                 — Example: Video platform
+├── my_work/                    ← CarGurus context: the source for every story
+│   ├── agent_orchestration.md  — how I work now; override log; AI-competency material
+│   ├── ai_agent_platform.md    — the agentic system: architecture, perf work, incidents
+│   ├── TODO_details.md         — metrics/context still to gather (unfilled)
+│   └── private/                — see note below
 │
-├── java/                          ← Java-specific prep
-│   └── java_playbook.md           — Java interview topics, JVM, concurrency, collections
+├── design/
+│   ├── study/                  ← LIVING study system (git subtree, see below)
+│   │   ├── design_knowledge_base.md  — distilled reference, rewritten in place
+│   │   ├── corrections.md            — "what I believed → what's accurate → why I was wrong"
+│   │   ├── open-questions.md         — unverified claims + what would settle them
+│   │   ├── log/                      — append-only session log, 19 entries
+│   │   └── README.md, SETUP.md       — the working loop and conventions
+│   └── interview/              ← Delivery artifacts
+│       ├── playbook.md         — staff+ framework, tradeoff articulation
+│       ├── component_decision_tree.md — technology selection
+│       ├── domain_playbook.md  — payments domain walkthrough
+│       ├── platform_infra_angle.md
+│       ├── system_design_cheatsheet.html, system_design_flow.html
+│       └── examples/           — worked problems (+ coinbase/, openai/ sets)
 │
-├── python/                        ← Python-specific prep (coming soon)
-│   └── (empty — add Python LC, idioms, asyncio, Pydantic notes here)
+├── coding/
+│   ├── patterns.md             — patterns + data structures (was technical_playbook.md)
+│   ├── lc_quickref.md          — "what pattern is this?" skim sheet
+│   ├── study_plan.md
+│   └── problems/               — coinbase_oa/, coinbase_vo/, openai/ (reusable sets)
 │
-├── job_search/                    ← Job search tracking & strategy
-│   ├── round3_plan.md             — ★ START HERE. Active plan: state, diagnosis, action items, decisions
-│   ├── job_search_todo.md         — Round 1–2 history, results, lessons (superseded as active doc)
-│   ├── reapply_timeline.md        — Re-application schedule, cooldown tracking
-│   └── job_search_todo_old.md     — Archived (pre-June 2026)
+├── behavioral/
+│   ├── behavioral_playbook.md  — STAR stories, LP mapping
+│   ├── assessment_playbook.md  — take-home strategy
+│   └── disagree_to_commit_supportive.md
 │
-├── generic/                       ← Universal interview materials
-│   ├── interviewer_questions.md   — Questions to ask interviewers (by stage + company)
-│   ├── leetcode_study_plan.md     — LC patterns, study schedule
-│   └── technical_playbook.md      — General technical interview strategies
+├── languages/
+│   ├── java_playbook.md        — JVM, concurrency, collections (stale in daily practice)
+│   └── typescript/             — EMPTY. Daily language now; no material yet.
 │
-├── companies/                     ← Company-specific resumes & materials
-│   ├── coinbase/
-│   ├── meta/
-│   ├── nvidia/
-│   ├── affirm/
-│   ├── circle/
-│   ├── spotify/
-│   └── (others...)
+├── companies/                  ← Live targets only
+│   ├── anthropic/              — STUB. Boston office new, no reqs yet. Time-sensitive.
+│   ├── coinbase/               — cooldown resets ~Nov 2026. AI-native format documented.
+│   ├── meta/                   — applied, no recruiter contact
+│   ├── netflix/                — referral resting to ~Feb 2027; cold apply unblocked
+│   ├── google/                 — assessment cooldown ~Q1 2027
+│   ├── cherry/                 — rejected, but HM said stay connected
+│   ├── stripe/, reddit/, airbnb/ — re-apply candidates
+│   └── archive/                — 12 closed or never-pursued companies
 │
-├── cheatsheets/                   ← Quick reference sheets
-│   └── (various cheat sheets)
-│
-└── .claude/                       ← Claude Code config & memory
-    └── memory/                    — Auto-memory (feedback, project status, etc.)
+├── generic/                    — resume_base.html, interviewer_questions.md, salary_negotiation.md
+└── tools/                      — find_remote_jobs.py
 ```
 
 ---
 
-## Quick Start by Interview Type
+## The lifecycle split
 
-| Interview Type | What to Read |
-|---|---|
-| **System Design** | `system_design/design_knowledge_base.md` (patterns + tools) → `system_design/system_design_playbook.md` (delivery) |
-| **Behavioral** | `behavioral/behavioral_playbook.md` → pick 3-4 stories, practice STAR format |
-| **LeetCode** | `generic/leetcode_study_plan.md` → focus on patterns, not volume |
-| **Java coding** | `java/java_playbook.md` → JVM, concurrency, collections deep dive |
-| **Python coding** | `python/` (TBD — start with LC in Python, asyncio, Pydantic) |
-| **Asking questions** | `generic/interviewer_questions.md` → manager screening, culture red flags |
+Two kinds of content want opposite things, so they live apart.
 
----
+| | Lifecycle | Rule |
+|---|---|---|
+| `design/study/design_knowledge_base.md` | **Rewritten in place** | Always reflects current best understanding. Delete what's wrong — git keeps history. |
+| `design/study/log/` | **Append-only** | Never revised. Preserves the reasoning path, including wrong turns. |
+| `design/study/corrections.md` | **Append-only** | The highest-value file here. Also the best source of design-round narration. |
+| `design/interview/`, `coding/`, `behavioral/` | Artifacts | Interview delivery material, revised freely. |
+| `my_work/` | Living | Ground truth about my own work; feeds resumes and stories. |
+| `companies/` | Per-application | Archive when a target closes rather than deleting. |
 
-## Current Job Search Status (as of July 2026)
+### Reading pattern
 
-**Active Pipeline:**
-- Meta (E6) — referral submitted, waiting for recruiter contact
-- Affirm — waiting on connection response
-- Circle — waiting on connection response
-- Spotify — ready to cold apply
-
-**Upcoming:**
-- Coinbase — November re-apply (6-month cooldown)
-- NVIDIA — monitoring for new US-based roles
-
-See `job_search/job_search_todo.md` and `job_search/reapply_timeline.md` for details.
+- *"What should I do?"* → `design/study/design_knowledge_base.md`
+- *"How did I get here, what did I believe before?"* → `design/study/log/`
+- *"Am I about to repeat a known mistake?"* → `design/study/corrections.md`
+- *"What should I dig into next?"* → `design/study/open-questions.md`
+- *"Where does the search stand?"* → `job_search/round3_plan.md`
 
 ---
 
-## Prep Philosophy (lessons from 3 months of interviews)
+## `design/study/` is a git subtree
 
-1. **System Design:** Start simple, add complexity ONLY when constraint forces it. Show the WHY (tradeoffs), not just the WHAT (solution).
-2. **Behavioral:** 2-3 min per story (30s setup, 60s what/why, 30s result). Pause and let them dig deeper. Show reasoning, not just outcomes.
-3. **LeetCode:** Pattern recognition > volume. Know 10 patterns deeply, not 200 problems shallowly.
-4. **Delivery:** Conversational > rehearsed. IBM energy > desperate Coinbase energy.
-5. **Manager Screening:** Ask about autonomy, decision-making, and process vs. outcomes. Detect anxiety-driven management early.
+It tracks a separate repo so the study loop keeps its own history — `git log` there *is* the record of understanding evolving.
 
----
+```bash
+# Pull in new study sessions from the source repo
+git subtree pull --prefix=design/study design-notes master
 
-## Key Learnings from April-June 2026
+# Push changes made here back to it
+git subtree push --prefix=design/study design-notes master
+```
 
-- **Coinbase (Staff):** Passed all rounds, feedback: show WHY (tradeoffs, reasoning) not just WHAT (solution). Re-apply November.
-- **NVIDIA (Senior):** Passed 4 rounds, likely stalled due to HM leave + headcount moved to India. Monitor for new US roles.
-- **IBM/HashiCorp (Senior II):** Offered but down-leveled + hybrid + comp didn't work. Declined.
-- **Cherry (Staff):** Strong HM connection, "stay connected." Reach out September.
-- **Stripe, GitHub, Reddit, Airbnb:** System rejections from cold apps. Warm referrals > cold apps, always.
+The `design-notes` remote points at a local path (`~/Downloads/design-notes`). **If you move that folder, update the remote:**
 
-**The gap identified:** Showing reasoning journey (options considered, tradeoffs made, why this choice) vs. just stating the solution.
+```bash
+git remote set-url design-notes /new/path/to/design-notes
+```
 
-**The fix:** "I need X. Options are A vs B. Picking A because [reason]. Tradeoff: [what I give up]."
+**Do not rename or relocate files inside `design/study/`** — that guarantees conflicts on every pull. Add new material through the source repo, or edit in place and push back.
 
 ---
 
-## Memory System
+## A note on `private/`
 
-Auto-memory lives in `.claude/memory/` and persists across conversations:
+`design/study/private/vdp_orchestration_graphql_analysis.md` is internal analysis. It lives inside the subtree rather than under `my_work/private/` on purpose: moving it would make it reappear on every `subtree pull`.
 
-- `feedback_*.md` — What to do / not do (based on interview feedback, work frustrations)
-- `project_*.md` — Job search status, pipeline tracking
-- `user_*.md` — Your background, preferences, constraints
-
-These inform the AI assistant's recommendations without needing to repeat context.
-
----
-
-## What's Next
-
-**Immediate (July 2026):**
-- Wait for Affirm/Circle connections (1 week)
-- Cold apply Spotify if no connection found
-- Start Python LC warmup (for NVIDIA role)
-
-**Medium-term (Aug-Oct 2026):**
-- Re-apply wave to Stripe, Netflix, Dropbox (at Senior level)
-- Keep browsing Meta for right infra role
-- Prep Go basics (for Coinbase November)
-
-**Long-term (Nov 2026+):**
-- Coinbase re-apply (Staff, with improved delivery)
-- Evaluate Klaviyo as safety net if needed
-- Continue side project (options-ai) for learning + portfolio
-
----
-
-## Contributing / Updating
-
-This is your personal interview prep repo. Update freely:
-
-- Add new company-specific questions to `generic/interviewer_questions.md`
-- Log new applications in `job_search/job_search_todo.md`
-- Add Python notes to `python/` as you learn
-- Update `behavioral/behavioral_playbook.md` with new stories
-
-Keep it organized. Future-you will thank present-you.
+This repo is **private on GitHub** — verify that before ever changing visibility, and note that `.gitignore` does not untrack what's already committed.

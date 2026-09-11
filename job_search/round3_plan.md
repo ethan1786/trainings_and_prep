@@ -2,7 +2,7 @@
 
 > **START HERE in a new session.** This is the working doc: current state, corrected diagnosis, action items, and decisions already made.
 > Last updated: September 11, 2026
-> History for Rounds 1–2 lives in `job_search_todo.md`. Re-apply schedule in `reapply_timeline.md`.
+> History for Rounds 1–2 lives in `archive/`. Re-apply schedule in `reapply_timeline.md`. Repo map in `../README.md`.
 
 ---
 
@@ -36,19 +36,21 @@ Evidence:
 
 ## Current Phase — Sept–Oct 2026 Foundations Study
 
-**The method (his own, and it's the right one):** read the basics of each technology/tool/database in the stack, then pair it with **how that decision was actually made at CarGurus** — so it becomes his story rather than textbook knowledge.
+**This is already running in `design/study/`** — a living knowledge base (2676 lines), an append-only session log (19 entries since Aug 11), `corrections.md`, and `open-questions.md`, with a defined per-session working loop in `design/study/SETUP.md`.
+
+**The method:** read the basics of each technology/tool/database in the stack, then pair it with **how that decision was actually made at CarGurus** — so it becomes his story rather than textbook knowledge.
 
 Why this beats textbook study: a real decision carries its constraints with it (team skills, existing infra, deadline, cost ceiling, sunk investment). "Postgres vs Mongo" in the abstract has no right answer, which is why reciting one reads as thin. Staff+ rounds test reasoning *under constraints*, and real decisions are the only free source of constraints. It also survives depth — textbook knowledge collapses at the third consecutive "why."
 
-**Capture two columns per item, not one:**
+**Capture two columns per item, not one** (the existing `In practice (CG):` convention already does this):
 1. **WHY depth** — when it's the right choice, when it's wrong, what the alternatives are, how it fails
 2. **When it mattered to my area** — the moment this decision had a consequence for his product
 
 Column 1 alone is still someone else's knowledge with a CarGurus label on it. Column 2 is what makes it his.
 
-**Scope guard:** "every technology" is unbounded and will eat two months. Bound it to the ~12–15 items that appear in his own stack and his own stories — the agentic system (MongoDB, Redis, LLM providers, circuit breakers, connection pools), the payments/Java history, and what recurs in design rounds.
+**Scope guard:** "every technology" is unbounded and will eat two months. Bound it to the items that appear in his own stack and his own stories — the agentic system (MongoDB, Redis, LLM providers, circuit breakers, connection pools), the payments/Java history, and what recurs in design rounds. `design/study/open-questions.md` is the queue; work it rather than browsing.
 
-**Forcing function:** reading reliably produces the *feeling* of understanding — that's exactly the trap Round 1 fell into. The test isn't "did I read it," it's **can I take three consecutive whys without reaching for a pattern name.**
+**Forcing function — already built in.** The log template's *"The wrong turn worth keeping"* and *"Pressure I applied"* sections are exactly this, and `corrections.md` is the record. Reading reliably produces the *feeling* of understanding; the test isn't "did I read it," it's **can I take three consecutive whys without reaching for a pattern name.** Confidence labels (`verified` / `inferred` / `unverified`) keep that honest.
 
 **Handling decisions other teams made** — honest framing, already settled:
 > Another team owned it. I followed the process closely to understand how and why it was done, and whether it would affect my product area. Being aware of and actively following technical decisions is how I operate as a Principal here — so when a project lands on me, I pick it up fast and make sound calls with that context already in place.
@@ -61,7 +63,7 @@ Two cautions on that story:
 
 ## How I Work Now — the AI orchestration pipeline
 
-Source material for AI-competency stories and the resume rewrite. Full detail in memory (`ai-orchestration-workflow`).
+Source material for AI-competency stories and the resume rewrite. **Full detail and the override log: `my_work/agent_orchestration.md`.**
 
 1. AI gathers ticket requirements, reads codebase to understand the change
 2. **He authors** the implementation + testing + release + monitoring plan
@@ -94,7 +96,7 @@ Source material for AI-competency stories and the resume rewrite. Full detail in
 
 - [ ] **Keep a running override log.** Decaying asset — these specifics will be gone by November. Capture: what the agent proposed, what was wrong with it, how it was caught, what he did instead.
 - [ ] **Find one instance where cross-team awareness produced a concrete outcome** (see cautions above)
-- [ ] **Fill in `companies/meta/TODO_ai_agent_details.md`** — traffic/conversations per day, LLM calls, MongoDB cluster config, Redis deployment, team structure, cost impact. Still entirely unfilled since June. One gathering pass unblocks the resume, the Anthropic story, *and* the Coinbase AI-competency stories.
+- [ ] **Fill in `my_work/TODO_details.md`** — traffic/conversations per day, LLM calls, MongoDB cluster config, Redis deployment, team structure, cost impact. Still entirely unfilled since June. One gathering pass unblocks the resume, the Anthropic story, *and* the Coinbase AI-competency stories.
 - [ ] **Re-warm Java.** Stale in daily practice since ~March — zero Java at work now. Matters for Netflix and any Java shop.
 - [ ] Identify the actual knowledge holes as they surface, so the eventual WHY-depth list is targeted
 
@@ -115,10 +117,11 @@ All four `resume_*.html` variants predate June 2026 and describe a Java backend 
 - [ ] New variant leading with full-stack TypeScript + AI agentic systems + agent orchestration
 - [ ] Anthropic-specific resume + cover
 - [ ] Decide how to handle the Java-recency question — 13 years of Java, but the last 6+ months are TypeScript. Not fatal; needs a prepared answer, not improvisation.
-- [ ] Update `## Resume Strategy` table in `job_search_todo.md` once a new variant exists
+- [ ] Update the `## Resume Strategy` table in `archive/round2_todo.md` once a new variant exists
 
 ### D. Story updates needed (from the Sept 11 conversation)
 
+- [ ] **Convert `design/study/corrections.md` into design-round narration.** This is the most interview-valuable and least-used asset in the repo: *"the intuitive answer is X — that's what I believed — but it's wrong because Y"* IS narrating the journey. Same for the log's "Pressure I applied" sections, which are pre-built answers to interviewer pushback. 2676 lines of reference and 19 log entries currently reach zero interview material.
 - [ ] Add AI-competency material to `behavioral/behavioral_playbook.md`, built on override moments — not on "I use AI"
 - [ ] Rewrite the cross-team awareness story to include a produced outcome
 - [ ] Add an answer to "how do you decide how much verification is enough?" including a case of deliberately spending less
@@ -182,12 +185,16 @@ The delegation split for AI-enabled rounds:
 
 | Need | File |
 |---|---|
-| Round 1–2 history, results, lessons | `job_search/job_search_todo.md` |
+| Round 1–2 history, results, lessons | `job_search/archive/round2_todo.md` |
 | Re-apply schedule, cooldowns | `job_search/reapply_timeline.md` |
 | STAR stories, LP mapping | `behavioral/behavioral_playbook.md` |
-| Design mental model + delivery | `system_design/system_design_playbook.md` |
-| Patterns, constraint→solution mapping | `system_design/design_knowledge_base.md` |
-| Payments domain walkthrough | `system_design/domain_interview_playbook.md` |
-| Java depth | `java/java_playbook.md` |
+| Design mental model + delivery | `design/interview/playbook.md` |
+| Patterns, constraint→solution mapping | `design/study/design_knowledge_base.md` (live, 2676 lines) |
+| **Why I was wrong before** — best narration source | `design/study/corrections.md` |
+| Study session reasoning paths | `design/study/log/` (19 entries) |
+| Payments domain walkthrough | `design/interview/domain_playbook.md` |
+| Java depth | `languages/java_playbook.md` |
 | Coinbase AI-native interview format | `companies/coinbase/prep_coinbase.md` |
-| CarGurus agentic system detail (incomplete) | `companies/meta/ai_agent_platform_deepdive.md` + `TODO_ai_agent_details.md` |
+| CarGurus agentic system detail (incomplete) | `my_work/ai_agent_platform.md` + `my_work/TODO_details.md` |
+| How I work now; override log | `my_work/agent_orchestration.md` |
+| Coding patterns + practice problems | `coding/` |
