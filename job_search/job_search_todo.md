@@ -2,7 +2,7 @@
 
 > Last updated: June 8, 2026
 > Strategy shift: Senior roles at higher-bar companies for growth + comp.
-> Status: PAUSED. Taking a break. Resume in September 2026.
+> Status: **SUPERSEDED as the active doc — see `round3_plan.md`.** Kept for Round 1–2 history, results, and lessons.
 
 ---
 
@@ -316,6 +316,8 @@ The knowledge is there. The experience is there. The correct answers are there. 
 - Applied to 7 more companies cold (Netflix, Stripe, Affirm, Reddit, Dropbox, Airbnb, GitHub)
 
 **Key insight discovered:** The gap is NOT knowledge — it's delivery. I know all the correct answers but deploy them too fast without showing the reasoning journey. Staff+ requires "narrating the journey to a known destination" — not just arriving at the destination instantly.
+
+> **⚠️ CORRECTED September 2026 — this conclusion was incomplete.** The delivery symptom was concealing genuinely missing WHY: there was no reasoning to narrate because pattern recall had substituted for understanding ("use WebSocket because crypto exchanges do"). Foundations study is the fix, not presentation polish. See `round3_plan.md` → "The Diagnosis".
 
 **The fix (3 habits):**
 1. Don't name the solution for 3-5 minutes (explore the problem first)

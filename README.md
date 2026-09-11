@@ -35,7 +35,8 @@ interview_prep/
 │   └── (empty — add Python LC, idioms, asyncio, Pydantic notes here)
 │
 ├── job_search/                    ← Job search tracking & strategy
-│   ├── job_search_todo.md         — Active pipeline, todos, application tracking
+│   ├── round3_plan.md             — ★ START HERE. Active plan: state, diagnosis, action items, decisions
+│   ├── job_search_todo.md         — Round 1–2 history, results, lessons (superseded as active doc)
 │   ├── reapply_timeline.md        — Re-application schedule, cooldown tracking
 │   └── job_search_todo_old.md     — Archived (pre-June 2026)
 │
