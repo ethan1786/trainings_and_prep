@@ -22,6 +22,28 @@ Adding hours beyond ~10/wk: **keep the 2 design sessions fixed** — that's the 
 
 Same rules on every extra problem: timed + narrated. Volume without narration just re-practices the quiet solving that caused the round-2 ding.
 
+### Reading map — spare-time reading, in priority order
+
+Reading supports sessions; it never replaces them (bare reading = the "feeling of understanding" trap).
+
+**Coding (second-pass refresh — dups make it cheap):**
+1. `coding/lc_quickref.md` — skim first: pure problem→pattern re-linking.
+2. `coding/patterns.md` — skim decision tree + "when to use" + pitfalls. **Skip code templates for problems still scheduled as timed drills** — reading them right before turns the solve into typing. Only read templates after solving.
+3. `coding/study_plan.md` — tracker only; don't re-read problem lists.
+4. Review-exam days and stretch problems stay **unskimmed** — they're the cold signal.
+
+**Design:**
+1. `design/study/corrections.md` — now. Highest value, feeds D11.
+2. `design/study/open-questions.md` — 10 min; the session menu for D1–D8.
+3. `design/interview/playbook.md` — skim once before week 4.
+4. `design/study/design_knowledge_base.md` — **lookup only** (2676 lines): read the section matching each design session's topic before that session.
+5. `design/interview/component_decision_tree.md` — skim before weeks 4–5.
+6. `design/interview/domain_playbook.md` — skim before D10 (payment/settlement).
+7. `design/study/log/*` — only the entries the schedule pairs with sessions. Not all 19.
+8. `design/interview/examples/**` — **do NOT pre-read.** Draw-then-diff needs them unspoiled.
+9. `design/interview/platform_infra_angle.md` — optional, lowest.
+10. `design/interview/system_design_cheatsheet.html` — print near interview time.
+
 ---
 
 ## Coverage audit — does the list cover everything?
