@@ -11,6 +11,17 @@
 - **Coding:** solve **in the LeetCode editor** — interviews use online editors where syntax check is basic and expected, so plain-text solving is unnecessary practice. Timed (25 min M / 35 min H), narrate out loud + type decision points, one-sentence pattern note, check the `coding/study_plan.md` tracker. Paste the final solution into the session file after. Solve cold — repo solutions only after.
 - **Language:** **Java only** in all coding sessions. TypeScript is work-only.
 
+### Extra time — where it goes (don't cut design)
+
+Adding hours beyond ~10/wk: **keep the 2 design sessions fixed** — that's the round-3 foundations fix. Extra time goes to coding, in this order:
+
+1. Stretch problems already listed in the session.
+2. Pull forward the next coding session in the schedule — it's sequential, just advance down the list.
+3. Review exam days (standalone ~1 hr, 3 timed problems) — can start now, don't wait for November.
+4. Coinbase OA re-solves as warm-ups (Java).
+
+Same rules on every extra problem: timed + narrated. Volume without narration just re-practices the quiet solving that caused the round-2 ding.
+
 ---
 
 ## Coverage audit — does the list cover everything?
