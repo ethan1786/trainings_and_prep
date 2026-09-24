@@ -54,12 +54,77 @@ checkIn(2, "Leyton", 21);  checkOut(2, "Paradise", 30);  getAverageTime("Leyton"
 
 ## Solution
 
+> Solved in the LeetCode editor (compile-check + autocomplete), pasted back here for the record.
+
 ```java
-// write here
+import java.math.BigInteger;
+class UndergroundSystem {
+    // so we need to keep track of the stations and time to get the average
+    private Map<Integer, Pair<String, Integer>> customerTrips;
+    private Map<String, Map<String, Pair<BigInteger, BigInteger>>> averages;
+    public UndergroundSystem() {
+        customerTrips = new HashMap<>();
+        averages = new HashMap<>();
+    }
+
+    public void checkIn(int id, String stationName, int t) {
+        if (customerTrips.containsKey(id) && !customerTrips.get(id).left.equals(stationName)) {
+            throw new RuntimeException("Customer id " + id + " is checked into different places.");
+        }
+        customerTrips.put(id, Pair.of(stationName, t));
+    }
+
+    // question: for concurrent use cases, we need to lock on the customer trip, so it cannot check in a new trip before checking out the current trip.
+    public void checkOut(int id, String stationName, int t) {
+        if (!customerTrips.containsKey(id)) {
+            throw new RuntimeException("Customer id " + id + " is not checked in before checking out.");
+        }
+        // question: what if check in station name is the same as check out station name
+        int travelTime = t - customerTrips.get(id).right;
+        String startStation = customerTrips.get(id).left;
+        averages.putIfAbsent(startStation, new HashMap<>());
+        Map<String, Pair<BigInteger, BigInteger>> trips = averages.get(startStation);
+        trips.putIfAbsent(stationName, Pair.of(BigInteger.ZERO, BigInteger.ZERO));
+        Pair<BigInteger, BigInteger> totalTime = trips.get(stationName);
+        totalTime.left = totalTime.left.add(BigInteger.valueOf(travelTime));
+        totalTime.right = totalTime.right.add(BigInteger.ONE);
+    }
+
+    public double getAverageTime(String startStation, String endStation) {
+        // question 1: what if startStation equals endStation?
+        // question 2: concurrent? call volume?
+        Pair<BigInteger, BigInteger> totalTime = averages.computeIfAbsent(startStation, k -> new HashMap<>())
+            .computeIfAbsent(endStation, k -> Pair.of(BigInteger.ZERO, BigInteger.ZERO));
+        if (totalTime.right.intValue() == 0) {
+            return 0d;
+        } else {
+            return totalTime.left.doubleValue() / totalTime.right.doubleValue();
+        }
+    }
+
+    private static class Pair<T, R> {
+        T left;
+        R right;
+        static <T, R> Pair<T, R> of(T l, R r) {
+            Pair<T, R> p = new Pair<>();
+            p.left = l;
+            p.right = r;
+            return p;
+        }
+    }
+}
 ```
 
-## Debrief (fill together after)
+## Debrief
 
-- Time taken, where the minutes went:
-- What got narrated vs. skipped:
-- Verdict → which study-plan weeks to redo:
+- **Time taken, where the minutes went:** ~35 min, solved in the LeetCode editor. Most minutes went to Java syntax recall (months of TypeScript only), not algorithm. Verified against the examples; passing all test cases assumed (not yet re-confirmed).
+- **What got narrated vs. skipped:** three typed `question:` comments — concurrency lock per customer, same-station check-in/out, call volume. Good staff-level instincts, but surfaced as code comments mid-solve rather than spoken requirement clarifications upfront. No complexity statement (O(1) per op, O(n) space) and no spoken tradeoff reasoning.
+- **Verdict → which study-plan weeks to redo:** Algorithm memory intact — the two-map design was immediate and correct. **Week 1 = skim, not redo.** Java syntax re-warm is confirmed as a real need (`languages/java_playbook.md` pitfalls before Java drills). Narration remains the primary gap, same as the round-2 diagnosis.
+
+### Interviewer notes on the solution
+
+- Correct canonical approach: two maps (customer → checkin, stationPair → total/count), O(1) all ops.
+- **Overflow instinct is right but overbuilt:** total travel time ≤ 2×10^4 calls × 10^6 t = 2×10^10 > int, fits `long` easily. `BigInteger` is heavy — expect "why BigInteger, why not long?" and be ready to state the bound math out loud (that's the signal they want, not the type choice).
+- **Mutable shared `Pair` accumulation works single-threaded but is subtle** — and you yourself raised concurrency. Under concurrency it's broken; the per-customer lock answer you wrote is the right shape (LC 2043 Level 1). Cleaner read: small `Stats {long total; int count;}` and reassign via `put`.
+- **The guard throws are dead code per the problem's guarantees** (chronological events, checkout matches checkin). Fine to keep, but have the answer ready: "the contract guarantees it; the guard fails loudly during development and costs nothing."
+- **The three `question:` comments are the best part of the solve** — move them *before* coding next time. That's exactly the Coinbase feedback: "more proactive on requirements."

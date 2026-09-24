@@ -3,12 +3,12 @@
 > Companion to `round3_plan.md`. Every session lists its exact questions/topics — no hunting needed.
 > ~10 hrs/week = 4 sessions/week (2 design, 2 coding), ~2.5 hrs each.
 > **Prep continues until an offer lands.** When a company responds, its prep doc + problem set jumps the queue (reapply_timeline rule).
-> **Coding assignments are provisional** until the Week 0 calibration verdict lands. **Design assignments are fixed.**
+> **Calibration verdict (Sep 23):** algorithm memory intact, Java syntax rusty, narration thin. Week 1 = skim, not redo; schedule stands as written. Skim `languages/java_playbook.md` pitfalls before each Java drill. **Design assignments are fixed.**
 
 ### Per-session protocol
 
 - **Design (study loop):** work the assigned open-questions item → per `design/study/SETUP.md`: log entry, knowledge-base update, corrections append, open-questions update, commit naming the change in understanding.
-- **Coding:** timed solve (25 min M / 35 min H), narrate + type decision points, one-sentence pattern note, check the `coding/study_plan.md` tracker. Solve cold — repo solutions only after.
+- **Coding:** solve **in the LeetCode editor** (compile-check + autocomplete — plain-text solving doesn't work well), timed (25 min M / 35 min H), narrate out loud + type decision points, one-sentence pattern note, check the `coding/study_plan.md` tracker. Paste the final solution into the session file after. Solve cold — repo solutions only after.
 - **Language:** **Java** for Coinbase VO/OA drills (re-warm goal); TypeScript fine elsewhere.
 
 ---
