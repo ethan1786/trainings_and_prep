@@ -8,8 +8,8 @@
 ### Per-session protocol
 
 - **Design (study loop):** work the assigned open-questions item → per `design/study/SETUP.md`: log entry, knowledge-base update, corrections append, open-questions update, commit naming the change in understanding.
-- **Coding:** solve **in the LeetCode editor** (compile-check + autocomplete — plain-text solving doesn't work well), timed (25 min M / 35 min H), narrate out loud + type decision points, one-sentence pattern note, check the `coding/study_plan.md` tracker. Paste the final solution into the session file after. Solve cold — repo solutions only after.
-- **Language:** **Java** for Coinbase VO/OA drills (re-warm goal); TypeScript fine elsewhere.
+- **Coding:** solve **in the LeetCode editor** — interviews use online editors where syntax check is basic and expected, so plain-text solving is unnecessary practice. Timed (25 min M / 35 min H), narrate out loud + type decision points, one-sentence pattern note, check the `coding/study_plan.md` tracker. Paste the final solution into the session file after. Solve cold — repo solutions only after.
+- **Language:** **Java only** in all coding sessions. TypeScript is work-only.
 
 ---
 

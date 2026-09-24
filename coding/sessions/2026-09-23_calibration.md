@@ -11,8 +11,7 @@ a Hard (Part B) follows in the chat.
 - **Narrate out loud** — and type decision points into the notes section below as you
   go (requirements you clarify, API choices, edge cases, complexity). Narration is
   scored as much as the code.
-- Language: **Java or TypeScript** — whichever you intend to interview in. Write
-  compilable code, not pseudocode.
+- Language: **Java** — the only interview language from here on.
 - Don't peek at `coding/problems/` or any solution files while solving.
 
 ## Part A — LC 1396 · Design Underground System (Medium)
