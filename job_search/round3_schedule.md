@@ -48,8 +48,10 @@ Reading supports sessions; it never replaces them (bare reading = the "feeling o
 
 ## Coverage audit — does the list cover everything?
 
-**Design classics (all ~25 scheduled across the phases):**
-Covered in weeks 0–5: URL shortener, rate limiter, news feed, Twitter, YouTube, chat, notification, payment, exchange/order book, realtime market data, S3. Added Nov: KV store/cache, message queue, indexer, reconciliation, custody, metrics. Added Dec: web crawler, typeahead, top-K, unique ID, Uber/proximity, Ticketmaster, Dropbox.
+**Design classics (~30 scheduled across the phases):**
+Walkthrough sessions (draw-then-diff): realtime market data (D9), payment or rate limiter (D10), notification or S3 (D12). Nov: KV store/cache, message queue, indexer, reconciliation, custody, metrics. Dec: web crawler, typeahead, top-K, unique ID, Uber, Ticketmaster, Dropbox. Jan rotation (priority order): checkout, job scheduler, chat, CDN, Google Docs, URL shortener, YouTube, Twitter/news feed, chess. Repo example docs exist for: twitter, news_feed, youtube, chat, url_shortener, rate_limiter, notification, payment, chess + the coinbase set.
+
+**LinkedIn list cross-check (Sep 30):** 12/16 DSA + 12/16 SD were already scheduled. Net-new added: LC 703, 138, 18, 140 (coding) + e-commerce checkout, CDN, Google Docs, job scheduler (design). Nothing else missing.
 
 **Coding — full `study_plan.md` coverage:** all 106 problems + 10 review-exam days + bonus sets are mapped below. Intentionally light, per your own study plan: DP (pattern recognition only), concurrency (low-med), strings/two-pointers (light), segment tree/KMP/Manacher (reference only, never asked).
 
@@ -139,10 +141,10 @@ Covered in weeks 0–5: URL shortener, rate limiter, news feed, Twitter, YouTube
 | C14 | Coding | Sliding window hard — LC 239 (H, if pending), LC 1438 (M), LC 862 (H), LC 739 (M; monotonic-stack intro). |
 | C15 | Coding | Prefix sum + two pointers — LC 560 (M), LC 525 (M), LC 15 (M), LC 42 (H). |
 | C16 | Coding | Union-find + trees — LC 684 (M), LC 721 (M), LC 236 (M), LC 297 (H), LC 102 (M). |
-| C17 | Coding | Heaps + design — LC 347 (M), LC 973 (M), LC 215 (M), LC 355 (M). |
-| C18 | Coding | Linked lists + matrix — LC 206 (E), LC 25 (H), LC 142 (M), LC 48 (M), LC 54 (M). |
+| C17 | Coding | Heaps + design — LC 347 (M), LC 973 (M), LC 215 (M), LC 703 (E, stream variant), LC 355 (M). |
+| C18 | Coding | Linked lists + matrix — LC 206 (E), LC 25 (H), LC 138 (M, random pointers), LC 142 (M), LC 48 (M), LC 54 (M). |
 | C19 | Coding | Binary search — LC 33 (M), LC 4 (H), LC 528 (M). |
-| C20 | Coding | Backtracking + trie — LC 46 (M), LC 79 (M), LC 208 (M), LC 212 (H), LC 17 (M). Stretch: LC 51 (H). |
+| C20 | Coding | Backtracking + trie — LC 46 (M), LC 79 (M), LC 208 (M), LC 212 (H), LC 17 (M). Stretch: LC 51 (H), LC 140 (H). |
 | — | Warm-ups | **Coinbase OA re-solve (Java)** — one per coding session all month: bank_system, cloud_file_system, in_memory_database, recipe_manager, task_management, flappyBird. Cold, ~20 min each. |
 | — | Cadence | **Review exam days begin** — 1 per week, ~1 hr: 3 timed problems each. See checklist below. |
 
@@ -173,7 +175,16 @@ Covered in weeks 0–5: URL shortener, rate limiter, news feed, Twitter, YouTube
 
 # Phase 4 — January 2027+ · Rotation mode (until offer)
 
-- **1 design mock/week** with pushback — rotating topics from the full list above; redraw from memory, diff against repo examples or your notes.
+- **1 design mock/week** with pushback. Work the queue in order — redraw from memory before diffing against repo examples or notes:
+  1. E-commerce checkout system (payments lane fit)
+  2. Distributed job scheduler
+  3. Chat application (repo example)
+  4. CDN
+  5. Google Docs / collaborative editing (OT vs CRDT)
+  6. URL shortener (repo example — quick)
+  7. YouTube / video streaming (repo example)
+  8. Twitter / news feed (repo example)
+  9. Chess (openai example)
 - **1–2 coding sessions/week** — rotation: 1 new problem + 1 weakest re-solve; exam days until done.
 - **Interview-driven:** any company response → switch to that company's `companies/*/prep_*.md` + its problem set. (Google assessment ~Q1 2027; Netflix referral usable ~Feb 2027.)
 - **Keep the study loop alive:** new corrections → `corrections.md` → convert to narration; keep the override log current.
@@ -202,7 +213,7 @@ Skimmable or one-trick — don't let them eat a full session. From `study_plan.m
 
 - **Sliding-window variants:** 438, 209, 1004, 30, 159 (P), 727 (P)
 - **Prefix variants:** 523, 974, 304, 238, 49
-- **Two-pointer variants:** 271 (P), 15 (already main in C15)
+- **Two-pointer variants:** 271 (P), 18 (4Sum), 15 (already main in C15)
 - **Quick wins (5 min each):** 169, 53, 75, 41, 876, 382, 164
 - **Know the concept (10 min):** 211, 31, 528
 - **Reference only (never asked — skim):** segment tree/BIT, KMP, Manacher, A*, suffix array
