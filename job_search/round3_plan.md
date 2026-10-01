@@ -168,7 +168,7 @@ The delegation split for AI-enabled rounds:
 | **Anthropic** | ~200 eng roles open now; in-lane ones are SF/NYC/SEA. Boston has no product-eng reqs yet. | Best fit, gated on location. Watch what Boston posts next. Apply ~Nov. |
 | **Coinbase** | Rejected May 2026 (Staff). AI-native format already documented in prep doc. | Cooldown resets **~Nov 2026**. Strong re-target — his current work matches their published bar. |
 
-**November is the convergence point:** Anthropic apply + Coinbase cooldown reset. Working backwards, that makes **resume done by end of October** a hard deadline, landing right as the Sept–Oct study phase closes.
+**The convergence point has moved to mid-Nov / early Dec** (decided Sep 30 — no outreach before then). Working backwards, that makes **resume done by early-to-mid November** the hard deadline.
 | **Meta** | Applied, no recruiter contact | Passive. Prep docs exist. |
 | **Netflix** | Two referred apps got no response. Referral connection **resting until ~Feb 2027**. | Cold apply anytime — nothing blocks it. **JR41744 Pricing, Catalog and Offers (USA Remote)** was the best in-lane fit and was never applied to. Verify still open. |
 | **Google** | Failed hiring assessment April 2026 | ~Q1 2027 |
@@ -191,6 +191,7 @@ The delegation split for AI-enabled rounds:
 - **Apply at Senior level** to widen the funnel — worked for Coinbase and NVIDIA in Round 1. Companies level up strong candidates in the loop.
 - **Foundations before delivery polish.** See corrected diagnosis.
 - **Study through Sept–Oct** before resume/mock/list work.
+- **No outreach or re-applications until mid-Nov / early Dec (decided Sep 30).** Sickness shifted the prep start ~2 weeks; the wait buys prep runway (6–8 weeks by then) and lets old applications cool. **Exception:** if a dead-center Anthropic Boston product-eng req appears before then, the req-composition trigger overrides the calendar (§B).
 
 ---
 

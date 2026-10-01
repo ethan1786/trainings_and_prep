@@ -2,7 +2,8 @@
 
 > Strategy: Apply at Senior level. Companies level up in the loop if you're strong.
 > Don't grind prep. If someone responds, take the call with low-pressure energy.
-> Last updated: June 16, 2026
+> **HOLD (decided Sep 30):** no outreach or re-applications until mid-Nov / early Dec — prep first, let old apps cool. Exception: a dead-center Anthropic Boston req. See `round3_plan.md` decisions.
+> Last updated: June 16, 2026 (hold added Sep 30)
 
 ---
 
@@ -52,7 +53,7 @@ For companies that got your cold app in May and haven't responded in 6+ weeks.
 | Company | Cooldown Resets | Action |
 |---|---|---|
 | **Airbnb** | No formal cooldown, but needs a new angle | Apply at Senior + seek warm intro. Resume alone won't pass their filter. |
-| **Coinbase** | ~November 2026 (6 months from May rejection) | Wait until November. Re-apply at Staff with improved delivery. |
+| **Coinbase** | ~November 2026 (6 months from May rejection) | Re-apply mid-Nov or early Dec (decision Sep 30), Staff level, after prep. |
 | **Cherry** | Anytime (HM said "stay connected") | Reach out to Tim casually in September. Don't formally re-apply yet. |
 
 ### Late 2026 — Stretch / Monitor

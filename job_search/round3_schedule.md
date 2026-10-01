@@ -123,9 +123,9 @@ Walkthrough sessions (draw-then-diff): realtime market data (D9), payment or rat
 
 ---
 
-# Phase 2 — November · Finish coverage + Coinbase re-apply window
+# Phase 2 — November · Finish coverage + pure prep month
 
-> Study phase closes; **mock rounds with live pushback begin here** (round3_plan §G). Coinbase cooldown resets ~Nov 1 — OA re-solve distributed as warm-ups all month.
+> Study phase closes; **mock rounds with live pushback begin here** (round3_plan §G). **No outreach/re-applications until mid-Nov / early Dec** (decision Sep 30) — November is pure prep; OA re-solves distributed as warm-ups all month.
 
 | # | Track | Session |
 |---|---|---|
