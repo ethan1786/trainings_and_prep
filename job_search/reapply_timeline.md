@@ -11,7 +11,7 @@
 
 | Company | Role Applied | Date Applied | Action |
 |---|---|---|---|
-| **Arrowstreet Capital (likely — unverified)** | Staff/Principal SWE, greenfield research data platform | Recruiter inbound Oct 20 | Take the info call (inbound ≠ outbound; no-outreach rule holds). Verify identity, stack, WLB, comp band. Python/AWS, hybrid 1 day/wk Boston, ~$400K TC claimed. |
+| **Arrowstreet Capital (likely — unverified)** | Staff/Principal SWE, greenfield research data platform | Recruiter inbound Oct 20 | Reply sent Oct 20 (interest + Java-interview question + firm/scope/team/level/process). If it progresses: target loop mid/late Nov; pull D13/D14/D17 forward. Python/AWS, hybrid 1 day/wk Boston, ~$400K TC claimed. |
 | **NVIDIA** | Senior/Staff SWE | Completed all rounds | Likely dead. Send final follow-up, then close. |
 | **HashiCorp/IBM** | Senior SWE | SD round done June 16 | Let it play out. Decide only if offer lands. |
 | **Netflix** | L5, Membership & Monetization Platform | May 30 | Wait until July 15. If no response → re-apply. |
