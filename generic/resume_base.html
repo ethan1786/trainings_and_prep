@@ -275,7 +275,8 @@
   <span class="project-name">Options AI — Autonomous Options Trading Platform</span>
   <ul>
     <li>Built an AI-powered options trading platform: a layered pipeline from conversational-agent intent routing and autonomous opportunity scanning through a trade planner, risk engine (guardrails, correlation, position limits), and compute engine (Greeks, IV surface, sizing, payoff analysis) — with human-in-the-loop approval gates and authenticated broker-API execution including paper-trading mode.</li>
-    <li>Platform engineering underneath: cloud Postgres with secrets in a credential vault, data snapshots enabling offline replay and P&amp;L-based strategy evaluation, a supervisor + watchdog process model with heartbeat-based crash recovery, and a webhook-driven control plane for remote deploy, status, and reporting.</li>
+    <li>Platform infrastructure: cloud Postgres with secrets in a credential vault, data snapshots enabling offline replay and P&amp;L-based strategy evaluation, a supervisor + watchdog process model with heartbeat-based crash recovery, and a webhook-driven control plane for remote deploy, status, and reporting.</li>
+    <li>Built multi-broker/multi-account execution support enabling A/B experiments in paper-trading mode — comparing trading strategies, AI models, and configuration changes against a shared baseline — plus AI token cost evaluation with consolidated dashboard reporting to prevent overspend.</li>
   </ul>
 </div>
 <div class="project" style="padding-left:8px;">
