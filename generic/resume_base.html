@@ -274,8 +274,8 @@
 <div class="project" style="padding-left:8px;">
   <span class="project-name">Options AI — Autonomous Options Trading Platform</span>
   <ul>
-    <li>Built an AI-powered options trading system: autonomous market scanning on a tiered cadence, 24/7 news monitoring classified against a per-sector investment thesis, and a price + news signal accumulator — with every trade proposal gated by human Slack approval; the system never changes a thesis on its own.</li>
-    <li>Designed for resilience and remote operation: a separate manager process with a watchdog that auto-restarts on crashes or stale heartbeats, Slack-based deploy/status/dashboard commands, autonomous position management (trailing stops, profit targets, stop-loss, DTE floor), and Supabase for all config and state.</li>
+    <li>Built an AI-powered options trading platform: an event-driven pipeline with tiered autonomous market scanning, 24/7 news classification, and a signal accumulator that combines price and news evidence into trade proposals.</li>
+    <li>Architected the operational layer: a supervisor + watchdog process model for crash and stale-heartbeat recovery, a webhook-driven control plane for remote deploy, status, and reporting, autonomous position management (trailing stops, profit targets, stop-losses, expiry floors), and human-in-the-loop approval gates on every state change.</li>
   </ul>
 </div>
 <div class="project" style="padding-left:8px;">
