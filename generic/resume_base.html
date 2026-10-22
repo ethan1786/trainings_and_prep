@@ -270,7 +270,14 @@
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
-<div class="section-title">Independent Project</div>
+<div class="section-title">Independent Projects</div>
+<div class="project" style="padding-left:8px;">
+  <span class="project-name">Options AI — Autonomous Options Trading Platform</span>
+  <ul>
+    <li>Built an AI-powered options trading system: autonomous market scanning on a tiered cadence, 24/7 news monitoring classified against a per-sector investment thesis, and a price + news signal accumulator — with every trade proposal gated by human Slack approval; the system never changes a thesis on its own.</li>
+    <li>Designed for resilience and remote operation: a separate manager process with a watchdog that auto-restarts on crashes or stale heartbeats, Slack-based deploy/status/dashboard commands, autonomous position management (trailing stops, profit targets, stop-loss, DTE floor), and Supabase for all config and state.</li>
+  </ul>
+</div>
 <div class="project" style="padding-left:8px;">
   <span class="project-name">GenAI Decision Engine &amp; Experimentation Platform</span>
   <ul>
@@ -291,11 +298,10 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Conversational AI Assistant — Agentic Platform Foundation (TypeScript, MCP, JSON-RPC)</span>
+    <span class="project-name">Conversational AI Assistant — Agentic Platform Foundation (TypeScript, MCP)</span>
     <ul>
       <li>Defined a provider- and language-agnostic chatbot architecture for a conversational AI shopping assistant; implemented the vehicle listing-details MCP contract over JSON-RPC 2.0 with schema validation, structured error handling, and full integration coverage.</li>
       <li>Built MCP tool services that fetch from the federated GraphQL layer to expose delivery lookup, service-provider resolution, fee breakdowns, all-in pricing, and instant market-value updates — creating reusable, structured data contracts for multiple AI agents and eliminating REST/MCP duplication and data-exposure risks.</li>
-      <li>Evolved the earlier ChatGPT MCP proof-of-concept into the production platform; architecture patterns now reused by multiple conversational AI agents across the org.</li>
     </ul>
   </div>
 
@@ -320,12 +326,10 @@
     </ul>
   </div>
 
-  <div class="project">
+  <div class="project compact">
     <span class="project-name">GraphQL Federation — Delivery Lookup DGS Subgraph</span>
     <ul>
-      <li>Designed and integrated a Netflix DGS subgraph for the Delivery Lookup service into CarGurus' federated GraphQL gateway, exposing vehicle delivery details data to frontend, backend, and AI consumers from a single graph.</li>
-      <li>Implemented schema federation, batch data loaders (N+1 prevention), and JVM warmup strategies to avoid JIT compilation latency spikes on cold starts.</li>
-      <li>Built load tests and staging GraphQL integration tests; migrating from legacy REST endpoints (2 consumers) to support the new AI chatbot/shopping assistant platform.</li>
+      <li>Designed and integrated a Netflix DGS subgraph for the Delivery Lookup service into the federated GraphQL gateway (schema federation, batch data loaders, JVM warmup strategies, staged load/integration tests), migrating legacy REST consumers to the new AI chatbot platform.</li>
     </ul>
   </div>
 
@@ -346,19 +350,17 @@
     </ul>
   </div>
 
-  <div class="project">
+  <div class="project compact">
     <span class="project-name">Digital Shopping &amp; Online Leads Products</span>
     <ul>
-      <li>Led backend design and implementation for a new digital shopping product launched during the pandemic to capture online leads, using a microservice and event-driven architecture for inventory, merchandising, and lead flows.</li>
-      <li>Subsequently led backend work for additional digital commerce experiments, enabling the company to quickly launch and safely retire product bets without destabilizing core systems.</li>
+      <li>Led backend design for a new digital shopping product (microservice + event-driven architecture for inventory, merchandising, and lead flows), then led additional commerce experiments — enabling quick, safe launches and retirements of product bets without destabilizing core systems.</li>
     </ul>
   </div>
 
   <div class="project compact">
     <span class="project-name">Cross-Org Platform &amp; API Leadership</span>
     <ul>
-      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams; authored key design docs, RFCs, and decision records that drove consensus across platform and product teams.</li>
-      <li>Mentored multiple senior engineers on system design, performance work, and path to Principal-level scope.</li>
+      <li>Established patterns for API design, caching, and distributed orchestration adopted across multiple teams (authored key RFCs and decision records); mentored senior engineers to Principal-level scope.</li>
     </ul>
   </div>
 </div>
