@@ -40,6 +40,28 @@
 
 ---
 
+## Behavioral prep (HM screen)
+
+**The one-line story:** "You're describing the job I've been doing — building the shared platform other teams depend on — plus the domain I practice in my spare time."
+
+**Likely HM questions → answer sources** (all in `behavioral_playbook.md`):
+
+| Question | Answer source |
+|---|---|
+| Walk me through your background / why this role | Direct Questions: "Tell me about yourself" + Arrowstreet "Why this company" |
+| What does your data-platform work look like at CarGurus? | Stories 3, 3b, 3c |
+| Tell me about debugging a hard production problem | Story 3c (MongoDB 71K-span diagnosis) |
+| How do you use AI day-to-day? | Story 19 + Direct Questions AI answer |
+| Tell me about a security-sensitive design | Story 17 |
+| Why did you rebuild your trading platform? | Story 18 ("Why Rebuild" answer) |
+| Tell me about a disagreement | Story 8 |
+| What level/scope are you operating at? | Direct Questions: promotion answer (Principal = Staff scope) |
+| Python vs Java | Direct Questions: Java-recency answer |
+
+**Level-scope positioning:** "I'm currently Principal — that's Staff scope at most companies, and I've been operating at that scope: cross-org initiatives, architecture standards, 10+ teams. The level question matters because I want the scope to match the title — I'm not looking for a de-level, and if your Senior carries Staff scope internally, I'm happy to be evaluated against that."
+
+**WLB/on-call probe** (ask, don't answer): on-call rotation reality, week intensity, how the platform team is valued vs. research.
+
 ## Next steps
 
 - [ ] **Behavioral update in progress — see `behavioral/story_update_plan.md`** (new stories for this year's work; HM-ready by early Nov)

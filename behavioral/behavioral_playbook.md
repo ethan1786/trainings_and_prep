@@ -25,6 +25,18 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 **"Tell me about yourself." / "Walk me through your background."**
 > "Principal backend engineer, 13 years. Early engineer at Toast — built core services and infrastructure from scratch during hypergrowth. Then led auth platform modernization at Applause. For the last 6 years at CarGurus, I've been the platform technical lead — redesigned the highest-traffic API (5x latency, 99.9% availability), drove architecture standards across 10+ teams. Most recently, I've been building AI platform infrastructure — MCP servers and agent backends. I build the systems that other teams and AI products depend on."
 
+**"How do you use AI in your day-to-day engineering work?"**
+> "I run an AI-orchestrated pipeline that's my standard workflow, and it's deliberately structured: I author the implementation, testing, release, and monitoring plan; an AI agent validates it against the codebase and enriches it; then a *separate* agent adversarially stress-tests the plan itself before any code is written. Agents write the code, I review manually, a second agent double-checks, and agents handle deployment validation, monitoring, and docs. The judgment lives in the overrides — where I reject the agent's output or discard my own plan after validation. About two months of this, nothing has escaped to production. I also use AI for review and architecture exploration. What I don't use it for: security-critical or financial logic without manual verification."
+
+**"How do you decide how much verification is enough?"**
+> "Verification budget follows the cost of being wrong, not uniform rigor. In the AI pipeline, the plan gets adversarial review because the plan is the single point of failure — everything downstream validates against it. For low-stakes work I ship with basic tests and verify by use. [FILL: one concrete instance of deliberately spending less — what it was, why light verification was the right call.] The test: if I can't name the failure mode that light verification accepts, I haven't made a budget decision — I've just skipped thinking."
+
+**"How do you manage AI token costs?"** *(only if asked — don't lead with this)*
+> "I track token spend per endpoint and experiment, and I've built consolidated dashboards so cost hotspots are visible within hours. My org is early on token-expense auditing and so am I — I know the spend exceeds our current expense limits [FILL: rough magnitude, e.g. 'low five figures a month'], and I treat it as an accepted, tracked tradeoff, not a hidden one."
+
+**"Your recent work is TypeScript but your background is Java — what's your primary language?"**
+> "Java is my deepest language — 13 years, and it's what I interview in. The last six months I've been full-stack TypeScript because that's the platform stack. The distributed-systems judgment transfers directly — I've picked up new language ecosystems multiple times in my career, and re-warming to daily Java is a matter of weeks, not months."
+
 **"Why are you leaving your current role?"**
 
 **Short version (30 sec — for tech round openers):**
@@ -38,6 +50,7 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 - **HashiCorp/IBM:** "I use Terraform daily, and my auth background — Keycloak, Kong, service mesh — maps directly to Vault and Boundary. IBM's backing gives the team stability to invest long-term."
 - **Cherry:** "Early-stage, full-stack ownership, building real infrastructure from scratch — I did this at Toast and it's where I thrive."
 - **NVIDIA:** "The platform work — distributed systems, data pipelines, APIs across engineering orgs — is my core strength. My academic background in control systems and sensor processing is a bonus fit."
+- **Arrowstreet:** "A research data platform is the exact intersection of what I do and what I care about. I build internal platforms that other teams depend on — data contracts, real-time workloads, reliability — and I've built my own quant platforms in my spare time, so I know the domain from the consumer side too. The JD describes my last six years: shared platform, APIs, batch and real-time, heavy stakeholder work."
 
 ### Career & Growth
 
@@ -189,11 +202,15 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 | 2 | API Modernization — Parity Testing Framework | Invent and Simplify, Dive Deep | Coinbase, Stripe |
 | 3 | AI Platform Backend — MCP & Conversational AI Infrastructure | Bias for Action, Earn Trust, Customer Obsession | Coinbase, All |
 | 3b | AI Agent Platform — Infrastructure & Performance | Ownership, Delivers Results, Insists on Highest Standards, Dive Deep, Bias for Action | All (especially infrastructure-focused: Meta, Stripe, Coinbase, Uber) |
+| 3c | MongoDB Diagnosis — 71K-Doc Scans & Gateway Timeouts (2026) | Dive Deep, Ownership, Insists on Highest Standards | Arrowstreet (data platform!), Coinbase |
 | 4 | Digital Shopping — 0→1 Product Building | Bias for Action, Delivers Results, Customer Obsession, Ownership, Are Right A Lot | Coinbase, Stripe, Cherry |
 | 5 | Cross-Org Leadership — Mentoring to Staff Level | Hire & Develop The Best, Earn Trust | All |
 | 7 | GenAI Engine — Architecture & Experimentation Platform | Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards | Coinbase, Stripe, Netflix |
 | 8 | Disagree and Commit — Pushing Back on Architecture | Have Backbone, Disagree and Commit | All |
 | 9 | AI-Powered Cross-Domain Validation (In Progress) | Invent and Simplify, Think Big, Customer Obsession | Coinbase, All |
+| 17 | Secure Shopper Identity & Platform Migration (2026) | Insists on Highest Standards, Ownership, Are Right A Lot | Arrowstreet, Coinbase, security-sensitive questions |
+| 18 | V1→V2 Quant Platform Rebuild (personal) | Learn and be Curious, Invent and Simplify, Deliver Results | Arrowstreet (fit story), "passion projects" |
+| 19 | AI Orchestration — How I Work & Where I Override | Insists on Highest Standards, Learn and be Curious, Earn Trust | Coinbase AI rubric, Arrowstreet AI-tools questions |
 
 ### Section B: Brief References (mention for experience, not lead stories)
 
@@ -304,48 +321,45 @@ You already use GraphQL (Netflix DGS) elsewhere, so this is a natural question. 
 
 ---
 
-## Story 3: AI Platform Backend — MCP & Conversational AI Infrastructure
+## Story 3: AI Platform Backend — From ChatGPT POC to Production Agentic Platform
 
-**Anchor:** AI-First Platform Initiative · **LPs:** Bias for Action, Earn Trust, Customer Obsession
-**Best for:** Coinbase (AI-first signal), All companies
-**Use for:** "Tell me about AI/LLM work" — this is your answer. Keep it concise (60-90 sec), then let them dig.
+**Anchor:** Conversational AI Assistant Platform · **LPs:** Bias for Action, Earn Trust, Customer Obsession, Invent and Simplify
+**Best for:** Coinbase (AI-first signal), Arrowstreet (AI systems in JD), all companies
+**Use for:** "Tell me about AI/LLM work" — this is your answer. 60–90 sec, then let them dig.
 
-### Framing: "I build the backends that AI products depend on"
+### Framing: "I build the platforms AI products depend on"
 
-Don't position this as an AI story. Position it as a **platform story** where AI is the consumer:
+> "AI platform work has been my last two years. It started when my director picked me to build the backend for our first ChatGPT integration — a high-visibility POC with no internal precedent. I owned the MCP server end-to-end and delivered a working backend in the first sprint that unblocked stakeholder demos. That POC became the seed of our production conversational AI platform. I defined a provider- and language-agnostic chatbot architecture, implemented MCP contracts over JSON-RPC with schema validation and structured error handling, and built MCP tool services that fetch from our federated GraphQL layer — delivery lookup, pricing, fee breakdowns — as reusable, structured data contracts that multiple AI agents across the org now consume. On top of that I've owned the platform's reliability and security: MongoDB timeouts, circuit breakers, shopper authentication (Stories 3b, 3c, 17). I build the backends AI products depend on."
 
-> "AI has been a major focus for me this year. It started when my director picked me to build the backend for our ChatGPT integration — a high-visibility project with no internal precedent. I owned the MCP server architecture end-to-end while the frontend team built the conversational UI. I delivered a working backend in the first sprint that unblocked stakeholder demos, and the modular design absorbed three rounds of requirement changes without rework. That work expanded into designing MCP APIs for several other conversational AI agents across the org — I proposed the architecture and own the backend interfaces, even where other teams handle the implementation. And now I'm driving a broader initiative using AI to automate our cross-team validation process (Story 9). Each project built on the last."
-
-### The Progression (one answer, three data points)
+### The Progression (one answer, four data points)
 
 | Phase | What Happened | Signal |
 |---|---|---|
-| MCP Server | Director picked me for high-visibility AI integration; owned backend, delivered fast, navigated stakeholder ambiguity | "I can execute on AI platform work" |
-| Conversational AI agents | Proposed MCP API designs for multiple agents; own backend interfaces | "I can shape AI platform direction" |
-| Cross-domain validation (Story 9) | Identified highest-leverage opportunity for AI, currently driving initiative | "I can identify where AI creates org-level leverage" |
+| ChatGPT POC (2025) | Director picked me; owned backend end-to-end; first-sprint demo; absorbed 3 rounds of requirement changes | "I can execute on AI platform work" |
+| Production platform (2026) | Defined the chatbot architecture + MCP data contracts reused org-wide | "I can design AI platform architecture" |
+| Reliability & security (2026) | MongoDB diagnosis, circuit breakers, secure auth — Stories 3b, 3c, 17 | "I can operate AI platforms in production" |
+| Personal quant platforms | V1→V2 rebuild with A/B validation (Story 18) | "AI systems are my craft, not just my job" |
 
 ### STAR Spoken-Style
 
-**Situation:** CarGurus was going AI-first this year — a company-wide strategic bet. The first major initiative was integrating with ChatGPT through the OpenAI Apps SDK to expose CarGurus capabilities (vehicle search, pricing, delivery estimates) through conversational AI. There was no existing framework for this internally, the protocol was new, and requirements were evolving weekly across multiple stakeholder groups — PMs needed demos, the AI team needed a stable foundation, and directors wanted a production path.
+**Situation:** CarGurus went AI-first as a company-wide strategic bet. The first initiative was integrating with ChatGPT via the OpenAI Apps SDK — no internal framework, new protocol, requirements changing weekly. Three stakeholder groups wanted different things: PMs wanted demos, the AI team wanted a stable interface, directors wanted a production path.
 
-**Task:** My director chose me to own the backend for this — a high-visibility project that needed someone who could figure out the architecture independently under ambiguity. I owned the MCP server end-to-end; the frontend team built the conversational UI on top of my APIs.
+**Task:** My director chose me to own the backend. Deliver the POC fast, then turn it into a platform that could serve every conversational AI agent the company would build.
 
-**Action:** I studied the MCP protocol deeply, then designed a modular server architecture — a core protocol handler with a plugin system where each capability was a separate tool that could be registered independently. I delivered a working backend in the first sprint that unblocked PM demos. When requirements shifted (new capabilities, different response formats, production safety concerns), the architecture absorbed the changes without rework. I managed stakeholder expectations transparently — I gave PMs early access to working demos, held weekly syncs with the AI team on interface contracts, and maintained a clear roadmap for directors showing demo-ready vs. production-ready with explicit gaps. When asks were too expensive, I proposed alternatives instead of saying no.
+**Action:** I studied MCP deeply and designed a modular server — core protocol handler with each capability as an independently registerable tool. Delivered a working backend in the first sprint; when requirements shifted, the architecture absorbed them without rework. When the POC proved out, I defined the production architecture: provider- and language-agnostic chatbot core, MCP contracts over JSON-RPC 2.0 with schema validation and structured error handling, and MCP tool services that fetch from our federated GraphQL layer. The key design decision: make each capability a structured, reusable data contract — delivery lookup, pricing, fee breakdowns, instant market value — so every new agent consumes the same contracts instead of each team re-integrating with REST. That eliminated the REST/MCP duplication we were drifting toward and closed a data-exposure gap on pricing data.
 
-**Result:** The POC was successful — every stakeholder group got what they needed. The MCP architecture became the foundation for the company's AI platform. I went on to propose and design MCP APIs for several additional conversational AI agents across the org, owning the backend interfaces. This work is now evolving into a broader initiative (Story 9) using AI to automate cross-team validation.
+**Result:** The POC became the production platform. The data contracts I defined are reused by multiple conversational AI agents across the org. I then owned the platform's production maturity — performance, reliability, and security (Stories 3b, 3c, 17).
 
 ### Bullet Recap
 
-- **Pain:** Company going AI-first, no internal precedent. Three stakeholders wanted different things (PM: demo, director: production path, AI team: stable API). Ambiguous scope, shifting requirements.
-- **What I did:** Owned backend end-to-end. Mapped stakeholder needs to phased plan. Delivered working POC in sprint 1 (unblocked demos). Architecture absorbed 3 rounds of requirement changes without rework. Proposed alternatives instead of saying no.
-- **Result:** POC successful. Architecture became the AI platform foundation. Expanded to designing APIs for multiple agents across the org. Now driving AI-powered cross-domain validation initiative.
+- **S:** Company AI-first, no precedent; POC for ChatGPT integration with 3 stakeholder groups pulling different directions
+- **A:** Owned POC end-to-end (first-sprint demo, architecture absorbed requirement churn). Defined production architecture: language-agnostic chatbot core, MCP contracts over JSON-RPC with validation/error handling, MCP tool services over federated GraphQL, capabilities as reusable data contracts
+- **R:** POC → production platform; contracts reused by multiple AI agents org-wide; eliminated REST/MCP duplication; foundation for reliability/security ownership (3b, 3c, 17)
 
 ### Interview Tips
-- **Keep it to 60-90 seconds.** This is a supporting story, not your flagship. Let them ask follow-ups.
-- **If they dig into technical depth:** Talk about the modular tool plugin architecture, the demo/production boundary separation.
-- **If they dig into stakeholder management:** Talk about the transparent tradeoff approach — "We can do this for the demo, but here's what's needed for production."
-- **If they ask "what else in AI?":** Mention the conversational AI agent APIs, Story 3b (AI Agent Platform Infrastructure), and Story 9 initiative. Show the progression.
-- **Don't oversell.** You built the backend platform. You didn't build the AI models or the frontend. That's honest and that's fine — you're interviewing for a platform role.
+- 60–90 seconds; the progression table is the spine — one answer, four data points.
+- If they dig: modular tool registration (POC era), data-contract design (platform era).
+- Don't oversell: you build the platform, not the models. You're interviewing for a platform role.
 
 ---
 
@@ -363,6 +377,8 @@ This is your most recent substantial Staff-level IC work with measurable impact:
 - **88% overhead reduction** (1,355ms→167ms)
 - **Comprehensive observability from scratch** (Prometheus, Grafana, OpenTelemetry)
 - **30+ tickets over 4 months** (sustained 3-5 tickets/week pace)
+
+**2026 update:** for the newer reliability work (71K-span MongoDB diagnosis with 30s gateway timeouts, telemetry circuit breakers, vehicle-search latency 1–4s→200–400ms), use **Story 3c** — it's fresher and sharper as a single-incident story.
 
 **What you owned:** Backend infrastructure for a platform someone else architected. You made it production-ready through operational and performance decisions.
 
@@ -443,6 +459,36 @@ For cost visibility, the first week in production burned through budget quickly 
 - **Story 3 (MCP Server):** Builds on this — MCP was the 0→1, this is the production maturity and performance optimization
 - **Story 9 (AI Cross-Domain Validation):** Leverages this experience — understanding AI operational challenges informed the design
 - **Story 14 (Failure — Connection Starvation):** Lesson learned there directly applied here — sized connection pools for peak traffic, not averages
+
+---
+
+## Story 3c: MongoDB Diagnosis — 71K-Document Scans Killing Our Gateway
+
+**Anchor:** Agentic Platform Reliability (2026) · **LPs:** Dive Deep, Ownership, Insists on Highest Standards
+**Best for:** Arrowstreet (data platform!), Coinbase, all
+**Use for:** "Tell me about debugging a hard production problem," "databases at scale," "ownership of quality"
+
+### STAR Spoken-Style
+
+**Situation:** Our AI platform's observability was failing at the data layer: the MongoDB queries backing it were scanning 71K+ span documents and hitting the 30-second gateway timeout. The practical effect: when something went wrong in production, the very queries we'd use to debug it were timing out. [FILL: how it surfaced — user report? dashboard?]
+
+**Task:** Find the root cause and fix it without disrupting production. Index changes on a live collection are a production operation — create the wrong index and writes slow down for everyone.
+
+**Action:** I profiled the actual query patterns and found full-collection scans — the queries weren't served by any existing index. I designed compound indexes matching the real query shapes, and made a deliberate call on rollout: create them at deploy time, versioned with the code that needs them, rather than ad-hoc against production. Then I validated with sub-two-second query checks against the same patterns that had been timing out. I also added Atlas/Grafana health alerting so database degradation shows up as an alert, not as a wall of timeouts discovered by accident.
+
+**Result:** The 30-second gateway timeouts stopped. Debugging data became available again — observability observably worked. And the alerting means the next DB problem surfaces early instead of at 30-second timeouts. (Resume: "Gateway timeouts: eliminated.")
+
+### Bullet Recap
+
+- **S:** Observability queries scanning 71K+ span docs, timing out at the 30s gateway limit — debugging itself was broken
+- **T:** Root-cause and fix on a live production database without disrupting writes
+- **A:** Profiled query patterns → compound indexes matching real shapes → deploy-time index creation (versioned, reviewable, rolls with the code) → sub-2s validation → Atlas/Grafana health alerting
+- **R:** Timeouts eliminated; debugging restored; early DB-failure detection
+
+### Likely Follow-Ups
+- **"Why deploy-time index creation?"** > "Ad-hoc index creation against production is un-versioned and unrepeatable — six months later nobody knows why the index exists or whether it's still needed. Deploy-time means the index is reviewed, versioned, and rolls out with the code that depends on it. Slightly more ceremony, but that's the point."
+- **"How did you know the index would fix it?"** > "explain() on the failing query patterns showed COLLSCAN over 71K+ docs. The compound index covered the actual filter/sort shapes. I validated on staging before production rollout."
+- **Arrowstreet connection:** "this is the data-platform reality — observability and data services are the same infrastructure."
 
 ---
 
@@ -701,6 +747,107 @@ Story 9 (THIS)               → combines both: AI agent validates cross-domain
 - **Don't oversell.** Say "I'm in the design phase" — honesty about status builds trust.
 - **Show the thinking.** Walk through *why* you chose this problem (highest leverage), *how* it builds on prior work (MCP + parity testing), and *what the phases are* (incremental delivery, not big bang).
 - **Connect to the company.** For Coinbase: "This is the same pattern you'd need for cross-team validation across payment rails, compliance, and risk — every domain change needs to be validated against other domains' contracts."
+
+---
+
+## Story 17: Secure Shopper Identity & Platform Migration
+
+**Anchor:** Secure Shopper Identity · **LPs:** Insists on Highest Standards, Ownership, Are Right A Lot
+**Best for:** Arrowstreet, Coinbase, any security/data-sensitivity question
+**Use for:** "Tell me about a security-sensitive design," "tradeoffs," "how do you break down a large migration"
+
+### STAR Spoken-Style
+
+**Situation:** Enabling shopper-scoped financing capabilities on the AI platform required passing the shopper's authenticated context into AI tool calls. The naive approach — putting credentials or tokens into prompts or shared context — would leak them to LLM providers, logs, memory, and shared MCP client state across shoppers. In a platform serving multiple agents, one shopper's session must never surface in another's.
+
+**Task:** Design an authentication path where the shopper's identity reaches the tools that need it, without credentials ever appearing in prompts, memory, logs, or shared state.
+
+**Action:** I designed the path around an **opaque session key** — the credential itself never enters the agent's context. The key maps to **request-scoped context**; actual token material is resolved **lazily from Redis** only when a tool invocation actually needs it, and injected **per-invocation as a bearer token** at the call boundary. Separately, I authored the core AI-backend migration breakdown — MCP tool ownership, handler decomposition, surface configuration, regression evaluation — turning a complex migration into testable, incremental work with explicit regression protection. I also implemented config-driven feedback routing with **allowlisted metadata only** and PII safeguards.
+
+**Result:** Shopper-scoped financing capabilities shipped safely. Cross-shopper credential risk reduced to the resolution boundary. The migration executed incrementally with regression protection instead of a big-bang rewrite.
+
+### Bullet Recap
+
+- **S:** Shopper context must flow into AI tool calls; naive approach leaks credentials to prompts/logs/shared state
+- **A:** Opaque session key → request-scoped context → lazy Redis token resolution → per-invocation bearer injection; migration broken into ownership/handlers/surfaces with regression evaluation; feedback routing with allowlisted metadata + PII safeguards
+- **R:** Shopper-scoped capabilities safe; cross-shopper credential risk contained; incremental migration with explicit regression protection
+
+### Likely Follow-Ups
+- **"Why lazy resolution?"** > "The credential should exist only at the moment a tool needs it, not for the lifetime of the session. Shorter exposure window, and it means most tool calls never touch the token at all."
+- **"How did you sequence the migration?"** > "By MCP tool ownership first — which team owns each tool — then handler decomposition, then surface configuration. Each step shipped and validated independently with regression evaluation before the next."
+
+---
+
+## Story 18: V1→V2 — Rebuilding My Quant Trading Platform
+
+**Anchor:** Personal quant platforms · **LPs:** Learn and be Curious, Invent and Simplify, Deliver Results
+**Best for:** Arrowstreet (the hook — this is your fit story), "passion/initiative" questions anywhere
+**Use for:** "Tell me about a project you did on your own time," "what have you learned recently"
+
+### STAR Spoken-Style
+
+**Situation:** Last year I built a GenAI decision engine (V1) for stock trading — a hybrid rules + multi-path GenAI engine with a policy overlay, plus "Prompt Lab" for offline backtesting and prompt/parameter search. It worked, but operating it taught me its limits: decision logic and operational infrastructure were tangled together, evaluation was ad-hoc, and I didn't fully trust it with real money.
+
+**Task:** Rebuild with a completely different architecture — one that separated concerns, evaluated before it traded, and could be operated remotely and safely.
+
+**Action:** I rebuilt it as a layered pipeline: a conversational agent for intent routing, autonomous market scanning, a planning engine, a **risk engine** (guardrails, correlation, position limits), and a **compute engine** (Greeks, IV surface, position sizing, payoff analysis) — with **human-in-the-loop approval gates** on every state change, and broker-API execution including paper-trading mode. Underneath, real platform engineering: cloud Postgres with secrets in a credential vault, data snapshots for offline replay and P&L-based strategy evaluation, a supervisor + watchdog process model with heartbeat-based crash recovery, and a webhook-driven control plane for remote deploy, status, and reporting. I also built multi-broker/multi-account support so I can run **A/B experiments in paper-trading mode** — comparing strategies, AI models, and configuration changes against a shared baseline — and token-cost dashboards so AI spend stays visible.
+
+**Result:** The system runs autonomously: it proposes, I approve. Strategy changes are now validated by replay against historical snapshots and A/B against the incumbent before risking capital. Cost is visible per experiment.
+
+### Bullet Recap
+
+- **S:** V1 worked but tangled decision logic with ops, ad-hoc eval, insufficient trust for real money
+- **A:** V2 layered pipeline (agent → planner → risk engine → compute engine) + human-in-the-loop gates; platform layer (Postgres+Vault, snapshot replay, P&L eval, supervisor+watchdog, webhook control plane); A/B paper-trading across brokers/accounts; token-cost dashboards
+- **R:** Autonomous with approval gates; changes A/B-validated against baseline before real capital; spend visible
+
+### The "Why Rebuild?" Answer (Arrowstreet HM will ask this)
+
+> "V1 taught me three things. First, decision logic and operational infrastructure have to be separate layers — otherwise you can't evolve either. Second, evaluation has to be replayable offline before it can be A/B in production — 'did the change help' has to be a measurement, not an opinion. Third, human-in-the-loop gates aren't a lack of trust in the system; they're the control that makes it possible to trust it. The same muscles apply to a research data platform: layered services, offline evaluation, measured change."
+
+---
+
+## Story 19: AI Orchestration — How I Work & Where I Override
+
+**Anchor:** AI-orchestrated engineering pipeline · **LPs:** Insists on Highest Standards, Learn and be Curious, Earn Trust
+**Best for:** Coinbase AI-competency rubric (Usage/Application/Limits), Arrowstreet AI-tools questions
+**Use for:** "How do you use AI day-to-day," "tell me about a time AI got it wrong," "how do you know AI output is correct"
+
+### The Pipeline (one answer — walk it in 30 seconds)
+
+1. AI gathers ticket requirements and reads the codebase
+2. **I author** the implementation + testing + release + monitoring plan
+3. AI validates the plan against the codebase and enriches it; I iterate
+4. **A separate agent adversarially stress-tests the plan** against edge cases
+5. Agent writes the code
+6. **I manually review**
+7. Another agent double-checks
+8. Deploy + test with an agent
+9. Agents resolve review comments, revisit testing
+10. Post-merge: AI validates the release, builds monitoring, dashboards, alerts
+11. AI writes documentation and the stakeholder release notification
+
+**Track record:** ~2 months of this pipeline, nothing has escaped to production.
+
+### Why It's Structurally Sound (the design insight)
+
+> "The key decision: a human originates the plan, and a *separate* agent adversarially reviews the plan itself — not just the code. Without step 4, the plan is an unchecked single point of failure and every downstream agent validates against it rather than questioning it."
+
+### The Overrides Are the Signal (what actually scores)
+
+Not "I orchestrate agents and review output" — that's table stakes. The signal is the overrides: where the review agent surfaced a case I missed, where I rejected AI enrichment because it misread the codebase, where I discarded my own plan after validation.
+
+**[FILL — 3 override moments, dated, from the override log: what the agent proposed → what was wrong with it → how it was caught → what I did instead. These become the "tell me about a time AI got it wrong" answer.]**
+
+1. [FILL: override moment 1]
+2. [FILL: override moment 2]
+3. [FILL: override moment 3]
+
+### Known Risks — Have These Answers Ready
+
+- **Review is the only human gate** on large AI-generated volume, and review depth degrades as volume rises — have the honest answer on how review stays deep
+- **Not writing code costs the friction signal** ("this is awkward to implement, so the design is wrong") — I compensate by keeping the plan-review step adversarial
+- **"How do you decide how much verification is enough?"** — not maximum rigor uniformly; see Direct Questions. Have an instance of deliberately spending less.
+- **Token cost** — exceeds expense limits; one defensible sentence, then move on (see Direct Questions)
 
 ---
 
