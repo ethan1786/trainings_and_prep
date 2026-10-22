@@ -24,11 +24,14 @@
 
 ---
 
-## Sourcer claims (unverified — pin with HM, get in writing at offer)
+## Sourcer claims (verified Oct 22)
 
-- "These are Staff/Principal level, the highest level in the team, with direct leadership on design."
-- "Comp is all cash: $350–400K base + 20–30% bonus" → **$420–520K total.**
-- ⚠️ Discrepancies to note: posted titles are "Senior," posted base band tops at **$325K**; the Oct 20 email said "~$400K total." The numbers have drifted *up* in the sourcer's mouth. Possible band-breaking for exceptional candidates — or optimism. No equity (all cash); employee-owned firm — probe profit-sharing at HM stage.
+- **Title/level: "Associate Director"** — mirrors investment-division titles; Sam claims AD = Lead/Principal externally, everyone placed at AD came from Lead/Staff/Principal. Scope: higher-level IC — design/architecture, roadmap, stakeholders, technical direction + mentoring, hands-on coding. **This resolves the level question — scope matches Principal.**
+- **Comp: ~$250K base / $400K TC** (all cash, no equity). Bonus ≈ $150K (60% of base): **25% paid July, 75% EOY.** Posted base band $135–325K → $250K is *mid-band*, not top.
+- Sam's pitch: 70 placements at Arrowstreet, bonus "always paid" incl. COVID/crashes; minimum = offer letter; top performers overshoot; 95% family health coverage; 7% 401k match; "top of market in Boston except big tech."
+- ⚠️ **History check:** original email "~$400K total" → call "$350–400K base + 20–30% bonus" ($420–520K) → now "$250K base / $400K TC." Base was inflated ~40%; TC claim held. Treat all numbers as directional until the offer letter.
+- **Open negotiation points:** base vs. top of posted band ($325K); year-1 bonus proration (joining mid-cycle — 25% July / 75% EOY timing); guaranteed minimum in offer letter; sign-on to bridge a partial first cycle.
+- **Title note for the future:** "Associate Director" needs translation on future resumes ("Principal-equivalent scope") — manageable, but the scope bullet list should be documented while at the firm.
 
 ---
 
