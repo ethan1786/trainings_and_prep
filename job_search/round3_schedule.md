@@ -4,6 +4,7 @@
 > ~10 hrs/week = 4 sessions/week (2 design, 2 coding), ~2.5 hrs each.
 > **Prep continues until an offer lands.** When a company responds, its prep doc + problem set jumps the queue (reapply_timeline rule).
 > **Calibration verdict (Sep 23):** algorithm memory intact, Java syntax rusty, narration thin. Week 1 = skim, not redo; schedule stands as written. Skim `languages/java_playbook.md` pitfalls before each Java drill. **Design assignments are fixed.**
+> **Rebalance (Oct 22):** (1) no coding at work → Java re-warm is the *only* coding — daily 30–45 min block is the core habit, volume over session length. (2) **Realistic coding > LC**: Coinbase VO pool + OA set are the primary drills (OOD/parsing/state-machine = what interviews now test); LC remains for pattern reps. (3) November: repo-based project drill — port options-ai logic (signal accumulator or risk engine) to Java as a small testable project; doubles as Arrowstreet story material.
 
 ### Per-session protocol
 
