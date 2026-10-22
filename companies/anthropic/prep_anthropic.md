@@ -10,7 +10,7 @@
 
 Current day job is an **AI agentic system, written in TypeScript, built with Claude Code daily**, where I author the plans and own review while delegating implementation. That is about as directly relevant as experience gets for Anthropic's product surfaces.
 
-Full detail: `my_work/agent_orchestration.md` and `my_work/ai_agent_platform.md`.
+Full detail: `behavioral/behavioral_playbook.md` Stories 3, 3b, 3c, 19.
 
 ---
 
@@ -34,6 +34,6 @@ Full detail: `my_work/agent_orchestration.md` and `my_work/ai_agent_platform.md`
 
 **Be ready for:** Java recency. Thirteen years of Java, but the last six-plus months are TypeScript. Needs a prepared answer, not improvisation.
 
-**Do not lead with:** token spend. See the cost note in `my_work/agent_orchestration.md`.
+**Do not lead with:** token spend. See the cost note in `behavioral/behavioral_playbook.md` Direct Questions.
 
 **Timing discipline:** prepping *after* a req posts is how the Netflix referral got wasted on a vague ask. Have the resume and the target org decided in advance so the application is specific on day one.

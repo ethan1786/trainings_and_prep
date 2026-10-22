@@ -818,6 +818,7 @@ Story 9 (THIS)               → combines both: AI agent validates cross-domain
 **Anchor:** AI-orchestrated engineering pipeline · **LPs:** Insists on Highest Standards, Learn and be Curious, Earn Trust
 **Best for:** Coinbase AI-competency rubric (Usage/Application/Limits), Arrowstreet AI-tools questions
 **Use for:** "How do you use AI day-to-day," "tell me about a time AI got it wrong," "how do you know AI output is correct"
+**Living override log:** append new override moments here as they happen at work — this story is the log.
 
 ### The Pipeline (one answer — walk it in 30 seconds)
 

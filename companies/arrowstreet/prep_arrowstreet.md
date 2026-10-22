@@ -67,7 +67,7 @@
 
 ## Next steps
 
-- [ ] **Behavioral update in progress — see `behavioral/story_update_plan.md`** (new stories for this year's work; HM-ready by early Nov)
+- [x] **Behavioral docs complete (Oct 22)** — new stories 3c/17/18/19/20 in `behavioral_playbook.md`; HM question map in this doc. Remaining: mock run-through (30 min, day before HM).
 - [x] Resume variant created (`resume_arrowstreet.html`, Oct 22) — quant-framed: trading language restored, data-platform summary, V1/V2 pairing explicit. **This is the version sent to the sourcer.**
 - [ ] Ask the sourcer: **which req am I being submitted to?** (different teams, different fits — JD1 preferred)
 - [ ] HM screen ~early Nov; technical loop **late Nov** (framed as work delivery period, never "prep")

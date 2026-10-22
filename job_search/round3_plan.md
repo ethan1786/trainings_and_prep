@@ -63,7 +63,7 @@ Two cautions on that story:
 
 ## How I Work Now — the AI orchestration pipeline
 
-Source material for AI-competency stories and the resume rewrite. **Full detail and the override log: `my_work/agent_orchestration.md`.**
+Source material for AI-competency stories and the resume rewrite. **Full detail and the override log: `behavioral/behavioral_playbook.md`, Story 19.**
 
 1. AI gathers ticket requirements, reads codebase to understand the change
 2. **He authors** the implementation + testing + release + monitoring plan
@@ -96,7 +96,7 @@ Source material for AI-competency stories and the resume rewrite. **Full detail 
 
 - [ ] **Keep a running override log.** Decaying asset — these specifics will be gone by November. Capture: what the agent proposed, what was wrong with it, how it was caught, what he did instead.
 - [ ] **Find one instance where cross-team awareness produced a concrete outcome** (see cautions above)
-- [ ] **Fill in `my_work/TODO_details.md`** — traffic/conversations per day, LLM calls, MongoDB cluster config, Redis deployment, team structure, cost impact. Still entirely unfilled since June. One gathering pass unblocks the resume, the Anthropic story, *and* the Coinbase AI-competency stories.
+- [x] ~~Fill in `my_work/TODO_details.md`~~ **Obsolete (Oct 22)** — stories now carry their own verified metrics (3c: 71K spans/30s/200–400ms; 3b: 46–59% latency etc.). File removed.
 - [ ] **Re-warm Java.** Stale in daily practice since ~March — zero Java at work now. Matters for Netflix and any Java shop.
 - [ ] Identify the actual knowledge holes as they surface, so the eventual WHY-depth list is targeted
 
@@ -218,6 +218,6 @@ The delegation split for AI-enabled rounds:
 | Payments domain walkthrough | `design/interview/domain_playbook.md` |
 | Java depth | `languages/java_playbook.md` |
 | Coinbase AI-native interview format | `companies/coinbase/prep_coinbase.md` |
-| CarGurus agentic system detail (incomplete) | `my_work/ai_agent_platform.md` + `my_work/TODO_details.md` |
-| How I work now; override log | `my_work/agent_orchestration.md` |
+| CarGurus agentic system detail | `behavioral/behavioral_playbook.md` Stories 3, 3b, 3c |
+| How I work now; override log | `behavioral/behavioral_playbook.md` Story 19 |
 | Coding patterns + practice problems | `coding/` |

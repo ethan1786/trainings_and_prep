@@ -228,5 +228,5 @@ Skimmable or one-trick — don't let them eat a full session. From `study_plan.m
 
 ## Open items to keep alive
 
-- **Override log** (`my_work/agent_orchestration.md`) — capture at work weekly; batch into a session.
+- **Override log** — append new overrides directly to Story 19 in `behavioral/behavioral_playbook.md`; capture at work, integrate in-session.
 - Cross-team awareness outcome instance (round3_plan open question #1) — watching for it.

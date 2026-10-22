@@ -17,11 +17,10 @@ interview_prep/
 │   ├── reapply_timeline.md     — cooldowns and re-application schedule
 │   └── archive/                — round1_todo.md, round2_todo.md (history)
 │
-├── my_work/                    ← CarGurus context: the source for every story
-│   ├── agent_orchestration.md  — how I work now; override log; AI-competency material
-│   ├── ai_agent_platform.md    — the agentic system: architecture, perf work, incidents
-│   ├── TODO_details.md         — metrics/context still to gather (unfilled)
-│   └── private/                — see note below
+├── my_work/                    ← (empty — consolidated Oct 2026)
+│                                 Work-context material now lives in behavioral/behavioral_playbook.md:
+│                                 Stories 3/3b/3c (agentic platform), 17 (secure identity), 18 (V1→V2
+│                                 platforms), 19 (AI orchestration + override log), 20 (cross-team)
 │
 ├── design/
 │   ├── study/                  ← LIVING study system (git subtree, see below)
