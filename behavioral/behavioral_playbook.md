@@ -473,20 +473,20 @@ For cost visibility, the first week in production burned through budget quickly 
 
 ### STAR Spoken-Style
 
-**Situation:** Our AI platform's observability was failing at the data layer: the MongoDB queries backing it were scanning 71K+ span documents and hitting the 30-second gateway timeout. The practical effect: when something went wrong in production, the very queries we'd use to debug it were timing out. [FILL: how it surfaced — user report? dashboard?]
+**Situation:** In early May, users started reporting intermittent slowness and "Something went wrong" on our search and vehicle-detail pages. The first look at the Shopper Service found nothing — Sentry had no useful errors. Then a manual observability call timed out: the MongoDB query behind `/observability/traces` was scanning all 71K+ span documents and hitting the 30-second gateway limit. Root cause turned out to be Prometheus autodiscovery scraping that endpoint roughly every second — each scrape triggered a full collection scan, and the scans saturated MongoDB. The irony: the very tooling we'd use to debug production was itself breaking production, and the SEV2 alert only fired *after* the incident was declared — user reports beat our dashboards.
 
-**Task:** Find the root cause and fix it without disrupting production. Index changes on a live collection are a production operation — create the wrong index and writes slow down for everyone.
+**Task:** Fix the query path so the scans stop, without disrupting production — index changes on a live collection are a production operation, and the wrong index slows writes for everyone. And make sure the next degradation is caught by monitoring *before* users notice.
 
-**Action:** I profiled the actual query patterns and found full-collection scans — the queries weren't served by any existing index. I designed compound indexes matching the real query shapes, and made a deliberate call on rollout: create them at deploy time, versioned with the code that needs them, rather than ad-hoc against production. Then I validated with sub-two-second query checks against the same patterns that had been timing out. I also added Atlas/Grafana health alerting so database degradation shows up as an alert, not as a wall of timeouts discovered by accident.
+**Action:** I profiled the actual query patterns and found full-collection scans — the queries weren't served by any existing index. I designed compound indexes matching the real query shapes, and made a deliberate call on rollout: create them at deploy time, versioned with the code that needs them, rather than ad-hoc against production. Then I validated with sub-two-second query checks against the same patterns that had been timing out. I also tightened the alerting — the SEV2 had fired after the fact, so I added DB-level health alerting (connection saturation, slow-query thresholds) so database degradation surfaces as an alert, not as user-facing failures.
 
 **Result:** The 30-second gateway timeouts stopped. Debugging data became available again — observability observably worked. And the alerting means the next DB problem surfaces early instead of at 30-second timeouts. (Resume: "Gateway timeouts: eliminated.")
 
 ### Bullet Recap
 
-- **S:** Observability queries scanning 71K+ span docs, timing out at the 30s gateway limit — debugging itself was broken
-- **T:** Root-cause and fix on a live production database without disrupting writes
-- **A:** Profiled query patterns → compound indexes matching real shapes → deploy-time index creation (versioned, reviewable, rolls with the code) → sub-2s validation → Atlas/Grafana health alerting
-- **R:** Timeouts eliminated; debugging restored; early DB-failure detection
+- **S:** Users reported intermittent slowness/"Something went wrong" on SRP/VDP; Sentry empty. Manual `/observability/traces` call timed out: MongoDB scanning all 71K+ span docs → 30s gateway limit. Root cause: Prometheus autodiscovery scraping the endpoint ~1/sec, each scrape triggering a full collection scan, saturating MongoDB. SEV2 alert fired only after the incident was declared.
+- **T:** Stop the scans without disrupting production; make monitoring catch DB degradation before users do
+- **A:** Profiled query patterns → compound indexes matching real shapes → deploy-time index creation (versioned, reviewable, rolls with the code) → sub-2s validation → DB-level health alerting (connection saturation, slow-query thresholds)
+- **R:** Timeouts eliminated; debugging restored; alerting now front-runs user reports
 
 ### Likely Follow-Ups
 - **"Why deploy-time index creation?"** > "Ad-hoc index creation against production is un-versioned and unrepeatable — six months later nobody knows why the index exists or whether it's still needed. Deploy-time means the index is reviewed, versioned, and rolls out with the code that depends on it. Slightly more ceremony, but that's the point."
