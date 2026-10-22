@@ -29,7 +29,7 @@ These aren't STAR questions — they're direct, and you need a prepared crisp an
 > "I run an AI-orchestrated pipeline that's my standard workflow, and it's deliberately structured: I author the implementation, testing, release, and monitoring plan; an AI agent validates it against the codebase and enriches it; then a *separate* agent adversarially stress-tests the plan itself before any code is written. Agents write the code, I review manually, a second agent double-checks, and agents handle deployment validation, monitoring, and docs. The judgment lives in the overrides — where I reject the agent's output or discard my own plan after validation. About two months of this, nothing has escaped to production. I also use AI for review and architecture exploration. What I don't use it for: security-critical or financial logic without manual verification."
 
 **"How do you decide how much verification is enough?"**
-> "Verification budget follows the cost of being wrong, not uniform rigor. In the AI pipeline, the plan gets adversarial review because the plan is the single point of failure — everything downstream validates against it. For low-stakes work I ship with basic tests and verify by use. [FILL: one concrete instance of deliberately spending less — what it was, why light verification was the right call.] The test: if I can't name the failure mode that light verification accepts, I haven't made a budget decision — I've just skipped thinking."
+> "Verification budget follows the cost of being wrong, not uniform rigor — and the method should match the risk. In the AI pipeline, the plan gets adversarial review because the plan is the single point of failure. The VDP timeout work was the opposite: instead of a pre-rollout test program to prove a capacity risk, I proposed a live controlled experiment — timeout to 2.5 seconds, zero retries, updated alerts, compare metrics over time. The accepted failure mode was explicit: transient failures lose their retry. The tradeoff was visible, measurable, and rollback was one config change. Same logic on stacked PRs: if a PR's tree is a strict subset of an already whole-stack-verified tree, I don't re-run manual verification — the proof carries over. And a PoC ships as 'not for merge' with its boundary documented — the artifact is a decision input, not production code. The test: if I can't name the failure mode that light verification accepts, I haven't made a budget decision — I've just skipped thinking."
 
 **"How do you manage AI token costs?"** *(only if asked — don't lead with this)*
 > "I track token spend per endpoint and experiment, and I've built consolidated dashboards so cost hotspots are visible within hours. My org is early on token-expense auditing and so am I — I know the spend exceeds our current expense limits [FILL: rough magnitude, e.g. 'low five figures a month'], and I treat it as an accepted, tracked tradeoff, not a hidden one."
@@ -836,11 +836,26 @@ Story 9 (THIS)               → combines both: AI agent validates cross-domain
 
 Not "I orchestrate agents and review output" — that's table stakes. The signal is the overrides: where the review agent surfaced a case I missed, where I rejected AI enrichment because it misread the codebase, where I discarded my own plan after validation.
 
-**[FILL — 3 override moments, dated, from the override log: what the agent proposed → what was wrong with it → how it was caught → what I did instead. These become the "tell me about a time AI got it wrong" answer.]**
+**1. The wrong credential boundary (shopper auth — this override IS Story 17)**
+- **Proposed:** header-only token propagation through the agent's request context, with token exchange as a "later option."
+- **Wrong:** raw tokens in request context/memory is exactly the leak surface — prompts, logs, shared MCP client state.
+- **Caught:** I challenged the ownership boundary: who should hold and resolve the credential at all?
+- **Instead:** pass the opaque Redis key to Finance MCP and let the downstream service resolve/validate it. The credential never enters the agent layer. This became the shopper-auth architecture (Story 17).
 
-1. [FILL: override moment 1]
-2. [FILL: override moment 2]
-3. [FILL: override moment 3]
+**2. The confidently wrong matcher (negotiation handoff)**
+- **Proposed:** a deterministic affirmative matcher for negotiation messages — simple keyword logic.
+- **Wrong:** "I'm not sure" or "Yes, but don't contact the dealer" would have counted as acceptance.
+- **Caught:** during plan review — I walked concrete messages through the proposed logic and watched it fail.
+- **Instead:** conservative whole-message matching plus regression coverage: negation, unrelated clauses, stale history, cancellation, Unicode apostrophes. The tests came from the override.
+
+**3. The over-scoped cleanup (PR #347)**
+- **Proposed:** a "cleanup plan" mixing real reviewer comments with optional AI hardening, Changeset work, and another validation run.
+- **Wrong:** invented and optional work buried the real issue — a 401/403 circuit-breaker bug.
+- **Caught:** reviewing the plan, I asked what was actually confirmed vs. suggested.
+- **Instead:** required confirmed comments separated from AI suggestions; the handoff narrowed to the circuit-breaker fix and the stale review.
+
+**The recurring pattern (the "how do you catch AI errors" framework):**
+AI's failure modes here are consistent — scope too broad or invented work; assumed platform capabilities that were never verified; shortcuts that miss edge cases; overstated operational risk; and inferring production state from code instead of requiring runtime evidence. My checks follow the same list: what's confirmed vs. suggested, what edge cases does the shortcut drop, and what does production actually say.
 
 ### Known Risks — Have These Answers Ready
 
