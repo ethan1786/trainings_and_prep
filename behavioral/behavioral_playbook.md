@@ -210,7 +210,7 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 | 5 | Cross-Org Leadership — Mentoring to Staff Level | Hire & Develop The Best, Earn Trust | All |
 | 7 | GenAI Engine — Architecture & Experimentation Platform | Invent and Simplify, Think Big, Learn and be Curious, Insists on Highest Standards | Coinbase, Stripe, Netflix |
 | 8 | Disagree and Commit — Pushing Back on Architecture | Have Backbone, Disagree and Commit | All |
-| 9 | AI-Powered Cross-Domain Validation (In Progress) | Invent and Simplify, Think Big, Customer Obsession | Coinbase, All |
+| 9 | AI-Powered Cross-Domain Validation (Superseded — use sparingly) | Invent and Simplify, Think Big, Customer Obsession | Honest-initiative-arc questions only |
 | 17 | Secure Shopper Identity & Platform Migration (2026) | Insists on Highest Standards, Ownership, Are Right A Lot | Arrowstreet, Coinbase, security-sensitive questions |
 | 18 | V1→V2 Quant Platform Rebuild (personal) | Learn and be Curious, Invent and Simplify, Deliver Results | Arrowstreet (fit story), "passion projects" |
 | 19 | AI Orchestration — How I Work & Where I Override | Insists on Highest Standards, Learn and be Curious, Earn Trust | Coinbase AI rubric, Arrowstreet AI-tools questions |
@@ -704,11 +704,10 @@ This story pairs well with:
 
 ---
 
-## Story 9: AI-Powered Cross-Domain Validation (In Progress)
+## Story 9: AI-Powered Cross-Domain Validation (Superseded — Use Sparingly)
 
 **Anchor:** VDP Cross-Team Validation · **LPs:** Invent and Simplify, Think Big, Customer Obsession, Bias for Action
-**Best for:** Coinbase (AI-first signal), all companies (cross-org, initiative-driven)
-**Status:** In design phase — use as "current initiative" story
+**Status (Oct 22, 2026):** the initiative was never shipped as a standalone system — the design doc stayed draft (May 4) with no implementation record. Its pieces were absorbed elsewhere: **config-driven feedback routing shipped** (allowlisted metadata, PII safeguards — see Story 17), and the **core AI-backend migration** (CNAI-638) became the active architectural path. **Do NOT present this as a current initiative.**
 
 ### Motivation Framing
 
@@ -746,10 +745,14 @@ Story 9 (THIS)               → combines both: AI agent validates cross-domain
                                consistency using MCP tools + parity patterns
 ```
 
-### Interview Tips for "In Progress" Stories
-- **Don't oversell.** Say "I'm in the design phase" — honesty about status builds trust.
-- **Show the thinking.** Walk through *why* you chose this problem (highest leverage), *how* it builds on prior work (MCP + parity testing), and *what the phases are* (incremental delivery, not big bang).
-- **Connect to the company.** For Coinbase: "This is the same pattern you'd need for cross-team validation across payment rails, compliance, and risk — every domain change needs to be validated against other domains' contracts."
+### How to Use This Story Now (Oct 2026)
+
+**Option 1 — the honest initiative arc (if asked about scoping or initiative judgment):**
+> "I proposed an AI-powered cross-domain validation pipeline for VDP — AI impact analysis on PRs, spec validation, generated test suites. I scoped it and wrote the design... and then the org's priorities moved: the core AI-backend migration became the architectural path. The pieces that mattered most shipped separately — the feedback-routing work with allowlisted metadata and PII safeguards, which I implemented. The lesson I apply: propose the full vision, then let the pieces that survive be the ones with owners and shipped value — not orphaned design docs."
+
+**Option 2 — skip it.** Stories 17 (feedback routing + migration) and 3c (MongoDB) carry the same AI-judgment signal with shipped results. Prefer those.
+
+**The "why this problem" thinking is still reusable** — highest-leverage AI opportunities, cross-org friction. Reuse the motivation framing when asked "where do you think AI creates leverage in an org?"
 
 ---
 
