@@ -197,7 +197,7 @@ The delegation split for AI-enabled rounds:
 
 ## Open Questions
 
-1. Is there a concrete instance where following another team's decision produced an outcome for his area? (Blocks the Principal-level cross-team story.)
+1. ~~Is there a concrete instance where following another team's decision produced an outcome for his area?~~ **Answered Oct 22:** VOC routing data-integrity catch — studied the AWN/VOC engine instead of treating it as a black box, found reusing AI_DISCOVERY would contaminate Discover's VoC data, changed the design to config-driven routing with a dedicated area (PR merged). Story 20 in `behavioral_playbook.md`, with alternates: dealer-review critical-path removal, Ontario contract, financing-auth pre-adaptation.
 2. What are the actual knowledge holes? (Surfaces during study; feeds the deferred list.)
 3. How to answer the Java-recency question.
 4. What does Anthropic's interview process actually look like? (Unverified.)

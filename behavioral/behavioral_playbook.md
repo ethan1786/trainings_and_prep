@@ -214,6 +214,7 @@ These are the terms FAANG interviewers listen for. Don't force them — weave th
 | 17 | Secure Shopper Identity & Platform Migration (2026) | Insists on Highest Standards, Ownership, Are Right A Lot | Arrowstreet, Coinbase, security-sensitive questions |
 | 18 | V1→V2 Quant Platform Rebuild (personal) | Learn and be Curious, Invent and Simplify, Deliver Results | Arrowstreet (fit story), "passion projects" |
 | 19 | AI Orchestration — How I Work & Where I Override | Insists on Highest Standards, Learn and be Curious, Earn Trust | Coinbase AI rubric, Arrowstreet AI-tools questions |
+| 20 | Cross-Team Awareness — VOC Data-Integrity Catch | Dive Deep, Earn Trust, Ownership | Principal cross-team story, "influencing another team's design" |
 
 ### Section B: Brief References (mention for experience, not lead stories)
 
@@ -869,6 +870,37 @@ AI's failure modes here are consistent — scope too broad or invented work; ass
 - **Not writing code costs the friction signal** ("this is awkward to implement, so the design is wrong") — I compensate by keeping the plan-review step adversarial
 - **"How do you decide how much verification is enough?"** — not maximum rigor uniformly; see Direct Questions. Have an instance of deliberately spending less.
 - **Token cost** — exceeds expense limits; one defensible sentence, then move on (see Direct Questions)
+
+---
+
+## Story 20: Cross-Team Awareness — Catching a Data-Integrity Failure Before Launch
+
+**Anchor:** UAI feedback routing into the shared VOC platform · **LPs:** Dive Deep, Earn Trust, Ownership, Invent and Simplify
+**Best for:** "Tell me about influencing another team's design," "cross-org collaboration," "data integrity," Principal-level cross-team story
+**The claim:** not "I stayed informed" — awareness that changed a shared platform's design before launch.
+
+### STAR Spoken-Style
+
+**Situation:** Building the Universal AI feedback path required routing user feedback into the company's existing VOC (voice-of-customer) platform. The natural shortcut was to reuse the existing AI_DISCOVERY product-area routing — it was already there, and it looked like the obvious integration point.
+
+**Task:** Integrate the feedback without corrupting another team's data.
+
+**Action:** Instead of treating the VOC engine as a black box, I studied its routing behavior first. Two problems surfaced: reusing AI_DISCOVERY would mix UAI feedback into Discover's Slack channel and product-area records — contaminating Discover's VOC trends, the exact data that team runs on — and letting the LLM select the product area would scatter records unpredictably across the platform. I raised both and changed the design: config-driven entrypoint-to-product-area routing with a dedicated UNIVERSAL_AI area, plus regression tests protecting Discover's existing route.
+
+**Result:** The PR merged, the related stories closed, and Discover's data stayed untouched. The next team onboarding into the VOC platform inherits the config-driven pattern instead of adding another hardcoded branch.
+
+### Why This Scores (round3_plan cautions respected)
+
+- It's awareness **with an outcome** — a data-integrity failure prevented before launch, with merged evidence.
+- It's not the dominant mode: headline depth remains Stories 1, 3c, 17 (owned work). Use this as the cross-team/influence answer.
+
+### Alternate Cross-Team Cases (angle guide)
+
+| Case | Use When |
+|---|---|
+| VDP dealer-review SEV1 → removing `reviewSummary` from the critical path | "Business impact" / "incident lessons" — frame as "turned an incident concern into an accepted architecture change" (caveat: blocked on agent-orchestration migration, so don't claim shipped) |
+| Ontario dealer-stat contract → backend passthrough-only, Remix applies the legal rule | "Stopped my team building the wrong thing" / API contract design |
+| Financing MCP authorization pre-adaptation | Security-boundary questions — overlaps Story 17 |
 
 ---
 
