@@ -42,6 +42,7 @@
 
 ## Next steps
 
+- [x] Resume variant created (`resume_arrowstreet.html`, Oct 22) — quant-framed: trading language restored, data-platform summary, V1/V2 pairing explicit. **This is the version sent to the sourcer.**
 - [ ] Ask the sourcer: **which req am I being submitted to?** (different teams, different fits — JD1 preferred)
 - [ ] HM screen ~early Nov; technical loop **late Nov** (framed as work delivery period, never "prep")
 - [ ] HM questions: what's above this level in the team; comp in writing; why greenfield now (what's being replaced); WLB/on-call reality
