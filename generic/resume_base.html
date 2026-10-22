@@ -291,10 +291,10 @@
   </div>
 
   <div class="project">
-    <span class="project-name">Universal AI — Agentic Platform Foundation (TypeScript, MCP, JSON-RPC)</span>
+    <span class="project-name">Conversational AI Assistant — Agentic Platform Foundation (TypeScript, MCP, JSON-RPC)</span>
     <ul>
-      <li>Defined a provider- and language-agnostic chatbot architecture for the Universal AI shopping assistant; implemented the Listing Details MCP contract over JSON-RPC 2.0 with schema validation, structured error handling, and full integration coverage.</li>
-      <li>Integrated delivery lookup, service-provider resolution, fee breakdowns, all-in pricing, and IMV updates into the GraphQL/UAI flow — creating reusable, structured data contracts for multiple AI agents and eliminating REST/MCP duplication and data-exposure risks.</li>
+      <li>Defined a provider- and language-agnostic chatbot architecture for a conversational AI shopping assistant; implemented the vehicle listing-details MCP contract over JSON-RPC 2.0 with schema validation, structured error handling, and full integration coverage.</li>
+      <li>Built MCP tool services that fetch from the federated GraphQL layer to expose delivery lookup, service-provider resolution, fee breakdowns, all-in pricing, and instant market-value updates — creating reusable, structured data contracts for multiple AI agents and eliminating REST/MCP duplication and data-exposure risks.</li>
       <li>Evolved the earlier ChatGPT MCP proof-of-concept into the production platform; architecture patterns now reused by multiple conversational AI agents across the org.</li>
     </ul>
   </div>
@@ -308,7 +308,7 @@
     </ul>
     <div class="metrics">
       <div class="m">Search latency: 1–4 s → ~200–400 ms</div>
-      <div class="m">Gateway timeouts: 30 s → 0</div>
+      <div class="m">Gateway timeouts: eliminated</div>
     </div>
   </div>
 
@@ -316,7 +316,7 @@
     <span class="project-name">Secure Shopper Identity &amp; Platform Migration</span>
     <ul>
       <li>Built the shopper-authentication path using an opaque session key, request-scoped context, lazy Redis token resolution, and per-invocation bearer-token injection — credentials never exposed to prompts, memory, logs, or shared MCP client state.</li>
-      <li>Authored the Guru Core backend migration breakdown (MCP tool ownership, handler decomposition, surface configuration, regression evaluation) and implemented config-driven feedback routing with allowlisted metadata and PII safeguards.</li>
+      <li>Authored the core conversational-AI backend migration breakdown (MCP tool ownership, handler decomposition, surface configuration, regression evaluation) and implemented config-driven feedback routing with allowlisted metadata and PII safeguards.</li>
     </ul>
   </div>
 
