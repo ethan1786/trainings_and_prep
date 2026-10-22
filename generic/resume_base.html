@@ -248,11 +248,10 @@
 <!-- ═══════════════════ SUMMARY ═════════════════════════════════ -->
 <div class="section-title">Summary</div>
 <p class="summary">
-  Principal/Staff-level backend &amp; platform engineer focused on 0→1 architecture, high-traffic API design,
-  distributed systems, performance optimization, and cross-org technical leadership. Recent work spans
-  LLM/ChatGPT integration (MCP server &amp; Apps SDK), GraphQL federation with Netflix DGS,
-  and experimentation/policy frameworks. Track record of leading multi-team migrations, defining
-  architectural standards, and mentoring engineers toward Principal-level scope.
+  Principal/Staff-level platform engineer — 13 years across 0→1 architecture, distributed systems,
+  high-traffic APIs, and cross-org technical leadership. Most recently: full-stack TypeScript agentic
+  AI platform work (MCP tool services, AI orchestration, reliability at scale), on a track record of
+  multi-team migrations, architectural standards, and mentoring to Principal scope.
 </p>
 
 <!-- ═══════════════════ LEADERSHIP & TECHNOLOGIES ══════════════ -->
@@ -261,12 +260,11 @@
   <li>Led multi-team platform and API migrations involving 10+ engineering teams across 3 departments</li>
   <li>Architected and delivered multiple 0→1 systems spanning AI/LLM integrations and service platforms</li>
   <li>Mentored senior engineers to Principal-level scope; drove cross-org architectural impact</li>
-  <li>Drove architecture standards for high-scale APIs, caching strategy, and distributed orchestration</li>
 </ul>
 <div class="tech-sub">
   <span class="tech-sub-label">Technologies:</span>
-  Java, Spring Boot, GraphQL (Netflix DGS), Python, Node.js · AWS, Kubernetes, Kafka, Redis, PostgreSQL ·
-  Microservices, Event-Driven, CQRS · OpenAI/ChatGPT, MCP Protocol · Datadog, Grafana · Keycloak, SSO, OAuth 2.0
+  Java, Spring Boot, TypeScript, Python, Node.js · GraphQL (Netflix DGS), MCP Protocol, Agentic AI Systems ·
+  AWS, Kubernetes, Kafka, Redis, PostgreSQL, MongoDB · Microservices, Event-Driven, CQRS · Datadog, Grafana · Keycloak, SSO, OAuth 2.0
 </div>
 
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
@@ -283,7 +281,6 @@
   <span class="project-name">GenAI Decision Engine &amp; Experimentation Platform</span>
   <ul>
     <li>Architected a hybrid rules + multi-path GenAI engine (fast vs. deep inference) with a policy overlay over heterogeneous telemetry, producing explainable real-time recommendations.</li>
-    <li>Designed a configurable policy framework with DB-backed enterprise configs, environment-specific overrides, and a scheduler-driven tuning loop that sweeps parameters and publishes promotable config versions.</li>
     <li>Built "Prompt Lab" for historical backfill, end-to-end decision simulation, offline evaluation/backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with a robust scheduler, observability, and multi-provider LLM support.</li>
   </ul>
 </div>
@@ -322,8 +319,7 @@
   <div class="project compact">
     <span class="project-name">Secure Shopper Identity &amp; Platform Migration</span>
     <ul>
-      <li>Built the shopper-authentication path using an opaque session key, request-scoped context, lazy Redis token resolution, and per-invocation bearer-token injection — credentials never exposed to prompts, memory, logs, or shared MCP client state.</li>
-      <li>Authored the core conversational-AI backend migration breakdown (MCP tool ownership, handler decomposition, surface configuration, regression evaluation) and implemented config-driven feedback routing with allowlisted metadata and PII safeguards.</li>
+      <li>Built the shopper-authentication path (opaque session key, request-scoped context, lazy Redis token resolution, per-invocation bearer injection — credentials never exposed to prompts, memory, or logs); authored the core AI-backend migration plan (MCP tool ownership, handler decomposition, regression evaluation) with config-driven feedback routing and PII safeguards.</li>
     </ul>
   </div>
 
@@ -339,7 +335,6 @@
     <ul>
       <li>Led 3 principal/senior engineers and partnered with ~10 teams across 3 departments to redesign the core API behind CarGurus' most-visited page (~8,000 rpm, millions of daily impressions); the new implementation handled 50% of traffic during A/B testing.</li>
       <li>Introduced a new orchestration service and GraphQL boundary, consolidating 12 downstream integrations into 5 well-defined services, reducing fan-out and simplifying failure modes.</li>
-      <li>Produced initial architecture in ~2 weeks; shipped the first production milestone in 6 months and completed the overall modernization ahead of schedule.</li>
     </ul>
     <div class="metrics">
       <div class="m">p99: 250 ms → 50 ms <span>(5×)</span></div>
@@ -379,16 +374,10 @@
       <li>Upgraded legacy authentication to a modern Keycloak-based SSO platform, unifying auth across internal systems, an enterprise partner platform, and a large external community. Introduced social login and mobile login; migrated multiple Angular, Node.js, and Java monoliths behind the new auth gateway with minimal downtime.</li>
     </ul>
   </div>
-  <div class="project">
+  <div class="project compact">
     <span class="project-name">Event Sourcing &amp; CQRS Initiative</span>
     <ul>
       <li>Drove early design and prototyping of a microservice architecture based on event sourcing and CQRS; defined foundational patterns for services, events, and read/write models adopted by new domains.</li>
-    </ul>
-  </div>
-  <div class="project compact">
-    <span class="project-name">Cross-Org Collaboration</span>
-    <ul>
-      <li>Partnered with product, support, and customer-facing teams to modernize internal workflows and enterprise integrations with clear observability and rollback paths.</li>
     </ul>
   </div>
 </div>
@@ -400,17 +389,10 @@
     <span class="dates">Sep 2014 – Oct 2017</span>
   </div>
 
-  <div class="project">
-    <span class="project-name">Monolith → Microservices Decomposition</span>
-    <ul>
-      <li>Among the earliest engineers during hypergrowth (first customer to hundreds in a few years); designed and implemented core backend services (Order Service, Labor Service, foundational APIs) that became the basis for future growth.</li>
-      <li>Built initial AWS deployment pipelines before a dedicated DevOps team existed; created the first automated testing framework before dedicated QA, enabling safer releases during rapid product expansion.</li>
-    </ul>
-  </div>
   <div class="project compact">
-    <span class="project-name">Third-Party Integrations &amp; Cross-Functional Leadership</span>
+    <span class="project-name">Early Engineer — Core Services, CI, Integrations</span>
     <ul>
-      <li>Led integrations with key partners (e.g., workforce management), ensuring reliable bidirectional sync and schema evolution. Partnered with PMs, sales, and support to translate early customer feedback into platform capabilities.</li>
+      <li>Among the earliest engineers during hypergrowth: designed core backend services (Order, Labor, foundational APIs), built the first AWS deployment pipelines and automated testing framework before dedicated teams existed, and led key partner integrations with bidirectional sync and schema evolution.</li>
     </ul>
   </div>
 </div>
