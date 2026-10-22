@@ -271,7 +271,7 @@
 <!-- ═══════════════════ INDEPENDENT PROJECT ═════════════════════ -->
 <div class="section-title">Independent Projects</div>
 <div class="project" style="padding-left:8px;">
-  <span class="project-name">Autonomous Quant Trading Platform (V2)</span>
+  <span class="project-name">Autonomous Quant Trading Platform (V2) — Options</span>
   <ul>
     <li>Rebuilt the earlier decision-engine platform into an autonomous options-trading system: a layered pipeline from conversational-agent intent routing and autonomous market scanning through a planning engine, risk engine (guardrails, correlation, position limits), and compute engine (Greeks, IV surface, sizing, payoff analysis) — human-in-the-loop approval gates throughout, with authenticated broker-API execution including paper-trading mode.</li>
     <li>Platform infrastructure: cloud Postgres with secrets in a credential vault, data snapshots enabling offline replay and P&amp;L-based strategy evaluation, a supervisor + watchdog process model with heartbeat-based crash recovery, and a webhook-driven control plane for remote deploy, status, and reporting.</li>
@@ -279,9 +279,9 @@
   </ul>
 </div>
 <div class="project" style="padding-left:8px;">
-  <span class="project-name">GenAI Decision Engine &amp; Experimentation Platform (V1)</span>
+  <span class="project-name">Autonomous Quant Trading Platform (V1) — Stock Decision Engine</span>
   <ul>
-    <li>Architected a hybrid rules + multi-path GenAI engine (fast vs. deep inference) with a policy overlay over heterogeneous telemetry, producing explainable real-time recommendations.</li>
+    <li>Architected a hybrid rules + multi-path GenAI engine (fast vs. deep inference) for stock-trading decisions, with a policy overlay over heterogeneous telemetry, producing explainable real-time recommendations.</li>
     <li>Built "Prompt Lab" for historical backfill, end-to-end decision simulation, offline evaluation/backtesting, and prompt/parameter search (grid &amp; Bayesian optimization) with a robust scheduler, observability, and multi-provider LLM support.</li>
   </ul>
 </div>
