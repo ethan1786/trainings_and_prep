@@ -43,6 +43,14 @@
 
 ---
 
+## Interview process intel (verified via Glassdoor + aggregators, Oct 24)
+
+**Loop structure:** recruiter screen → 30-min technical screen (Python/engineering fundamentals) → 45–60 min coding (LC-mediums; explain approach + complexity while coding) → 1-hr architecture discussion with two engineers (microservices/distributed design) → 30-min culture call with senior director.
+
+**Reported coding topics:** tree vertical-order traversal, best-time-to-buy-sell, merge intervals, BFS/graph, linked lists, hash maps, sliding window — plus practical tasks (moving-average class, basic SQL, string suffix manipulation). Difficulty ~3.5/5; one report calls the coding round "the easiest coding problem I've done."
+
+**Prep implication:** the coding bar is LOW for a Staff candidate. Priority re-sort for Arrowstreet: **architecture discussion (SD) > culture call (behavioral) > coding.** SD prep = `design/interview/playbook.md` (data-platform topics: KV store, message queues, event pipelines, metrics — sections 32–35 especially). Behavioral = the HM map in this doc. Coding = triage pass + canonical patterns only.
+
 ## Behavioral prep (HM screen)
 
 **The one-line story:** "You're describing the job I've been doing — building the shared platform other teams depend on — plus the domain I practice in my spare time."
