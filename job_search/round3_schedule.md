@@ -39,10 +39,10 @@ Reading supports sessions; it never replaces them (bare reading = the "feeling o
 3. `design/interview/playbook.md` — skim once before week 4.
 4. `design/study/design_knowledge_base.md` — **lookup only** (2676 lines): read the section matching each design session's topic before that session.
 5. `design/interview/component_decision_tree.md` — skim before weeks 4–5.
-6. `design/interview/domain_playbook.md` — skim before D10 (payment/settlement).
+6. Payments domain walkthrough — now in `design/interview/playbook.md` (section 31) — skim before D10 (payment/settlement).
 7. `design/study/log/*` — only the entries the schedule pairs with sessions. Not all 19.
 8. `design/interview/examples/**` — **do NOT pre-read.** Draw-then-diff needs them unspoiled.
-9. `design/interview/platform_infra_angle.md` — optional, lowest.
+9. `behavioral/platform_infra_angle.md` — mindset switch for platform/infra loops (now includes Arrowstreet).
 10. `design/interview/system_design_cheatsheet.html` — print near interview time.
 
 ---

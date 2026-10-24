@@ -30,10 +30,10 @@ interview_prep/
 │   │   ├── log/                      — append-only session log, 19 entries
 │   │   └── README.md, SETUP.md       — the working loop and conventions
 │   └── interview/              ← Delivery artifacts
-│       ├── playbook.md         — staff+ framework, tradeoff articulation
+│       ├── playbook.md         — THE single SD prep doc: framework, building blocks,
+│       │                         constraint→solution map, tradeoff pairs, meta-principles,
+│       │                         corrections narration, payments domain walkthrough
 │       ├── component_decision_tree.md — technology selection
-│       ├── domain_playbook.md  — payments domain walkthrough
-│       ├── platform_infra_angle.md
 │       ├── system_design_cheatsheet.html, system_design_flow.html
 │       └── examples/           — worked problems (+ coinbase/, openai/ sets)
 │

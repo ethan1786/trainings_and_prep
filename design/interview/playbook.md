@@ -35,7 +35,13 @@
 27. [Deep Dive: Fraud Detection Pipeline](#fraud-detection-pipeline-deep-dive)
 28. [Numbers Every Engineer Should Know](#numbers-every-engineer-should-know)
 29. [Staff+ Differentiators](#staff-differentiators)
-30. [Recommended Resources](#recommended-resources)
+30. [Quick Reference: System Design Checklist](#quick-reference-system-design-checklist)
+31. [Domain Walkthrough — Digital Transaction Platform (Payments)](#domain-walkthrough--digital-transaction-platform-payments)
+32. [Constraint → Solution Mapping](#constraint--solution-mapping-quick-reference)
+33. [Tradeoff Pairs (One-Liners)](#tradeoff-pairs-one-liners)
+34. [Recurring Meta-Principles](#recurring-meta-principles)
+35. [Corrections — Design-Round Narration](#corrections--design-round-narration)
+36. [Recommended Resources](#recommended-resources)
 
 ---
 
@@ -4346,6 +4352,289 @@ Before you finish, make sure you've covered:
 - [ ] **Failure modes** identified with mitigation
 - [ ] **Monitoring** — how you know it's healthy
 - [ ] **Security** — auth, encryption, PII handling
+
+---
+
+---
+
+# Domain Walkthrough — Digital Transaction Platform (Payments)
+
+> From the Coinbase VO domain interview prep (Miro-based). The flagship payments story: how the transaction platform was built and why each decision was made.
+
+## Opening
+
+CarGurus is a car marketplace, we connect buyers with dealers. The gap we solved: before my platform, customers only submitted contact info. Dealers called them blind. I built a transaction platform that gives both sides the full information: trade-in values, fees and taxes, financing, and a way to hold the car by putting down a deposit, before anyone picks up the phone.
+
+## Context & Role
+
+| Question | Answer |
+|---|---|
+| What is this system? | Digital transaction platform for both customers and dealers. Customers see full estimation of trade-in values, fees, financing, and can hold a car by putting down a deposit. Dealers get enhanced customer information and a more confirmed lead when customers come to the store for a test drive. |
+| Why was it needed? | Introduced during pandemic — consumers couldn't come to the store. We close the gap: give consumers more confidence before entering a dealership, give dealers more information about consumers to push forward with the deal. |
+| What was your role? | Sole backend architect + primary implementer. All architecture decisions mine. Started with 2 backend engineers. Got promoted to Principal on this project. |
+| What's the hard part? | Three things: (1) Figuring out product ambiguities — fast iterations across teams to find better product designs. (2) Product vs engineering tradeoff judgment — knowing when to ship fast vs invest in correctness. (3) Strong correctness and robustness for the payment/financial system — can't lose state, can't double-charge, must handle money safely. |
+
+## Architecture — Key Decisions
+
+| Component | WHY this design |
+|---|---|
+| **Per-step service calls** (not a chain) | Each step is a separate customer action → one downstream call. State machine enforces dependency order (can't calc fees without trade-in). Not one long-running request chaining through services. |
+| **Eventual consistency for leads/notifications** | Dealer notification can lag seconds. Not critical path. Decoupled via Kafka. |
+| **Single DB (Postgres)** | 100-200 writes/min. Doesn't justify separate DBs. Config + transactional in same DB, different tables. |
+| **Redis cache (write-through)** | Improves read performance. Write to DB first, then update Redis. No race condition concern — one customer updates one transaction at a time. |
+| **Feature flags** | Product experiments. Safe retirement. Kill experiments without code deploys. |
+| **Configurable steps** (transaction) | Steps: create txn, trade-in, fee/tax, financing, deposit. Each step is optional (dealer config). If a service fails, customer proceeds with empty data and fixes later. If earlier step is updated, downstream recalculates. No rigid state machine — flexible to dealer config and service availability. |
+| **Transaction dedup** | New transactions: compound key (user_id + vehicle_id) with unique constraint — second create returns existing. Step updates: each request carries a session ID. Short-lived in-memory cache checks for recent duplicates — if found, return cached result, skip downstream call. If cache expired, enough time has passed that data may have changed — fresh downstream call is justified. Audit log in DB records all actions permanently regardless. |
+
+## Payment System — Key Points
+
+| Point | Detail |
+|---|---|
+| **Auth-then-capture** | Authorize immediately (hold funds). Capture only when dealer confirms. Cancel before capture = free (release hold). "Auth is not the charge." |
+| **Payment state machine** | AUTH → CONFIRMED → CAPTURED → PAID_OUT. Branches: CANCELLED, REFUNDED, DECLINED. |
+| **Dual communication** | Outbound: sync HTTP to Stripe (auth, capture, cancel). Inbound: async webhooks (confirmation, failure). |
+| **Source of truth** | Remote provider (Stripe). Always poll before action. Never act on stale local state. |
+| **Idempotency** | Customer_id + vehicle_id is compound key for the transaction. Transaction ID attached as idempotency key on Stripe calls. Only two calls touch the card: auth (transaction ID as key — Stripe won't create two holds) and capture (auth ID — can only capture a hold once). Redis lock on transaction ID dedupes concurrent requests before hitting Stripe — reduces server load and protects Stripe rate limits. |
+| **Audit trail** | Append-only action log in DB for all transaction actions with full details. Never mutate — only append. Full history for disputes, compliance, and reconciliation. |
+| **Reconciliation** | Daily job compares internal records vs Stripe settlement. Catches missed webhooks, stuck payments. |
+
+## Failure Modes (know all of these)
+
+| Failure | Recovery |
+|---|---|
+| **Stripe returns error on auth** | Roll back to CREATED. Return error to user. Compensating transaction. |
+| **Auth succeeds but DB write fails** | Webhook will arrive and create/correct record. Poll-before-action on next operation reads latest from Stripe. |
+| **Webhook never arrives** | Don't wait. Actively poll on next action. Daily reconciliation job catches stuck payments. |
+| **Duplicate webhook** | Idempotency key saved in DB after processing. Second event is no-op. |
+| **Out-of-order webhook** | Some transitions tolerated, some not. Invalid critical transitions prompt support review. |
+| **Hold expires (7 days)** | Daily reconciliation job detects expired holds and updates our records. Webhook is another trigger. Re-auth available if deal still active. |
+| **Cancel-capture race** | Stripe is authority. Only one succeeds. Poll-before-action ensures we check latest state. |
+| **Customer clicks pay twice** | Three layers: (1) API dedup by transaction compound key (customer + vehicle), (2) Redis lock on transaction ID in payment service blocks concurrent/retry requests, (3) Transaction ID as Stripe's idempotency key on auth call — even if two requests reach Stripe, only one auth created. |
+| **Fee/Tax service slow** | Cached by dealer. If cache miss + slow: return partial data with error. Customer fixes before deposit. |
+| **Loan service down** | Non-blocking. Customer proceeds without estimate. Can add later. |
+| **Refund after capture** | Separate flow, requires support review (we lose processing fee on refunds). |
+
+## Orchestration & Architecture Deep Dive
+
+| Question | Answer |
+|---|---|
+| **Config vs transactional data?** | Same DB, different tables. Config: read-heavy, cached aggressively, long TTL. Transactional: write-heavy, strongly consistent, no cache for active records. |
+| **Configurable flows (not all dealers offer trade-in)?** | Config-driven. If feature not configured, skip in UI. Backend validates config before each step. |
+| **Adding a new service (e.g., insurance)?** | Add as optional step in backend. Plug in integration, test. Release in UI via feature flag. |
+
+## Scale & Performance
+
+| Metric | Value | Implication |
+|---|---|---|
+| Config/consumer reads | 10-15K rpm | Cached in Redis (write-through) |
+| Transaction reads | ~2K rpm | Moderate, strong consistency |
+| Transaction creates | 100-200/min | Single DB handles fine |
+| Read:write ratio | ~10:1 | Cache-first architecture |
+| Why no sharding? | Two reasons | (1) Volume is low (100-200 writes/min). (2) Transactions older than 6 months moved to separate reporting DB — active table stays small. |
+
+**Key line:** "I sized for actual load. Didn't over-engineer. That's judgment."
+
+## Operational Excellence
+
+| Question | Answer |
+|---|---|
+| **What do you monitor?** | Engineering: 200/500 rates, RPM, p50/p99, cache miss rate, DB pool, payment auth errors by code, webhook lag, reconciliation mismatches. Product: funnel conversion, drop-off rates. |
+| **On-call at 3 AM — payment auth fails?** | Honestly never happens — payment service is low traffic and not the source of truth. If service is unhealthy, SRE on-call bounces it. No eng investigation needed. If Stripe is down, customers just can't deposit until it's back — transaction data is safe, no money at risk because nothing gets authorized. |
+| **How to deploy safely?** | Canary deploys. Spring Boot graceful shutdown (finish active requests). Risky changes wrapped in feature flags — new transactions use new path, existing ones finish on old path. |
+| **How to test end-to-end?** | Staging with real payment provider in test mode (test cards, real API calls, real webhooks, prod DB copy). No mocking the provider — too critical to fake. |
+
+## Key Principles (weave naturally)
+
+- **"Auth is not the charge"** — same as "hold is not the trade"
+- **"Provider is the source of truth"** — always poll before acting
+- **"Append-only, never mutate"** — audit trail for financial compliance
+- **"Reconciliation runs always"** — not error handling, permanent safety net
+- **"Strong consistency for money, eventual for everything else"**
+- **"Sized for actual load — didn't over-engineer"**
+- **"Correctness over performance"** — redundant validation at every step
+
+---
+
+# Constraint → Solution Mapping (Quick Reference)
+
+> Distilled from `design/study/design_knowledge_base.md` Part 4. The full KB stays in design/study for depth.
+
+| Constraint | Pattern | Tool options |
+|---|---|---|
+| High read volume | Cache | In-memory → Redis/Valkey → CDN (layered) |
+| High write burst (async OK) | Queue/buffer | Kafka (replay) vs SQS (simple) |
+| High write burst (sync required) | Scale write path | Shard, batch+flush, back-pressure (429) |
+| Slow processing | Async job | Message queue + worker pool |
+| Read/write contention | Separation | Read replica, CQRS, materialized views |
+| Data growing unbounded | Tiering | Hot/warm/cold, TTL, archive to object storage |
+| External service unreliable | Resilience | Timeout + bulkhead + circuit breaker + bounded retry; fallback optional |
+| Multiple services need same data | Shared state | Redis, event-driven invalidation, CDC |
+| Need audit trail | Append-only log | Event table, Kafka topic, event sourcing |
+| Caller needs durability guarantee | Sync persist | Must hit the durable store before 200 |
+| Caller only needs acceptance | Fast-ack + async | Accept into fast store, 200, persist async, reconcile |
+| Business operation spans services | Distributed transaction | Saga (simple) or TC/C (parallel) |
+| Global users, static content | Edge delivery | CDN + versioned URLs |
+| Need unique time-sortable IDs | Distributed ID gen | Snowflake-style (64-bit, no coordination) |
+| Need full-text search | Search index | Elasticsearch/OpenSearch (secondary, never source of truth) |
+| Need coordination / leader election | Consensus service | ZooKeeper / etcd / Consul (3–5 nodes) |
+| **Known refresh interval, client-driven** | Polling | HTTP + `ETag`/deltas |
+| **Server must push immediately, one direction** | Streaming | SSE (stateless, proxy-friendly) |
+| **Simultaneous two-way / binary / high-rate** | Bidirectional channel | WebSocket (stateful — plan sticky sessions) |
+| **"It's slow" — cause unknown, many layers** | Attribute before optimizing | Tracing → layer walk → shape classification |
+| p50 regressed at a deploy | Regression, not capacity | Diff review + revert; skip the capacity work |
+| p99 bad, p50 fine, high fan-out | Tail amplification | Reduce fan-out, hedge, timeout, fail-open non-critical |
+| Everything slow simultaneously | Saturation / queueing | Pool + concurrency limits, shed load, add capacity |
+| Latency ∝ number of items on page | N+1 / fan-out | Batch + dedup (DataLoader), not a cache |
+| Spans sum ≪ end-to-end latency | Queueing before the work starts | Thread/connection pool, event-loop lag, admission control |
+| Rows examined ≫ rows returned | Missing/non-selective index | Index or rewrite the query — never cache over it |
+| **"Will it hold at 10x?"** | Find the binding constraint | Little's Law estimate → stress test to the knee |
+| Slow only above a load threshold | Capacity, not latency | Utilization knee — target 50–70%, not 90% |
+| Latency high, DB CPU low | Connection/thread pool exhaustion | Size with `throughput × latency`; add pool before pods |
+| Writes plateau, reads scale fine | Single-writer constraint | Shard/partition; replicas don't help writes |
+| Throughput pinned to a round number | Downstream quota or hand-set throttle | Their limit is your capacity — cache, queue, or negotiate |
+| Throughput plateaus with CPU idle | Lock / hot-key contention | Shard the key, coalesce; some serialization is irreducible |
+| Brownout escalates to outage | Retry amplification | Retry budget at one layer, backoff **with jitter**, breaker |
+| Spike breaks it, gradual growth fine | Autoscaling lag | Headroom absorbs spikes; autoscaling only handles trends |
+| Demand may exceed capacity regardless | Load shedding | Rate limit + degrade + back-pressure — plan it before you need it |
+| **Content slow to produce, revealed progressively** | Stream it | SSE with typed events |
+| **N clients each composing M fragmented services** | Composition layer | GraphQL Federation (shallow graph) |
+| **Same entity referenced many times in one request** | Intra-request dedup | DataLoader batch loader |
+| **Same entity re-requested across requests** | Cache the owner | Redis/Valkey **at the owning service** |
+| **Proven-hot internal M2M hop (benchmarked)** | Binary RPC | gRPC (per-edge, L7 LB required) |
+| **True bidirectional server-to-server streaming** | RPC streaming | gRPC bidi |
+| **Derived store must survive restart/redeploy fast** | Artifact bootstrap | Object storage snapshot + change-log offset |
+| **Derived store index must swap safely** | Versioned index + alias | Build new version → atomic alias repoint |
+| **Incremental ingestion must be replay-safe** | Durable watermark | Advance only after successful idempotent upsert |
+| **Incrementals can't express deletion** | Completeness backstop | Periodic full rebuild from source |
+| **Streaming workload starves page-serving pods** | Route isolation | Separate target group / streaming BFF |
+| **Autoscaler blind to held-open connections** | Custom metric | `active_streams` gauge + dual trigger (CPU + streams) |
+| **Long-held connections exhaust a scarce upstream** | Load shedding | Per-pod concurrency cap, 503 early, client handling |
+| **Handshake cost dominates short queries** | Connection pooling | Driver pool with tuned `min`/`maxPoolSize` |
+| **Need state across events (windows/joins/patterns)** | Stream processing | Kafka Streams (no cluster) → Flink (heavy state) |
+| **Analytics tolerating minutes of latency** | ELT | Land raw in object storage → warehouse transform |
+| **Exactly one instance must run a job** | Leader election | Session + KV lock (Consul/etcd/ZK), TTL heartbeat |
+| **Large file transfer must be reliable** | Multipart upload | SDK transfer manager (parallel parts, per-part retry) |
+| **Swarm of tiny objects** | Logical batching | Aggregate records into right-sized objects |
+| **Client needs direct upload/download** | Presigned URL | Time-limited URL, no proxying bytes through the app |
+| **Orphaned cost in object storage** | Lifecycle rules | Expire old versions + abort incomplete multipart |
+
+---
+
+# Tradeoff Pairs (One-Liners)
+
+> From KB Part 5. Each row is a ready-made "A vs B — the deciding question" narration.
+
+| Decision | A | B | The deciding question |
+|---|---|---|---|
+| Relational vs document | ACID, joins, constraints | Flexible schema, horizontal scale | Need transactions or joins? → relational |
+| Redis vs in-memory cache | Shared across instances | Zero latency, no serde | Multiple instances need the same view? → Redis |
+| Kafka vs SQS | Replay, ordering, multi-consumer | Managed, simple, cheap | Need replay or multiple consumers? → Kafka |
+| REST vs gRPC | Human-readable, browser-compatible | Binary, typed, streaming | External API? → REST. Internal + hot? → gRPC |
+| Sync vs async | Simple, immediate consistency | Decoupled, absorbs burst | User waiting? → Sync |
+| Push vs pull fan-out | Fast reads (pre-built) | No wasted writes | Most users low-follower? → Push, hybrid for celebrities |
+| Strong vs eventual consistency | Correct, higher latency | Fast, stale possible | Money/inventory? → Strong |
+| Monolith vs microservice | Simple ops, fast iteration | Independent scale and ownership | Early stage? → Monolith |
+| Optimistic vs pessimistic locking | No lock held, conflict on write | Lock held, blocks others | Low conflict? → Optimistic |
+| **SSE vs WebSocket** | Stateless, proxy-friendly, one-way | Bidirectional, binary, high-rate | Client sends *while* server streams? → WebSocket |
+| **Polling vs streaming** | Simple, cacheable, client-driven | Immediate, server-driven | Is the interval known? → Poll |
+| **REST+CDN vs federation** | Free edge caching on repeats | Composition on cold, fragmented reads | High repeat + low fan-out? → REST+CDN |
+| **Batching vs dedup** | Fewer round-trips | Less downstream **work** | Is fan-in high (many refs → few entities)? → dedup is the real win |
+| **Entity reference vs `@provides`** | Router batches and hydrates | Fields returned inline, zero hydration | Does the subgraph already hold the data? → `@provides` |
+| **Reference vs scalar id** | Router-hydrated, batched | Consumer hydrates in a second query | Is the key **dependent** on a prior call? → scalar id |
+| **Shared library vs owning service** | Cheapest for same-language pure logic | Works across languages | Are consumers polyglot? → owning service |
+| **Fewer vs more partitions** | Less metadata/coordination overhead | Headroom for consumer scale-up | Size to *max useful consumers*, not current pods |
+| **Global order vs throughput** | 1 partition, fully serialized | N partitions keyed by entity | Need per-entity order only? → key by entity |
+| **Build-from-source vs dump a node** | Authoritative, resumable, format-independent | Mechanically simpler | Is the node a derivative? → always build from source |
+| **Snapshot cadence vs source load** | Fresher baseline | Less pressure on the source | Widen the lookback window before adding runs |
+| **Multi-doc transaction vs bulk write** | Cross-document atomicity | Throughput, one command many atomic ops | Can the document embed it? → bulk write |
+| **Write-through vs write+invalidate** | Cache warm immediately | No cache/DB divergence on partial failure | Durable business data? → write DB, invalidate |
+| **TTL vs event invalidation** | Simple, bounded staleness | Fresher, more moving parts | Use **both**: events with a long TTL backstop |
+| **Local L1 vs shared L2** | Microsecond, no hop | One consistent view | Is the object large or hot-and-immutable? → local |
+| **Consensus store vs embedded Raft** | Reusable across systems | No external dependency to operate | Building the system itself? → embed |
+| **Stream processor vs consumer** | State across events | Simplicity | Do you need windows/joins/patterns? → processor |
+
+---
+
+# Recurring Meta-Principles
+
+> From KB Part 6. The reasoning that generalizes beyond any single tool — weave these into tradeoff narration in SD rounds.
+
+**1. Truth lives upstream; everything downstream is a bounded-staleness derivative.** The job of a system is to keep that staleness **bounded and recoverable** — never to promote a derivative into the source. Applies to search indices, caches, read models, and node-local state alike. Corollary: never seed a backup from a replica, because one node's drift becomes everyone's starting point.
+
+**2. Logic belongs with whoever owns the data it derives from.** Domain-semantic derivations belong in their domain. Cross-domain composition belongs to a service that owns that composition. Presentation belongs to the app. The anti-pattern is a shared concern owned in the wrong place.
+
+**3. Convenience is a tiebreaker, never a justification.** "It's already wired up" can choose *between* correct homes; it can never *make* a home correct. Otherwise the busiest junction accretes all logic and becomes a distributed monolith with a single critical-path chokepoint.
+
+**4. Identify the real bottleneck before adding capacity.** More partitions don't help if the constraint is a downstream API. More replicas don't help if the pool is exhausted by latency. Every scaling lever should follow a measurement, not an intuition.
+
+**5. Distinguish the capability trigger from the cost trigger.** Volume tells you *when* something becomes expensive; capability tells you *whether* the simpler tool can do the job at all. Adopt heavy platforms only when a capability is genuinely required — then climb the operational-weight ladder only as far as forced.
+
+**6. Every platform has an exit cost — choose which lock-in fits the dominant workload.** There is no commitment-free option at the architecture layer. Weight by blast radius and reversibility.
+
+**7. Consequences are not justifications.** Decomposition is justified by **boundary and independence** (independent deploy, scale, failure domain); the resilience and observability wins are **dividends the boundary pays**. Mistaking the dividend for the reason leads to decomposing the next thing "for speed" — and decomposition usually makes a single request *slower*.
+
+**8. Ask what the failure path costs, not just the happy path.** A circuit breaker that dumps cache traffic onto the primary datastore. A load shedder that 503s the user. A fail-open timeout that returns a null field. Every resilience mechanism relocates load rather than deleting it — know where it lands.
+
+**9. Symmetry and interchangeability are features.** Leader election works precisely *because* nodes are interchangeable: zero config, automatic failover, race-safety for free.
+
+**10. Prefer designs that keep the workload simple enough that heavy tooling never becomes necessary.** The best architectural move is often the one that removes the need for a later one.
+
+**11. Simulate the decision in logs before building the mechanism.** Most design arguments can be converted into a number for the cost of one log line: log the cache key you *would* use → projected hit rate. Log the shard key you *would* route on → skew. When a design choice depends on the shape of production traffic, **instrument the hypothesis, don't debate it.**
+
+**12. Headroom is not waste — it is the budget you spend on latency, spikes, and failover.** Waiting scales as `1/(1−utilization)`; a system at 90% is one traffic bump from a latency cliff. Corollary: capacity is set by **one binding constraint at a time** — relieving the constraint just promotes the next one, which you should name in advance.
+
+---
+
+# Corrections — Design-Round Narration
+
+> Distilled from `design/study/corrections.md` (the append-only log — full entries live there). This is the highest-value SD narration material: *"the intuitive answer is X — that's what I believed — but it's wrong because Y"* IS the journey interviewers want to hear.
+
+## How to use corrections in an SD round
+
+Don't recite the right answer — narrate the correction. Each row below is a pre-built narration: the commonly-held claim, the accurate version, and (from the full log) the reason the error is tempting.
+
+## Corrections index (common claim → accurate version)
+
+| Common claim | The accurate version |
+|---|---|
+| "WebSocket holds far more concurrent connections than SSE" | Near-identical per-connection cost; capacity is FDs/memory/event-loop plus app throttles. SSE's only real limit is the ~6-per-domain HTTP/1.1 browser cap, removed by HTTP/2 |
+| "A low stream cap is an SSE limitation" | It's an application throttle protecting a scarce upstream (LLM concurrency, per-stream memory) |
+| "HTTP/2 push can replace SSE" | Deprecated in browsers; not an alternative |
+| "Streaming is needed because the payload is large" | It's needed because the payload is **slow to produce and revealed progressively** |
+| "DB caches are usually disabled" | Engine caches (buffer pool, WiredTiger) are always on; the *ORM second-level/query* cache is what's often disabled |
+| "Write-through gives strong consistency" | Cache and DB writes aren't atomic; prefer write-DB-then-invalidate |
+| "Redis is a persistence layer" | Treat as ephemeral: ~1s fsync, journals may not be backed up, restore may not exist |
+| "A distributed cache is always better than local" | A >500KB value can turn ~1ms into seconds and exhaust the pool; local was the fix |
+| "Going direct instead of via the router restores free caching" | Free edge caching lives only at the **client edge**; internal hops never had it. Caching and routing are orthogonal axes |
+| "The router's caching improves data performance" | Plan/normalization cache saves **router CPU**; entity/response caching is the hard, often-unbuilt part |
+| "Elasticsearch is slow to write, so keep it in sync directly" | Maintain it as a derived store: relational → read model → change events → index, with a dedicated ingestor |
+| "Elasticsearch/OpenSearch can be the source of truth" | Always pair with a primary store; rebuild-from-source is the recovery model |
+| "Snapshot the running index — simpler than rebuilding" | A node index is a derivative with baked-in drift, no crisp resume offset, and physical format coupling |
+| "A new snapshot re-bases the fleet" | Nodes adopt a snapshot only on **startup**; continuous change consumption is the freshness mechanism |
+| "One consumer with two partitions processes them in parallel" | Not guaranteed by Kafka; parallelism comes from more consumer **instances** |
+| "partitions = consumers is the rule" | Conservative default; size to **max useful consumers** with headroom, avoid over-partitioning overhead |
+| "GraphQL is a data store / read-only / can't do writes" | It's a contract + composition layer; `mutation` and `subscription` are first-class. Writes stay on REST because federation has **no cross-subgraph atomicity** |
+| "gRPC is REST over a better connection" | Four pillars: HTTP/2 multiplexing, protobuf, IDL+codegen, four call types incl. bidirectional |
+| "gRPC is about performance, GraphQL isn't" | Different axes: GraphQL attacks round-trips/over-fetch, gRPC attacks wire serialization |
+| "@provides means the subgraph fetches the entity" | It's a **declaration** that fields are already present (`resolvable: false`); only free if the data is already held |
+| "A subgraph can call back into the router" | Resolution flows strictly downward; if a subgraph must fetch, it calls the owning service directly |
+| "Logic is logic, data is data" | Too clean — it exiles legitimate derived domain attributes. The axis is **whose** logic |
+| "Distributed systems always use ZooKeeper" | Being displaced (KRaft and equivalents); still maintained and widely deployed, just not chosen for new systems |
+| "ZooKeeper is a single point of failure" | The ensemble is quorum-fault-tolerant; the real costs are operational weight and shared-fate coupling |
+| "etcd is only for Kubernetes, and we don't use it" | If you run Kubernetes, you use it constantly and invisibly — it stores all cluster state |
+| "Consul is a service mesh tool" | Four pillars: discovery, health, **KV**, multi-DC. KV+sessions powers leader election, often the heaviest use |
+| "Decomposition was justified by performance" | Justified by boundary/independence; resilience and observability are dividends the boundary pays |
+| "No Flink means a stream-processing gap" | Two independent reasons: per-event stateless workload + low volume. The real trigger is fault-tolerant **state across events** — a windowing requirement, even at low volume |
+
+## The recurring correction patterns
+
+- Round limits (50, 100, 1000) are usually app throttles, not technical ceilings
+- "It's slow" needs **attribution** (where does time go) before **treatment** (what to build) — tracing and key-logging answer different questions
+- A cache hides the source inefficiency it papers over — can the source survive 100% miss at peak? A cache outage is then a capacity incident, not a latency one
+- Derivatives (caches, indexes, read models, node state) never become the source of truth — truth lives upstream
+- Repeat rate is measurable before building anything: log the cache key you *would* use and compute `1 − (distinct keys / total requests)`
+- Mistaking consequences for justifications (decomposition "for speed") leads to wrong architectures
+- The failure path, not the happy path, is where resilience mechanisms earn their keep — every breaker/shedder relocates load; know where it lands
 
 ---
 

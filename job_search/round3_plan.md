@@ -215,7 +215,7 @@ The delegation split for AI-enabled rounds:
 | Patterns, constraint→solution mapping | `design/study/design_knowledge_base.md` (live, 2676 lines) |
 | **Why I was wrong before** — best narration source | `design/study/corrections.md` |
 | Study session reasoning paths | `design/study/log/` (19 entries) |
-| Payments domain walkthrough | `design/interview/domain_playbook.md` |
+| Payments domain walkthrough | `design/interview/playbook.md` §31 (merged Oct 24) |
 | Java depth | `languages/java_playbook.md` |
 | Coinbase AI-native interview format | `companies/coinbase/prep_coinbase.md` |
 | CarGurus agentic system detail | `behavioral/behavioral_playbook.md` Stories 3, 3b, 3c |

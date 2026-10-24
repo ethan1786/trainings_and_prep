@@ -1,8 +1,7 @@
 # Platform / Infrastructure Interview Angle
 
-> Shared context for HashiCorp/IBM and NVIDIA interviews.
-> Different mindset from Coinbase/Cherry (product-driven, consumer-facing).
-> Use this to switch context before Wed May 13 (HashiCorp) and Thu May 14 (NVIDIA).
+> Behavioral context-switch for platform/infra roles. Originally written for HashiCorp/IBM and NVIDIA interviews (May 2026) — now the live target is **Arrowstreet** (Shared Data Platform / Investment Technology: internal platform, other engineers as users). Use this doc to shift mindset before any platform/infra loop.
+> Stories referenced here live in `behavioral_playbook.md`; the new platform-flavored stories (3c, 17, 20) fit this angle naturally.
 
 ---
 
