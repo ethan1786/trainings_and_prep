@@ -1,5 +1,7 @@
 # Round 3 — Session Schedule (Sept 23 → offer)
 
+> **Daily model (Oct 24, user decision):** 70% design / 30% coding per hour of prep (e.g., 40 min design + 20 min coding). Design: read `design/interview/playbook.md` in order — framework (§2–8) → building blocks (§9–30) → distilled tables (§32–35) → walkthrough examples; last 2 weeks shift to draw-then-diff walkthroughs + mocks (delivery, not reading). Word-for-word only for the payments presentation (§31); everything else = derivation/narration fluency. Coding: daily LC easy-mediums for syntax refresh + pattern re-familiarization (the triage model below). Behavioral: 15 min/day familiarization now (next week's sourcer call may screen), full mock before the HM screen.
+
 > Companion to `round3_plan.md`. Every session lists its exact questions/topics — no hunting needed.
 > ~10 hrs/week = 4 sessions/week (2 design, 2 coding), ~2.5 hrs each.
 > **Prep continues until an offer lands.** When a company responds, its prep doc + problem set jumps the queue (reapply_timeline rule).
