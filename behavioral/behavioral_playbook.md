@@ -361,6 +361,7 @@ You already use GraphQL (Netflix DGS) elsewhere, so this is a natural question. 
 - **R:** POC → production platform; contracts reused by multiple AI agents org-wide; eliminated REST/MCP duplication; foundation for reliability/security ownership (3b, 3c, 17)
 
 ### Interview Tips
+- **This is the default opener for generic "tell me about a project" questions** (current + AI + full arc). Story 1 remains the lead only for leadership/cross-org questions — its age doesn't hurt it there, because that question isn't about recency or AI.
 - 60–90 seconds; the progression table is the spine — one answer, four data points.
 - If they dig: modular tool registration (POC era), data-contract design (platform era).
 - Don't oversell: you build the platform, not the models. You're interviewing for a platform role.
