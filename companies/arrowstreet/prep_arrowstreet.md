@@ -63,6 +63,7 @@
 | What does your data-platform work look like at CarGurus? | Stories 3, 3b, 3c |
 | Tell me about debugging a hard production problem | Story 3c (MongoDB 71K-span diagnosis) |
 | How do you use AI day-to-day? | Story 19 + Direct Questions AI answer |
+| How hands-on are you? (JDs emphasize hands-on coding) | Direct Questions: "Do you still write code?" — hands-on = plan authoring + full review, not typing |
 | Tell me about a security-sensitive design | Story 17 |
 | Why did you rebuild your trading platform? | Story 18 ("Why Rebuild" answer) |
 | Tell me about a disagreement | Story 8 |
