@@ -33,6 +33,7 @@ interview_prep/
 │       ├── playbook.md         — THE single SD prep doc: framework, building blocks,
 │       │                         constraint→solution map, tradeoff pairs, meta-principles,
 │       │                         corrections narration, payments domain walkthrough
+│       ├── reference.md        — NFR solutions, full estimation worksheet, numbers (lookup only)
 │       ├── component_decision_tree.md — technology selection
 │       ├── system_design_cheatsheet.html, system_design_flow.html
 │       └── examples/           — worked problems (+ coinbase/, openai/ sets)
