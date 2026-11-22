@@ -236,23 +236,76 @@ DELETE /api/v1/messages/{id}     — delete
 ```
 
 ### Pagination
+
 ```
 GET /api/v1/feed?cursor=<opaque_token>&limit=20
 
 Response:
 {
   "data": [...],
-  "next_cursor": "abc123",  // opaque, encodes position
+  "next_cursor":  "<older than bottom item>",  // scroll down
+  "newer_cursor": "<newer than top item>",     // check for new items (DESC feeds)
   "has_more": true
 }
 ```
 
-**Cursor-based** (preferred for feeds/timelines):
-- Stable under inserts/deletes
-- Encode last seen ID or timestamp
+#### Cursor vs Offset: which to use
 
-**Offset-based** (`?page=3&limit=20`):
-- Simple but breaks when data changes between pages
+| | Cursor (keyset) | Offset (`?page=3&limit=20`) |
+|---|---|---|
+| **Deep pages** | Same cost on every page (index seek) | Gets slower with depth (DB scans and discards OFFSET rows) |
+| **Inserts/deletes mid-scroll** | Stable: no duplicates, no skips | Shifts: duplicates or skipped rows |
+| **Jump to page N / "page 7 of 40"** | Not possible | Yes |
+| **Total count** | Not included (separate, often approximate) | Natural fit |
+| **User-chosen sort columns** | Needs an index + tiebreaker per sort | Any `ORDER BY` works |
+| **Use for** | Feeds, infinite scroll, large or fast-changing data, sync/export APIs | Admin tables, small bounded result sets, search results with page numbers |
+
+**Default to cursor; use offset when the UI needs page numbers.** Hybrid: offset with a depth cap (Google stops at ~page 40, Elasticsearch `max_result_window` defaults to 10K), and cursor/`search_after` for anything deeper or for exports.
+
+#### The cursor is opaque but stateless
+
+"Opaque" means clients don't parse it. It doesn't mean it's a random key you have to look up. No Redis needed:
+
+```
+cursor = base64({"created_at": "...", "id": 98231, "v": 1, "f": <filter hash>}) + HMAC
+
+next page:  WHERE (created_at, id) < (:created_at, :id)
+            ORDER BY created_at DESC, id DESC  LIMIT 20
+```
+- **Opaque** → you can change the encoding later (new sort key, shard ID) without breaking clients. Version it.
+- **Signed (HMAC)** → a tampered cursor can't point into another tenant's rows. Encrypt it if the sort key itself is sensitive.
+- **Filter hash** → reject a cursor reused with different filters or sort.
+- **Tiebreaker** → always add a unique column (`id`) after the sort key so rows with equal timestamps aren't skipped.
+
+**TTL?** Data growth never invalidates a keyset cursor, because it's a position in the sort order, not an offset. Add `exp` to the signed payload only for security (leaked links), encoding migrations, or data retention (rows deleted past retention).
+
+**When server-side cursor state *is* justified** (Redis with TTL, cursor = `session_id + offset`):
+
+| Case | Why stateless breaks | Store |
+|---|---|---|
+| Ranked/personalized feed | Scores change between pages → dupes/skips | Snapshot of ranked ID list |
+| Expensive query (search, aggregation) | Re-running per page is too costly | Result IDs, or ES point-in-time |
+| Consistent snapshot required | Mid-scroll inserts shift results | Snapshot ID / `AS OF` timestamp |
+
+Costs: memory, TTL policy, and an "expired cursor" error clients must handle (restart from page 1).
+
+#### DESC feeds: new items land on page 1
+
+Keyset pagination going **older** is unaffected. New rows are above the cursor, so pages 2, 3, … stay stable. Offset is the one that breaks here: 5 new rows push 5 already-seen rows onto page 2.
+
+Only the page the user already has goes stale. Handle it with the **newer cursor**:
+```
+WHERE (created_at, id) > (:top_created_at, :top_id)
+ORDER BY created_at ASC, id ASC  LIMIT 50
+```
+- Poll every N seconds (or push a signal over SSE/WS) → "12 new posts" banner → prepend on tap. (Twitter's `since_id` / `max_id`.)
+- If the gap is larger than ~50, don't stitch. Reload from the top.
+
+#### Edge cases
+- **The sort key must not change.** Sorting by `updated_at` or a score moves items across the cursor boundary → dupes/skips. Sort by an immutable key, or snapshot (above). The client can also dedupe by ID as a safety net.
+- **Late-arriving rows.** A row committed with a timestamp below an already-issued cursor (clock skew, slow transaction) gets missed. Use a monotonic ID (Snowflake/sequence) as the key. For exports or ledgers, paginate by commit sequence / CDC offset.
+
+**Say it:** "Cursor-based, opaque to clients but stateless on the server: it encodes the last `(created_at, id)` and is signed. Older pages stay stable under inserts, and a newer cursor drives the 'new posts' banner. I'd only keep server-side cursor state for ranked feeds, where I snapshot the ID list in Redis with a short TTL."
 
 ### API Design Principles (Staff+ Level)
 - **Idempotency**: POST with client-generated idempotency key for writes
