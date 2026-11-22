@@ -206,68 +206,16 @@ How to actually satisfy each NFR (QPS tiers, latency techniques, availability ti
 
 ### Scale → Component Lookup (estimate just-in-time)
 
-Don't run a standalone estimation phase. There are only a handful of components and scale bands, so recognize the band and state what it implies. Do the math only when a decision hinges on it, and be ready to show the **one-line derivation** if asked.
+Don't run a standalone estimation phase. Recognize the pattern and the scale band, then state what it implies. Only do the math when a decision depends on it, and be ready to show the **one-line derivation** if asked.
 
 **The only conversion you need:** per day ÷ 100K ≈ per second (86,400 s/day). Peak ≈ 2–5× average.
 
 **How to say it:**
 > "Quick estimate in my head: 50M DAU × ~40 messages is ~2B/day, so ~20K QPS average, ~100K peak. That's past a single Postgres for writes, so I'll start with a write-optimized store partitioned by conversation. In practice we'd validate with real traffic, but for this interview I'll start there."
 
-#### Read QPS
+**Full lookup:** [scale_lookup.md](scale_lookup.md) covers single-node limits, generic axes (read/write QPS, data size, connections, fanout), 24 patterns with scale tiers, components, and a "say it" line for each, plus tier-jump signals.
 
-| Range | What it needs |
-|---|---|
-| < 10K | Single Postgres, optional Redis |
-| 10K–50K | Redis cache + read replicas |
-| 50K–500K | Redis cluster + multiple replicas, CDN for anything cacheable |
-| 500K+ | In-process cache (L1) + Redis (L2), CQRS read models |
-
-#### Write QPS (sustained)
-
-| Range | What it needs |
-|---|---|
-| < 5K | Single Postgres with connection pooling |
-| 5K–50K | Shard by entity (user/tenant), or Cassandra/DynamoDB |
-| 50K–1M | Partitioned Kafka in front, write-optimized store, batch writes |
-| 1M+ (latest-value only, e.g. GPS) | In-memory store (Redis), overwrite in place, partition by geography/key |
-
-Queues absorb **bursts**. If writes exceed capacity **sustained**, shard. A queue only delays the problem.
-
-#### Data size
-
-| Range | Where it lives |
-|---|---|
-| < 100 GB | Fits in memory. Whole working set can be cached |
-| < 1 TB | Single Postgres, no special handling |
-| 1–10 TB | Postgres with time/key partitioning, archive old data |
-| 10–50 TB | Sharded Postgres or DynamoDB/Cassandra |
-| 50 TB+ / media | S3 (+ Parquet for analytics), hot slice in DB |
-
-#### Concurrent connections
-
-| Range | What it needs |
-|---|---|
-| < 100K | A few WS/SSE servers, sticky LB |
-| 1M–10M+ | Fleet of stateful gateways (~100K conns each), user→gateway registry, pub/sub between gateways |
-
-#### Fanout per event
-
-| Followers / recipients | Strategy |
-|---|---|
-| < ~10K | Fan-out on write (push to each inbox/feed) |
-| > ~10K (celebrities, large channels) | Fan-out on read (pull and merge at read time) |
-
-#### Single-node limits (the numbers that actually get used)
-
-| Component | Rough ceiling |
-|---|---|
-| Postgres | ~5K writes/s, ~10K–50K indexed reads/s |
-| Redis | ~100K–500K ops/s |
-| Kafka broker | ~100K–500K msgs/s |
-| App server | ~5K–50K req/s |
-| WS gateway | ~100K connections |
-
-**Exception:** when storage or cost *is* the hard problem (video, logs/metrics, object storage), do the full storage and bandwidth math. See [reference.md](reference.md#back-of-envelope-estimation-full-worksheet) for the worksheet and worked examples.
+**The five numbers to carry in your head:** Postgres ~5K writes/s · Redis ~100K+ ops/s · Kafka broker ~100K+ msgs/s · WS gateway ~100K connections · fan-out on write up to ~10K followers.
 
 ### Staff+ Move: Identify the Hard Problem
 After scoping, explicitly state: "The hardest part of this system is ___. I want to spend most of our time there." This shows you can cut through noise.
@@ -3981,7 +3929,7 @@ Incident response:
 
 ## Numbers Every Engineer Should Know
 
-Moved to [reference.md](reference.md#numbers-every-engineer-should-know). For interview use, see the [Scale → Component Lookup](#scale--component-lookup-estimate-just-in-time).
+Moved to [reference.md](reference.md#numbers-every-engineer-should-know). For interview use, see [scale_lookup.md](scale_lookup.md).
 
 ---
 
