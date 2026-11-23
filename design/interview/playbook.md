@@ -307,7 +307,6 @@ ORDER BY created_at ASC, id ASC  LIMIT 50
 
 **Say it:** "Cursor-based, opaque to clients but stateless on the server: it encodes the last `(created_at, id)` and is signed. Older pages stay stable under inserts, and a newer cursor drives the 'new posts' banner. I'd only keep server-side cursor state for ranked feeds, where I snapshot the ID list in Redis with a short TTL."
 
-
 #### Page numbers over live data (e.g. transaction report)
 
 Product wants "page 7 of 40" but rows arrive every second. That's a contradiction to name out loud: page 3 has no fixed meaning if rows keep arriving. The real requirement is **consistent pages plus a way to see new data**, so freeze the view and show "37 new · Refresh."
@@ -327,6 +326,42 @@ Product wants "page 7 of 40" but rows arrive every second. That's a contradictio
 - Cache `COUNT(*)` per `(query, as_of)`. For very large sets, show an approximate total ("10,000+").
 
 **Say it:** "Page numbers over a live table aren't well-defined, so I'd freeze the report at `as_of` on first load. Offset pagination over that frozen set gives stable pages and totals, and a 'N new transactions, refresh' indicator covers freshness. Transactions are append-only, so the as-of bound is enough. If the query were expensive I'd snapshot the result IDs in Redis with a TTL, and big ranges go to an async CSV export."
+
+#### Where paging params live & caching
+
+**Paging params → query string.** A page is a GET, so the URL should fully identify it:
+```
+GET /api/v1/accounts/123/transactions?page=3&page_size=50&sort=-created_at
+```
+- Bookmarkable and shareable, back button works, caches key on it.
+- Not headers (caches don't key on them, the page can't be shared as a link). Not the body (poorly supported on GET).
+- Cap `page_size` (e.g. 100) and limit depth.
+- Metadata goes in the body (`page`, `page_size`, `total`). Optionally add a `Link` header with `next`/`prev`/`last` URLs, as GitHub's API does.
+
+**CDN caching depends on whether the data is the same for everyone:**
+
+| Data | CDN? | Headers |
+|---|---|---|
+| Public, same for all (catalog, public posts) | Yes. Full URL including query string is the cache key | `public, s-maxage=30, stale-while-revalidate=60` |
+| Per-user / authenticated (transaction report) | **No.** A shared cache can serve one user's data to another (a classic incident) | `private, no-store` for financial data |
+
+- Public lists: include the query string in the CDN cache key, allow only known params, and normalize their order (otherwise `?page=3&size=50` and `?size=50&page=3` are cached separately). Dropping unknown params also stops attackers filling the cache with junk keys.
+- Offset pages from a CDN can be mutually inconsistent (fresh page 2, 30s-old page 3). That's fine for public browsing.
+- Per-user data: cache on the server (count cache, snapshot). As-of pages never change for a given `as_of`, so `private, max-age=300` + ETag is safe in the browser, and going back to an earlier page is instant.
+
+**Snapshot ID → in the URL, as a resource:**
+```
+POST /api/v1/accounts/123/reports        {filters, sort}
+  → 201 {"report_id": "rpt_7f3a…", "as_of": "...", "total": 1987, "expires_at": "..."}
+
+GET  /api/v1/reports/rpt_7f3a…/rows?page=3&page_size=50
+```
+- Stateless as-of variant needs no ID: `?as_of=2026-11-22T10:32:05Z&page=3`. Clamp `as_of` to ≤ now and within retention.
+- **Not a cookie:** it ties the snapshot to the browser session, so two tabs on different reports overwrite each other.
+- **Not a header:** caches don't key on it, and the page can't be shared as a link.
+- **Security:** random 128-bit ID, checked against the caller's user/tenant on *every* request (unguessable alone isn't authorization), with a TTL. When expired → `410 Gone` + `snapshot_expired` → client restarts from page 1.
+
+**Say it:** "Paging params go in the query string so the URL identifies the page. Public lists are CDN-cached on the full URL with a short `s-maxage`. Per-user financial data is `private, no-store` and never goes through a shared cache. For snapshot reports, POST creates the snapshot resource and GET `/reports/{id}/rows?page=N` reads it. The server checks ownership, and the snapshot has a TTL."
 
 ### API Design Principles (Staff+ Level)
 - **Idempotency**: POST with client-generated idempotency key for writes
