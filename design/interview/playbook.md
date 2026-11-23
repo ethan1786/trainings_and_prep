@@ -307,6 +307,27 @@ ORDER BY created_at ASC, id ASC  LIMIT 50
 
 **Say it:** "Cursor-based, opaque to clients but stateless on the server: it encodes the last `(created_at, id)` and is signed. Older pages stay stable under inserts, and a newer cursor drives the 'new posts' banner. I'd only keep server-side cursor state for ranked feeds, where I snapshot the ID list in Redis with a short TTL."
 
+
+#### Page numbers over live data (e.g. transaction report)
+
+Product wants "page 7 of 40" but rows arrive every second. That's a contradiction to name out loud: page 3 has no fixed meaning if rows keep arriving. The real requirement is **consistent pages plus a way to see new data**, so freeze the view and show "37 new · Refresh."
+
+| Option | How | Pros | Cons | Use when |
+|---|---|---|---|---|
+| **As-of offset** (default) | Capture `as_of` (or `max_id`) on page 1 and return it. Every page: `WHERE created_at <= :as_of … OFFSET/LIMIT`. Count uses the same bound | Stateless, stable page numbers and total, cheap | Only freezes *inserts*. Rows whose sort/filter fields change (e.g. `status`) can still move | Append-only data (transactions, logs, audit) |
+| **Point-in-time read** | DB snapshot read: `AS OF SYSTEM TIME` (CockroachDB), temporal tables, or `REPEATABLE READ` held open | True snapshot, handles updates too | DB support varies. Long-held snapshots bloat MVCC / block vacuum | Mutable rows, short browsing sessions |
+| **Stored result snapshot** | Run the query once, store ordered result IDs in Redis / temp table keyed by `report_id` with a TTL. Page N = slice, then hydrate | Expensive query runs once; any sort works; exact total | Memory per open report, TTL expiry errors, stale until refresh | Expensive filters/joins/aggregations |
+| **Async export** | Job writes CSV/Parquet to S3 and notifies the user | No pagination problem at all; handles millions of rows | Not interactive; minutes of latency | Big date ranges, accounting/compliance pulls |
+| **Client-side paging** (old jQuery DataTables) | Ship N pages in one payload; browser sorts/pages | Zero backend calls while browsing | Big payloads, overfetches sensitive data, sort/filter only over what was shipped, silently stale | Small, non-sensitive, bounded lists only |
+
+**Keeping offset fast:**
+- Reports are filtered (account + date range), so the set is bounded. Index on `(account_id, created_at, id)`.
+- **Deferred join** for deep pages: `SELECT id … ORDER BY … OFFSET … LIMIT` on the covering index, then join back for full rows.
+- Cap the depth (e.g. 100 pages). Anything bigger goes to async export.
+- Cache `COUNT(*)` per `(query, as_of)`. For very large sets, show an approximate total ("10,000+").
+
+**Say it:** "Page numbers over a live table aren't well-defined, so I'd freeze the report at `as_of` on first load. Offset pagination over that frozen set gives stable pages and totals, and a 'N new transactions, refresh' indicator covers freshness. Transactions are append-only, so the as-of bound is enough. If the query were expensive I'd snapshot the result IDs in Redis with a TTL, and big ranges go to an async CSV export."
+
 ### API Design Principles (Staff+ Level)
 - **Idempotency**: POST with client-generated idempotency key for writes
 - **Versioning**: `/v1/` prefix or header-based
