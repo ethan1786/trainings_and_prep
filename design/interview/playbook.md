@@ -363,12 +363,316 @@ GET  /api/v1/reports/rpt_7f3a…/rows?page=3&page_size=50
 
 **Say it:** "Paging params go in the query string so the URL identifies the page. Public lists are CDN-cached on the full URL with a short `s-maxage`. Per-user financial data is `private, no-store` and never goes through a shared cache. For snapshot reports, POST creates the snapshot resource and GET `/reports/{id}/rows?page=N` reads it. The server checks ownership, and the snapshot has a TTL."
 
+---
+
+### Idempotency Keys
+
+**Problem:** the client sends `POST /payments`, the connection drops, and the client doesn't know if the charge happened. Retrying blindly can double-charge. Never retrying can lose the payment.
+
+```
+POST /api/v1/payments
+Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324
+{"amount": 5000, "currency": "usd", "source": "card_123"}
+```
+
+**Server flow:**
+```
+1. Look up (tenant_id, key)
+   ├─ not found      → INSERT row {status: IN_PROGRESS, request_hash}   ← unique constraint = the lock
+   │                   execute → store {status: DONE, response_code, response_body}
+   ├─ DONE, same hash → replay stored response (same status code + body)
+   ├─ DONE, diff hash → 422 (key reused with a different request)
+   └─ IN_PROGRESS     → 409 Conflict + Retry-After (concurrent duplicate)
+2. Key row lives 24h–7d, then expires
+```
+
+| Decision | Choice | Why |
+|---|---|---|
+| Where the key goes | `Idempotency-Key` header | Same across endpoints, not mixed into the business payload. IETF-draft standard, Stripe-style |
+| Who generates it | Client (UUIDv4), once per *logical* operation, reused on every retry | Server can't tell a retry from a new intent |
+| Scope | `(tenant/user, key)`, optionally + endpoint | Stops one client's key colliding with another's |
+| Request fingerprint | Hash of the canonical body, stored with the key | Detects a buggy client reusing a key for a different charge |
+| Storage | Same DB transaction as the business write (Postgres) | If the key is in Redis and the payment is in Postgres, a crash between them breaks the guarantee |
+| What's stored | Final status code + body | A retry must get the *same answer*, including the same error |
+| Retention | 24h (Stripe) to 7d | Longer than any client retry window. A TTL job purges old keys |
+
+**Edge cases:**
+- **Crash mid-execution** leaves the row stuck at `IN_PROGRESS`. Add a `locked_until` lease. After it expires, the next retry may take over, but only if the downstream call is itself idempotent (pass the same key through to the PSP).
+- **Don't store transient failures** (5xx, timeouts) as final. Let the retry run again. Do store deterministic 4xx (validation, card declined).
+- **Downstream calls:** pass an idempotency key to the PSP too (derive it, e.g. `key + ":auth"`), otherwise you're only idempotent at your own edge.
+- **GET/PUT/DELETE** are idempotent by HTTP semantics. Keys are for POST and PATCH that cause side effects.
+
+**Alternative:** use a natural key instead of a client-generated one (e.g. unique constraint on `(user_id, order_id)`). Simpler when a natural key exists, but it can't replay the original response.
+
+**Say it:** "Every side-effecting POST takes an `Idempotency-Key`. The server inserts it with a unique constraint *in the same transaction* as the payment, stores the final response, and replays it on retry. A concurrent duplicate gets 409, and a reused key with a different body gets 422. I pass a derived key to the PSP so the whole chain is idempotent, not just my edge."
+
+---
+
+### Long-Running / Async Operations
+
+**Problem:** the work takes longer than an HTTP request should stay open (> ~10–30s): report export, video transcode, bulk import, provisioning.
+
+```
+POST /api/v1/exports        {filters...}
+  → 202 Accepted
+    Location: /api/v1/operations/op_91x
+    {"id": "op_91x", "status": "PENDING"}
+
+GET /api/v1/operations/op_91x
+  → 200 {"id": "op_91x", "status": "RUNNING", "progress": 0.42}
+  → 200 {"id": "op_91x", "status": "SUCCEEDED", "result": {"url": "https://s3…presigned"}}
+  → 200 {"id": "op_91x", "status": "FAILED", "error": {"code": "...", "message": "..."}}
+
+POST /api/v1/operations/op_91x:cancel  → 202
+```
+
+**State machine:** `PENDING → RUNNING → SUCCEEDED | FAILED | CANCELLED`, with terminal states final. Store the state in a DB row. Workers pull from a queue and update the row.
+
+**How the client learns it's done:**
+
+| Mechanism | Pros | Cons | Use when |
+|---|---|---|---|
+| **Polling** `GET /operations/{id}` | Simplest, works everywhere, stateless | Wasted calls, latency up to the poll interval | Default. Return `Retry-After` to pace clients |
+| **Webhook** on completion | No polling, works server-to-server | Client must host an endpoint; delivery is at-least-once | B2B / API customers |
+| **SSE / WebSocket** | Instant, live progress | Connection management, reconnects | Browser UI with a progress bar |
+
+Most real systems offer **polling plus a webhook**. Polling is the fallback that always works.
+
+**Edge cases:**
+- **Idempotent creation:** `POST /exports` with an `Idempotency-Key` returns the *same* operation on retry. Otherwise a retry kicks off a second job.
+- **Results:** large outputs go to S3 with a pre-signed URL and an expiry. Don't put them in the operation body.
+- **Retention:** keep operation records for N days, then return 404/410.
+- **Stuck jobs:** workers hold a lease and heartbeat. If the lease expires, re-queue. The job itself must be idempotent (at-least-once execution).
+- **Cancellation is a request, not a guarantee.** The worker checks a cancel flag between steps, and some work can't be undone.
+
+**Say it:** "Anything over a few seconds returns 202 with an operation resource. Clients poll it with `Retry-After` pacing, or register a webhook. Creation is idempotent, results go to S3 behind a pre-signed URL, and workers hold leases so a crashed job gets re-queued."
+
+---
+
+### Webhooks (Outbound Events)
+
+**Problem:** you notify a customer's server when something happens (payment succeeded, export done). The receiver is out of your control: it can be slow, down, or receive duplicates.
+
+```
+POST https://customer.example.com/hooks
+Webhook-Id: evt_3f9a                     ← unique per event, receiver dedupes on it
+Webhook-Timestamp: 1763808725
+Webhook-Signature: v1=base64(HMAC-SHA256(secret, id + "." + timestamp + "." + body))
+{"type": "payment.succeeded", "data": {"id": "pay_123", "status": "succeeded"}, "created": ...}
+```
+
+| Concern | Design |
+|---|---|
+| **Authenticity** | HMAC signature with a per-endpoint secret. Receiver verifies with constant-time compare |
+| **Replay attacks** | Timestamp is in the signed content. Receiver rejects anything older than ~5 min |
+| **Delivery guarantee** | At-least-once. Receiver **must** dedupe by event ID |
+| **Retries** | Exponential backoff with jitter over ~1–3 days (e.g. 1m, 5m, 30m, 2h, …). Success = any 2xx within ~5–10s |
+| **Ordering** | **Not guaranteed** (retries reorder). Include `created` / a version. Receiver ignores older versions, or re-fetches current state |
+| **Slow receivers** | Short timeout. Receiver should ack fast and process async |
+| **Failing endpoints** | After N consecutive failures, disable the endpoint and notify the owner. Per-endpoint queues so one bad customer doesn't back up everyone else |
+| **Recovery** | Delivery log UI + `POST /events/{id}/redeliver` + an events list API so customers can backfill |
+| **Secret rotation** | Sign with both old and new secrets during rotation (multiple `v1=` values) |
+
+**Thin vs fat payloads:**
+
+| | Thin (`{"type", "id"}`, receiver calls GET) | Fat (full object) |
+|---|---|---|
+| Pros | Always current data; ordering doesn't matter; less sensitive data in transit | One fewer call; works if your API is down |
+| Cons | Extra API call; load spike on your API | Stale or out-of-order snapshots; bigger payloads |
+
+**Internal architecture:** business transaction writes the event to an **outbox table** → relay to Kafka → per-endpoint delivery workers → delivery log. The outbox ensures that if the payment commits, the event exists. It doesn't depend on a dual write succeeding.
+
+**Receiving webhooks (e.g. from Stripe):** verify the signature, store the raw event (dedupe on event ID), return 200 immediately, process async. Never trust the webhook as the only signal. Reconcile by polling the provider.
+
+**Say it:** "Webhooks are signed with HMAC over id + timestamp + body, delivered at-least-once with exponential backoff for a few days, and unordered. So receivers dedupe on event ID and either check versions or fetch current state. Events come from a transactional outbox, so a committed payment always produces an event, and each endpoint has its own queue so one dead receiver doesn't block others."
+
+---
+
+### Concurrency Control (Lost Updates)
+
+**Problem:** two clients read a resource at version 5, both modify it, both write. The second write silently overwrites the first.
+
+**Optimistic (default for APIs):**
+```
+GET /api/v1/listings/42
+  → 200  ETag: "v5"   {"price": 20000, ...}
+
+PATCH /api/v1/listings/42
+If-Match: "v5"
+{"price": 19500}
+  → 200  ETag: "v6"                      (matched)
+  → 412 Precondition Failed               (someone else wrote v6 first) → client re-reads, re-applies, retries
+
+Server: UPDATE listings SET price=?, version=version+1 WHERE id=42 AND version=5
+        → 0 rows affected = conflict
+```
+- `428 Precondition Required` if you want to *force* clients to send `If-Match` on writes.
+- Body-level alternative: `{"version": 5, ...}`. Same idea, easier for clients that don't handle headers well.
+
+| Approach | How | Pros | Cons | Use when |
+|---|---|---|---|---|
+| **Optimistic (ETag / version)** | Conditional write, fail on mismatch | No locks held, scales, stateless | Retry loop on conflict; bad under high contention | Default. Conflicts are rare |
+| **Pessimistic (lock resource)** | `POST /listings/42/lock` → lease token → write with token → release | No wasted work under contention | Lock leaks (need a TTL), held across user think-time, poor fit for HTTP | Long edits with high contention (document checkout) |
+| **Last-write-wins** | No check | Simplest | Silent data loss | Truly independent fields, or the overwrite is acceptable |
+| **Field-level / atomic ops** | `PATCH` only changed fields; server-side `increment` ops | Fewer conflicts | Doesn't protect cross-field invariants | Counters, independent attributes |
+| **CRDT / OT merge** | Merge concurrent edits | No conflicts surfaced | Complex | Collaborative editing |
+
+**Edge cases:**
+- **Weak vs strong ETags:** use a version number or hash. Don't derive from `updated_at` (two writes in the same ms collide).
+- **ETag doubles as a cache validator:** `If-None-Match` → `304 Not Modified` saves bandwidth on GET.
+- **High contention on one row** (inventory count): optimistic retries go wrong and pile up. Use an atomic DB op (`UPDATE … SET qty = qty - 1 WHERE qty > 0`) instead of read-modify-write.
+
+**Say it:** "Writes are conditional: GET returns an ETag from the row version, PATCH sends `If-Match`, and the server does `UPDATE … WHERE version = ?`. Zero rows means 412 and the client re-reads. For hot counters I skip read-modify-write and use an atomic decrement."
+
+---
+
+### Errors & Retryability
+
+**Problem:** clients need to know (1) what went wrong, (2) whether it's their fault, and (3) **whether it's safe to retry**. Retry the wrong thing and you amplify an outage or double a side effect.
+
+**Consistent error envelope** (RFC 9457 `application/problem+json` style):
+```
+HTTP/1.1 422 Unprocessable Content
+{
+  "type": "https://api.example.com/errors/insufficient-funds",
+  "title": "Insufficient funds",
+  "status": 422,
+  "code": "insufficient_funds",            ← stable, machine-readable. Clients switch on this
+  "detail": "Balance 12.00 < amount 50.00",
+  "request_id": "req_8f2c",                ← correlates with logs/traces
+  "errors": [{"field": "amount", "code": "exceeds_balance"}]   ← field-level validation
+}
+```
+HTTP status = category. `code` = the specific reason. Never make clients parse `detail`.
+
+**Retry matrix:**
+
+| Status | Meaning | Retry? |
+|---|---|---|
+| 400, 401, 403, 404, 422 | Client error | **No.** Fix the request |
+| 409 | Conflict (state / concurrent idempotency) | After re-reading state, or after `Retry-After` |
+| 412 | Precondition failed (ETag) | Re-read, re-apply, retry |
+| 429 | Rate limited | **Yes,** after `Retry-After` |
+| 500 | Server bug | Maybe, with backoff. Only if the request is idempotent or carries a key |
+| 502, 503, 504 | Upstream / overloaded / timeout | **Yes,** backoff + jitter, honor `Retry-After`. Only if idempotent |
+| Network timeout (no response) | Unknown outcome | Only with an idempotency key |
+
+**Rules:**
+- **Retry only idempotent requests:** GET/PUT/DELETE, or POST with an `Idempotency-Key`.
+- **Client retry policy:** capped exponential backoff + jitter, max ~3 attempts, and a **retry budget** (e.g. retries ≤ 10% of requests) so retries can't multiply load during an outage.
+- **Don't leak internals:** no stack traces, and no hints that confirm a resource exists (consider 404 instead of 403 for resources the caller can't see).
+- **Partial failure in batches:** see Bulk Endpoints below.
+- **`request_id` on every response,** success or error. It's the first thing support asks for.
+
+**Say it:** "Errors use one envelope: HTTP status for the category, a stable `code` clients switch on, and a `request_id` for tracing. 4xx means don't retry. 429 and 503 are retryable after `Retry-After`. A timeout is retried only with an idempotency key. Clients use capped, jittered backoff with a retry budget so retries can't turn a blip into an outage."
+
+---
+
+### Large Uploads
+
+**Don't stream bytes through your API servers.** Issue a pre-signed URL and let the client upload straight to object storage.
+
+```
+1. POST /api/v1/uploads {filename, size, content_type, sha256}
+     → 201 {"upload_id": "up_7", "url": "https://s3…presigned-PUT", "expires_in": 900}
+2. Client PUTs bytes directly to S3
+3. POST /api/v1/uploads/up_7/complete   (or S3 event notification → your service)
+     → server verifies size/checksum, marks READY, kicks off processing (async op)
+```
+
+| Concern | Design |
+|---|---|
+| Large files (> ~100 MB) | S3 multipart: parts ≥ 5 MB (except the last), up to 10K parts, parallel and individually retryable. Server issues pre-signed URLs per part |
+| Flaky networks / mobile | Resumable upload: client asks which parts already landed (`ListParts`) and resumes. The tus protocol is the open standard |
+| Integrity | Client sends a checksum. Verify on complete. Content-addressed storage (key = hash) also gives you dedup |
+| Abuse | Pre-signed URL restricts size, content type, and expiry. Abandoned uploads are cleaned up by a lifecycle rule (abort incomplete multipart after N days) |
+| Security | Upload to a quarantine bucket → virus/content scan → move to serving bucket. Never trust the client's `content_type` |
+
+**Say it:** "Uploads bypass my servers: I issue pre-signed multipart URLs, the client uploads parts in parallel and can resume, and a complete call (or S3 event) triggers checksum verification and async processing."
+
+---
+
+### Choosing a Real-Time API
+
+| Mechanism | Direction | Pros | Cons | Use when |
+|---|---|---|---|---|
+| **Short polling** | Client → server | Trivial, cacheable, stateless | Latency = interval; wasted calls | Updates every 10s+ are fine |
+| **Long polling** | Server holds the request until data or timeout | Works through any proxy, near real-time | One held request per client; reconnect churn | Fallback, or low-volume notifications |
+| **SSE** | Server → client stream over HTTP | Simple, auto-reconnect, `Last-Event-ID` resume, HTTP/2 friendly | One-way; text only | Feeds, tickers, progress, notifications |
+| **WebSocket** | Bidirectional | Low latency both ways, binary | Stateful gateways, custom reconnect/resume, harder through proxies/LBs | Chat, games, collaborative editing |
+
+**API design points regardless of transport:**
+- **Resume after reconnect:** every event has a monotonic ID. The client reconnects with its last ID (`Last-Event-ID` for SSE, a `since` param for WS) and the server replays the gap from a buffer or log. If the gap is too old, tell the client to do a full refetch.
+- **Heartbeats** every ~15–30s so dead connections are detected and idle proxies don't kill the stream.
+- **Signal, then fetch:** for complex state, push "X changed", and the client GETs the authoritative state through the normal API. That keeps one source of truth and one auth path.
+- **Backpressure:** conflate (send the latest value) for slow clients instead of buffering forever.
+
+**Say it:** "Server-to-client only, so SSE: built-in reconnect with `Last-Event-ID` replay, plain HTTP. I'd only reach for WebSockets if the client also streams up, like chat or collaborative editing."
+
+---
+
+### Versioning & Evolution
+
+| Strategy | Example | Pros | Cons |
+|---|---|---|---|
+| **URL path** | `/v1/orders` | Obvious, easy routing, cacheable | Coarse; tempts big-bang v2 rewrites |
+| **Header / media type** | `Accept: application/vnd.x.v2+json` | Clean URLs, per-resource versions | Hidden, harder to test/cache |
+| **Date-based** (Stripe) | `Stripe-Version: 2024-06-20`, pinned per account | Many small changes, each customer upgrades on their own schedule | Server maintains a chain of transformations between versions |
+
+**Additive changes are safe, so don't version for them:** new optional fields, new endpoints, new optional params. Clients must **ignore unknown fields**.
+
+**Breaking changes:** removing or renaming fields, changing types or meaning, new required params, new enum values *if* clients switch on them exhaustively (document enums as open-ended from day one).
+
+**Deprecation:** announce → `Deprecation` + `Sunset: <date>` headers → track per-client usage of the old version → reach out to the stragglers → brown-outs (scheduled short failures) → remove. Internally, use **expand-contract**: add the new field, dual-write/read, migrate clients, then remove the old field.
+
+**Say it:** "URL major version for clarity, but I avoid v2 by keeping changes additive and having clients ignore unknown fields. For real breaks: `Sunset` headers, per-client usage tracking, then removal. With many external customers, Stripe-style date versioning pinned per account."
+
+---
+
+### Bulk / Batch Endpoints
+
+```
+POST /api/v1/contacts:batchCreate
+{"items": [{...}, {...}, ...]}                 ← cap at 100–1000 items
+
+→ 200 {"results": [
+    {"index": 0, "status": 201, "id": "c_1"},
+    {"index": 1, "status": 422, "error": {"code": "invalid_email"}}
+  ]}
+```
+
+| Semantics | Pros | Cons | Use when |
+|---|---|---|---|
+| **All-or-nothing** (one transaction) | Simple client logic, invariant-safe | One bad item fails all; big transactions lock a lot | Items must be consistent together (ledger postings) |
+| **Per-item results** (partial success) | Maximizes throughput; client retries only failures | Client must handle mixed results | Independent items (imports, notifications) |
+
+- Return **200 with per-item status** (or 207 Multi-Status). A top-level 4xx/5xx only when the batch itself is invalid.
+- **Idempotency:** a key per batch (replay the whole result), or per-item client IDs so retrying just the failures is safe.
+- **Big batches** (> a few thousand, or slow) → make it an async operation that returns 202 with a result file.
+- Rate limits count **items**, not requests, otherwise batching bypasses them.
+
+---
+
+### Create Semantics: POST vs PUT
+
+| | `POST /orders` (server ID) | `PUT /orders/{client_id}` (client ID) |
+|---|---|---|
+| ID generated by | Server | Client (UUID/ULID) |
+| Idempotent? | No, needs an `Idempotency-Key` | **Yes, by HTTP semantics.** Retrying the same PUT is safe |
+| Pros | Server controls the ID format; no client trust needed | Natural retry safety; offline-first clients can create locally and sync later |
+| Cons | Extra idempotency machinery | Client must generate good IDs; server must validate format and ownership |
+
+**Say it:** "Default to POST with an idempotency key. For offline-first or sync clients, client-generated IDs with PUT make creates naturally idempotent, so the client can create offline and replay safely."
+
+---
+
 ### API Design Principles (Staff+ Level)
-- **Idempotency**: POST with client-generated idempotency key for writes
-- **Versioning**: `/v1/` prefix or header-based
-- **Rate limiting**: return `429` with `Retry-After` header
-- **Bulk endpoints**: `POST /api/v1/messages/bulk` for batch operations
+- **Idempotency**: `Idempotency-Key` header on side-effecting POSTs (see [Idempotency Keys](#idempotency-keys))
+- **Versioning**: additive changes by default; `/v1/` for majors (see [Versioning & Evolution](#versioning--evolution))
+- **Rate limiting**: return `429` with `Retry-After` header (see [Errors & Retryability](#errors--retryability))
+- **Bulk endpoints**: per-item results, count items toward limits (see [Bulk / Batch Endpoints](#bulk--batch-endpoints))
 - **Field selection**: `?fields=id,title,author` to reduce payload
+- **Long work**: `202` + operation resource (see [Long-Running / Async Operations](#long-running--async-operations))
 
 ---
 
