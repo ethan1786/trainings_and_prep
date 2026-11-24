@@ -387,7 +387,18 @@ Look up (tenant_id, key)
       Txn 2:  INSERT payment result + UPDATE key → {DONE, response}           ← this pair is atomic
 Key row lives 24h–7d, then a TTL job purges it
 ```
-You can't hold a DB transaction open across a 2-second PSP call (it ties up a connection and holds locks). So protection *across* the external call comes from the PSP's own idempotency key. If you crash after the PSP call, the retry calls again with the same derived key and gets the original result, not a second charge.
+**Why the flow is split into three steps:**
+
+*Commit the claim first, for visibility and durability:*
+- An *uncommitted* unique insert already blocks a concurrent duplicate in Postgres, but it **blocks instead of answering**. The duplicate waits the whole PSP call while holding its own connection. A committed `IN_PROGRESS` row gives the duplicate a fast `409 + Retry-After`.
+- **A committed claim survives a crash.** An uncommitted claim rolls back and leaves no trace that a charge may have gone out. A committed `IN_PROGRESS` row means "an external call may have happened, reconcile with the PSP first." The recovery job or the post-lease retry acts on it.
+
+*Call the PSP outside any transaction, for resources and atomicity:*
+- **Connection pool exhaustion:** 100 TPS × 2s PSP latency ≈ 200 connections held idle, against a typical pool of 20–50. A slow day at Stripe becomes your database outage.
+- **Locks and table bloat:** row/index locks stay held for seconds, and long transactions stop Postgres vacuum from cleaning dead rows (they hold back the xmin horizon), so tables bloat.
+- **The atomicity is fake:** a DB rollback can't undo a Stripe charge, because the two systems don't share a transaction. If the PSP succeeds and your commit then fails, your record is gone but the money moved. You need the PSP key and reconciliation regardless, so wrapping only adds cost.
+
+Protection *across* the external call comes from the PSP's own idempotency key. If you crash after the PSP call, the retry calls again with the same derived key and gets the original result, not a second charge.
 
 | Decision | Choice | Why |
 |---|---|---|
