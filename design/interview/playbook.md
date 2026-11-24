@@ -377,14 +377,17 @@ Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324
 
 **Server flow:**
 ```
-1. Look up (tenant_id, key)
-   ├─ not found      → INSERT row {status: IN_PROGRESS, request_hash}   ← unique constraint = the lock
-   │                   execute → store {status: DONE, response_code, response_body}
-   ├─ DONE, same hash → replay stored response (same status code + body)
-   ├─ DONE, diff hash → 422 (key reused with a different request)
-   └─ IN_PROGRESS     → 409 Conflict + Retry-After (concurrent duplicate)
-2. Key row lives 24h–7d, then expires
+Look up (tenant_id, key)
+ ├─ DONE, same hash → replay stored response (same status code + body)
+ ├─ DONE, diff hash → 422 (key reused with a different request)
+ ├─ IN_PROGRESS     → 409 Conflict + Retry-After (concurrent duplicate)
+ └─ not found:
+      Txn 1:  INSERT key {IN_PROGRESS, request_hash, locked_until} → COMMIT   ← unique constraint = the lock
+      Call:   PSP with a derived key (key + ":auth")                          ← OUTSIDE any DB transaction
+      Txn 2:  INSERT payment result + UPDATE key → {DONE, response}           ← this pair is atomic
+Key row lives 24h–7d, then a TTL job purges it
 ```
+You can't hold a DB transaction open across a 2-second PSP call (it ties up a connection and holds locks). So protection *across* the external call comes from the PSP's own idempotency key. If you crash after the PSP call, the retry calls again with the same derived key and gets the original result, not a second charge.
 
 | Decision | Choice | Why |
 |---|---|---|
@@ -392,7 +395,7 @@ Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324
 | Who generates it | Client (UUIDv4), once per *logical* operation, reused on every retry | Server can't tell a retry from a new intent |
 | Scope | `(tenant/user, key)`, optionally + endpoint | Stops one client's key colliding with another's |
 | Request fingerprint | Hash of the canonical body, stored with the key | Detects a buggy client reusing a key for a different charge |
-| Storage | Same DB transaction as the business write (Postgres) | If the key is in Redis and the payment is in Postgres, a crash between them breaks the guarantee |
+| Storage | Same **database** as the business write (Postgres). Key completion (`DONE`) is in the same transaction as the result write | Redis and Postgres can't commit together. A crash between them leaves a payment with no key, or a key with no payment |
 | What's stored | Final status code + body | A retry must get the *same answer*, including the same error |
 | Retention | 24h (Stripe) to 7d | Longer than any client retry window. A TTL job purges old keys |
 
@@ -402,9 +405,21 @@ Idempotency-Key: 8e03978e-40d5-43e8-bc93-6894a57f9324
 - **Downstream calls:** pass an idempotency key to the PSP too (derive it, e.g. `key + ":auth"`), otherwise you're only idempotent at your own edge.
 - **GET/PUT/DELETE** are idempotent by HTTP semantics. Keys are for POST and PATCH that cause side effects.
 
-**Alternative:** use a natural key instead of a client-generated one (e.g. unique constraint on `(user_id, order_id)`). Simpler when a natural key exists, but it can't replay the original response.
+**Key table vs. unique column on the business row:**
 
-**Say it:** "Every side-effecting POST takes an `Idempotency-Key`. The server inserts it with a unique constraint *in the same transaction* as the payment, stores the final response, and replays it on retry. A concurrent duplicate gets 409, and a reused key with a different body gets 422. I pass a derived key to the PSP so the whole chain is idempotent, not just my edge."
+| | Unique column (`UNIQUE (tenant_id, idempotency_key)` on `payments`) | Separate `idempotency_keys` table |
+|---|---|---|
+| Replay the *exact* original response | No. Rebuild it from the row (often fine) | Yes |
+| Same answer for deterministic failures (declined, validation) | Only if a failure also creates a row | Yes, the failure response is stored |
+| Detect key reuse with a different body (422) | Only if you add a request-hash column | Built in |
+| Non-create operations (refund across tables, "send") | No natural row to hold the key | Works for any operation |
+| Retention | Key stays on the table forever (or null it out later) | TTL job deletes old keys |
+| Write cost | Extra unique index on a hot, large table, forever | One extra insert per request, on a small purged table |
+| Complexity | Simplest | More machinery |
+
+Use the unique column when the operation creates one row and "return the existing resource" is a good enough replay. Use the key table as the general solution (Stripe-style). A **natural key** (`UNIQUE (user_id, order_id)`) is the same idea as the column, with no client key at all.
+
+**Say it:** "Every side-effecting POST takes an `Idempotency-Key`. The server claims the key with a unique-constraint insert, calls the PSP outside any DB transaction using a derived key, then writes the result and marks the key done in one transaction. Retries get the stored response replayed. A concurrent duplicate gets 409, and a reused key with a different body gets 422. I pass a derived key to the PSP so the whole chain is idempotent, not just my edge."
 
 ---
 
