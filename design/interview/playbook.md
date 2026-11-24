@@ -784,11 +784,79 @@ This is where staff+ candidates differentiate. Pick the 1–2 hardest subproblem
 
 | Dimension | Tension |
 |---|---|
-| **Consistency vs Availability** | CP vs AP (CAP theorem in practice) |
+| **Consistency vs Availability** | Refuse or answer with possibly-stale data when you can't confirm the latest state. Decide per operation (see below) |
 | **Latency vs Throughput** | Batching increases throughput, hurts latency |
 | **Simplicity vs Scalability** | Monolith is simpler; microservices scale independently |
 | **Cost vs Performance** | More replicas = faster reads but higher cost |
 | **Freshness vs Load** | Real-time sync = more DB load than eventual consistency |
+
+### Consistency vs Availability (the tradeoff that matters most)
+
+#### Reframe: it only applies when something fails
+
+Strictly, C vs A only comes into play **during a failure** (network partition, lost replica, region outage). Then the question is:
+
+> **We can't confirm the latest state right now. Do we refuse (C) or answer with data that may be stale or conflicting (A)?**
+
+The rest of the time the everyday tradeoff is **consistency vs latency** (PACELC). Strong consistency costs a synchronous round trip on every write: ~1–2ms across AZs, ~50–150ms across regions. So: **C vs A sets your failure behavior. C vs latency sets your everyday cost.**
+
+#### Decide per operation, not per system
+
+"We chose AP" for a whole system is a red flag. Real systems mix both.
+
+| Operation | Choice | Why |
+|---|---|---|
+| Debit a balance, transfer money | **C** | Wrong = double spend, regulatory exposure, money lost |
+| Sell the last unit, book a seat | **C** (or reservations/escrow, below) | Overselling = refunds and angry customers |
+| Unique username / email | **C** | Two people can't own it |
+| Leader election, distributed locks | **C** | Two leaders = split brain, corrupted data |
+| Feed, likes, view counts | **A** | A few seconds stale costs nothing |
+| Add to cart | **A** | Dynamo's original use case. A lost add costs a sale; a duplicate add is harmless |
+| Product catalog, search | **A** | A stale price is fixed at checkout (C) |
+| Feature flags / config | **A** + last-known-good | Down config must not mean down product |
+| Show balance | **A** + staleness marker | Display only. The debit path is C |
+
+E-commerce in one line: **browse and cart are available, checkout is consistent.**
+
+**The business question behind every row:** *which costs more, being wrong or being down?* Ask that, and you're reasoning from requirements rather than reciting CAP.
+
+#### Mechanisms on each side
+
+| | Consistent side | Available side |
+|---|---|---|
+| Replication | Single leader + sync replica, quorum (W + R > N), consensus (Raft/Paxos) | Multi-leader, leaderless, async replication |
+| During a partition | Minority side **refuses writes** (503); majority continues | Every side accepts writes; reconcile later |
+| Conflicts | Prevented up front | Resolved afterwards: last-write-wins, version vectors + app merge, CRDTs |
+| Repair | Not needed | Read repair, anti-entropy, hinted handoff |
+| Examples | Postgres primary, etcd/ZooKeeper, Spanner | Cassandra, DynamoDB (default), DNS, CDNs |
+
+**Watch out for last-write-wins:** it looks available and simple, but under concurrency it **silently discards writes**. Use it only when losing a concurrent write is acceptable.
+
+#### The middle ground (where most of the staff signal is)
+
+**Guarantees between strong and eventual:**
+- **Read-your-writes:** a user always sees their own changes. Route their reads to the leader for a few seconds after a write, or track their last write position.
+- **Monotonic reads:** results never go backward in time. Pin a user to one replica.
+- **Bounded staleness:** "at most 5 seconds behind" (Cosmos DB offers it; approximate by checking replica lag).
+- **Causal:** a reply never appears before the message it replies to.
+
+**Making the available side safe for things that look like money:**
+- **Escrow / quotas:** split 10,000 tickets as 5K per region. Each region sells its share with no coordination, and you rebalance occasionally. Available during a partition, no overselling.
+- **Reservations with a TTL:** claim first (C), take payment, then confirm. Most of the flow stays available.
+- **Accept, then reconcile and compensate:** airline overbooking, bank overdrafts. The business accepts rare conflicts and compensates (refund, apology, fee). Legitimate when the conflict rate is low and compensation is cheap.
+
+**Leader per entity, not per system:** give each account a home region. Writes are consistent at home, and other accounts aren't affected by an outage elsewhere. Avoids global consensus.
+
+**Degrade instead of failing completely:** if the consistent write path is down, keep serving reads from replicas with an "updated 2 min ago" banner. Reads stay available while writes are refused.
+
+#### Common mistakes
+- **Choosing for the whole system** instead of per operation.
+- **"Eventual" means seconds.** It means *unbounded* during a partition. State the staleness you can actually tolerate.
+- **Stale reads feeding writes.** A stale read in a read-modify-write gives a lost update, a consistency bug on an "available" path. Use conditional writes (ETag/version).
+- **A Redis lock used for correctness.** A single Redis node isn't on the consistent side: failover can lose the lock. Use fencing tokens, or etcd/ZooKeeper.
+- **Bringing up CAP unprompted.** Make the decision and justify it in business terms instead.
+
+**Say it:** "I'll decide per operation. Browsing and cart are available: async replicas, a few seconds stale is fine. Checkout and payment debit are consistent: single-leader Postgres with a sync replica, and during a partition the minority side refuses writes rather than risk a double charge. The everyday cost is a synchronous replica write, about 2ms within a region. For inventory I'd avoid global coordination by giving each region its own allocation, so we stay available without overselling."
 
 ### Staff+ Move: Name the Tradeoff Before Being Asked
 "I want to call out that this design prioritizes availability over consistency. If a user posts a message, followers might see it with up to 5 seconds delay. For a social feed that's acceptable, but if this were a payment system, we'd need strong consistency and I'd design it differently."
@@ -1133,6 +1201,8 @@ In a network partition, you must choose:
 - "Can users see stale data?" → your consistency choice
 
 Don't bring up "CAP theorem" unprompted. Just make a consistency decision and justify it. If asked directly: "I'm choosing CP for payment data — refuse writes during partition rather than risk inconsistency."
+
+For per-operation decisions, mechanisms, middle-ground techniques (escrow, reservations, leader per entity), and common mistakes, see [Consistency vs Availability](#consistency-vs-availability-the-tradeoff-that-matters-most).
 
 ### Consistency Models
 
