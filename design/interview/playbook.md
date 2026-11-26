@@ -800,6 +800,63 @@ Strictly, C vs A only comes into play **during a failure** (network partition, l
 
 The rest of the time the everyday tradeoff is **consistency vs latency** (PACELC). Strong consistency costs a synchronous round trip on every write: ~1–2ms across AZs, ~50–150ms across regions. So: **C vs A sets your failure behavior. C vs latency sets your everyday cost.**
 
+#### Three different questions (don't blur them)
+
+| Property | The question | Example of choosing each way |
+|---|---|---|
+| **Durability** | When I acknowledge a write, could it still be lost? | Persist then return (WAL, sync replica) vs return then persist later (write-behind, async flush) |
+| **Consistency** | Does every read see the latest acknowledged write, no matter which copy answers? | Read the primary vs a lagging replica or cache |
+| **Availability** | When a copy or node can't be reached, do I still answer? | Refuse (503) vs serve whatever copy is reachable |
+
+They vary independently:
+- **Durable but not consistent:** Cassandra `W=1`. The write is on disk on one node before the ack, but a read served by another replica doesn't see it yet.
+- **Consistent but not durable:** single in-memory Redis with no persistence. Every read sees the latest write, until a restart loses it.
+
+"Return first, persist later" is a **durability** risk, not a consistency choice.
+
+**The C in ACID is a different C.** ACID consistency = a transaction keeps invariants intact (balance ≥ 0, valid foreign keys) within one database. CAP consistency = every copy answers reads as if there were only one copy. When someone says "we need consistency," ask which one.
+
+#### It's everywhere, because copies are everywhere
+
+The CAP theorem itself is narrow, but the same question appears **wherever there's more than one copy of the data**: *when copies disagree or one can't be reached, which do I trust, and do I still answer?*
+
+| Where there's a second copy | Consistent choice | Available / low-latency choice |
+|---|---|---|
+| Cache vs DB | Read through, invalidate on write | Serve from cache, accept TTL staleness, serve stale if the DB is down |
+| Primary vs read replica | Read the primary | Read a replica (replica lag) |
+| Write acknowledgment | Wait for a sync replica | Async replication |
+| Search index vs source DB | Query the source | Query the index (CDC, seconds behind) |
+| Service A needs Service B's data | Call B synchronously: fresh, but **if B is down, A is down** | Local copy fed by B's events: survives B's outage, reads stale data |
+| CDN / browser cache | `no-cache`, revalidate | TTL caching |
+
+The microservice row is the one people miss: a synchronous call between services is a consistency choice, and the price is that their availability becomes linked.
+
+#### Everyday: consistency and durability are paid for in latency
+
+In normal operation the real decision is **consistency vs latency vs durability**, and both guarantees cost the same thing: waiting for more copies.
+
+| Setting | The question | Stronger → | Real configuration options |
+|---|---|---|---|
+| **Write acknowledgment** (durability) | How many copies must have the write before I say "done"? | More copies → safer, slower | Kafka `acks=0/1/all` · Postgres `synchronous_commit` off/local/on · Cassandra `W` · Redis `appendfsync no/everysec/always` |
+| **Read source** (consistency) | Which copy do I trust for this read? | More authoritative / more copies → fresher, slower | Primary vs replica · cache vs DB · Cassandra `R` · Spanner strong vs stale reads |
+
+They're connected: with `W + R > N`, a write's acknowledgment level and a read's quorum together give you consistency.
+
+Postgres shows the difference: `synchronous_commit = on` waits for the replica to have the write **on disk** (durability), but a replica read can still be stale because the replica hasn't applied it yet. `remote_apply` waits for the replica to **apply** it, so replica reads see it too (consistency), at extra latency.
+
+- **Availability is the failure-time cost.** The more copies a write must reach, the more ways it can be blocked. `W = N` means one replica down means no writes. With sync replication, a dead sync replica stalls the primary until you fail over or downgrade to async.
+- **Throughput and cost are the fourth factor.** Batching (group commit, Kafka linger and batch size) keeps durability strong and gets throughput back, for a little latency per request. More replicas give durability and read capacity, at higher cost.
+
+| System | Durability | Consistency | Latency budget |
+|---|---|---|---|
+| Payments / ledger | Max: sync replica, fsync | Strong on the write path | Pays a few ms for it |
+| Chat messages | High: Kafka `acks=all` | Eventual reads, ordered per conversation | Tens of ms |
+| Metrics / logs | Low: `acks=1`, batched, a little loss OK | Eventual | Throughput matters most |
+| Cache | None (rebuildable) | TTL staleness | Sub-ms |
+| Session store | Medium: losing one means a re-login | Read-your-writes | Sub-ms to 1ms |
+
+**Mental model:** "On every write, how many copies before I say yes? On every read, which copy do I trust? Both cost latency, and requiring more copies means more ways to be blocked when something fails."
+
 #### Decide per operation, not per system
 
 "We chose AP" for a whole system is a red flag. Real systems mix both.
